@@ -1,0 +1,115 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\Assets.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GameEngine.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Scene.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_demo.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_draw.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_tables.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui_widgets.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\imgui\imgui-SFML.cpp">
+      <Filter>imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Scene_Perlin2D.cpp">
+      <Filter>scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Scene_Grid.cpp">
+      <Filter>scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\algorithms\Environment.cpp">
+      <Filter>algorithms</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\Assets.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GameEngine.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Vec2.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\WorldView.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Grid.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Timer.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Action.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene_Perlin2D.h">
+      <Filter>scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene_Grid.h">
+      <Filter>scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\algorithms\ClosedList.hpp">
+      <Filter>algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\algorithms\Environment.h">
+      <Filter>algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\algorithms\GridConnectivity.hpp">
+      <Filter>algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\algorithms\GridLegalActions.hpp">
+      <Filter>algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\algorithms\GridSearch.hpp">
+      <Filter>algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\algorithms\OpenList.hpp">
+      <Filter>algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\algorithms\OpenList_Vector.hpp">
+      <Filter>algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\algorithms\OpenList_VectorSorted.hpp">
+      <Filter>algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Perlin.hpp">
+      <Filter>scenes</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="engine">
+      <UniqueIdentifier>{15c27b81-2e23-4db7-9b31-c271b05d7ca1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="scenes">
+      <UniqueIdentifier>{e6405375-fc0b-41c2-b260-7a1a61b6a5e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="imgui">
+      <UniqueIdentifier>{fd00c5e6-54c2-4cbd-91ee-c7d51d1d1d6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="algorithms">
+      <UniqueIdentifier>{2bde35ec-8b1e-4759-a236-d345f95496c0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
