@@ -21,12 +21,16 @@ class Scene_Perlin2D : public Scene
 
 
     Perlin2DNew         m_perlin;
-    int                 m_octaves = 1;
+    int                 m_octaves = 5;
     int                 m_seed = 0;
     int                 m_seedSize = 9;
     float               m_persistance = 0.5f;
-    bool                m_drawContours = false;
     int                 m_waterLevel = 80;
+    bool                m_drawContours = false;
+    int                 m_contourSkip = 20;
+    float               m_contourLevel = 0.5;
+    int                 m_contourDiff = 3;
+    Grid<char>          m_onContour;
 
     Grid<float>         m_grid;
 
