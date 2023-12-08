@@ -38,6 +38,9 @@
     <ClCompile Include="..\src\algorithms\Environment.cpp">
       <Filter>algorithms</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Scene_Sandbox.cpp">
+      <Filter>scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Assets.h">
@@ -95,6 +98,9 @@
       <Filter>algorithms</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Perlin.hpp">
+      <Filter>scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene_Sandbox.h">
       <Filter>scenes</Filter>
     </ClInclude>
   </ItemGroup>

@@ -14,7 +14,7 @@ GameEngine::GameEngine()
 void GameEngine::init()
 {
     m_window.create(sf::VideoMode(1600, 900), "Grid View");
-    m_window.setFramerateLimit(60);
+    //m_window.setFramerateLimit(60);
 
     ImGui::SFML::Init(m_window);
 
