@@ -56,6 +56,7 @@ class Scene_Sandbox : public Scene
     void sUserInput();  
     void sRender();
     void calculateNoise();
+    bool isCameraConnected();
     
 public:
 

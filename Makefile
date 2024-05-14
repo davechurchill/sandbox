@@ -2,18 +2,18 @@
 # make run
 
 # define which compiler to use
-CXX    := g++
+CXX    := clang++
 OUTPUT := sandbox
 
 # if you need to manually specify your SFML install dir, do so here
 # this is often the case on Mac silicon with brew, for me it was:
 # SFML_DIR  := /opt/homebrew/Cellar/sfml/2.5.1_1
-SFML_DIR  := .
+#SFML_DIR  := .
 
 # compiler and linker flags
 CXX_FLAGS := -O3 -std=c++20 -Wno-unused-result
 INCLUDES  := -I./src -I ./src/imgui -I$(SFML_DIR)/include
-LDFLAGS   := -O3 -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lGL -L$(SFML_DIR)/lib
+LDFLAGS   := -O3 -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lopengl32 -L$(SFML_DIR)/lib
 
 # if you are on a mac, you must use this LDFLAGS and comment out the previous one
 #LDFLAGS   := -O3 -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -L$(SFML_DIR)/lib -framework OpenGL
