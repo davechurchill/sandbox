@@ -24,8 +24,7 @@ void Scene_Sandbox::init()
     ImGui::GetStyle().ScaleAllSizes(2.0f);
     ImGui::GetIO().FontGlobalScale = 2.0f;
 
-    m_view.setWindowSize(Vec2(m_game->window().getSize().x, m_game->window().getSize().y));
-
+    m_view.setWindowSize(m_game->window().getSize());
     m_view.setView(m_game->window().getView());
         
     m_font = Assets::Instance().getFont("Tech");
@@ -34,6 +33,13 @@ void Scene_Sandbox::init()
     m_text.setCharacterSize(10);
 
     // initialize rs2
+
+    if (!isCameraConnected())
+    {
+        std::cerr << "No RealSense Camera Found, check connection and restart\n";
+        exit(-1);
+    }
+
     m_pipe.start();
 
     // read a sample image and convert it to RGBA needed by sfml
@@ -121,57 +127,22 @@ void Scene_Sandbox::sUserInput()
         if (event.type == sf::Event::MouseButtonPressed)
         {
             // happens when the left mouse button is pressed
-            if (event.mouseButton.button == sf::Mouse::Left)
-            {
-                m_view.stopScroll();
-            }
-
-            // happens when the right mouse button is pressed
-            if (event.mouseButton.button == sf::Mouse::Right)
-            {
-                m_drag = { event.mouseButton.x, event.mouseButton.y };
-                m_view.stopScroll();
-            }
+            if (event.mouseButton.button == sf::Mouse::Left) {}
+            if (event.mouseButton.button == sf::Mouse::Right) {}
         }
 
         // happens when the mouse button is released
         if (event.type == sf::Event::MouseButtonReleased)
         {
-            // let go of the currently selected rectangle
-            if (event.mouseButton.button == sf::Mouse::Left)
-            {
-                
-            }
-
-            // let go of the currently selected rectangle
-            if (event.mouseButton.button == sf::Mouse::Right)
-            {
-                m_drag = { -1, -1 };
-            }
-        }
-
-        if (event.type == sf::Event::MouseWheelMoved)
-        {
-            double zoom = 1.0 - (0.2 * event.mouseWheel.delta);
-            m_view.zoomTo(zoom, Vec2(event.mouseWheel.x, event.mouseWheel.y));
+            if (event.mouseButton.button == sf::Mouse::Left) {}
+            if (event.mouseButton.button == sf::Mouse::Right) {}
         }
 
         // happens whenever the mouse is being moved
         if (event.type == sf::Event::MouseMoved)
         {
-            m_mouseScreen = { event.mouseMove.x, event.mouseMove.y };
-
-            // record the current mouse position in universe coordinates
+            m_mouseScreen = { (float)event.mouseMove.x, (float)event.mouseMove.y };
             m_mouseWorld = m_view.windowToWorld(m_mouseScreen);
-
-            if (m_drag.x != -1)
-            {
-                auto prev = m_view.windowToWorld(m_drag);
-                auto curr = m_view.windowToWorld({ event.mouseMove.x, event.mouseMove.y });
-                auto scroll = prev - curr;
-                m_view.scroll(prev - curr);
-                m_drag = { event.mouseMove.x, event.mouseMove.y };
-            }
         }
     }
 }

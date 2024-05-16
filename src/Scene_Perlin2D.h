@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Vec2.hpp"
 #include "Scene.h"
 #include "WorldView.hpp"
 #include "Grid.hpp"
@@ -34,9 +35,8 @@ class Scene_Perlin2D : public Scene
 
     Grid<float>         m_grid;
 
-    Vec2                m_drag = { -1, -1 };
-    Vec2                m_mouseScreen;
-    Vec2                m_mouseWorld;
+    sf::Vector2f        m_mouseScreen;
+    sf::Vector2f        m_mouseWorld;
     Vec2                m_mouseGrid;
     
     WorldView           m_view;

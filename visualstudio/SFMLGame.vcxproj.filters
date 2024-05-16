@@ -32,12 +32,6 @@
     <ClCompile Include="..\src\Scene_Perlin2D.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Scene_Grid.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\algorithms\Environment.cpp">
-      <Filter>algorithms</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Scene_Sandbox.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
@@ -70,33 +64,6 @@
     <ClInclude Include="..\src\Scene_Perlin2D.h">
       <Filter>scenes</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Scene_Grid.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\algorithms\ClosedList.hpp">
-      <Filter>algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\algorithms\Environment.h">
-      <Filter>algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\algorithms\GridConnectivity.hpp">
-      <Filter>algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\algorithms\GridLegalActions.hpp">
-      <Filter>algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\algorithms\GridSearch.hpp">
-      <Filter>algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\algorithms\OpenList.hpp">
-      <Filter>algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\algorithms\OpenList_Vector.hpp">
-      <Filter>algorithms</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\algorithms\OpenList_VectorSorted.hpp">
-      <Filter>algorithms</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Perlin.hpp">
       <Filter>scenes</Filter>
     </ClInclude>
@@ -113,9 +80,6 @@
     </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{fd00c5e6-54c2-4cbd-91ee-c7d51d1d1d6d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="algorithms">
-      <UniqueIdentifier>{2bde35ec-8b1e-4759-a236-d345f95496c0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

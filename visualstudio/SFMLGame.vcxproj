@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\algorithms\Environment.cpp" />
     <ClCompile Include="..\src\Assets.cpp" />
     <ClCompile Include="..\src\GameEngine.cpp" />
     <ClCompile Include="..\src\imgui\imgui-SFML.cpp" />
@@ -30,26 +29,16 @@
     <ClCompile Include="..\src\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\src\Scene.cpp" />
     <ClCompile Include="..\src\main.cpp" />
-    <ClCompile Include="..\src\Scene_Grid.cpp" />
     <ClCompile Include="..\src\Scene_Perlin2D.cpp" />
     <ClCompile Include="..\src\Scene_Sandbox.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Action.hpp" />
-    <ClInclude Include="..\src\algorithms\ClosedList.hpp" />
-    <ClInclude Include="..\src\algorithms\Environment.h" />
-    <ClInclude Include="..\src\algorithms\GridConnectivity.hpp" />
-    <ClInclude Include="..\src\algorithms\GridLegalActions.hpp" />
-    <ClInclude Include="..\src\algorithms\GridSearch.hpp" />
-    <ClInclude Include="..\src\algorithms\OpenList.hpp" />
-    <ClInclude Include="..\src\algorithms\OpenList_Vector.hpp" />
-    <ClInclude Include="..\src\algorithms\OpenList_VectorSorted.hpp" />
     <ClInclude Include="..\src\Assets.h" />
     <ClInclude Include="..\src\GameEngine.h" />
     <ClInclude Include="..\src\Perlin.hpp" />
     <ClInclude Include="..\src\Scene.h" />
     <ClInclude Include="..\src\Grid.hpp" />
-    <ClInclude Include="..\src\Scene_Grid.h" />
     <ClInclude Include="..\src\Scene_Perlin2D.h" />
     <ClInclude Include="..\src\Scene_Sandbox.h" />
     <ClInclude Include="..\src\Timer.hpp" />

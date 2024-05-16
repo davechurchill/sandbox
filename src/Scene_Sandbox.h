@@ -42,9 +42,8 @@ class Scene_Sandbox : public Scene
     sf::Sprite          m_depthSprite;
     sf::Sprite          m_colorSprite;
 
-    Vec2                m_drag = { -1, -1 };
-    Vec2                m_mouseScreen;
-    Vec2                m_mouseWorld;
+    sf::Vector2f        m_mouseScreen;
+    sf::Vector2f        m_mouseWorld;
     
     WorldView           m_view;
     
