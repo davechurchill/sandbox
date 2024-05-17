@@ -20,8 +20,8 @@ Scene_Sandbox::Scene_Sandbox(GameEngine * game)
 
 void Scene_Sandbox::init()
 {
-    ImGui::GetStyle().ScaleAllSizes(2.0f);
-    ImGui::GetIO().FontGlobalScale = 2.0f;
+    //ImGui::GetStyle().ScaleAllSizes(2.0f);
+    //ImGui::GetIO().FontGlobalScale = 2.0f;
             
     m_font = Assets::Instance().getFont("Tech");
     m_text.setFont(m_font);
@@ -103,7 +103,8 @@ void Scene_Sandbox::sUserInput()
             {
                 case sf::Keyboard::Escape:
                 {
-                    m_game->changeScene("MENU", nullptr, true);
+                    m_game->window().setView(m_game->window().getDefaultView());
+                    m_game->changeScene("Menu", nullptr, true);
                     break;
                 }
             }

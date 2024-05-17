@@ -35,6 +35,9 @@
     <ClCompile Include="..\src\Scene_Sandbox.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Scene_Menu.cpp">
+      <Filter>scenes</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Assets.h">
@@ -69,6 +72,9 @@
     </ClInclude>
     <ClInclude Include="..\src\ViewController.hpp">
       <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene_Menu.h">
+      <Filter>scenes</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

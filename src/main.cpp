@@ -1,4 +1,5 @@
 #include "GameEngine.h"
+#include "Scene_Menu.h"
 #include "Scene_Perlin2D.h"
 #include "Scene_Sandbox.h"
 
@@ -17,7 +18,7 @@ int main()
 {
 
     GameEngine engine;
-    engine.changeScene("Perlin", std::make_shared<Scene_Perlin2D>(&engine));
+    engine.changeScene("Menu", std::make_shared<Scene_Menu>(&engine));
     //engine.changeScene("Sandbox", std::make_shared<Scene_Sandbox>(&engine));
     engine.run();
 

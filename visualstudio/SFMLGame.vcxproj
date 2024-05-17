@@ -29,6 +29,7 @@
     <ClCompile Include="..\src\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\src\Scene.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\Scene_Menu.cpp" />
     <ClCompile Include="..\src\Scene_Perlin2D.cpp" />
     <ClCompile Include="..\src\Scene_Sandbox.cpp" />
   </ItemGroup>
@@ -39,6 +40,7 @@
     <ClInclude Include="..\src\Perlin.hpp" />
     <ClInclude Include="..\src\Scene.h" />
     <ClInclude Include="..\src\Grid.hpp" />
+    <ClInclude Include="..\src\Scene_Menu.h" />
     <ClInclude Include="..\src\Scene_Perlin2D.h" />
     <ClInclude Include="..\src\Scene_Sandbox.h" />
     <ClInclude Include="..\src\Timer.hpp" />
