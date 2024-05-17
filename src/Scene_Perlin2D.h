@@ -2,7 +2,7 @@
 
 #include "Vec2.hpp"
 #include "Scene.h"
-#include "WorldView.hpp"
+#include "ViewController.hpp"
 #include "Grid.hpp"
 #include "Perlin.hpp"
 
@@ -39,7 +39,7 @@ class Scene_Perlin2D : public Scene
     sf::Vector2f        m_mouseWorld;
     Vec2                m_mouseGrid;
     
-    WorldView           m_view;
+    ViewController      m_viewController;
     
     void init();  
 

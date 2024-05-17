@@ -1,6 +1,5 @@
 #include "Scene_Perlin2D.h"
 #include "GameEngine.h"
-#include "WorldView.hpp"
 #include "Assets.h"
 
 #include <fstream>
@@ -24,11 +23,7 @@ void Scene_Perlin2D::init()
     ImGui::GetStyle().ScaleAllSizes(2.0f);
     ImGui::GetIO().FontGlobalScale = 2.0f;
 
-    m_view.setWindowSize(m_game->window().getSize());
-
-    m_view.setView(m_game->window().getView());
-    m_view.zoomTo(16, { 0, 0 });
-    m_view.move({ -m_gridSize*3, -m_gridSize*3 });
+    m_viewController.zoomTo(m_game->window(), 20, { 0, 0 });
         
     m_font = Assets::Instance().getFont("Tech");
     m_text.setFont(m_font);
@@ -48,7 +43,6 @@ void Scene_Perlin2D::calculateNoise()
 
 void Scene_Perlin2D::onFrame()
 {
-    m_view.update();
     sUserInput();
     sRender(); 
     renderUI();
@@ -61,7 +55,7 @@ void Scene_Perlin2D::sUserInput()
     while (m_game->window().pollEvent(event))
     {
         ImGui::SFML::ProcessEvent(m_game->window(), event);
-        m_view.processEvent(event);
+        m_viewController.processEvent(m_game->window(), event);
 
         // this event triggers when the window is closed
         if (event.type == sf::Event::Closed)
@@ -119,9 +113,6 @@ void Scene_Perlin2D::sUserInput()
         {
             m_mouseScreen = { (float)event.mouseMove.x, (float)event.mouseMove.y };
 
-            // record the current mouse position in universe coordinates
-            m_mouseWorld = m_view.windowToWorld(m_mouseScreen);
-
             // record the grid cell that the mouse position is currently over
             m_mouseGrid = { floor(m_mouseWorld.x / m_gridSize) * m_gridSize, floor(m_mouseWorld.y / m_gridSize) * m_gridSize };
         }
@@ -137,7 +128,6 @@ void Scene_Perlin2D::sRender()
     m_lineStrip.clear();
     m_quadArray.clear();
     float gs = (float)m_gridSize;
-    m_game->window().setView(m_view.getSFMLView());
 
     m_onContour = Grid<char>((int)(1 << m_seedSize), (int)(1 << m_seedSize), 0);
 
@@ -285,7 +275,6 @@ void Scene_Perlin2D::sRender()
 
     m_game->window().draw(m_quadArray);
     m_game->window().draw(m_lineStrip);
-    m_game->window().setView(m_game->window().getDefaultView());
     m_game->window().draw(m_text);
 }
 

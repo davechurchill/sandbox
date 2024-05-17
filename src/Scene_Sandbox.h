@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Scene.h"
-#include "WorldView.hpp"
+#include "ViewController.hpp"
 #include "Grid.hpp"
 #include "Perlin.hpp"
 
@@ -42,10 +42,10 @@ class Scene_Sandbox : public Scene
     sf::Sprite          m_depthSprite;
     sf::Sprite          m_colorSprite;
 
-    sf::Vector2f        m_mouseScreen;
+    sf::Vector2i        m_mouseScreen;
     sf::Vector2f        m_mouseWorld;
     
-    WorldView           m_view;
+    ViewController      m_viewController;
     
     void captureImage();
     void setSprite(const cv::Mat& cvImage);

@@ -46,9 +46,6 @@
     <ClInclude Include="..\src\Vec2.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\WorldView.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Grid.hpp">
       <Filter>engine</Filter>
     </ClInclude>
@@ -69,6 +66,9 @@
     </ClInclude>
     <ClInclude Include="..\src\Scene_Sandbox.h">
       <Filter>scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ViewController.hpp">
+      <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,5 @@
 #include "Scene_Sandbox.h"
 #include "GameEngine.h"
-#include "WorldView.hpp"
 #include "Assets.h"
 
 #include <fstream>
@@ -23,10 +22,7 @@ void Scene_Sandbox::init()
 {
     ImGui::GetStyle().ScaleAllSizes(2.0f);
     ImGui::GetIO().FontGlobalScale = 2.0f;
-
-    m_view.setWindowSize(m_game->window().getSize());
-    m_view.setView(m_game->window().getView());
-        
+            
     m_font = Assets::Instance().getFont("Tech");
     m_text.setFont(m_font);
     m_text.setPosition(10, 5);
@@ -79,7 +75,6 @@ void Scene_Sandbox::captureImage()
 
 void Scene_Sandbox::onFrame()
 {
-    m_view.update();
     captureImage();
     sUserInput();
     sRender(); 
@@ -93,6 +88,7 @@ void Scene_Sandbox::sUserInput()
     while (m_game->window().pollEvent(event))
     {
         ImGui::SFML::ProcessEvent(m_game->window(), event);
+        m_viewController.processEvent(m_game->window(), event);
 
         // this event triggers when the window is closed
         if (event.type == sf::Event::Closed)
@@ -141,8 +137,8 @@ void Scene_Sandbox::sUserInput()
         // happens whenever the mouse is being moved
         if (event.type == sf::Event::MouseMoved)
         {
-            m_mouseScreen = { (float)event.mouseMove.x, (float)event.mouseMove.y };
-            m_mouseWorld = m_view.windowToWorld(m_mouseScreen);
+            m_mouseScreen = { event.mouseMove.x, event.mouseMove.y };
+            m_mouseWorld = m_game->window().mapPixelToCoords(m_mouseScreen);
         }
     }
 }
@@ -155,7 +151,6 @@ void Scene_Sandbox::sRender()
     m_game->window().clear();
     m_lineStrip.clear();
     m_quadArray.clear();
-    m_game->window().setView(m_view.getSFMLView());
 
     m_depthSprite.setColor(sf::Color(255, 255, 255, m_depthAlpha));
     m_depthSprite.setPosition(m_depthPos[0], m_depthPos[1]);
@@ -170,7 +165,6 @@ void Scene_Sandbox::sRender()
     
     m_game->window().draw(m_quadArray);
     m_game->window().draw(m_lineStrip);
-    m_game->window().setView(m_game->window().getDefaultView());
     m_game->window().draw(m_text);
 }
 
