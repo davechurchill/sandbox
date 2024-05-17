@@ -71,7 +71,7 @@ void Scene_Perlin2D::sUserInput()
             {
                 case sf::Keyboard::Escape:
                 {
-                    m_game->changeScene<Scene_Menu>("Menu", true);
+                    m_game->changeScene<Scene_Menu>("Menu");
                     break;
                 }
                 case sf::Keyboard::R: { m_seed += 1; calculateNoise(); break; }

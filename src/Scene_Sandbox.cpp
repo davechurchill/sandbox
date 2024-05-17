@@ -104,7 +104,7 @@ void Scene_Sandbox::sUserInput()
             {
                 case sf::Keyboard::Escape:
                 {
-                    m_game->changeScene<Scene_Menu>("Menu", true);
+                    m_game->changeScene<Scene_Menu>("Menu");
                     break;
                 }
             }
