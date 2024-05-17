@@ -1,4 +1,5 @@
 #include "Scene_Perlin2D.h"
+#include "Scene_Menu.h"
 #include "GameEngine.h"
 #include "Assets.h"
 
@@ -20,8 +21,8 @@ Scene_Perlin2D::Scene_Perlin2D(GameEngine * game)
 
 void Scene_Perlin2D::init()
 {
-    //ImGui::GetStyle().ScaleAllSizes(2.0f);
-    //ImGui::GetIO().FontGlobalScale = 2.0f;
+    ImGui::GetStyle().ScaleAllSizes(2.0f);
+    ImGui::GetIO().FontGlobalScale = 2.0f;
 
     m_viewController.zoomTo(m_game->window(), 20, { 0, 0 });
         
@@ -70,8 +71,7 @@ void Scene_Perlin2D::sUserInput()
             {
                 case sf::Keyboard::Escape:
                 {
-                    m_game->window().setView(m_game->window().getDefaultView());
-                    m_game->changeScene("Menu", nullptr, true);
+                    m_game->changeScene<Scene_Menu>("Menu", true);
                     break;
                 }
                 case sf::Keyboard::R: { m_seed += 1; calculateNoise(); break; }

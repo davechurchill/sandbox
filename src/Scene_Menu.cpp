@@ -55,8 +55,8 @@ void Scene_Menu::sUserInput()
             switch (event.key.code)
             {
                 case sf::Keyboard::Escape: { exit(0); }
-                case sf::Keyboard::Num1: { m_game->changeScene("Perlin", std::make_shared<Scene_Perlin2D>(m_game)); break; }
-                case sf::Keyboard::Num2: { m_game->changeScene("Sandbox", std::make_shared<Scene_Sandbox>(m_game)); break; }
+                case sf::Keyboard::Num1: { m_game->changeScene<Scene_Perlin2D>("Perlin"); break; }
+                case sf::Keyboard::Num2: { m_game->changeScene<Scene_Sandbox>("Sandbox"); break; }
             }
         }
     }

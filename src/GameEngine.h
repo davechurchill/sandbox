@@ -7,6 +7,9 @@
 #include <memory>
 #include <SFML/Graphics.hpp>
 
+#include "imgui.h"
+#include "imgui-SFML.h"
+
 typedef std::map<std::string, std::shared_ptr<Scene>> SceneMap;
 
 class GameEngine
@@ -20,6 +23,7 @@ protected:
     SceneMap            m_sceneMap;
     size_t              m_simulationSpeed = 1;
     bool                m_running = true;
+    ImGuiStyle          m_originalStyle;
 
     void update();
     std::shared_ptr<Scene> currentScene();
@@ -30,7 +34,26 @@ public:
 
     void init();
 
-    void changeScene(const std::string& sceneName, std::shared_ptr<Scene> scene = nullptr, bool endCurrentScene = false);
+    template <class T>
+    void changeScene(const std::string& sceneName, bool endCurrentScene = true)
+    {
+        m_window.setView(m_window.getDefaultView());
+        ImGui::GetStyle() = m_originalStyle;
+
+        if (endCurrentScene)
+        {
+            auto it = m_sceneMap.find(m_currentScene);
+            if (it != m_sceneMap.end()) { m_sceneMap.erase(it); }
+        }
+
+        if (m_sceneMap.find(sceneName) == m_sceneMap.end())
+        {
+            std::shared_ptr<Scene> scene = std::make_shared<T>(this);
+            m_sceneMap[sceneName] = scene;
+        }
+
+        m_currentScene = sceneName;
+    }
 
     void quit();
     void run();

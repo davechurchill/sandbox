@@ -16,10 +16,8 @@ bool isCameraConnected() {
 
 int main()
 {
-
     GameEngine engine;
-    engine.changeScene("Menu", std::make_shared<Scene_Menu>(&engine));
-    //engine.changeScene("Sandbox", std::make_shared<Scene_Sandbox>(&engine));
+    engine.changeScene<Scene_Menu>("Menu");
     engine.run();
 
     return 0;
