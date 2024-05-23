@@ -76,6 +76,9 @@
     <ClInclude Include="..\src\Scene_Menu.h">
       <Filter>scenes</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\ContourLines.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="engine">
