@@ -14,6 +14,13 @@
 #include <librealsense2/rs.hpp> // Include RealSense Cross Platform API
 #include <opencv2/opencv.hpp>   // Include OpenCV API
 
+enum class alignment
+{
+    depth,
+    color,
+    nothing
+};
+
 class Scene_Sandbox : public Scene
 {   
     sf::Font            m_font;             
@@ -29,8 +36,12 @@ class Scene_Sandbox : public Scene
     float               m_colorPos[2] = { 0, 0 };
     float               m_colorScale = 1.0f;
 
+    alignment           m_alignment = alignment::nothing;
+
     rs2::colorizer      m_colorMap;
     rs2::pipeline       m_pipe;
+    rs2::align          m_alignment_depth = rs2::align(RS2_STREAM_DEPTH);
+    rs2::align          m_alignment_color = rs2::align(RS2_STREAM_COLOR);
 
     cv::Mat             m_cvDepthImage;
     cv::Mat             m_cvColorImage;
