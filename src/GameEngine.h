@@ -26,13 +26,13 @@ protected:
     ImGuiStyle          m_originalStyle;
 
     void update();
-    std::shared_ptr<Scene> currentScene();
 
 public:
     
     GameEngine();
 
     void init();
+    std::shared_ptr<Scene> currentScene();
 
     template <class T>
     void changeScene(const std::string& sceneName, bool endCurrentScene = true)

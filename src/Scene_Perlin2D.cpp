@@ -32,14 +32,14 @@ void Scene_Perlin2D::init()
     m_text.setCharacterSize(10);
 
     calculateNoise();
-
 }
 
 void Scene_Perlin2D::calculateNoise()
 {
     m_perlin = Perlin2DNew((int)(1 << m_seedSize), (int)(1 << m_seedSize), m_seed);
     m_grid = m_perlin.GeneratePerlinNoise(m_octaves, m_persistance);
-    m_onContour = Grid<char>((int)(1 << m_seedSize), (int)(1 << m_seedSize), 0);
+    m_contour.init((int)(1 << m_seedSize), (int)(1 << m_seedSize));
+    m_contour.calculate(m_grid);
 }
 
 void Scene_Perlin2D::onFrame()
@@ -130,8 +130,6 @@ void Scene_Perlin2D::sRender()
     m_quadArray.clear();
     float gs = (float)m_gridSize;
 
-    m_onContour = Grid<char>((int)(1 << m_seedSize), (int)(1 << m_seedSize), 0);
-
     // draw grid cells with the associated colors
     for (size_t x = 0; x < m_grid.width(); x++)
     {
@@ -170,94 +168,14 @@ void Scene_Perlin2D::sRender()
                 }
 
                 drawRect<float>(x * m_gridSize, y * m_gridSize, m_gridSize, m_gridSize, c);
-
-                float height = m_grid.get(x, y);
-                if (height > m_contourLevel)
-                {
-                    if (y > 0 and m_grid.get(x, y - 1) <= m_contourLevel)
-                    {
-                        m_onContour.set(x, y, 1);
-                    }
-
-                    if (y < m_grid.height()-1 and m_grid.get(x, y + 1) <= m_contourLevel)
-                    {
-                        m_onContour.set(x, y, 1);
-                    }
-
-                    if (x > 0 and m_grid.get(x - 1, y) <= m_contourLevel)
-                    {
-                        m_onContour.set(x, y, 1);
-                    }
-
-                    if (x < m_grid.width()-1 and m_grid.get(x + 1, y) <= m_contourLevel)
-                    {
-                        m_onContour.set(x, y, 1);
-                    }
-                }
-
-
-
             }
         }
     }
 
     if (m_drawContours)
     {
-        for (size_t x = 0; x < m_grid.width(); x++)
-        {
-            for (size_t y = 0; y < m_grid.height(); y++)
-            {
-                if (!m_onContour.get(x, y)) { continue; }
-
-                float xx = x * m_gridSize + m_gridSize / 2;
-                float yy = y * m_gridSize + m_gridSize / 2;
-
-                if (y > 0 && m_onContour.get(x, y - 1))
-                {
-                    drawLine<float>(xx, yy, xx, yy - m_gridSize, sf::Color::White);
-                }
-
-                if (y < m_grid.height()-1 && m_onContour.get(x, y + 1))
-                {
-                    drawLine<float>(xx, yy, xx, yy + m_gridSize, sf::Color::White);
-                }
-
-                if (x > 0 && m_onContour.get(x - 1, y))
-                {
-                    drawLine<float>(xx, yy, xx - m_gridSize, yy, sf::Color::White);
-                }
-
-                if (x < m_grid.width() - 1 && m_onContour.get(x + 1, y))
-                {
-                    drawLine<float>(xx, yy, xx + m_gridSize, yy, sf::Color::White);
-                }
-
-                //
-
-                if (x > 0 && y > 0 && m_onContour.get(x - 1, y - 1))
-                {
-                    drawLine<float>(xx, yy, xx - m_gridSize, yy - m_gridSize, sf::Color::White);
-                }
-
-                if (x > 0 && y < m_grid.height() - 1 && m_onContour.get(x - 1, y + 1))
-                {
-                    drawLine<float>(xx, yy, xx - m_gridSize, yy + m_gridSize, sf::Color::White);
-                }
-
-                if (x < m_grid.width() - 1 && y > 0 && m_onContour.get(x + 1, y - 1))
-                {
-                    drawLine<float>(xx, yy, xx + m_gridSize, yy - m_gridSize, sf::Color::White);
-                }
-
-                if (x < m_grid.width() - 1 && y < m_grid.height() - 1 && m_onContour.get(x + 1, y + 1))
-                {
-                    drawLine<float>(xx, yy, xx + m_gridSize, yy + m_gridSize, sf::Color::White);
-                }
-            }
-        }
+        m_contour.render(m_game->currentScene(), m_gridSize);
     }
-
-    //std::cout << maxGrey << "\n";
 
     for (int x = 0; m_drawGrid && x <= (int)m_grid.width(); x++)
     {
@@ -315,8 +233,11 @@ void Scene_Perlin2D::renderUI()
             // PC Display Options
             ImGui::Checkbox("Greyscale", &m_drawGrey);
             ImGui::Checkbox("Contours", &m_drawContours);
-            ImGui::SliderFloat("C Level", &m_contourLevel, 0, 1);
-            ImGui::SliderInt("C Diff", &m_contourDiff, 1, 10);
+            if (ImGui::SliderFloat("C Level", &m_contourLevel, 0, 1))
+            {
+                m_contour.setContourLevel(m_contourLevel);
+                m_contour.calculate(m_grid);
+            }
 
             ImGui::EndTabItem();
         }

@@ -5,6 +5,7 @@
 #include "ViewController.hpp"
 #include "Grid.hpp"
 #include "Perlin.hpp"
+#include "ContourLines.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -30,8 +31,8 @@ class Scene_Perlin2D : public Scene
     bool                m_drawContours = false;
     int                 m_contourSkip = 20;
     float               m_contourLevel = 0.5;
-    int                 m_contourDiff = 3;
-    Grid<char>          m_onContour;
+
+    ContourLines        m_contour;
 
     Grid<float>         m_grid;
 
