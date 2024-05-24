@@ -49,6 +49,16 @@ void Scene_Sandbox::captureImage()
 {
     // Wait for next set of frames from the camera
     rs2::frameset data = m_pipe.wait_for_frames(); 
+
+    if (m_alignment==alignment::depth)
+    {
+        data = m_alignment_depth.process(data);
+    }
+    else if (m_alignment == alignment::color)
+    {
+        data = m_alignment_color.process(data);
+    }
+
     rs2::frame depth = data.get_depth_frame().apply_filter(m_colorMap);
     rs2::frame color = data.get_color_frame();
 
@@ -169,12 +179,31 @@ void Scene_Sandbox::renderUI()
         if (ImGui::BeginTabItem("Image"))
         {
             // PC Display Options
+
+            const char * items[] = { "Depth", "Color", "Nothing" };
+            ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
+
+
             ImGui::Checkbox("Depth", &m_drawDepth);
+            if (ImGui::Button("Match Color"))
+            {
+                m_depthAlpha = m_colorAlpha;
+                m_depthPos[0] = m_colorPos[0];
+                m_depthPos[1] = m_colorPos[1];
+                m_depthScale = m_colorScale;
+            }
             ImGui::SliderInt("DAlpha", &m_depthAlpha, 0, 255);
             ImGui::SliderFloat2("DPos", m_depthPos, -1000, 1000);
             ImGui::SliderFloat("DScale", &m_depthScale, 0, 2);
 
             ImGui::Checkbox("Color", &m_drawColor);
+            if (ImGui::Button("Match Depth"))
+            {
+                m_colorAlpha = m_depthAlpha;
+                m_colorPos[0] = m_depthPos[0];
+                m_colorPos[1] = m_depthPos[1];
+                m_colorScale = m_depthScale;
+            }
             ImGui::SliderInt("CAlpha", &m_colorAlpha, 0, 255);
             ImGui::SliderFloat2("CPos", m_colorPos, -1000, 1000);
             ImGui::SliderFloat("CScale", &m_colorScale, 0, 2);
