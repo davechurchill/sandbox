@@ -36,6 +36,7 @@
   <ItemGroup>
     <ClInclude Include="..\src\Action.hpp" />
     <ClInclude Include="..\src\Assets.h" />
+    <ClInclude Include="..\src\ContourLines.hpp" />
     <ClInclude Include="..\src\GameEngine.h" />
     <ClInclude Include="..\src\Perlin.hpp" />
     <ClInclude Include="..\src\Scene.h" />
