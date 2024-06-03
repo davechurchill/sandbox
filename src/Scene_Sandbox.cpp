@@ -59,7 +59,14 @@ void Scene_Sandbox::captureImage()
         data = m_alignment_color.process(data);
     }
 
-    rs2::frame depth = data.get_depth_frame().apply_filter(m_colorMap);
+    data = m_thresholdFilter.process(data);
+
+    rs2::depth_frame rawDepth = data.get_depth_frame();
+    if (m_decimation > 0)
+    {
+        rawDepth = m_decimationFilter.process(rawDepth);
+    }
+    rs2::frame depth = rawDepth.apply_filter(m_colorMap);
     rs2::frame color = data.get_color_frame();
 
     // Query frame size (width and height)
@@ -68,16 +75,30 @@ void Scene_Sandbox::captureImage()
     const int cw = color.as<rs2::video_frame>().get_width();
     const int ch = color.as<rs2::video_frame>().get_height();
 
+    // Copy data to depth grid
+    m_depthGrid.refill(dw, dh, 0.0);
+    if (m_maxDistance > m_minDistance)
+    {
+        for (int i = 0; i < dw; ++i)
+        {
+            for (int j = 0; j < dh; ++j)
+            {
+                m_depthGrid.set(i, j, 1 - (rawDepth.get_distance(i, j) - m_minDistance) / (m_maxDistance - m_minDistance));
+            }
+        }
+    }
+
     // Create OpenCV matrix of size (w,h) from the colorized depth data
     m_cvDepthImage = cv::Mat(cv::Size(dw, dh), CV_8UC3, (void*)depth.get_data(), cv::Mat::AUTO_STEP);
     cv::cvtColor(m_cvDepthImage, m_cvDepthImage, cv::COLOR_BGR2RGBA);
+    cv::resize(m_cvDepthImage, m_cvDepthImage, cv::Size(cw, ch), (0,0), (0,0), cv::InterpolationFlags::INTER_NEAREST);
     m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void*)color.get_data(), cv::Mat::AUTO_STEP);
     cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
 
     // Create the SFML sprites to be rendered
     m_sfDepthImage.create(m_cvDepthImage.cols, m_cvDepthImage.rows, m_cvDepthImage.ptr());
     m_sfDepthTexture.loadFromImage(m_sfDepthImage);
-    m_depthSprite.setTexture(m_sfDepthTexture);
+    m_depthSprite.setTexture(m_sfDepthTexture, true);
 
     m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
     m_sfColorTexture.loadFromImage(m_sfColorImage);
@@ -180,34 +201,63 @@ void Scene_Sandbox::renderUI()
         {
             // PC Display Options
 
-            const char * items[] = { "Depth", "Color", "Nothing" };
-            ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
-
-
-            ImGui::Checkbox("Depth", &m_drawDepth);
-            if (ImGui::Button("Match Color"))
+            if (ImGui::CollapsingHeader("Camera Options"))
             {
-                m_depthAlpha = m_colorAlpha;
-                m_depthPos[0] = m_colorPos[0];
-                m_depthPos[1] = m_colorPos[1];
-                m_depthScale = m_colorScale;
-            }
-            ImGui::SliderInt("DAlpha", &m_depthAlpha, 0, 255);
-            ImGui::SliderFloat2("DPos", m_depthPos, -1000, 1000);
-            ImGui::SliderFloat("DScale", &m_depthScale, 0, 2);
+                ImGui::Indent();
+                const char * items[] = { "Depth", "Color", "Nothing" };
+                    ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
 
-            ImGui::Checkbox("Color", &m_drawColor);
-            if (ImGui::Button("Match Depth"))
+                    if (ImGui::SliderInt("Decimation", &m_decimation, 0, 5) && m_decimation > 0)
+                    {
+                        m_decimationFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_decimation);
+                    }
+
+                if (ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 16.0))
+                {
+                    m_thresholdFilter.set_option(RS2_OPTION_MAX_DISTANCE, m_maxDistance);
+                }
+
+                if (ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 16.0))
+                {
+                    m_thresholdFilter.set_option(RS2_OPTION_MIN_DISTANCE, m_minDistance);
+                }
+                ImGui::Unindent();
+            }
+
+            if (ImGui::CollapsingHeader("Image Options"))
             {
-                m_colorAlpha = m_depthAlpha;
-                m_colorPos[0] = m_depthPos[0];
-                m_colorPos[1] = m_depthPos[1];
-                m_colorScale = m_depthScale;
-            }
-            ImGui::SliderInt("CAlpha", &m_colorAlpha, 0, 255);
-            ImGui::SliderFloat2("CPos", m_colorPos, -1000, 1000);
-            ImGui::SliderFloat("CScale", &m_colorScale, 0, 2);
+                ImGui::Indent();
+                ImGui::Checkbox("Depth", &m_drawDepth);
+                if (ImGui::Button("Match Color"))
+                {
+                    m_depthAlpha = m_colorAlpha;
+                    m_depthPos[0] = m_colorPos[0];
+                    m_depthPos[1] = m_colorPos[1];
+                    m_depthScale = m_colorScale;
+                }
+                ImGui::SliderInt("DAlpha", &m_depthAlpha, 0, 255);
+                ImGui::SliderFloat2("DPos", m_depthPos, -1000, 1000);
+                ImGui::SliderFloat("DScale", &m_depthScale, 0, 2);
 
+                ImGui::Checkbox("Color", &m_drawColor);
+                if (ImGui::Button("Match Depth"))
+                {
+                    m_colorAlpha = m_depthAlpha;
+                    m_colorPos[0] = m_depthPos[0];
+                    m_colorPos[1] = m_depthPos[1];
+                    m_colorScale = m_depthScale;
+                }
+                ImGui::SliderInt("CAlpha", &m_colorAlpha, 0, 255);
+                ImGui::SliderFloat2("CPos", m_colorPos, -1000, 1000);
+                ImGui::SliderFloat("CScale", &m_colorScale, 0, 2);
+                ImGui::Unindent();
+            }
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Minecraft"))
+        {
+            m_game->minecraft().imgui(m_depthGrid, 0.4);
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();

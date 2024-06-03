@@ -38,6 +38,9 @@
     <ClCompile Include="..\src\Scene_Menu.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\MinecraftInterface.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Assets.h">
@@ -77,6 +80,9 @@
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ContourLines.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MinecraftInterface.h">
       <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>

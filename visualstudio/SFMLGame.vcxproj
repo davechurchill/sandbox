@@ -27,6 +27,7 @@
     <ClCompile Include="..\src\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\src\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\src\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\src\MinecraftInterface.cpp" />
     <ClCompile Include="..\src\Scene.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\Scene_Menu.cpp" />
@@ -38,6 +39,7 @@
     <ClInclude Include="..\src\Assets.h" />
     <ClInclude Include="..\src\ContourLines.hpp" />
     <ClInclude Include="..\src\GameEngine.h" />
+    <ClInclude Include="..\src\MinecraftInterface.h" />
     <ClInclude Include="..\src\Perlin.hpp" />
     <ClInclude Include="..\src\Scene.h" />
     <ClInclude Include="..\src\Grid.hpp" />

@@ -9,6 +9,7 @@
 
 #include "imgui.h"
 #include "imgui-SFML.h"
+#include "MinecraftInterface.h"
 
 typedef std::map<std::string, std::shared_ptr<Scene>> SceneMap;
 
@@ -24,6 +25,7 @@ protected:
     size_t              m_simulationSpeed = 1;
     bool                m_running = true;
     ImGuiStyle          m_originalStyle;
+    MinecraftInterface  m_mcInterface;
 
     void update();
 
@@ -61,5 +63,6 @@ public:
     unsigned int height() const;
 
     sf::RenderWindow & window();
+    MinecraftInterface & minecraft();
     bool isRunning();
 };

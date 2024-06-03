@@ -57,6 +57,15 @@ class Scene_Sandbox : public Scene
     sf::Vector2f        m_mouseWorld;
     
     ViewController      m_viewController;
+
+    Grid<float>         m_depthGrid;
+
+    int                 m_decimation = 1;
+    rs2::decimation_filter m_decimationFilter;
+
+    float               m_maxDistance = 16.0;
+    float               m_minDistance = 0.0;
+    rs2::threshold_filter m_thresholdFilter;
     
     void captureImage();
     void setSprite(const cv::Mat& cvImage);

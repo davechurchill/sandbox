@@ -32,6 +32,11 @@ sf::RenderWindow & GameEngine::window()
     return m_window;
 }
 
+MinecraftInterface & GameEngine::minecraft()
+{
+    return m_mcInterface;
+}
+
 std::shared_ptr<Scene> GameEngine::currentScene()
 {
     return m_sceneMap.at(m_currentScene);
