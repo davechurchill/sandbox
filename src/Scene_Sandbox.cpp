@@ -197,61 +197,61 @@ void Scene_Sandbox::renderUI()
 
     if (ImGui::BeginTabBar("MyTabBar"))
     {
-        if (ImGui::BeginTabItem("Image"))
+        if (ImGui::BeginTabItem("Camera"))
         {
             // PC Display Options
+            const char * items[] = { "Depth", "Color", "Nothing" };
+            ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
 
-            if (ImGui::CollapsingHeader("Camera Options"))
+            if (ImGui::SliderInt("Decimation", &m_decimation, 0, 5) && m_decimation > 0)
             {
-                ImGui::Indent();
-                const char * items[] = { "Depth", "Color", "Nothing" };
-                    ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
-
-                    if (ImGui::SliderInt("Decimation", &m_decimation, 0, 5) && m_decimation > 0)
-                    {
-                        m_decimationFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_decimation);
-                    }
-
-                if (ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 16.0))
-                {
-                    m_thresholdFilter.set_option(RS2_OPTION_MAX_DISTANCE, m_maxDistance);
-                }
-
-                if (ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 16.0))
-                {
-                    m_thresholdFilter.set_option(RS2_OPTION_MIN_DISTANCE, m_minDistance);
-                }
-                ImGui::Unindent();
+                m_decimationFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_decimation);
             }
 
-            if (ImGui::CollapsingHeader("Image Options"))
+            if (ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 16.0))
             {
-                ImGui::Indent();
-                ImGui::Checkbox("Depth", &m_drawDepth);
-                if (ImGui::Button("Match Color"))
-                {
-                    m_depthAlpha = m_colorAlpha;
-                    m_depthPos[0] = m_colorPos[0];
-                    m_depthPos[1] = m_colorPos[1];
-                    m_depthScale = m_colorScale;
-                }
-                ImGui::SliderInt("DAlpha", &m_depthAlpha, 0, 255);
-                ImGui::SliderFloat2("DPos", m_depthPos, -1000, 1000);
-                ImGui::SliderFloat("DScale", &m_depthScale, 0, 2);
-
-                ImGui::Checkbox("Color", &m_drawColor);
-                if (ImGui::Button("Match Depth"))
-                {
-                    m_colorAlpha = m_depthAlpha;
-                    m_colorPos[0] = m_depthPos[0];
-                    m_colorPos[1] = m_depthPos[1];
-                    m_colorScale = m_depthScale;
-                }
-                ImGui::SliderInt("CAlpha", &m_colorAlpha, 0, 255);
-                ImGui::SliderFloat2("CPos", m_colorPos, -1000, 1000);
-                ImGui::SliderFloat("CScale", &m_colorScale, 0, 2);
-                ImGui::Unindent();
+                m_thresholdFilter.set_option(RS2_OPTION_MAX_DISTANCE, m_maxDistance);
             }
+
+            if (ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 16.0))
+            {
+                m_thresholdFilter.set_option(RS2_OPTION_MIN_DISTANCE, m_minDistance);
+            }
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("View"))
+        {
+            ImGui::Checkbox("Depth", &m_drawDepth);
+            if (ImGui::Button("Match Color"))
+            {
+                m_depthAlpha = m_colorAlpha;
+                m_depthPos[0] = m_colorPos[0];
+                m_depthPos[1] = m_colorPos[1];
+                m_depthScale = m_colorScale;
+            }
+            ImGui::SliderInt("DAlpha", &m_depthAlpha, 0, 255);
+            ImGui::SliderFloat2("DPos", m_depthPos, -1000, 1000);
+            ImGui::SliderFloat("DScale", &m_depthScale, 0, 2);
+
+            ImGui::Checkbox("Color", &m_drawColor);
+            if (ImGui::Button("Match Depth"))
+            {
+                m_colorAlpha = m_depthAlpha;
+                m_colorPos[0] = m_depthPos[0];
+                m_colorPos[1] = m_depthPos[1];
+                m_colorScale = m_depthScale;
+            }
+            ImGui::SliderInt("CAlpha", &m_colorAlpha, 0, 255);
+            ImGui::SliderFloat2("CPos", m_colorPos, -1000, 1000);
+            ImGui::SliderFloat("CScale", &m_colorScale, 0, 2);
+
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem(""))
+        {
+
             ImGui::EndTabItem();
         }
 

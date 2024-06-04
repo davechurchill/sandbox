@@ -1,14 +1,13 @@
-#pragma once
-
-#include<curlpp/Easy.hpp>
-#include<curlpp/cURLpp.hpp>
-#include<curlpp/Options.hpp>
-
 #include "MinecraftInterface.h"
 
 #include <format>
 #include <sstream>
 #include <imgui.h>
+
+#ifdef Use_Minecraft
+#include<curlpp/Easy.hpp>
+#include<curlpp/cURLpp.hpp>
+#include<curlpp/Options.hpp>
 
 MinecraftInterface::MinecraftInterface()
 {
@@ -102,7 +101,7 @@ inline void MinecraftInterface::fill(int x1, int y1, int z1, int x2, int y2, int
     }
 }
 
-void MinecraftInterface::imgui(const Grid<float> grid, float waterLevel)
+void MinecraftInterface::imgui(const Grid<float> & grid, float waterLevel)
 {
     if (ImGui::Button("Test Connection"))
     {
@@ -171,3 +170,12 @@ void MinecraftInterface::BlockPlacer::send(curlpp::Easy & m_handle)
         throw e;
     }
 }
+
+#else
+MinecraftInterface::MinecraftInterface(){}
+
+void MinecraftInterface::imgui(const Grid<float> & grid, float waterLevel)
+{
+    ImGui::Text("Minecraft connection not compiled, please define Use_Minecraft in MinecraftInterface.h");
+}
+#endif

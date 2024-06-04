@@ -41,6 +41,10 @@
     <ClCompile Include="..\src\MinecraftInterface.cpp">
       <Filter>engine</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Scene_Image.cpp" />
+    <ClCompile Include="..\src\Calibration.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Assets.h">
@@ -83,6 +87,10 @@
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\MinecraftInterface.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene_Image.h" />
+    <ClInclude Include="..\src\Calibration.h">
       <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>

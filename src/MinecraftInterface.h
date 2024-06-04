@@ -1,12 +1,17 @@
 #pragma once
 
+//#define Use_Minecraft
+#ifdef Use_Minecraft
 #include <curlpp/Easy.hpp>
 #include <curlpp/cURLpp.hpp>
-#include "Grid.hpp"
+#endif
+
 #include <sstream>
+#include "Grid.hpp"
 
 class MinecraftInterface
 {
+#ifdef Use_Minecraft
     curlpp::Easy m_handle;
     curlpp::Cleanup m_clean;
 
@@ -23,6 +28,7 @@ class MinecraftInterface
         void addBlocks(int x1, int y1, int z1, int x2, int y2, int z2, const std::string & name);
         void send(curlpp::Easy & handle);
     };
+#endif // Use_Minecraft
 
 public:
 
@@ -43,5 +49,5 @@ public:
 
     inline void fill(int x1, int y1, int z1, int x2, int y2, int z2, const std::string & block, const std::string & args = "");
 
-    void imgui(const Grid<float> grid, float waterLevel);
+    void imgui(const Grid<float> & grid, float waterLevel);
 };

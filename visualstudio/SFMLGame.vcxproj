@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Assets.cpp" />
+    <ClCompile Include="..\src\Calibration.cpp" />
     <ClCompile Include="..\src\GameEngine.cpp" />
     <ClCompile Include="..\src\imgui\imgui-SFML.cpp" />
     <ClCompile Include="..\src\imgui\imgui.cpp" />
@@ -30,6 +31,7 @@
     <ClCompile Include="..\src\MinecraftInterface.cpp" />
     <ClCompile Include="..\src\Scene.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\Scene_Image.cpp" />
     <ClCompile Include="..\src\Scene_Menu.cpp" />
     <ClCompile Include="..\src\Scene_Perlin2D.cpp" />
     <ClCompile Include="..\src\Scene_Sandbox.cpp" />
@@ -37,12 +39,14 @@
   <ItemGroup>
     <ClInclude Include="..\src\Action.hpp" />
     <ClInclude Include="..\src\Assets.h" />
+    <ClInclude Include="..\src\Calibration.h" />
     <ClInclude Include="..\src\ContourLines.hpp" />
     <ClInclude Include="..\src\GameEngine.h" />
     <ClInclude Include="..\src\MinecraftInterface.h" />
     <ClInclude Include="..\src\Perlin.hpp" />
     <ClInclude Include="..\src\Scene.h" />
     <ClInclude Include="..\src\Grid.hpp" />
+    <ClInclude Include="..\src\Scene_Image.h" />
     <ClInclude Include="..\src\Scene_Menu.h" />
     <ClInclude Include="..\src\Scene_Perlin2D.h" />
     <ClInclude Include="..\src\Scene_Sandbox.h" />
