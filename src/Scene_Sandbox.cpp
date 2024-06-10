@@ -99,7 +99,7 @@ void Scene_Sandbox::captureImage()
     m_sfDepthImage.create(m_cvDepthImage.cols, m_cvDepthImage.rows, m_cvDepthImage.ptr());
     m_sfDepthTexture.loadFromImage(m_sfDepthImage);
     m_depthSprite.setTexture(m_sfDepthTexture, true);
-
+    
     m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
     m_sfColorTexture.loadFromImage(m_sfColorImage);
     m_colorSprite.setTexture(m_sfColorTexture);
@@ -121,6 +121,7 @@ void Scene_Sandbox::sUserInput()
     {
         ImGui::SFML::ProcessEvent(m_game->window(), event);
         m_viewController.processEvent(m_game->window(), event);
+        m_calibration.processEvent(event, m_mouseWorld);
 
         // this event triggers when the window is closed
         if (event.type == sf::Event::Closed)
@@ -187,6 +188,8 @@ void Scene_Sandbox::sRender()
     m_game->window().draw(m_quadArray);
     m_game->window().draw(m_lineStrip);
     m_game->window().draw(m_text);
+
+    m_calibration.render(m_game->window());
 }
 
 void Scene_Sandbox::renderUI()
@@ -249,9 +252,9 @@ void Scene_Sandbox::renderUI()
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem(""))
+        if (ImGui::BeginTabItem("Calibration"))
         {
-
+            m_calibration.imgui();
             ImGui::EndTabItem();
         }
 

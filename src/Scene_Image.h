@@ -4,6 +4,7 @@
 #include "ViewController.hpp"
 #include "Grid.hpp"
 #include "Perlin.hpp"
+#include "Calibration.h"
 
 #include <chrono>
 #include <iostream>
@@ -18,17 +19,15 @@ class Scene_Image : public Scene
     sf::Font            m_font;             
     sf::Text            m_text;
 
-    int                 m_colorAlpha = 255;
-    float               m_colorPos[2] = { 0, 0 };
-    float               m_colorScale = 1.0f;
-
-    sf::Texture         m_sfColorTexture;
-    sf::Sprite          m_colorSprite;
+    cv::Mat             m_imageMatrix;
+    sf::Texture         m_sfTexture;
+    sf::Sprite          m_Sprite;
 
     sf::Vector2i        m_mouseScreen;
     sf::Vector2f        m_mouseWorld;
     
     ViewController      m_viewController;
+    Calibration         m_calibration;
 
     char                m_filename[128] = "";
 
@@ -36,6 +35,7 @@ class Scene_Image : public Scene
     void renderUI();
     void sUserInput();  
     void sRender();
+    void updateSprite();
     
 public:
 

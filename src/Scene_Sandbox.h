@@ -3,7 +3,7 @@
 #include "Scene.h"
 #include "ViewController.hpp"
 #include "Grid.hpp"
-#include "Perlin.hpp"
+#include "Calibration.h"
 
 #include <chrono>
 #include <iostream>
@@ -58,6 +58,8 @@ class Scene_Sandbox : public Scene
     
     ViewController      m_viewController;
 
+    Calibration         m_calibration;
+
     Grid<float>         m_depthGrid;
 
     int                 m_decimation = 1;
@@ -68,13 +70,11 @@ class Scene_Sandbox : public Scene
     rs2::threshold_filter m_thresholdFilter;
     
     void captureImage();
-    void setSprite(const cv::Mat& cvImage);
 
     void init();  
     void renderUI();
     void sUserInput();  
     void sRender();
-    void calculateNoise();
     bool isCameraConnected();
     
 public:

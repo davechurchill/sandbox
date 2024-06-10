@@ -1,0 +1,15 @@
+Calibration:
+
+Ideally: Find the matrix that transforms the real world
+         scene into the ideal scene that we want
+
+- Cropping image
+
+- Same Height Identifier
+  - Click button, then click points that should be same height
+  - The calibrated image will scale values so that they are
+    the same height at that level
+
+- Perspective Correction
+  - Click 4 corners of sandbox in image
+  - OpenCV trasnform it into rectangle within image frame

@@ -46,6 +46,7 @@ void Scene_Image::sUserInput()
     {
         ImGui::SFML::ProcessEvent(m_game->window(), event);
         m_viewController.processEvent(m_game->window(), event);
+        m_calibration.processEvent(event, m_mouseWorld);
 
         // this event triggers when the window is closed
         if (event.type == sf::Event::Closed)
@@ -98,15 +99,21 @@ void Scene_Image::sRender()
     m_lineStrip.clear();
     m_quadArray.clear();
 
-    m_colorSprite.setColor(sf::Color(255, 255, 255, m_colorAlpha));
-    m_colorSprite.setPosition(m_colorPos[0], m_colorPos[1]);
-    m_colorSprite.setScale(m_colorScale, m_colorScale);
-
-    m_game->window().draw(m_colorSprite);
+    m_game->window().draw(m_Sprite);
     
     m_game->window().draw(m_quadArray);
     m_game->window().draw(m_lineStrip);
     m_game->window().draw(m_text);
+    m_calibration.render(m_game->window());
+}
+
+void Scene_Image::updateSprite()
+{
+    m_calibration.transform(m_imageMatrix);
+    sf::Image i;
+    i.create(m_imageMatrix.cols, m_imageMatrix.rows, m_imageMatrix.ptr());
+    m_sfTexture.loadFromImage(i);
+    m_Sprite.setTexture(m_sfTexture, true);
 }
 
 void Scene_Image::renderUI()
@@ -123,18 +130,20 @@ void Scene_Image::renderUI()
             ImGui::SameLine();
             if (ImGui::Button("Load Image"))
             {
-                m_sfColorTexture.loadFromFile(std::format("../images/{}", m_filename));
-                m_colorSprite.setTexture(m_sfColorTexture, true);
+                m_imageMatrix = cv::imread(std::format("../images/{}", m_filename));
+                cv::cvtColor(m_imageMatrix, m_imageMatrix, cv::COLOR_BGR2RGBA);
+                updateSprite();
             }
             ImGui::EndTabItem();
         }
 
-        if (ImGui::BeginTabItem("View"))
+        if (ImGui::BeginTabItem("Calibration"))
         {
-            ImGui::SliderInt("CAlpha", &m_colorAlpha, 0, 255);
-            ImGui::SliderFloat2("CPos", m_colorPos, -1000, 1000);
-            ImGui::SliderFloat("CScale", &m_colorScale, 0, 2);
-
+            m_calibration.imgui();
+            if (ImGui::Button("Update Image"))
+            {
+                updateSprite();
+            }
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
