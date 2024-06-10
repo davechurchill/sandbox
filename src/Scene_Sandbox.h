@@ -43,6 +43,7 @@ class Scene_Sandbox : public Scene
     rs2::align          m_alignment_depth = rs2::align(RS2_STREAM_DEPTH);
     rs2::align          m_alignment_color = rs2::align(RS2_STREAM_COLOR);
 
+    cv::Mat             m_cvRawDepthImage;
     cv::Mat             m_cvDepthImage;
     cv::Mat             m_cvColorImage;
 

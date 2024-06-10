@@ -9,10 +9,13 @@ class Calibration
     int                             m_currentPoint = -1;
     bool                            m_calibrationComplete = false;
     bool                            m_applyTransform = false;
-    int                             m_width = 0;
-    int                             m_height = 0;
+    int                             m_width = 1200;
+    int                             m_height = 780;
     sf::Vector2f                    m_points[4];
     std::vector<sf::CircleShape>    m_pointCircles;
+
+    sf::Texture                     m_texture;
+
 public:
     Calibration();
     void imgui();

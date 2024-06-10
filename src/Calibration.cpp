@@ -35,6 +35,8 @@ void Calibration::imgui()
     ImGui::InputInt("Height", &m_height);
     ImGui::Text("Width: %d", m_width);
     ImGui::Text("Height: %d", m_height);
+
+    ImGui::Image(m_texture, sf::Vector2f(m_width / 4, m_height / 4));
 }
 
 void Calibration::transform(cv::Mat & image)
@@ -59,8 +61,10 @@ void Calibration::transform(cv::Mat & image)
         cv::Mat output;
         cv::Mat Matrix = cv::getPerspectiveTransform(srcPoints, dstPoints);
         cv::warpPerspective(image, output, Matrix, cv::Size(m_width, m_height));
-        cv::imshow("output", output);
 
+        sf::Image i;
+        i.create(output.cols, output.rows, output.ptr());
+        m_texture.loadFromImage(i);
     }
 }
 

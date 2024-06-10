@@ -75,15 +75,19 @@ void Scene_Sandbox::captureImage()
     const int cw = color.as<rs2::video_frame>().get_width();
     const int ch = color.as<rs2::video_frame>().get_height();
 
+    m_cvRawDepthImage = cv::Mat(cv::Size(dw, dh), CV_32F, (void *)depth.get_data(), cv::Mat::AUTO_STEP);
+    m_calibration.transform(m_cvRawDepthImage);
+
     // Copy data to depth grid
-    m_depthGrid.refill(dw, dh, 0.0);
+    auto size = m_cvRawDepthImage.size;
+    m_depthGrid.refill(size[1], size[1], 0.0);
     if (m_maxDistance > m_minDistance)
     {
-        for (int i = 0; i < dw; ++i)
+        for (int i = 0; i < size[0]; ++i)
         {
-            for (int j = 0; j < dh; ++j)
+            for (int j = 0; j < size[1]; ++j)
             {
-                m_depthGrid.set(i, j, 1 - (rawDepth.get_distance(i, j) - m_minDistance) / (m_maxDistance - m_minDistance));
+                m_depthGrid.set(i, j, 1 - (m_cvRawDepthImage.at<float>(cv::Point(i,j)) - m_minDistance) / (m_maxDistance - m_minDistance));
             }
         }
     }
