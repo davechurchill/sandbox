@@ -2,6 +2,12 @@
 #include "imgui-SFML.h"
 #include "imgui.h"
 
+#include <iostream>
+#include <opencv2/highgui.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp> 
+
+
 Calibration::Calibration()
 {
     float radius = 5.0;
@@ -25,13 +31,36 @@ void Calibration::imgui()
     {
         ImGui::Checkbox("Apply Transform", &m_applyTransform);
     }
+    ImGui::InputInt("Width", &m_width);
+    ImGui::InputInt("Height", &m_height);
+    ImGui::Text("Width: %d", m_width);
+    ImGui::Text("Height: %d", m_height);
 }
 
 void Calibration::transform(cv::Mat & image)
 {
     if (m_applyTransform && m_calibrationComplete)
     {
-        image = m_operator * image;
+        //image = m_operator * image;
+        cv::Point2f srcPoints [] = {
+            cv::Point(m_points[0].x, m_points[0].y),
+            cv::Point(m_points[1].x, m_points[1].y),
+            cv::Point(m_points[2].x, m_points[2].y),
+            cv::Point(m_points[3].x, m_points[3].y)
+        };
+
+        cv::Point2f dstPoints[] = {
+            cv::Point(0, 0),
+            cv::Point(m_width, 0),
+            cv::Point(0, m_height),
+            cv::Point(m_width, m_height),
+        };
+
+        cv::Mat output;
+        cv::Mat Matrix = cv::getPerspectiveTransform(srcPoints, dstPoints);
+        cv::warpPerspective(image, output, Matrix, cv::Size(m_width, m_height));
+        cv::imshow("output", output);
+
     }
 }
 
