@@ -44,12 +44,42 @@ void Calibration::transform(cv::Mat & image)
     if (m_applyTransform && m_calibrationComplete)
     {
         //image = m_operator * image;
-        cv::Point2f srcPoints [] = {
-            cv::Point(m_points[0].x, m_points[0].y),
-            cv::Point(m_points[1].x, m_points[1].y),
-            cv::Point(m_points[2].x, m_points[2].y),
-            cv::Point(m_points[3].x, m_points[3].y)
-        };
+        int a[] = { 0, 1, 2, 3 };
+        int  n = sizeof(a) / sizeof(a[0]);
+        std::sort(a, a + n);
+
+        cv::Point firstPoint(m_points[a[0]].x, m_points[a[0]].y);
+        cv::Point secondPoint(m_points[a[1]].x, m_points[a[1]].y);
+        cv::Point thirdPoint(m_points[a[2]].x, m_points[a[2]].y);
+        cv::Point fourthPoint(m_points[a[3]].x, m_points[a[3]].y);
+
+        while (std::next_permutation(a, a + n))
+        {
+                std::cout << a[0] << " " << a[1] << " " << a[2] << " " << a[3] << "\n";
+                int numberOfConditionMet = 0;
+
+                if (firstPoint.x < secondPoint.x && firstPoint.y < thirdPoint.y) { numberOfConditionMet += 1; }
+                if (secondPoint.x > firstPoint.x && secondPoint.y < fourthPoint.y) { numberOfConditionMet += 1; }
+                if (thirdPoint.x  < fourthPoint.x && thirdPoint.y  > firstPoint.y) { numberOfConditionMet += 1; }
+                if (thirdPoint.x  < fourthPoint.x && fourthPoint.y > secondPoint.y) { numberOfConditionMet += 1; }
+
+                if (numberOfConditionMet == 4) {
+                    break;
+                }
+                else
+                {
+                    firstPoint.x = m_points[a[0]].x;
+                    firstPoint.y = m_points[a[0]].y;
+                    secondPoint.x = m_points[a[1]].x;
+                    secondPoint.y = m_points[a[1]].y;
+                    thirdPoint.x = m_points[a[2]].x;
+                    thirdPoint.y = m_points[a[2]].y;
+                    fourthPoint.x = m_points[a[3]].x;
+                    fourthPoint.y = m_points[a[3]].y;
+                }
+        }
+
+        cv::Point2f srcPoints [] = { firstPoint, secondPoint, thirdPoint, fourthPoint};
 
         cv::Point2f dstPoints[] = {
             cv::Point(0, 0),
