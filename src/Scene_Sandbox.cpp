@@ -79,15 +79,14 @@ void Scene_Sandbox::captureImage()
     m_calibration.transform(m_cvRawDepthImage);
 
     // Copy data to depth grid
-    auto size = m_cvRawDepthImage.size;
-    m_depthGrid.refill(size[1], size[1], 0.0);
+    m_depthGrid.refill(m_cvRawDepthImage.cols, m_cvRawDepthImage.rows, 0.0);
     if (m_maxDistance > m_minDistance)
     {
-        for (int i = 0; i < size[0]; ++i)
+        for (int i = 0; i < m_cvRawDepthImage.cols; ++i)
         {
-            for (int j = 0; j < size[1]; ++j)
+            for (int j = 0; j < m_cvRawDepthImage.rows; ++j)
             {
-                m_depthGrid.set(i, j, 1 - (m_cvRawDepthImage.at<float>(cv::Point(i,j)) - m_minDistance) / (m_maxDistance - m_minDistance));
+                m_depthGrid.set(i, j, 1 - (m_cvRawDepthImage.at<float>(i,j) - m_minDistance) / (m_maxDistance - m_minDistance));
             }
         }
     }
@@ -96,6 +95,7 @@ void Scene_Sandbox::captureImage()
     m_cvDepthImage = cv::Mat(cv::Size(dw, dh), CV_8UC3, (void*)depth.get_data(), cv::Mat::AUTO_STEP);
     cv::cvtColor(m_cvDepthImage, m_cvDepthImage, cv::COLOR_BGR2RGBA);
     cv::resize(m_cvDepthImage, m_cvDepthImage, cv::Size(cw, ch), (0,0), (0,0), cv::InterpolationFlags::INTER_NEAREST);
+    m_calibration.transform(m_cvDepthImage);
     m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void*)color.get_data(), cv::Mat::AUTO_STEP);
     cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
 

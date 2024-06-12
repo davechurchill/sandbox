@@ -11,10 +11,10 @@ class Calibration
     bool                            m_applyTransform = false;
     int                             m_width = 1200;
     int                             m_height = 780;
-    sf::Vector2f                    m_points[4];
+    cv::Point2f                     m_points[4];
     std::vector<sf::CircleShape>    m_pointCircles;
 
-    sf::Texture                     m_texture;
+    void orderPoints();
 
 public:
     Calibration();

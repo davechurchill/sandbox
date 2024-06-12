@@ -140,14 +140,15 @@ void Scene_Image::renderUI()
         if (ImGui::BeginTabItem("Calibration"))
         {
             m_calibration.imgui();
-            if (ImGui::Button("Update Image"))
+            if (ImGui::Button("Reload Image"))
             {
+                m_imageMatrix = cv::imread(std::format("../images/{}", m_filename));
+                cv::cvtColor(m_imageMatrix, m_imageMatrix, cv::COLOR_BGR2RGBA);
                 updateSprite();
             }
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
     }
-
     ImGui::End();
 }
