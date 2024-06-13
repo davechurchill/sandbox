@@ -21,6 +21,13 @@ enum class alignment
     nothing
 };
 
+enum class MouseSelections
+{
+    None,
+    MaxDistance,
+    MinDistance
+};
+
 class Scene_Sandbox : public Scene
 {   
     sf::Font            m_font;             
@@ -37,6 +44,7 @@ class Scene_Sandbox : public Scene
     float               m_colorScale = 1.0f;
 
     alignment           m_alignment = alignment::nothing;
+    MouseSelections     m_mouseSelection = MouseSelections::None;
 
     rs2::colorizer      m_colorMap;
     rs2::pipeline       m_pipe;
@@ -62,6 +70,7 @@ class Scene_Sandbox : public Scene
     Calibration         m_calibration;
 
     Grid<float>         m_depthGrid;
+    float               m_mouseDepth;
 
     int                 m_decimation = 1;
     rs2::decimation_filter m_decimationFilter;

@@ -126,4 +126,9 @@ public:
     {
         return m_height;
     }
+
+    inline T * data()
+    {
+        return m_grid.data();
+    }
 };

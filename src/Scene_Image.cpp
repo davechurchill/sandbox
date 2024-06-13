@@ -55,7 +55,7 @@ void Scene_Image::sUserInput()
         }
 
         // this event is triggered when a key is pressed
-        if (event.type == sf::Event::KeyPressed)
+        if (!ImGui::GetIO().WantCaptureKeyboard && event.type == sf::Event::KeyPressed)
         {
             switch (event.key.code)
             {
@@ -66,26 +66,28 @@ void Scene_Image::sUserInput()
                 }
             }
         }
-
-        if (event.type == sf::Event::MouseButtonPressed)
+        if (!ImGui::GetIO().WantCaptureMouse)
         {
-            // happens when the left mouse button is pressed
-            if (event.mouseButton.button == sf::Mouse::Left) {}
-            if (event.mouseButton.button == sf::Mouse::Right) {}
-        }
+            if (event.type == sf::Event::MouseButtonPressed)
+            {
+                // happens when the left mouse button is pressed
+                if (event.mouseButton.button == sf::Mouse::Left) {}
+                if (event.mouseButton.button == sf::Mouse::Right) {}
+            }
 
-        // happens when the mouse button is released
-        if (event.type == sf::Event::MouseButtonReleased)
-        {
-            if (event.mouseButton.button == sf::Mouse::Left) {}
-            if (event.mouseButton.button == sf::Mouse::Right) {}
-        }
+            // happens when the mouse button is released
+            if (event.type == sf::Event::MouseButtonReleased)
+            {
+                if (event.mouseButton.button == sf::Mouse::Left) {}
+                if (event.mouseButton.button == sf::Mouse::Right) {}
+            }
 
-        // happens whenever the mouse is being moved
-        if (event.type == sf::Event::MouseMoved)
-        {
-            m_mouseScreen = { event.mouseMove.x, event.mouseMove.y };
-            m_mouseWorld = m_game->window().mapPixelToCoords(m_mouseScreen);
+            // happens whenever the mouse is being moved
+            if (event.type == sf::Event::MouseMoved)
+            {
+                m_mouseScreen = { event.mouseMove.x, event.mouseMove.y };
+                m_mouseWorld = m_game->window().mapPixelToCoords(m_mouseScreen);
+            }
         }
     }
 }
@@ -117,14 +119,12 @@ void Scene_Image::updateSprite()
 }
 
 void Scene_Image::renderUI()
-{
-    const char vals[7] = { '.', 'G', '@', 'O', 'T', 'S', 'W' };
-   
+{  
     ImGui::Begin("Options");
 
     if (ImGui::BeginTabBar("MyTabBar"))
     {
-        if (ImGui::BeginTabItem("Image"))
+        if (ImGui::BeginTabItem("Picture"))
         {
             ImGui::InputTextWithHint("", "filename in /images", m_filename, 128);
             ImGui::SameLine();

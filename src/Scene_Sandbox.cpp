@@ -59,6 +59,8 @@ void Scene_Sandbox::captureImage()
         data = m_alignment_color.process(data);
     }
 
+    m_thresholdFilter.set_option(RS2_OPTION_MAX_DISTANCE, m_maxDistance);
+    m_thresholdFilter.set_option(RS2_OPTION_MIN_DISTANCE, m_minDistance);
     data = m_thresholdFilter.process(data);
 
     rs2::depth_frame rawDepth = data.get_depth_frame();
@@ -75,21 +77,37 @@ void Scene_Sandbox::captureImage()
     const int cw = color.as<rs2::video_frame>().get_width();
     const int ch = color.as<rs2::video_frame>().get_height();
 
-    m_cvRawDepthImage = cv::Mat(cv::Size(dw, dh), CV_32F, (void *)depth.get_data(), cv::Mat::AUTO_STEP);
-    m_calibration.transform(m_cvRawDepthImage);
+    // Save depth at current mouse location
+    Vec2 pos;
+    pos.x = m_mouseWorld.x / m_depthSprite.getGlobalBounds().width;
+    pos.y = m_mouseWorld.y / m_depthSprite.getGlobalBounds().height;
+    if (pos.x < 1 && pos.y < 1 && pos.x >= 0 && pos.y >= 0)
+    {
+        pos.x *= dw;
+        pos.y *= dh;
+        m_mouseDepth = rawDepth.get_distance(pos.x, pos.y);
+    }
+    else
+    {
+        m_mouseDepth = -1.0;
+    }
 
     // Copy data to depth grid
-    m_depthGrid.refill(m_cvRawDepthImage.cols, m_cvRawDepthImage.rows, 0.0);
+    m_depthGrid.refill(dw, dh, 0.0);
     if (m_maxDistance > m_minDistance)
     {
-        for (int i = 0; i < m_cvRawDepthImage.cols; ++i)
+        for (int i = 0; i < dw; ++i)
         {
-            for (int j = 0; j < m_cvRawDepthImage.rows; ++j)
+            for (int j = 0; j < dh; ++j)
             {
-                m_depthGrid.set(i, j, 1 - (m_cvRawDepthImage.at<float>(i,j) - m_minDistance) / (m_maxDistance - m_minDistance));
+                m_depthGrid.set(i, j, 1 - ((rawDepth.get_distance(i,j) - m_minDistance) / (m_maxDistance - m_minDistance)));
             }
         }
     }
+
+    m_cvRawDepthImage = cv::Mat(cv::Size(dw, dh), CV_32F, (void *)m_depthGrid.data(), cv::Mat::AUTO_STEP);
+    
+    m_calibration.transform(m_cvRawDepthImage);
 
     // Create OpenCV matrix of size (w,h) from the colorized depth data
     m_cvDepthImage = cv::Mat(cv::Size(dw, dh), CV_8UC3, (void*)depth.get_data(), cv::Mat::AUTO_STEP);
@@ -149,7 +167,27 @@ void Scene_Sandbox::sUserInput()
         if (event.type == sf::Event::MouseButtonPressed)
         {
             // happens when the left mouse button is pressed
-            if (event.mouseButton.button == sf::Mouse::Left) {}
+            if (event.mouseButton.button == sf::Mouse::Left) 
+            {
+                switch (m_mouseSelection)
+                {
+                case MouseSelections::MaxDistance: 
+                    {
+                        if (m_mouseDepth >= 0.0)
+                        {
+                            m_maxDistance = m_mouseDepth;
+                        }
+                    } break;
+                case MouseSelections::MinDistance: 
+                    {
+                        if (m_mouseDepth >= 0.0)
+                        {
+                            m_minDistance = m_mouseDepth;
+                        }
+                    } break;
+                }
+                m_mouseSelection = MouseSelections::None;
+            }
             if (event.mouseButton.button == sf::Mouse::Right) {}
         }
 
@@ -215,14 +253,18 @@ void Scene_Sandbox::renderUI()
                 m_decimationFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_decimation);
             }
 
-            if (ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 16.0))
+            ImGui::Text("Distance from Mouse %f", m_mouseDepth);
+
+            ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 7.0);
+            if (ImGui::Button("Select Max Distance"))
             {
-                m_thresholdFilter.set_option(RS2_OPTION_MAX_DISTANCE, m_maxDistance);
+                m_mouseSelection = MouseSelections::MaxDistance;
             }
 
-            if (ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 16.0))
+            ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 7.0);
+            if (ImGui::Button("Select Min Distance"))
             {
-                m_thresholdFilter.set_option(RS2_OPTION_MIN_DISTANCE, m_minDistance);
+                m_mouseSelection = MouseSelections::MinDistance;
             }
             ImGui::EndTabItem();
         }

@@ -29,7 +29,7 @@ class Scene_Image : public Scene
     ViewController      m_viewController;
     Calibration         m_calibration;
 
-    char                m_filename[128] = "";
+    char                m_filename[128] = "test.png";
 
     void init();  
     void renderUI();
