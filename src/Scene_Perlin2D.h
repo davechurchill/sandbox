@@ -31,6 +31,7 @@ class Scene_Perlin2D : public Scene
     bool                m_drawContours = false;
     int                 m_contourSkip = 20;
     float               m_contourLevel = 0.5;
+    int                 m_numberOfContourLines = 5;
     
     int                 m_mcHeight = 30;
 

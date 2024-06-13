@@ -2,6 +2,7 @@
 #include "Scene_Menu.h"
 #include "GameEngine.h"
 #include "Assets.h"
+#include "ContourLines.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -169,9 +170,10 @@ void Scene_Perlin2D::sRender()
 
                 drawRect<float>(x * m_gridSize, y * m_gridSize, m_gridSize, m_gridSize, c);
             }
+
             if (m_contour.isOnContour(x, y))
             {
-                drawRect<float>(x * m_gridSize, y * m_gridSize, m_gridSize / 2, m_gridSize / 2, sf::Color::Black);
+                drawRect<float>(x * m_gridSize, y * m_gridSize, m_gridSize / 2, m_gridSize / 2, sf::Color::White);
             }
         }
     }
@@ -237,11 +239,18 @@ void Scene_Perlin2D::renderUI()
             // PC Display Options
             ImGui::Checkbox("Greyscale", &m_drawGrey);
             ImGui::Checkbox("Contours", &m_drawContours);
-            if (ImGui::SliderFloat("C Level", &m_contourLevel, 0, 1))
+
+            if (ImGui::InputInt("Contour Lines", &m_numberOfContourLines, 1, 10))
+            {
+                m_contour.setNumberofContourLines(m_numberOfContourLines);
+                m_contour.calculate(m_grid);
+            }
+
+            /*if (ImGui::SliderFloat("Contour Lines", &m_contourLevel, 0, 1))
             {
                 m_contour.setContourLevel(m_contourLevel);
                 m_contour.calculate(m_grid);
-            }
+            }*/
 
             ImGui::EndTabItem();
         }
