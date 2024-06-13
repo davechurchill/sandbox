@@ -4,6 +4,7 @@
 #include "ViewController.hpp"
 #include "Grid.hpp"
 #include "Calibration.h"
+#include "ContourLines.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -75,9 +76,17 @@ class Scene_Sandbox : public Scene
     int                 m_decimation = 1;
     rs2::decimation_filter m_decimationFilter;
 
-    float               m_maxDistance = 16.0;
+    float               m_maxDistance = 5.0;
     float               m_minDistance = 0.0;
     rs2::threshold_filter m_thresholdFilter;
+
+    int                 m_spatialMagnitude = 2;
+    float               m_smoothAlpha = 0.5;
+    int                 m_smoothDelta = 20;
+    int                 m_spatialHoleFill = 0;
+    rs2::spatial_filter m_spatialFilter;
+
+    ContourLines        m_contour;
     
     void captureImage();
 

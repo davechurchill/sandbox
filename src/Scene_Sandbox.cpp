@@ -29,6 +29,8 @@ void Scene_Sandbox::init()
     m_text.setPosition(10, 5);
     m_text.setCharacterSize(10);
 
+    m_contour.setContourLevel(0.5);
+
     // initialize rs2
 
     if (!isCameraConnected())
@@ -64,10 +66,19 @@ void Scene_Sandbox::captureImage()
     data = m_thresholdFilter.process(data);
 
     rs2::depth_frame rawDepth = data.get_depth_frame();
+
     if (m_decimation > 0)
     {
+        m_decimationFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_decimation);
         rawDepth = m_decimationFilter.process(rawDepth);
     }
+
+    if (m_spatialMagnitude > 0)
+    {
+        m_spatialFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_spatialMagnitude);
+        //m_spatialFilter
+    }
+
     rs2::frame depth = rawDepth.apply_filter(m_colorMap);
     rs2::frame color = data.get_color_frame();
 
@@ -105,6 +116,9 @@ void Scene_Sandbox::captureImage()
         }
     }
 
+    m_contour.init(dw, dh);
+    m_contour.calculate(m_depthGrid);
+
     m_cvRawDepthImage = cv::Mat(cv::Size(dw, dh), CV_32F, (void *)m_depthGrid.data(), cv::Mat::AUTO_STEP);
     
     m_calibration.transform(m_cvRawDepthImage);
@@ -112,13 +126,25 @@ void Scene_Sandbox::captureImage()
     // Create OpenCV matrix of size (w,h) from the colorized depth data
     m_cvDepthImage = cv::Mat(cv::Size(dw, dh), CV_8UC3, (void*)depth.get_data(), cv::Mat::AUTO_STEP);
     cv::cvtColor(m_cvDepthImage, m_cvDepthImage, cv::COLOR_BGR2RGBA);
-    cv::resize(m_cvDepthImage, m_cvDepthImage, cv::Size(cw, ch), (0,0), (0,0), cv::InterpolationFlags::INTER_NEAREST);
+    //cv::resize(m_cvDepthImage, m_cvDepthImage, cv::Size(cw, ch), (0,0), (0,0), cv::InterpolationFlags::INTER_NEAREST);
     m_calibration.transform(m_cvDepthImage);
     m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void*)color.get_data(), cv::Mat::AUTO_STEP);
     cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
 
     // Create the SFML sprites to be rendered
     m_sfDepthImage.create(m_cvDepthImage.cols, m_cvDepthImage.rows, m_cvDepthImage.ptr());
+
+    for (int i = 0; i < dw; ++i)
+    {
+        for (int j = 0; j < dh; ++j)
+        {
+            if (m_contour.isOnContour(i, j))
+            {
+                m_sfDepthImage.setPixel(i, j, sf::Color::Black);
+            }
+        }
+    }
+
     m_sfDepthTexture.loadFromImage(m_sfDepthImage);
     m_depthSprite.setTexture(m_sfDepthTexture, true);
     
@@ -248,9 +274,16 @@ void Scene_Sandbox::renderUI()
             const char * items[] = { "Depth", "Color", "Nothing" };
             ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
 
-            if (ImGui::SliderInt("Decimation", &m_decimation, 0, 5) && m_decimation > 0)
+            ImGui::SliderInt("Decimation", &m_decimation, 0, 5);
+
+            ImGui::SliderInt("Spatial Filter", &m_spatialMagnitude, 0, 5);
+            if (m_spatialMagnitude > 0)
             {
-                m_decimationFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_decimation);
+                ImGui::Indent();
+                ImGui::SliderFloat("Smooth Alpha", &m_smoothAlpha, 0.25, 1.0);
+                ImGui::SliderInt("Smooth Delta", &m_smoothDelta, 1, 50);
+                ImGui::SliderInt("Hole Filling", &m_spatialHoleFill, 0, 5);
+                ImGui::Unindent();
             }
 
             ImGui::Text("Distance from Mouse %f", m_mouseDepth);

@@ -169,6 +169,10 @@ void Scene_Perlin2D::sRender()
 
                 drawRect<float>(x * m_gridSize, y * m_gridSize, m_gridSize, m_gridSize, c);
             }
+            if (m_contour.isOnContour(x, y))
+            {
+                drawRect<float>(x * m_gridSize, y * m_gridSize, m_gridSize / 2, m_gridSize / 2, sf::Color::Black);
+            }
         }
     }
 

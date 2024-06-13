@@ -75,58 +75,58 @@ public:
 
     void render(std::shared_ptr<Scene> scene, float gridSize)
     {
-        for (size_t x = 0; x < m_onContour.width(); x++)
-        {
-            for (size_t y = 0; y < m_onContour.height(); y++)
-            {
-                // if this cell is not on the contour, then skip it
-                if (!isOnContour(x, y)) { continue; }
+        //for (size_t x = 0; x < m_onContour.width(); x++)
+        //{
+        //    for (size_t y = 0; y < m_onContour.height(); y++)
+        //    {
+        //        // if this cell is not on the contour, then skip it
+        //        if (!isOnContour(x, y)) { continue; }
 
-                float xx = x * gridSize + gridSize / 2;
-                float yy = y * gridSize + gridSize / 2;
+        //        float xx = x * gridSize + gridSize / 2;
+        //        float yy = y * gridSize + gridSize / 2;
 
-                if (y > 0 && isOnContour(x, y - 1))
-                {
-                    scene->drawLine<float>(xx, yy, xx, yy - gridSize, sf::Color::White);
-                }
+        //        if (y > 0 && isOnContour(x, y - 1))
+        //        {
+        //            scene->drawLine<float>(xx, yy, xx, yy - gridSize, sf::Color::White);
+        //        }
 
-                if (y < m_onContour.height() - 1 && isOnContour(x, y + 1))
-                {
-                    scene->drawLine<float>(xx, yy, xx, yy + gridSize, sf::Color::White);
-                }
+        //        if (y < m_onContour.height() - 1 && isOnContour(x, y + 1))
+        //        {
+        //            scene->drawLine<float>(xx, yy, xx, yy + gridSize, sf::Color::White);
+        //        }
 
-                if (x > 0 && isOnContour(x - 1, y))
-                {
-                    scene->drawLine<float>(xx, yy, xx - gridSize, yy, sf::Color::White);
-                }
+        //        if (x > 0 && isOnContour(x - 1, y))
+        //        {
+        //            scene->drawLine<float>(xx, yy, xx - gridSize, yy, sf::Color::White);
+        //        }
 
-                if (x < m_onContour.width() - 1 && isOnContour(x + 1, y))
-                {
-                    scene->drawLine<float>(xx, yy, xx + gridSize, yy, sf::Color::White);
-                }
+        //        if (x < m_onContour.width() - 1 && isOnContour(x + 1, y))
+        //        {
+        //            scene->drawLine<float>(xx, yy, xx + gridSize, yy, sf::Color::White);
+        //        }
 
-                //
+        //        //
 
-                if (x > 0 && y > 0 && isOnContour(x - 1, y - 1))
-                {
-                    scene->drawLine<float>(xx, yy, xx - gridSize, yy - gridSize, sf::Color::White);
-                }
+        //        if (x > 0 && y > 0 && isOnContour(x - 1, y - 1))
+        //        {
+        //            scene->drawLine<float>(xx, yy, xx - gridSize, yy - gridSize, sf::Color::White);
+        //        }
 
-                if (x > 0 && y < m_onContour.height() - 1 && isOnContour(x - 1, y + 1))
-                {
-                    scene->drawLine<float>(xx, yy, xx - gridSize, yy + gridSize, sf::Color::White);
-                }
+        //        if (x > 0 && y < m_onContour.height() - 1 && isOnContour(x - 1, y + 1))
+        //        {
+        //            scene->drawLine<float>(xx, yy, xx - gridSize, yy + gridSize, sf::Color::White);
+        //        }
 
-                if (x < m_onContour.width() - 1 && y > 0 && isOnContour(x + 1, y - 1))
-                {
-                    scene->drawLine<float>(xx, yy, xx + gridSize, yy - gridSize, sf::Color::White);
-                }
+        //        if (x < m_onContour.width() - 1 && y > 0 && isOnContour(x + 1, y - 1))
+        //        {
+        //            scene->drawLine<float>(xx, yy, xx + gridSize, yy - gridSize, sf::Color::White);
+        //        }
 
-                if (x < m_onContour.width() - 1 && y < m_onContour.height() - 1 && isOnContour(x + 1, y + 1))
-                {
-                    scene->drawLine<float>(xx, yy, xx + gridSize, yy + gridSize, sf::Color::White);
-                }
-            }
-        }
+        //        if (x < m_onContour.width() - 1 && y < m_onContour.height() - 1 && isOnContour(x + 1, y + 1))
+        //        {
+        //            scene->drawLine<float>(xx, yy, xx + gridSize, yy + gridSize, sf::Color::White);
+        //        }
+        //    }
+        //}
     }
 };
