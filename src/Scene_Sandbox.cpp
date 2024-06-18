@@ -65,6 +65,22 @@ void Scene_Sandbox::captureImage()
     m_thresholdFilter.set_option(RS2_OPTION_MIN_DISTANCE, m_minDistance);
     data = m_thresholdFilter.process(data);
 
+    // Handle regular video footage
+    rs2::frame color = data.get_color_frame();
+    const int cw = color.as<rs2::video_frame>().get_width();
+    const int ch = color.as<rs2::video_frame>().get_height();
+    if (m_drawColor)
+    {
+        m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void *)color.get_data(), cv::Mat::AUTO_STEP);
+        cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
+        m_calibration.transform(m_cvColorImage);
+        m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
+        m_sfColorTexture.loadFromImage(m_sfColorImage);
+        m_colorSprite.setTexture(m_sfColorTexture);
+    }
+
+
+    // Handle depth feed
     rs2::depth_frame rawDepth = data.get_depth_frame();
 
     if (m_decimation > 0)
@@ -83,14 +99,9 @@ void Scene_Sandbox::captureImage()
         rawDepth = m_spatialFilter.process(rawDepth);
     }
 
-    rs2::frame depth = rawDepth.apply_filter(m_colorMap);
-    rs2::frame color = data.get_color_frame();
-
     // Query frame size (width and height)
-    const int dw = depth.as<rs2::video_frame>().get_width();
-    const int dh = depth.as<rs2::video_frame>().get_height();
-    const int cw = color.as<rs2::video_frame>().get_width();
-    const int ch = color.as<rs2::video_frame>().get_height();
+    int dw = rawDepth.as<rs2::video_frame>().get_width();
+    int dh = rawDepth.as<rs2::video_frame>().get_height();
 
     // Save depth at current mouse location
     Vec2 pos;
@@ -107,6 +118,21 @@ void Scene_Sandbox::captureImage()
         m_mouseDepth = -1.0;
     }
 
+    // Make OpenCV matrix from raw depth data
+    m_cvRawDepthImage.create(cv::Size(dw, dh), CV_32F);
+    for (int i = 0; i < dw; ++i)
+    {
+        for (int j = 0; j < dh; ++j)
+        {
+            m_cvRawDepthImage.at<float>(j, i) = rawDepth.get_distance(i, j);
+        }
+    }
+
+    // Calibration
+    m_calibration.transform(m_cvRawDepthImage);
+    dw = m_cvRawDepthImage.cols;
+    dh = m_cvRawDepthImage.rows;
+
     // Copy data to depth grid
     m_depthGrid.refill(dw, dh, 0.0);
     if (m_maxDistance > m_minDistance)
@@ -115,20 +141,11 @@ void Scene_Sandbox::captureImage()
         {
             for (int j = 0; j < dh; ++j)
             {
-                m_depthGrid.set(i, j, 1 - ((rawDepth.get_distance(i,j) - m_minDistance) / (m_maxDistance - m_minDistance)));
+                // Scale data to 0-1 range, where 1 is the highest point 
+                m_depthGrid.set(i, j, 1 - ((m_cvRawDepthImage.at<float>(j,i) - m_minDistance) / (m_maxDistance - m_minDistance)));
             }
         }
     }
-
-    m_cvRawDepthImage = cv::Mat(cv::Size(dw, dh), CV_32F, (void *)m_depthGrid.data(), cv::Mat::AUTO_STEP);
-    
-    m_calibration.transform(m_cvRawDepthImage);
-
-    // Create OpenCV matrix of size (w,h) from the colorized depth data
-    m_cvDepthImage = cv::Mat(cv::Size(dw, dh), CV_8UC3, (void*)depth.get_data(), cv::Mat::AUTO_STEP);
-    m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void *)color.get_data(), cv::Mat::AUTO_STEP);
-    cv::cvtColor(m_cvDepthImage, m_cvDepthImage, cv::COLOR_BGR2RGBA);
-    cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
 
     // Calculate Contour Lines
     if (m_drawContours)
@@ -137,22 +154,26 @@ void Scene_Sandbox::captureImage()
         m_contour.calculate(m_depthGrid);
     }
 
-    // Apply Calibration
-    if (m_drawDepth) { m_calibration.transform(m_cvDepthImage); }
-    if (m_drawColor) { m_calibration.transform(m_cvColorImage); }
+    if (m_drawDepth)
+    {
+        // Create colorized depth image, scaling to the size of the video so they can align
+        cv::resize(m_cvRawDepthImage, m_cvRawDepthImage, cv::Size(cw, ch), (0, 0), (0, 0), cv::InterpolationFlags::INTER_NEAREST);
 
-    // Resize depth image to be the same size as the color image
-    cv::resize(m_cvDepthImage, m_cvDepthImage, cv::Size(cw, ch), (0, 0), (0, 0), cv::InterpolationFlags::INTER_NEAREST);
+        m_sfDepthImage.create(cw, ch);
+        for (int i = 0; i < cw; ++i)
+        {
+            for (int j = 0; j < ch; ++j)
+            {
+                float height = (m_cvRawDepthImage.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance);
+                m_sfDepthImage.setPixel(i, j, sf::Color(255 * height, 255 * height, 255 * height));
+            }
+        }
 
-    // Create the SFML sprites to be rendered
-    m_sfDepthImage.create(m_cvDepthImage.cols, m_cvDepthImage.rows, m_cvDepthImage.ptr());
+        // Create the SFML sprites to be rendered
 
-    m_sfDepthTexture.loadFromImage(m_sfDepthImage);
-    m_depthSprite.setTexture(m_sfDepthTexture, true);
-    
-    m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
-    m_sfColorTexture.loadFromImage(m_sfColorImage);
-    m_colorSprite.setTexture(m_sfColorTexture);
+        m_sfDepthTexture.loadFromImage(m_sfDepthImage);
+        m_depthSprite.setTexture(m_sfDepthTexture, true);
+    }
 }
 
 void Scene_Sandbox::onFrame()

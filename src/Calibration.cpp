@@ -32,10 +32,15 @@ void Calibration::imgui()
         if (m_calibrationComplete && ImGui::Button("Auto Sort Corners"))
         {
             orderPoints();
+            generateWarpMatrix();
         }
     }
-    ImGui::InputInt("Width", &m_width);
-    ImGui::InputInt("Height", &m_height);
+    bool w = ImGui::InputInt("Width", &m_width);
+    bool h = ImGui::InputInt("Height", &m_height);
+    if (w || h)
+    {
+        generateWarpMatrix();
+    }
     ImGui::Text("Width: %d", m_width);
     ImGui::Text("Height: %d", m_height);
 
