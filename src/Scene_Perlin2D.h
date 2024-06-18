@@ -44,6 +44,8 @@ class Scene_Perlin2D : public Scene
     Vec2                m_mouseGrid;
     
     ViewController      m_viewController;
+
+    sf::Sprite          m_contourSprite;
     
     void init();  
 

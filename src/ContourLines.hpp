@@ -12,6 +12,8 @@ class ContourLines
     float m_contourLevel = 0.5;
     int   m_numberOfContourLines = 5;
     std::vector <float> m_contourLevels;
+    sf::Image m_linesImage;
+    sf::Texture m_linesTexture;
 
 public:
 
@@ -48,11 +50,11 @@ public:
 
     bool isOnContour(size_t x, size_t y)
     {
-        return m_onContour.get(x,y) == 1;
+        return m_onContour.get(x, y) == 1;
     }
 
     //heightGrid has all the floating values that will help to compare with the contourlevel.
-    void calculate(const Grid<float>& heightGrid)
+    void calculate(const Grid<float> & heightGrid)
     {
         for (auto& contourLevel : m_contourLevels)
         {
@@ -97,60 +99,25 @@ public:
         }
     }
 
-    void render(std::shared_ptr<Scene> scene, float gridSize)
+    sf::Texture & generateTexture()
     {
-        //for (size_t x = 0; x < m_onContour.width(); x++)
-        //{
-        //    for (size_t y = 0; y < m_onContour.height(); y++)
-        //    {
-        //        // if this cell is not on the contour, then skip it
-        //        if (!isOnContour(x, y)) { continue; }
+        size_t width = m_onContour.width();
+        size_t height = m_onContour.height();
+        m_linesImage.create(width, height, sf::Color::Transparent);
 
-        //        float xx = x * gridSize + gridSize / 2;
-        //        float yy = y * gridSize + gridSize / 2;
+        for (int i = 0; i < width; ++i)
+        {
+            for (int j = 0; j < height; ++j)
+            {
+                if (isOnContour(i, j))
+                {
+                    m_linesImage.setPixel(i, j, sf::Color::White);
+                }
+            }
+        }
 
-        //        if (y > 0 && isOnContour(x, y - 1))
-        //        {
-        //            scene->drawLine<float>(xx, yy, xx, yy - gridSize, sf::Color::White);
-        //        }
+        m_linesTexture.loadFromImage(m_linesImage);
 
-        //        if (y < m_onContour.height() - 1 && isOnContour(x, y + 1))
-        //        {
-        //            scene->drawLine<float>(xx, yy, xx, yy + gridSize, sf::Color::White);
-        //        }
-
-        //        if (x > 0 && isOnContour(x - 1, y))
-        //        {
-        //            scene->drawLine<float>(xx, yy, xx - gridSize, yy, sf::Color::White);
-        //        }
-
-        //        if (x < m_onContour.width() - 1 && isOnContour(x + 1, y))
-        //        {
-        //            scene->drawLine<float>(xx, yy, xx + gridSize, yy, sf::Color::White);
-        //        }
-
-        //        //
-
-        //        if (x > 0 && y > 0 && isOnContour(x - 1, y - 1))
-        //        {
-        //            scene->drawLine<float>(xx, yy, xx - gridSize, yy - gridSize, sf::Color::White);
-        //        }
-
-        //        if (x > 0 && y < m_onContour.height() - 1 && isOnContour(x - 1, y + 1))
-        //        {
-        //            scene->drawLine<float>(xx, yy, xx - gridSize, yy + gridSize, sf::Color::White);
-        //        }
-
-        //        if (x < m_onContour.width() - 1 && y > 0 && isOnContour(x + 1, y - 1))
-        //        {
-        //            scene->drawLine<float>(xx, yy, xx + gridSize, yy - gridSize, sf::Color::White);
-        //        }
-
-        //        if (x < m_onContour.width() - 1 && y < m_onContour.height() - 1 && isOnContour(x + 1, y + 1))
-        //        {
-        //            scene->drawLine<float>(xx, yy, xx + gridSize, yy + gridSize, sf::Color::White);
-        //        }
-        //    }
-        //}
+        return m_linesTexture;
     }
 };

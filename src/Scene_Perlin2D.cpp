@@ -170,17 +170,7 @@ void Scene_Perlin2D::sRender()
 
                 drawRect<float>(x * m_gridSize, y * m_gridSize, m_gridSize, m_gridSize, c);
             }
-
-            if (m_contour.isOnContour(x, y))
-            {
-                drawRect<float>(x * m_gridSize, y * m_gridSize, m_gridSize / 2, m_gridSize / 2, sf::Color::White);
-            }
         }
-    }
-
-    if (m_drawContours)
-    {
-        m_contour.render(m_game->currentScene(), m_gridSize);
     }
 
     for (int x = 0; m_drawGrid && x <= (int)m_grid.width(); x++)
@@ -193,14 +183,16 @@ void Scene_Perlin2D::sRender()
         drawLine<float>(0, y*m_gridSize, m_grid.width() * m_gridSize, y*m_gridSize, gridColor);
     }
 
-    if (m_drawContours)
-    {
-
-    }
-
     m_game->window().draw(m_quadArray);
     m_game->window().draw(m_lineStrip);
     m_game->window().draw(m_text);
+
+    if (m_drawContours)
+    {
+        m_contourSprite.setTexture(m_contour.generateTexture(), true);
+        m_contourSprite.setScale(m_gridSize, m_gridSize);
+        m_game->window().draw(m_contourSprite);
+    }
 }
 
 void Scene_Perlin2D::renderUI()

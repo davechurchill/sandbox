@@ -15,6 +15,7 @@ class Calibration
     std::vector<sf::CircleShape>    m_pointCircles;
 
     void orderPoints();
+    void generateWarpMatrix();
 
 public:
     Calibration();

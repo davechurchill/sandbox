@@ -76,7 +76,11 @@ void Scene_Sandbox::captureImage()
     if (m_spatialMagnitude > 0)
     {
         m_spatialFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_spatialMagnitude);
-        //m_spatialFilter
+        m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlpha);
+        m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, m_smoothDelta);
+        m_spatialFilter.set_option(RS2_OPTION_HOLES_FILL, m_spatialHoleFill);
+
+        rawDepth = m_spatialFilter.process(rawDepth);
     }
 
     rs2::frame depth = rawDepth.apply_filter(m_colorMap);
@@ -116,34 +120,32 @@ void Scene_Sandbox::captureImage()
         }
     }
 
-    m_contour.init(dw, dh);
-    m_contour.calculate(m_depthGrid);
-
     m_cvRawDepthImage = cv::Mat(cv::Size(dw, dh), CV_32F, (void *)m_depthGrid.data(), cv::Mat::AUTO_STEP);
     
     m_calibration.transform(m_cvRawDepthImage);
 
     // Create OpenCV matrix of size (w,h) from the colorized depth data
     m_cvDepthImage = cv::Mat(cv::Size(dw, dh), CV_8UC3, (void*)depth.get_data(), cv::Mat::AUTO_STEP);
+    m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void *)color.get_data(), cv::Mat::AUTO_STEP);
     cv::cvtColor(m_cvDepthImage, m_cvDepthImage, cv::COLOR_BGR2RGBA);
-    //cv::resize(m_cvDepthImage, m_cvDepthImage, cv::Size(cw, ch), (0,0), (0,0), cv::InterpolationFlags::INTER_NEAREST);
-    m_calibration.transform(m_cvDepthImage);
-    m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void*)color.get_data(), cv::Mat::AUTO_STEP);
     cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
+
+    // Calculate Contour Lines
+    if (m_drawContours)
+    {
+        m_contour.init(dw, dh);
+        m_contour.calculate(m_depthGrid);
+    }
+
+    // Apply Calibration
+    if (m_drawDepth) { m_calibration.transform(m_cvDepthImage); }
+    if (m_drawColor) { m_calibration.transform(m_cvColorImage); }
+
+    // Resize depth image to be the same size as the color image
+    cv::resize(m_cvDepthImage, m_cvDepthImage, cv::Size(cw, ch), (0, 0), (0, 0), cv::InterpolationFlags::INTER_NEAREST);
 
     // Create the SFML sprites to be rendered
     m_sfDepthImage.create(m_cvDepthImage.cols, m_cvDepthImage.rows, m_cvDepthImage.ptr());
-
-    for (int i = 0; i < dw; ++i)
-    {
-        for (int j = 0; j < dh; ++j)
-        {
-            if (m_contour.isOnContour(i, j))
-            {
-                m_sfDepthImage.setPixel(i, j, sf::Color::Black);
-            }
-        }
-    }
 
     m_sfDepthTexture.loadFromImage(m_sfDepthImage);
     m_depthSprite.setTexture(m_sfDepthTexture, true);
@@ -257,6 +259,15 @@ void Scene_Sandbox::sRender()
     m_game->window().draw(m_lineStrip);
     m_game->window().draw(m_text);
 
+    if (m_drawContours)
+    {
+        m_contourSprite.setTexture(m_contour.generateTexture(), true);
+        float scaleX = (float)m_sfDepthImage.getSize().x / m_depthGrid.width();
+        float scaleY = (float)m_sfDepthImage.getSize().y / m_depthGrid.height();
+        m_contourSprite.setScale(scaleX, scaleY);
+        m_game->window().draw(m_contourSprite);
+    }
+
     m_calibration.render(m_game->window());
 }
 
@@ -276,28 +287,36 @@ void Scene_Sandbox::renderUI()
 
             ImGui::SliderInt("Decimation", &m_decimation, 0, 5);
 
-            ImGui::SliderInt("Spatial Filter", &m_spatialMagnitude, 0, 5);
-            if (m_spatialMagnitude > 0)
+            if (ImGui::CollapsingHeader("Spatial Filter"))
             {
                 ImGui::Indent();
-                ImGui::SliderFloat("Smooth Alpha", &m_smoothAlpha, 0.25, 1.0);
-                ImGui::SliderInt("Smooth Delta", &m_smoothDelta, 1, 50);
-                ImGui::SliderInt("Hole Filling", &m_spatialHoleFill, 0, 5);
+                ImGui::SliderInt("Magnitude", &m_spatialMagnitude, 0, 5);
+                if (m_spatialMagnitude > 0)
+                {
+                    ImGui::SliderFloat("Smooth Alpha", &m_smoothAlpha, 0.25, 1.0);
+                    ImGui::SliderInt("Smooth Delta", &m_smoothDelta, 1, 50);
+                    ImGui::SliderInt("Hole Filling", &m_spatialHoleFill, 0, 5);
+                }
                 ImGui::Unindent();
             }
 
-            ImGui::Text("Distance from Mouse %f", m_mouseDepth);
-
-            ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 7.0);
-            if (ImGui::Button("Select Max Distance"))
+            if (ImGui::CollapsingHeader("Threshold Filter"))
             {
-                m_mouseSelection = MouseSelections::MaxDistance;
-            }
+                ImGui::Indent();
+                ImGui::Text("Distance from Mouse %f", m_mouseDepth);
 
-            ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 7.0);
-            if (ImGui::Button("Select Min Distance"))
-            {
-                m_mouseSelection = MouseSelections::MinDistance;
+                ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 7.0);
+                if (ImGui::Button("Select Max Distance"))
+                {
+                    m_mouseSelection = MouseSelections::MaxDistance;
+                }
+
+                ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 7.0);
+                if (ImGui::Button("Select Min Distance"))
+                {
+                    m_mouseSelection = MouseSelections::MinDistance;
+                }
+                ImGui::Unindent();
             }
             ImGui::EndTabItem();
         }
@@ -327,6 +346,10 @@ void Scene_Sandbox::renderUI()
             ImGui::SliderInt("CAlpha", &m_colorAlpha, 0, 255);
             ImGui::SliderFloat2("CPos", m_colorPos, -1000, 1000);
             ImGui::SliderFloat("CScale", &m_colorScale, 0, 2);
+
+            ImGui::Spacing();
+
+            ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
 
             ImGui::EndTabItem();
         }

@@ -86,7 +86,9 @@ class Scene_Sandbox : public Scene
     int                 m_spatialHoleFill = 0;
     rs2::spatial_filter m_spatialFilter;
 
+    bool                m_drawContours = false;
     ContourLines        m_contour;
+    sf::Sprite          m_contourSprite;
     
     void captureImage();
 

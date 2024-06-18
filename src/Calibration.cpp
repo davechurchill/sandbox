@@ -49,17 +49,7 @@ void Calibration::transform(cv::Mat & image)
 {
     if (m_applyTransform && m_calibrationComplete)
     {
-        //image = m_operator * image;
-
-        cv::Point2f dstPoints[] = {
-            cv::Point2f(0, 0),
-            cv::Point2f(m_width, 0),
-            cv::Point2f(0, m_height),
-            cv::Point2f(m_width, m_height),
-        };
-
-        cv::Mat Matrix = cv::getPerspectiveTransform(m_points, dstPoints);
-        cv::warpPerspective(image, image, Matrix, cv::Size(m_width, m_height));
+        cv::warpPerspective(image, image, m_operator, cv::Size(m_width, m_height));
     }
 }
 
@@ -74,6 +64,7 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
         {
             m_currentPoint = -1;
             m_calibrationComplete = true;
+            generateWarpMatrix();
         }
     }
 }
@@ -132,4 +123,16 @@ void Calibration::orderPoints()
     m_points[1] = secondPoint;
     m_points[2] = thirdPoint;
     m_points[3] = fourthPoint;
+}
+
+void Calibration::generateWarpMatrix()
+{
+    cv::Point2f dstPoints[] = {
+            cv::Point2f(0, 0),
+            cv::Point2f(m_width, 0),
+            cv::Point2f(0, m_height),
+            cv::Point2f(m_width, m_height),
+    };
+
+    m_operator = cv::getPerspectiveTransform(m_points, dstPoints);
 }
