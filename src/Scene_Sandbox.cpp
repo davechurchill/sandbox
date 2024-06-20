@@ -299,6 +299,11 @@ void Scene_Sandbox::renderUI()
    
     ImGui::Begin("Options");
 
+    if (!m_cameraConnected)
+    {
+        ImGui::Text("Please Connect Camera");
+    }
+
     ImGui::Text("Framerate: %d", (int)m_game->framerate());
 
     if (ImGui::BeginTabBar("MyTabBar"))
@@ -306,8 +311,8 @@ void Scene_Sandbox::renderUI()
         if (ImGui::BeginTabItem("Camera"))
         {
             // PC Display Options
-            const char* items[] = { "Depth", "Color", "Nothing" };
-            ImGui::Combo("Alignment", (int*)&m_alignment, items, 3);
+            const char * items[] = { "Depth", "Color", "Nothing" };
+            ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
 
             ImGui::SliderInt("Decimation", &m_decimation, 0, 5);
 
@@ -371,11 +376,8 @@ void Scene_Sandbox::renderUI()
                 }
             }
 
-        }
-
             ImGui::EndTabItem();
         }
-
         if (ImGui::BeginTabItem("View"))
         {
             ImGui::Checkbox("Depth", &m_drawDepth);
@@ -425,8 +427,8 @@ void Scene_Sandbox::renderUI()
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
-    
 
+    }
     ImGui::End();
 }
 

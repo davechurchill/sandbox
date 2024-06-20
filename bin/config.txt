@@ -1,0 +1,7 @@
+Decimation 1
+Magnitude 2
+Alpha 0.5
+Delta 20
+Hole 0
+MaxDistance 1.254
+MinDistance 0.889
