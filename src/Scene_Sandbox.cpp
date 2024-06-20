@@ -33,13 +33,16 @@ void Scene_Sandbox::init()
 
     // initialize rs2
 
-    if (!isCameraConnected())
-    {
-        std::cerr << "No RealSense Camera Found, check connection and restart\n";
-        exit(-1);
-    }
+    //if (!isCameraConnected())
+    //{
+    //    std::cerr << "No RealSense Camera Found, check connection and restart\n";
+    //    exit(-1);
+    //}
 
-    m_pipe.start();
+    if (isCameraConnected())
+    {
+        m_pipe.start();
+    }
 
     // read a sample image and convert it to RGBA needed by sfml
     //m_cvImage = cv::imread("images/seinfeld.jpg", cv::IMREAD_COLOR);
@@ -178,7 +181,10 @@ void Scene_Sandbox::captureImage()
 
 void Scene_Sandbox::onFrame()
 {
-    captureImage();
+    if (isCameraConnected())
+    {
+        captureImage();
+    }
     sUserInput();
     sRender(); 
     renderUI();
@@ -371,6 +377,10 @@ void Scene_Sandbox::renderUI()
             ImGui::Spacing();
 
             ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
+            if (ImGui::Button("Toggle Fullscreen"))
+            {
+                m_game->toggleFullscreen();
+            }
 
             ImGui::EndTabItem();
         }

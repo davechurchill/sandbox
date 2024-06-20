@@ -26,6 +26,7 @@ protected:
     bool                m_running = true;
     ImGuiStyle          m_originalStyle;
     MinecraftInterface  m_mcInterface;
+    bool                m_isFullscreen = false;
 
     void update();
 
@@ -65,4 +66,5 @@ public:
     sf::RenderWindow & window();
     MinecraftInterface & minecraft();
     bool isRunning();
+    void toggleFullscreen();
 };
