@@ -309,8 +309,8 @@ void Scene_Sandbox::renderUI()
         if (ImGui::BeginTabItem("Camera"))
         {
             // PC Display Options
-            const char * items[] = { "Depth", "Color", "Nothing" };
-            ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
+            const char* items[] = { "Depth", "Color", "Nothing" };
+            ImGui::Combo("Alignment", (int*)&m_alignment, items, 3);
 
             ImGui::SliderInt("Decimation", &m_decimation, 0, 5);
 
@@ -345,6 +345,37 @@ void Scene_Sandbox::renderUI()
                 }
                 ImGui::Unindent();
             }
+
+            if (ImGui::Button("Save Configuration"))
+            {
+                std::ofstream fout("config.txt");
+                fout << "Decimation" << " " << m_decimation << "\n";
+                fout << "Magnitude" << " " << m_spatialMagnitude << "\n";
+                fout << "Alpha" << " " << m_smoothAlpha << "\n";
+                fout << "Delta" << " " << m_smoothDelta << "\n";
+                fout << "Hole" << " " << m_spatialHoleFill << "\n";
+                fout << "MaxDistance" << " " << m_maxDistance << "\n";
+                fout << "MinDistance" << " " << m_minDistance << "\n";
+                fout.close();
+            }
+
+            if (ImGui::Button("Load Configuration"))
+            {
+                std::ifstream fin("config.txt");
+                std::string temp;
+                while (fin >> temp)
+                {
+                    if (temp == "Decimation") { fin >> m_decimation; }
+                    if (temp == "Magnitude") { fin >> m_spatialMagnitude; }
+                    if (temp == "Alpha") { fin >> m_smoothAlpha; }
+                    if (temp == "Hole") { fin >> m_spatialHoleFill; }
+                    if (temp == "MaxDistance") { fin >> m_maxDistance; }
+                    if (temp == "MinDistance") { fin >> m_minDistance; }
+                }
+            }
+
+        }
+
             ImGui::EndTabItem();
         }
 
@@ -397,7 +428,7 @@ void Scene_Sandbox::renderUI()
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
-    }
+    
 
     ImGui::End();
 }
