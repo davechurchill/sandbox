@@ -62,7 +62,9 @@ void GameEngine::update()
 
     if (m_sceneMap.empty()) { return; }
 
-    ImGui::SFML::Update(m_window, m_deltaClock.restart());
+    sf::Time dt = m_deltaClock.restart();
+    m_framerate = 1.0f / dt.asSeconds();
+    ImGui::SFML::Update(m_window, dt);
 
     currentScene()->onFrame();
 
@@ -92,4 +94,9 @@ unsigned int GameEngine::width() const
 unsigned int GameEngine::height() const
 {
     return m_window.getSize().x;
+}
+
+float GameEngine::framerate() const
+{
+    return m_framerate;
 }

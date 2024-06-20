@@ -30,24 +30,6 @@ void Scene_Sandbox::init()
     m_text.setCharacterSize(10);
 
     m_contour.setContourLevel(0.5);
-
-    // initialize rs2
-
-    //if (!isCameraConnected())
-    //{
-    //    std::cerr << "No RealSense Camera Found, check connection and restart\n";
-    //    exit(-1);
-    //}
-
-    if (isCameraConnected())
-    {
-        m_pipe.start();
-    }
-
-    // read a sample image and convert it to RGBA needed by sfml
-    //m_cvImage = cv::imread("images/seinfeld.jpg", cv::IMREAD_COLOR);
-    //cv::cvtColor(m_cvImage, m_cvImage, cv::COLOR_BGR2RGBA);
-    //setSprite(m_cvImage);
 }
 
 void Scene_Sandbox::captureImage()
@@ -181,13 +163,20 @@ void Scene_Sandbox::captureImage()
 
 void Scene_Sandbox::onFrame()
 {
-    if (isCameraConnected())
+    if (m_cameraConnected)
     {
         captureImage();
     }
+    else
+    {
+        attemptCameraConnection();
+    }
     sUserInput();
-    sRender(); 
-    renderUI();
+    sRender();
+    if (m_drawUI)
+    {
+        renderUI();
+    }
     m_currentFrame++;
 }
 
@@ -214,6 +203,12 @@ void Scene_Sandbox::sUserInput()
                 case sf::Keyboard::Escape:
                 {
                     m_game->changeScene<Scene_Menu>("Menu");
+                    break;
+                }
+
+                case sf::Keyboard::I:
+                {
+                    m_drawUI = !m_drawUI;
                     break;
                 }
             }
@@ -303,6 +298,8 @@ void Scene_Sandbox::renderUI()
     const char vals[7] = { '.', 'G', '@', 'O', 'T', 'S', 'W' };
    
     ImGui::Begin("Options");
+
+    ImGui::Text("Framerate: %d", (int)m_game->framerate());
 
     if (ImGui::BeginTabBar("MyTabBar"))
     {
@@ -433,8 +430,13 @@ void Scene_Sandbox::renderUI()
     ImGui::End();
 }
 
-bool Scene_Sandbox::isCameraConnected() {
+void Scene_Sandbox::attemptCameraConnection()
+{
     rs2::context ctx;  // Create a context object, which is used to manage devices
     rs2::device_list devices = ctx.query_devices();  // Get a list of connected RealSense devices
-    return devices.size() > 0;  // Return true if at least one device is connected
+    if (devices.size() > 0) // If at least one device is connected start pipe
+    {
+        m_pipe.start();
+        m_cameraConnected = true;
+    }
 }

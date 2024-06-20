@@ -31,11 +31,14 @@ enum class MouseSelections
 
 class Scene_Sandbox : public Scene
 {   
+    bool                m_cameraConnected = false;
+
     sf::Font            m_font;             
     sf::Text            m_text;
 
     bool                m_drawDepth = true;
     bool                m_drawColor = false; 
+    bool                m_drawUI = true;
 
     int                 m_depthAlpha = 255;
     float               m_depthPos[2] = { 0, 0 };
@@ -95,7 +98,7 @@ class Scene_Sandbox : public Scene
     void renderUI();
     void sUserInput();  
     void sRender();
-    bool isCameraConnected();
+    void attemptCameraConnection();
     
 public:
 
