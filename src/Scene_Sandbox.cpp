@@ -358,7 +358,12 @@ void Scene_Sandbox::renderUI()
                 fout << "Hole" << " " << m_spatialHoleFill << "\n";
                 fout << "MaxDistance" << " " << m_maxDistance << "\n";
                 fout << "MinDistance" << " " << m_minDistance << "\n";
-                fout.close();
+
+                fout << "ViewCenter" << " " << m_game->window().getView().getCenter().x <<" "
+                     << m_game->window().getView().getCenter().y << "\n";
+
+                fout << "ViewSize" << " " << m_game->window().getView().getSize().x << " "
+                    << m_game->window().getView().getSize().y << "\n";
             }
 
             if (ImGui::Button("Load Configuration"))
@@ -373,6 +378,20 @@ void Scene_Sandbox::renderUI()
                     if (temp == "Hole") { fin >> m_spatialHoleFill; }
                     if (temp == "MaxDistance") { fin >> m_maxDistance; }
                     if (temp == "MinDistance") { fin >> m_minDistance; }
+                    if (temp == "ViewCenter")
+                    {
+                        float x, y;
+                        fin >> x;
+                        fin >> y;
+                        sf::View view = m_game->window().getView();
+                        view.setCenter(x, y);
+                        fin >> temp;
+                        float sizeX, sizeY;
+                        fin >> sizeX;
+                        fin >> sizeY;
+                        view.setSize(sizeX, sizeY);
+                        m_game->window().setView(view);
+                    }
                 }
             }
 
