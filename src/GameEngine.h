@@ -27,6 +27,7 @@ protected:
     ImGuiStyle          m_originalStyle;
     MinecraftInterface  m_mcInterface;
     bool                m_isFullscreen = false;
+    float               m_framerate;
 
     void update();
 
@@ -62,6 +63,7 @@ public:
     void run();
     unsigned int width() const;
     unsigned int height() const;
+    float        framerate() const;
 
     sf::RenderWindow & window();
     MinecraftInterface & minecraft();
