@@ -42,7 +42,8 @@ class Scene_Sandbox : public Scene
 
     int                 m_depthAlpha = 255;
     float               m_depthPos[2] = { 0, 0 };
-    float               m_depthScale = 1.0f;
+    float               m_depthScaleX = 1.0f;
+    float               m_depthScaleY = 1.0f;
     int                 m_colorAlpha = 255;
     float               m_colorPos[2] = { 0, 0 };
     float               m_colorScale = 1.0f;
@@ -91,6 +92,8 @@ class Scene_Sandbox : public Scene
     bool                m_drawContours = false;
     ContourLines        m_contour;
     sf::Sprite          m_contourSprite;
+
+    int                 m_numberOfContourLines = 5;
     
     void captureImage();
 
@@ -99,6 +102,8 @@ class Scene_Sandbox : public Scene
     void sUserInput();  
     void sRender();
     void attemptCameraConnection();
+
+    sf::Color colorize(float height);
     
 public:
 

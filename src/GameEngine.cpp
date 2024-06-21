@@ -63,7 +63,7 @@ void GameEngine::update()
     if (m_sceneMap.empty()) { return; }
 
     sf::Time dt = m_deltaClock.restart();
-    m_framerate = 1.0f / dt.asSeconds();
+    m_framerate = m_framerate * 0.75f + 0.25f / dt.asSeconds();
     ImGui::SFML::Update(m_window, dt);
 
     currentScene()->onFrame();

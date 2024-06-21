@@ -120,7 +120,10 @@ void Scene_Sandbox::captureImage()
     dh = m_cvRawDepthImage.rows;
 
     // Copy data to depth grid
-    m_depthGrid.refill(dw, dh, 0.0);
+    if (m_depthGrid.width() != dw || m_depthGrid.height() != dh)
+    {
+        m_depthGrid.refill(dw, dh, 0.0);
+    }
     if (m_maxDistance > m_minDistance)
     {
         for (int i = 0; i < dw; ++i)
@@ -143,15 +146,21 @@ void Scene_Sandbox::captureImage()
     if (m_drawDepth)
     {
         // Create colorized depth image, scaling to the size of the video so they can align
-        cv::resize(m_cvRawDepthImage, m_cvRawDepthImage, cv::Size(cw, ch), (0, 0), (0, 0), cv::InterpolationFlags::INTER_NEAREST);
+        //cv::resize(m_cvRawDepthImage, m_cvRawDepthImage, cv::Size(cw, ch), (0, 0), (0, 0), cv::InterpolationFlags::INTER_NEAREST);
 
-        m_sfDepthImage.create(cw, ch);
-        for (int i = 0; i < cw; ++i)
+        m_sfDepthImage.create(dw, dh);
+        for (int i = 0; i < dw; ++i)
         {
-            for (int j = 0; j < ch; ++j)
+            for (int j = 0; j < dh; ++j)
             {
                 float height = (m_cvRawDepthImage.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance);
-                m_sfDepthImage.setPixel(i, j, sf::Color(255 * height, 255 * height, 255 * height));
+                if (height < 0.0f)
+                {
+                    m_sfDepthImage.setPixel(i, j, sf::Color::Black);
+                    continue;
+                }
+                
+                m_sfDepthImage.setPixel(i, j, colorize(height));
             }
         }
 
@@ -269,7 +278,7 @@ void Scene_Sandbox::sRender()
 
     m_depthSprite.setColor(sf::Color(255, 255, 255, m_depthAlpha));
     m_depthSprite.setPosition(m_depthPos[0], m_depthPos[1]);
-    m_depthSprite.setScale(m_depthScale, m_depthScale);
+    m_depthSprite.setScale(m_depthScaleX, m_depthScaleY);
 
     m_colorSprite.setColor(sf::Color(255, 255, 255, m_colorAlpha));
     m_colorSprite.setPosition(m_colorPos[0], m_colorPos[1]);
@@ -285,8 +294,8 @@ void Scene_Sandbox::sRender()
     if (m_drawContours)
     {
         m_contourSprite.setTexture(m_contour.generateTexture(), true);
-        float scaleX = (float)m_sfDepthImage.getSize().x / m_depthGrid.width();
-        float scaleY = (float)m_sfDepthImage.getSize().y / m_depthGrid.height();
+        float scaleX = m_depthScaleX * (float)m_sfDepthImage.getSize().x / m_depthGrid.width();
+        float scaleY = m_depthScaleY * (float)m_sfDepthImage.getSize().y / m_depthGrid.height();
         m_contourSprite.setScale(scaleX, scaleY);
         m_game->window().draw(m_contourSprite);
     }
@@ -416,11 +425,13 @@ void Scene_Sandbox::renderUI()
                 m_depthAlpha = m_colorAlpha;
                 m_depthPos[0] = m_colorPos[0];
                 m_depthPos[1] = m_colorPos[1];
-                m_depthScale = m_colorScale;
+                m_depthScaleX = m_colorScale;
+                m_depthScaleY = m_colorScale;
             }
             ImGui::SliderInt("DAlpha", &m_depthAlpha, 0, 255);
             ImGui::SliderFloat2("DPos", m_depthPos, -1000, 1000);
-            ImGui::SliderFloat("DScale", &m_depthScale, 0, 2);
+            ImGui::SliderFloat("DScale X", &m_depthScaleX, 0, 5);
+            ImGui::SliderFloat("DScale Y", &m_depthScaleY, 0, 5);
 
             ImGui::Checkbox("Color", &m_drawColor);
             if (ImGui::Button("Match Depth"))
@@ -428,7 +439,7 @@ void Scene_Sandbox::renderUI()
                 m_colorAlpha = m_depthAlpha;
                 m_colorPos[0] = m_depthPos[0];
                 m_colorPos[1] = m_depthPos[1];
-                m_colorScale = m_depthScale;
+                m_colorScale = m_depthScaleX;
             }
             ImGui::SliderInt("CAlpha", &m_colorAlpha, 0, 255);
             ImGui::SliderFloat2("CPos", m_colorPos, -1000, 1000);
@@ -437,6 +448,10 @@ void Scene_Sandbox::renderUI()
             ImGui::Spacing();
 
             ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
+            if (ImGui::InputInt("Contour Lines", &m_numberOfContourLines, 1, 10))
+            {
+                m_contour.setNumberofContourLines(m_numberOfContourLines);
+            }
             if (ImGui::Button("Toggle Fullscreen"))
             {
                 m_game->toggleFullscreen();
@@ -471,4 +486,21 @@ void Scene_Sandbox::attemptCameraConnection()
         m_pipe.start();
         m_cameraConnected = true;
     }
+}
+
+sf::Color Scene_Sandbox::colorize(float height)
+{
+    int dNormal = height * 1529.f;
+    int pR, pG, pB;
+    int i = dNormal / 255;
+    switch (i)
+    {
+    case 0: { pR = 255; pG = dNormal; pB = dNormal; } break;
+    case 1: { pR = dNormal - 255; pG = 255; pB = dNormal;} break;
+    case 2: { pR = 0; pG = 765 - dNormal; pB = dNormal; } break;
+    case 3: { pR = 0; pG = 0; pB = dNormal - 765; } break;
+    case 4: { pR = dNormal - 1020; pG = 0; pB = 255; } break;
+    case 5: { pR = 255;pG = 0;pB = 1529 - dNormal; } break;
+    }
+    return sf::Color(pR, pG, pB);
 }

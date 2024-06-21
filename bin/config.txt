@@ -1,15 +1,15 @@
 Decimation 1
-Magnitude 2
+Magnitude 0
 Alpha 0.5
 Delta 20
 Hole 0
-MaxDistance 5
-MinDistance 0
-ViewCenter 800 450
-ViewSize 1600 900
-m_points[0] 593 395
-m_points[1] 634 529
-m_points[2] 722 301
-m_points[3] 417 246
+MaxDistance 1.162
+MinDistance 0.929
+ViewCenter 1070.93 457.663
+ViewSize 2049.56 1152.88
+m_points[0] 73 103
+m_points[1] 591 102
+m_points[2] 74 387
+m_points[3] 590 386
 m_width 1200
 m_height 780
