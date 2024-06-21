@@ -1,0 +1,16 @@
+C:\dev\code\Minecraft\src\Assets.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\Assets.obj
+C:\dev\code\Minecraft\src\Calibration.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\Calibration.obj
+C:\dev\code\Minecraft\src\GameEngine.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\GameEngine.obj
+C:\dev\code\Minecraft\src\imgui\imgui-SFML.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\imgui-SFML.obj
+C:\dev\code\Minecraft\src\imgui\imgui.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\imgui.obj
+C:\dev\code\Minecraft\src\imgui\imgui_demo.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\imgui_demo.obj
+C:\dev\code\Minecraft\src\imgui\imgui_draw.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\imgui_draw.obj
+C:\dev\code\Minecraft\src\imgui\imgui_tables.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\imgui_tables.obj
+C:\dev\code\Minecraft\src\imgui\imgui_widgets.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\imgui_widgets.obj
+C:\dev\code\Minecraft\src\MinecraftInterface.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\MinecraftInterface.obj
+C:\dev\code\Minecraft\src\Scene.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\Scene.obj
+C:\dev\code\Minecraft\src\main.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\main.obj
+C:\dev\code\Minecraft\src\Scene_Image.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\Scene_Image.obj
+C:\dev\code\Minecraft\src\Scene_Menu.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\Scene_Menu.obj
+C:\dev\code\Minecraft\src\Scene_Perlin2D.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\Scene_Perlin2D.obj
+C:\dev\code\Minecraft\src\Scene_Sandbox.cpp;C:\dev\code\Minecraft\visualstudio\SFMLGame\x64\Debug\Scene_Sandbox.obj

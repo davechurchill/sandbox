@@ -3,5 +3,13 @@ Magnitude 2
 Alpha 0.5
 Delta 20
 Hole 0
-MaxDistance 1.254
-MinDistance 0.889
+MaxDistance 5
+MinDistance 0
+ViewCenter 800 450
+ViewSize 1600 900
+m_points[0] 593 395
+m_points[1] 634 529
+m_points[2] 722 301
+m_points[3] 417 246
+m_width 1200
+m_height 780

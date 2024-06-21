@@ -20,6 +20,9 @@ class Calibration
 public:
     Calibration();
     void imgui();
+    std::vector<cv::Point2f>  getConfig();
+    cv::Point2f getDimension();
+    void loadConfiguration();
     void transform(cv::Mat & image);
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void render(sf::RenderWindow & window);

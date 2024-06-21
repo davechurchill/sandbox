@@ -2,6 +2,7 @@
 #include "Scene_Menu.h"
 #include "GameEngine.h"
 #include "Assets.h"
+#include "Calibration.h"
 
 #include <fstream>
 #include <iostream>
@@ -364,6 +365,15 @@ void Scene_Sandbox::renderUI()
 
                 fout << "ViewSize" << " " << m_game->window().getView().getSize().x << " "
                     << m_game->window().getView().getSize().y << "\n";
+                
+                fout << "m_points[0]" << " " << m_calibration.getConfig()[0].x << " " << m_calibration.getConfig()[0].y << "\n";
+                fout << "m_points[1]" << " " << m_calibration.getConfig()[1].x << " " << m_calibration.getConfig()[1].y << "\n";
+                fout << "m_points[2]" << " " << m_calibration.getConfig()[2].x << " " << m_calibration.getConfig()[2].y << "\n";
+                fout << "m_points[3]" << " " << m_calibration.getConfig()[3].x << " " << m_calibration.getConfig()[3].y << "\n";
+
+                fout << "m_width"  <<  " " << m_calibration.getDimension().x << "\n";
+                fout << "m_height" <<  " " << m_calibration.getDimension().y << "\n";
+
             }
 
             if (ImGui::Button("Load Configuration"))
@@ -393,6 +403,7 @@ void Scene_Sandbox::renderUI()
                         m_game->window().setView(view);
                     }
                 }
+                m_calibration.loadConfiguration();
             }
 
             ImGui::EndTabItem();

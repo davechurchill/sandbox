@@ -1,0 +1,51 @@
+﻿  Calibration.cpp
+C:\dev\code\Minecraft\src\Calibration.cpp(68,60): warning C4244: 'argument': conversion from 'const T' to '_Tp', possible loss of data
+C:\dev\code\Minecraft\src\Calibration.cpp(68,60): warning C4244:         with
+C:\dev\code\Minecraft\src\Calibration.cpp(68,60): warning C4244:         [
+C:\dev\code\Minecraft\src\Calibration.cpp(68,60): warning C4244:             T=float
+C:\dev\code\Minecraft\src\Calibration.cpp(68,60): warning C4244:         ]
+C:\dev\code\Minecraft\src\Calibration.cpp(68,60): warning C4244:         and
+C:\dev\code\Minecraft\src\Calibration.cpp(68,60): warning C4244:         [
+C:\dev\code\Minecraft\src\Calibration.cpp(68,60): warning C4244:             _Tp=int
+C:\dev\code\Minecraft\src\Calibration.cpp(68,60): warning C4244:         ]
+C:\dev\code\Minecraft\src\Calibration.cpp(68,51): warning C4244: 'argument': conversion from 'const T' to '_Tp', possible loss of data
+C:\dev\code\Minecraft\src\Calibration.cpp(68,51): warning C4244:         with
+C:\dev\code\Minecraft\src\Calibration.cpp(68,51): warning C4244:         [
+C:\dev\code\Minecraft\src\Calibration.cpp(68,51): warning C4244:             T=float
+C:\dev\code\Minecraft\src\Calibration.cpp(68,51): warning C4244:         ]
+C:\dev\code\Minecraft\src\Calibration.cpp(68,51): warning C4244:         and
+C:\dev\code\Minecraft\src\Calibration.cpp(68,51): warning C4244:         [
+C:\dev\code\Minecraft\src\Calibration.cpp(68,51): warning C4244:             _Tp=int
+C:\dev\code\Minecraft\src\Calibration.cpp(68,51): warning C4244:         ]
+C:\dev\code\Minecraft\src\Calibration.cpp(83,15): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\dev\code\Minecraft\src\Calibration.cpp(147,33): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+C:\dev\code\Minecraft\src\Calibration.cpp(147,33): warning C4244:         with
+C:\dev\code\Minecraft\src\Calibration.cpp(147,33): warning C4244:         [
+C:\dev\code\Minecraft\src\Calibration.cpp(147,33): warning C4244:             _Tp=float
+C:\dev\code\Minecraft\src\Calibration.cpp(147,33): warning C4244:         ]
+C:\dev\code\Minecraft\src\Calibration.cpp(147,24): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+C:\dev\code\Minecraft\src\Calibration.cpp(147,24): warning C4244:         with
+C:\dev\code\Minecraft\src\Calibration.cpp(147,24): warning C4244:         [
+C:\dev\code\Minecraft\src\Calibration.cpp(147,24): warning C4244:             _Tp=float
+C:\dev\code\Minecraft\src\Calibration.cpp(147,24): warning C4244:         ]
+C:\dev\code\Minecraft\src\Calibration.cpp(199,25): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+C:\dev\code\Minecraft\src\Calibration.cpp(199,25): warning C4244:         with
+C:\dev\code\Minecraft\src\Calibration.cpp(199,25): warning C4244:         [
+C:\dev\code\Minecraft\src\Calibration.cpp(199,25): warning C4244:             _Tp=float
+C:\dev\code\Minecraft\src\Calibration.cpp(199,25): warning C4244:         ]
+C:\dev\code\Minecraft\src\Calibration.cpp(200,28): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+C:\dev\code\Minecraft\src\Calibration.cpp(200,28): warning C4244:         with
+C:\dev\code\Minecraft\src\Calibration.cpp(200,28): warning C4244:         [
+C:\dev\code\Minecraft\src\Calibration.cpp(200,28): warning C4244:             _Tp=float
+C:\dev\code\Minecraft\src\Calibration.cpp(200,28): warning C4244:         ]
+C:\dev\code\Minecraft\src\Calibration.cpp(201,34): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+C:\dev\code\Minecraft\src\Calibration.cpp(201,34): warning C4244:         with
+C:\dev\code\Minecraft\src\Calibration.cpp(201,34): warning C4244:         [
+C:\dev\code\Minecraft\src\Calibration.cpp(201,34): warning C4244:             _Tp=float
+C:\dev\code\Minecraft\src\Calibration.cpp(201,34): warning C4244:         ]
+C:\dev\code\Minecraft\src\Calibration.cpp(201,25): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+C:\dev\code\Minecraft\src\Calibration.cpp(201,25): warning C4244:         with
+C:\dev\code\Minecraft\src\Calibration.cpp(201,25): warning C4244:         [
+C:\dev\code\Minecraft\src\Calibration.cpp(201,25): warning C4244:             _Tp=float
+C:\dev\code\Minecraft\src\Calibration.cpp(201,25): warning C4244:         ]
+  SFMLGame.vcxproj -> C:\dev\code\Minecraft\bin\SFMLGame_d.exe

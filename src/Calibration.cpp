@@ -1,6 +1,7 @@
 #include "Calibration.h"
 #include "imgui-SFML.h"
 #include "imgui.h"
+#include <fstream>
 
 #include <iostream>
 #include <opencv2/highgui.hpp>
@@ -56,6 +57,7 @@ void Calibration::transform(cv::Mat & image)
     {
         cv::warpPerspective(image, image, m_operator, cv::Size(m_width, m_height));
     }
+    
 }
 
 void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
@@ -130,6 +132,66 @@ void Calibration::orderPoints()
     m_points[3] = fourthPoint;
 }
 
+std::vector<cv::Point2f>  Calibration::getConfig()
+{
+    std::vector<cv::Point2f> points;
+    points.push_back(m_points[0]);
+    points.push_back(m_points[1]);
+    points.push_back(m_points[2]);
+    points.push_back(m_points[3]);
+    return points;
+}
+
+cv::Point2f Calibration::getDimension()
+{
+    return cv::Point2f(m_width, m_height);
+}
+
+void Calibration::loadConfiguration()
+{
+    std::ifstream fin("config.txt");
+    std::string temp;
+    while (fin >> temp)
+    {
+        if (temp == "m_points[0]")
+        {
+            fin >> m_points[0].x;
+            fin >> m_points[0].y;
+        }
+
+        if (temp == "m_points[1]")
+        {
+            fin >> m_points[1].x;
+            fin >> m_points[1].y;
+        }
+
+        if (temp == "m_points[2]")
+        {
+            fin >> m_points[2].x;
+            fin >> m_points[2].y;
+        }
+
+        if (temp == "m_points[3]")
+        {
+            fin >> m_points[3].x;
+            fin >> m_points[3].y;
+        }
+
+        if (temp == "m_width")
+        {
+            fin >> m_width;
+        }
+
+        if (temp == "m_height")
+        {
+            fin >> m_height;
+        }
+    }
+    m_calibrationComplete = true;
+    m_applyTransform = true;
+    generateWarpMatrix();
+}
+
 void Calibration::generateWarpMatrix()
 {
     cv::Point2f dstPoints[] = {
@@ -138,6 +200,5 @@ void Calibration::generateWarpMatrix()
             cv::Point2f(0, m_height),
             cv::Point2f(m_width, m_height),
     };
-
     m_operator = cv::getPerspectiveTransform(m_points, dstPoints);
 }
