@@ -382,7 +382,8 @@ void Scene_Sandbox::renderUI()
 
                 fout << "m_width"  <<  " " << m_calibration.getDimension().x << "\n";
                 fout << "m_height" <<  " " << m_calibration.getDimension().y << "\n";
-
+                fout << "m_drawContours" << " " << m_drawContours << "\n";
+                fout << "m_numberOfContourLines" << " " << m_numberOfContourLines << "\n";
             }
 
             if (ImGui::Button("Load Configuration"))
@@ -411,6 +412,8 @@ void Scene_Sandbox::renderUI()
                         view.setSize(sizeX, sizeY);
                         m_game->window().setView(view);
                     }
+                    if (temp == "m_drawContours") { fin >> m_drawContours; }
+                    if (temp == "m_numberOfContourLines") { fin >> m_numberOfContourLines; }
                 }
                 m_calibration.loadConfiguration();
             }
