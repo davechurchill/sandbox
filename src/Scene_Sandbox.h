@@ -89,6 +89,10 @@ class Scene_Sandbox : public Scene
     int                 m_spatialHoleFill = 0;
     rs2::spatial_filter m_spatialFilter;
 
+   
+    float m_smoothAlphaTemporal = 0.4;
+    rs2::temporal_filter m_temporalFilter;
+
     bool                m_drawContours = false;
     ContourLines        m_contour;
     sf::Sprite          m_contourSprite;

@@ -85,6 +85,12 @@ void Scene_Sandbox::captureImage()
         rawDepth = m_spatialFilter.process(rawDepth);
     }
 
+    if (m_smoothAlphaTemporal > 0.0)
+    {
+        m_temporalFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlphaTemporal);
+        rawDepth = m_temporalFilter.process(rawDepth);
+    }
+
     // Query frame size (width and height)
     int dw = rawDepth.as<rs2::video_frame>().get_width();
     int dh = rawDepth.as<rs2::video_frame>().get_height();
@@ -339,6 +345,13 @@ void Scene_Sandbox::renderUI()
                 ImGui::Unindent();
             }
 
+            if (ImGui::CollapsingHeader("Temporal Filter"))
+            {
+                ImGui::Indent();
+                ImGui::SliderFloat("Filter Smooth Alpha", &m_smoothAlphaTemporal, 0.0, 1.0);
+                ImGui::Unindent();
+            }
+
             if (ImGui::CollapsingHeader("Threshold Filter"))
             {
                 ImGui::Indent();
@@ -362,6 +375,7 @@ void Scene_Sandbox::renderUI()
             {
                 std::ofstream fout("config.txt");
                 fout << "Decimation" << " " << m_decimation << "\n";
+                fout << "temporalAlpha" << " " << m_smoothAlphaTemporal << "\n";
                 fout << "Magnitude" << " " << m_spatialMagnitude << "\n";
                 fout << "Alpha" << " " << m_smoothAlpha << "\n";
                 fout << "Delta" << " " << m_smoothDelta << "\n";
@@ -393,6 +407,7 @@ void Scene_Sandbox::renderUI()
                 while (fin >> temp)
                 {
                     if (temp == "Decimation") { fin >> m_decimation; }
+                    if (temp == "temporalAlpha") { fin >> m_smoothAlphaTemporal; }
                     if (temp == "Magnitude") { fin >> m_spatialMagnitude; }
                     if (temp == "Alpha") { fin >> m_smoothAlpha; }
                     if (temp == "Hole") { fin >> m_spatialHoleFill; }
