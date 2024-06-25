@@ -36,9 +36,9 @@ void Scene_Sandbox::init()
 void Scene_Sandbox::captureImage()
 {
     // Wait for next set of frames from the camera
-    rs2::frameset data = m_pipe.wait_for_frames(); 
+    rs2::frameset data = m_pipe.wait_for_frames();
 
-    if (m_alignment==alignment::depth)
+    if (m_alignment == alignment::depth)
     {
         data = m_alignment_depth.process(data);
     }
@@ -85,7 +85,13 @@ void Scene_Sandbox::captureImage()
         rawDepth = m_spatialFilter.process(rawDepth);
     }
 
-    if (m_smoothAlphaTemporal > 0.0)
+    if (m_holeFill < 3)
+    {
+        m_holeFilter.set_option(RS2_OPTION_HOLES_FILL, m_holeFill);
+        rawDepth = m_holeFilter.process(rawDepth);
+    }
+
+    if (m_smoothAlphaTemporal < 1.0f)
     {
         m_temporalFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlphaTemporal);
         rawDepth = m_temporalFilter.process(rawDepth);
@@ -322,6 +328,17 @@ void Scene_Sandbox::renderUI()
 
     ImGui::Text("Framerate: %d", (int)m_game->framerate());
 
+    ImGui::SameLine();
+    if (ImGui::Button("Save"))
+    {
+        saveConfig();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Load"))
+    {
+        loadConfig();
+    }
+
     if (ImGui::BeginTabBar("MyTabBar"))
     {
         if (ImGui::BeginTabItem("Camera"))
@@ -371,66 +388,12 @@ void Scene_Sandbox::renderUI()
                 ImGui::Unindent();
             }
 
-            if (ImGui::Button("Save Configuration"))
+            if (ImGui::CollapsingHeader("Hole Filling Filter"))
             {
-                std::ofstream fout("config.txt");
-                fout << "Decimation" << " " << m_decimation << "\n";
-                fout << "temporalAlpha" << " " << m_smoothAlphaTemporal << "\n";
-                fout << "Magnitude" << " " << m_spatialMagnitude << "\n";
-                fout << "Alpha" << " " << m_smoothAlpha << "\n";
-                fout << "Delta" << " " << m_smoothDelta << "\n";
-                fout << "Hole" << " " << m_spatialHoleFill << "\n";
-                fout << "MaxDistance" << " " << m_maxDistance << "\n";
-                fout << "MinDistance" << " " << m_minDistance << "\n";
-
-                fout << "ViewCenter" << " " << m_game->window().getView().getCenter().x <<" "
-                     << m_game->window().getView().getCenter().y << "\n";
-
-                fout << "ViewSize" << " " << m_game->window().getView().getSize().x << " "
-                    << m_game->window().getView().getSize().y << "\n";
-                
-                fout << "m_points[0]" << " " << m_calibration.getConfig()[0].x << " " << m_calibration.getConfig()[0].y << "\n";
-                fout << "m_points[1]" << " " << m_calibration.getConfig()[1].x << " " << m_calibration.getConfig()[1].y << "\n";
-                fout << "m_points[2]" << " " << m_calibration.getConfig()[2].x << " " << m_calibration.getConfig()[2].y << "\n";
-                fout << "m_points[3]" << " " << m_calibration.getConfig()[3].x << " " << m_calibration.getConfig()[3].y << "\n";
-
-                fout << "m_width"  <<  " " << m_calibration.getDimension().x << "\n";
-                fout << "m_height" <<  " " << m_calibration.getDimension().y << "\n";
-                fout << "m_drawContours" << " " << m_drawContours << "\n";
-                fout << "m_numberOfContourLines" << " " << m_numberOfContourLines << "\n";
-            }
-
-            if (ImGui::Button("Load Configuration"))
-            {
-                std::ifstream fin("config.txt");
-                std::string temp;
-                while (fin >> temp)
-                {
-                    if (temp == "Decimation") { fin >> m_decimation; }
-                    if (temp == "temporalAlpha") { fin >> m_smoothAlphaTemporal; }
-                    if (temp == "Magnitude") { fin >> m_spatialMagnitude; }
-                    if (temp == "Alpha") { fin >> m_smoothAlpha; }
-                    if (temp == "Hole") { fin >> m_spatialHoleFill; }
-                    if (temp == "MaxDistance") { fin >> m_maxDistance; }
-                    if (temp == "MinDistance") { fin >> m_minDistance; }
-                    if (temp == "ViewCenter")
-                    {
-                        float x, y;
-                        fin >> x;
-                        fin >> y;
-                        sf::View view = m_game->window().getView();
-                        view.setCenter(x, y);
-                        fin >> temp;
-                        float sizeX, sizeY;
-                        fin >> sizeX;
-                        fin >> sizeY;
-                        view.setSize(sizeX, sizeY);
-                        m_game->window().setView(view);
-                    }
-                    if (temp == "m_drawContours") { fin >> m_drawContours; }
-                    if (temp == "m_numberOfContourLines") { fin >> m_numberOfContourLines; }
-                }
-                m_calibration.loadConfiguration();
+                ImGui::Indent();
+                const char* hole_options[] = { "Fill from left", "Farthest from around", "Nearest from around", "Off"};
+                ImGui::Combo("Fill Setting", &m_holeFill, hole_options, 4);
+                ImGui::Unindent();
             }
 
             ImGui::EndTabItem();
@@ -504,6 +467,70 @@ void Scene_Sandbox::attemptCameraConnection()
         m_pipe.start();
         m_cameraConnected = true;
     }
+}
+
+void Scene_Sandbox::saveConfig()
+{
+    std::ofstream fout("config.txt");
+    fout << "Decimation" << " " << m_decimation << "\n";
+    fout << "temporalAlpha" << " " << m_smoothAlphaTemporal << "\n";
+    fout << "Magnitude" << " " << m_spatialMagnitude << "\n";
+    fout << "Alpha" << " " << m_smoothAlpha << "\n";
+    fout << "Delta" << " " << m_smoothDelta << "\n";
+    fout << "SHole" << " " << m_spatialHoleFill << "\n";
+    fout << "MaxDistance" << " " << m_maxDistance << "\n";
+    fout << "MinDistance" << " " << m_minDistance << "\n";
+    fout << "HoleFill" << " " << m_holeFill << "\n";
+
+    fout << "ViewCenter" << " " << m_game->window().getView().getCenter().x << " "
+        << m_game->window().getView().getCenter().y << "\n";
+
+    fout << "ViewSize" << " " << m_game->window().getView().getSize().x << " "
+        << m_game->window().getView().getSize().y << "\n";
+
+    fout << "m_points[0]" << " " << m_calibration.getConfig()[0].x << " " << m_calibration.getConfig()[0].y << "\n";
+    fout << "m_points[1]" << " " << m_calibration.getConfig()[1].x << " " << m_calibration.getConfig()[1].y << "\n";
+    fout << "m_points[2]" << " " << m_calibration.getConfig()[2].x << " " << m_calibration.getConfig()[2].y << "\n";
+    fout << "m_points[3]" << " " << m_calibration.getConfig()[3].x << " " << m_calibration.getConfig()[3].y << "\n";
+
+    fout << "m_width" << " " << m_calibration.getDimension().x << "\n";
+    fout << "m_height" << " " << m_calibration.getDimension().y << "\n";
+    fout << "m_drawContours" << " " << m_drawContours << "\n";
+    fout << "m_numberOfContourLines" << " " << m_numberOfContourLines << "\n";
+}
+
+void Scene_Sandbox::loadConfig()
+{
+    std::ifstream fin("config.txt");
+    std::string temp;
+    while (fin >> temp)
+    {
+        if (temp == "Decimation") { fin >> m_decimation; }
+        if (temp == "temporalAlpha") { fin >> m_smoothAlphaTemporal; }
+        if (temp == "Magnitude") { fin >> m_spatialMagnitude; }
+        if (temp == "Alpha") { fin >> m_smoothAlpha; }
+        if (temp == "SHole") { fin >> m_spatialHoleFill; }
+        if (temp == "MaxDistance") { fin >> m_maxDistance; }
+        if (temp == "MinDistance") { fin >> m_minDistance; }
+        if (temp == "HoleFill") { fin >> m_holeFill; }
+        if (temp == "ViewCenter")
+        {
+            float x, y;
+            fin >> x;
+            fin >> y;
+            sf::View view = m_game->window().getView();
+            view.setCenter(x, y);
+            fin >> temp;
+            float sizeX, sizeY;
+            fin >> sizeX;
+            fin >> sizeY;
+            view.setSize(sizeX, sizeY);
+            m_game->window().setView(view);
+        }
+        if (temp == "m_drawContours") { fin >> m_drawContours; }
+        if (temp == "m_numberOfContourLines") { fin >> m_numberOfContourLines; }
+    }
+    m_calibration.loadConfiguration();
 }
 
 sf::Color Scene_Sandbox::colorize(float height)

@@ -93,6 +93,9 @@ class Scene_Sandbox : public Scene
     float m_smoothAlphaTemporal = 0.4;
     rs2::temporal_filter m_temporalFilter;
 
+    int                 m_holeFill = 1;
+    rs2::hole_filling_filter m_holeFilter;
+
     bool                m_drawContours = false;
     ContourLines        m_contour;
     sf::Sprite          m_contourSprite;
@@ -106,6 +109,8 @@ class Scene_Sandbox : public Scene
     void sUserInput();  
     void sRender();
     void attemptCameraConnection();
+    void saveConfig();
+    void loadConfig();
 
     sf::Color colorize(float height);
     

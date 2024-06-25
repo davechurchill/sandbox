@@ -1,15 +1,19 @@
 Decimation 1
-Magnitude 0
+temporalAlpha 0.4
+Magnitude 2
 Alpha 0.5
 Delta 20
-Hole 0
-MaxDistance 1.162
-MinDistance 0.929
-ViewCenter 1070.93 457.663
-ViewSize 2049.56 1152.88
-m_points[0] 73 103
-m_points[1] 591 102
-m_points[2] 74 387
-m_points[3] 590 386
+SHole 0
+MaxDistance 5
+MinDistance 0
+HoleFill 3
+ViewCenter 800 450
+ViewSize 1600 900
+m_points[0] 0 0
+m_points[1] 0 0
+m_points[2] 0 0
+m_points[3] 0 0
 m_width 1200
 m_height 780
+m_drawContours 0
+m_numberOfContourLines 5
