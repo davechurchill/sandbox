@@ -29,6 +29,11 @@ void Calibration::imgui()
         {
             m_currentPoint = 0;
             m_calibrationComplete = false;
+
+            for (int i = 0; i < 4; ++i)
+            {
+               m_pointCircles[i].setPosition(-3247, -3247);
+            }
         }
 
         if (m_calibrationComplete && ImGui::Button("Auto Sort Corners"))
@@ -139,17 +144,11 @@ void Calibration::render(sf::RenderWindow & window)
         sf::Vertex line[] =
         {
             sf::Vertex(sf::Vector2f(m_pointCircles[1].getPosition().x, m_pointCircles[1].getPosition().y)),
-            sf::Vertex(sf::Vector2f(m_pointCircles[3].getPosition().x, m_pointCircles[3].getPosition().y))
-        };
-
-        window.draw(line, 2, sf::Lines);
-
-        sf::Vertex line2[] =
-        {
+            sf::Vertex(sf::Vector2f(m_pointCircles[3].getPosition().x, m_pointCircles[3].getPosition().y)),
             sf::Vertex(sf::Vector2f(m_pointCircles[2].getPosition().x, m_pointCircles[2].getPosition().y)),
             sf::Vertex(sf::Vector2f(m_pointCircles[3].getPosition().x, m_pointCircles[3].getPosition().y))
         };
-        window.draw(line2, 2, sf::Lines);
+        window.draw(line, 4, sf::Lines);
     }
 }
 
