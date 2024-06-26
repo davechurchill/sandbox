@@ -249,7 +249,7 @@ void Scene_Perlin2D::renderUI()
 
         if (ImGui::BeginTabItem("Minecraft"))
         {
-            m_game->minecraft().imgui(m_grid, m_waterLevel);
+            m_game->minecraft().imgui(m_grid);
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();

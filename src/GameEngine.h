@@ -25,7 +25,7 @@ protected:
     size_t              m_simulationSpeed = 1;
     bool                m_running = true;
     ImGuiStyle          m_originalStyle;
-    MinecraftInterface  m_mcInterface;
+    mc::MinecraftInterface  m_mcInterface;
     bool                m_isFullscreen = false;
     float               m_framerate;
 
@@ -66,7 +66,7 @@ public:
     float        framerate() const;
 
     sf::RenderWindow & window();
-    MinecraftInterface & minecraft();
+    mc::MinecraftInterface & minecraft();
     bool isRunning();
     void toggleFullscreen();
 };

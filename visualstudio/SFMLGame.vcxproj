@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Assets.cpp" />
+    <ClCompile Include="..\src\BlockGeneration.cpp" />
     <ClCompile Include="..\src\Calibration.cpp" />
     <ClCompile Include="..\src\GameEngine.cpp" />
     <ClCompile Include="..\src\imgui\imgui-SFML.cpp" />
@@ -39,8 +40,10 @@
   <ItemGroup>
     <ClInclude Include="..\src\Action.hpp" />
     <ClInclude Include="..\src\Assets.h" />
+    <ClInclude Include="..\src\BlockGeneration.h" />
     <ClInclude Include="..\src\Calibration.h" />
     <ClInclude Include="..\src\ContourLines.hpp" />
+    <ClInclude Include="..\src\Cube.hpp" />
     <ClInclude Include="..\src\GameEngine.h" />
     <ClInclude Include="..\src\MinecraftInterface.h" />
     <ClInclude Include="..\src\Perlin.hpp" />

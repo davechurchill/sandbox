@@ -449,7 +449,7 @@ void Scene_Sandbox::renderUI()
 
         if (ImGui::BeginTabItem("Minecraft"))
         {
-            m_game->minecraft().imgui(m_depthGrid, 0.4);
+            m_game->minecraft().imgui(m_depthGrid);
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
