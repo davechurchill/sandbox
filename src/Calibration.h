@@ -7,6 +7,7 @@ class Calibration
 {
     cv::Mat                         m_operator;
     int                             m_currentPoint = -1;
+    int                             m_dragPoint = -1;
     bool                            m_calibrationComplete = false;
     bool                            m_applyTransform = false;
     int                             m_width = 1200;

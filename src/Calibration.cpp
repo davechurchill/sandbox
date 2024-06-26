@@ -16,6 +16,7 @@ Calibration::Calibration()
         sf::CircleShape c(radius);
         c.setOrigin(radius, radius);
         c.setFillColor(sf::Color::Green);
+        c.setPosition(-3247, -3247);
         m_pointCircles.push_back(c);
     }
 }
@@ -62,6 +63,27 @@ void Calibration::transform(cv::Mat & image)
 
 void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
+    if (m_dragPoint != -1) {
+        m_points[m_dragPoint] = cv::Point(mouse.x, mouse.y);
+        m_pointCircles[m_dragPoint].setPosition(mouse);
+    }
+    if (m_calibrationComplete == true && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+    {
+        int i = 0;
+        while (i < 4)
+        {
+            float xDistance = mouse.x - m_pointCircles[i].getPosition().x;
+            float yDistance = mouse.y - m_pointCircles[i].getPosition().y;
+            float pointsDistance = sqrt((xDistance * xDistance) + (yDistance * yDistance));
+
+            if (pointsDistance <= m_pointCircles[i].getRadius())
+            {
+                m_dragPoint = i;
+            }
+            i++;
+        }
+    }
+
     if (m_currentPoint > -1 && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
         std::cout << mouse.x << " " << mouse.y << std::endl;
@@ -74,6 +96,11 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
             generateWarpMatrix();
         }
     }
+    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+    {
+        m_dragPoint = -1;
+    }
+
 }
 
 void Calibration::render(sf::RenderWindow & window)
@@ -85,6 +112,44 @@ void Calibration::render(sf::RenderWindow & window)
         {
             window.draw(m_pointCircles[i]);
         }
+    }
+
+    if (m_pointCircles[1].getPosition().x != -3247)
+    {
+        sf::Vertex line[] =
+        {
+            sf::Vertex(sf::Vector2f(m_pointCircles[0].getPosition().x, m_pointCircles[0].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_pointCircles[1].getPosition().x, m_pointCircles[1].getPosition().y))
+        };
+        window.draw(line, 2, sf::Lines);
+    }
+
+    if (m_pointCircles[2].getPosition().x != -3247)
+    {
+        sf::Vertex line[] =
+        {
+            sf::Vertex(sf::Vector2f(m_pointCircles[0].getPosition().x, m_pointCircles[0].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_pointCircles[2].getPosition().x, m_pointCircles[2].getPosition().y))
+        };
+        window.draw(line, 2, sf::Lines);
+    }
+
+    if (m_calibrationComplete)
+    {
+        sf::Vertex line[] =
+        {
+            sf::Vertex(sf::Vector2f(m_pointCircles[1].getPosition().x, m_pointCircles[1].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_pointCircles[3].getPosition().x, m_pointCircles[3].getPosition().y))
+        };
+
+        window.draw(line, 2, sf::Lines);
+
+        sf::Vertex line2[] =
+        {
+            sf::Vertex(sf::Vector2f(m_pointCircles[2].getPosition().x, m_pointCircles[2].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_pointCircles[3].getPosition().x, m_pointCircles[3].getPosition().y))
+        };
+        window.draw(line2, 2, sf::Lines);
     }
 }
 
