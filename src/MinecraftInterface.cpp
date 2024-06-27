@@ -9,9 +9,12 @@
 #include<curlpp/cURLpp.hpp>
 #include<curlpp/Options.hpp>
 
+using namespace mc;
+
 MinecraftInterface::MinecraftInterface()
 {
     setup();
+    m_profile = std::make_shared<MonochromeProfile>();
 }
 
 void MinecraftInterface::setup()
@@ -21,9 +24,9 @@ void MinecraftInterface::setup()
 
 void MinecraftInterface::command(const std::string & command, int x, int y, int z, Dimension dimension)
 {
-    curlpp::Cleanup clean;
     try
     {
+        curlpp::Cleanup clean;
         std::string dim = "overworld";
         if (dimension == Dimension::End)
         {
@@ -47,45 +50,67 @@ void MinecraftInterface::command(const std::string & command, int x, int y, int 
     }
 }
 
-void MinecraftInterface::projectHeightmap(const Grid<float> & heightMap, int blockScale, float waterLevel, int x, int y, int z)
+void MinecraftInterface::projectHeightmap(const Grid<float> & heightMap, int blockScale)
 {
+    int nextCubeId = (m_currentCube + 1) % 2;
+    m_profile->generate(m_cubes[nextCubeId], heightMap, blockScale);
+    
     int wx = heightMap.width();
     int wz = heightMap.height();
-
-    if (wx <= 0 || wz <= 0) { return; }
-
-    int water = std::ceil(blockScale * waterLevel);
-    std::cout << waterLevel << std::endl;
     // Clear space
-    fill(x - 1, y - 1, z - 1, x + wx, y + blockScale, z + wz, "minecraft:spruce_planks", "outline");
-    fill(x, y, z, x + wx - 1, y + water, z + wz - 1, "minecraft:water");
-    fill(x, y + water + 1, z, x + wx - 1, y + blockScale, z + wz - 1, "minecraft:air");
+    fill(m_x - 1, m_y - 1, m_z - 1, m_x + wx, m_y + blockScale, m_z + wz, "minecraft:spruce_planks", "outline");
+    fill(m_x, m_y, m_z, m_x + wx - 1, m_y + blockScale, m_z + wz - 1, "minecraft:air");
 
+    const Cube<uint8_t> & cube = m_cubes[nextCubeId];
     BlockPlacer placer;
-    for (size_t i = 0; i < wx; ++i)
+    for (size_t x = 0; x < wx; ++x)
     {
-        for (size_t j = 0; j < wz; ++j)
+        for (size_t y = 0; y < blockScale; ++y)
         {
-            int height = heightMap.get(i, j) * blockScale;
-            int tx = i + x;
-            int tz = j + z;
-            if (height >= water)
+            for (size_t z = 0; z < wz; ++z)
             {
-                placer.addBlocks(tx, y + height, tz, tx, y + height, tz, "minecraft:grass_block");
-                height--;
-            }
-            if (height > 1)
-            {
-                placer.addBlocks(tx, y + height, tz, tx, y + height, tz, "minecraft:dirt");
-                height--;
-            }
-            if (height > 1)
-            {
-                placer.addBlocks(tx, y, tz, tx, y + height, tz, "minecraft:stone");
+                uint8_t block = cube.get(x, y, z);
+                if (block != 0)
+                {  
+                    placer.addBlock(x + m_x, y + m_y, z + m_z, m_profile->blockName(block));
+                }
             }
         }
     }
 
+    m_currentCube = nextCubeId;
+    std::cout << "Sending Blocks" << std::endl;
+    placer.send(m_handle);
+}
+
+void MinecraftInterface::projectHeightmapChanges(const Grid<float> & heightMap, int blockScale)
+{
+    int nextCubeId = (m_currentCube + 1) % 2;
+    m_profile->generate(m_cubes[nextCubeId], heightMap, blockScale);
+
+    int wx = heightMap.width();
+    int wz = heightMap.height();
+
+    const Cube<uint8_t> & cube = m_cubes[nextCubeId];
+    const Cube<uint8_t> & pastCube = m_cubes[m_currentCube];
+    BlockPlacer placer;
+    for (size_t x = 0; x < wx; ++x)
+    {
+        for (size_t y = 0; y < blockScale; ++y)
+        {
+            for (size_t z = 0; z < wz; ++z)
+            {
+                uint8_t block = cube.get(x, y, z);
+                if (block != pastCube.get(x,y,z))
+                {
+                    placer.addBlock(x + m_x, y + m_y, z + m_z, m_profile->blockName(block));
+                }
+            }
+        }
+    }
+
+    m_currentCube = nextCubeId;
+    std::cout << "Sending Blocks" << std::endl;
     placer.send(m_handle);
 }
 
@@ -101,7 +126,7 @@ inline void MinecraftInterface::fill(int x1, int y1, int z1, int x2, int y2, int
     }
 }
 
-void MinecraftInterface::imgui(const Grid<float> & grid, float waterLevel)
+void MinecraftInterface::imgui(const Grid<float> & grid)
 {
     if (ImGui::Button("Test Connection"))
     {
@@ -113,7 +138,17 @@ void MinecraftInterface::imgui(const Grid<float> & grid, float waterLevel)
 
     if (ImGui::Button("Project Perlin Noise"))
     {
-        projectHeightmap(grid, m_mcHeight, waterLevel / 255.0);
+        projectHeightmap(grid, m_mcHeight);
+    }
+
+    if (ImGui::Button("Update Perlin Noise"))
+    {
+        projectHeightmapChanges(grid, m_mcHeight);
+    }
+
+    if (ImGui::CollapsingHeader("Generation Profile Settings"))
+    {
+        m_profile->imgui();
     }
 }
 

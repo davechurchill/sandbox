@@ -38,14 +38,17 @@
     <ClCompile Include="..\src\Scene_Menu.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\MinecraftInterface.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Calibration.cpp">
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Scene_Image.cpp">
       <Filter>scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MinecraftInterface.cpp">
+      <Filter>minecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\BlockGeneration.cpp">
+      <Filter>minecraft</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,14 +91,20 @@
     <ClInclude Include="..\src\ContourLines.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\MinecraftInterface.h">
-      <Filter>engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Calibration.h">
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Scene_Image.h">
       <Filter>scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Cube.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MinecraftInterface.h">
+      <Filter>minecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\BlockGeneration.h">
+      <Filter>minecraft</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -107,6 +116,9 @@
     </Filter>
     <Filter Include="imgui">
       <UniqueIdentifier>{fd00c5e6-54c2-4cbd-91ee-c7d51d1d1d6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="minecraft">
+      <UniqueIdentifier>{1129600a-c15c-4492-9aa1-6c0056e70bf6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

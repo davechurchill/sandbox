@@ -46,7 +46,7 @@ sf::RenderWindow & GameEngine::window()
     return m_window;
 }
 
-MinecraftInterface & GameEngine::minecraft()
+mc::MinecraftInterface & GameEngine::minecraft()
 {
     return m_mcInterface;
 }
