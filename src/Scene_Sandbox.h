@@ -66,6 +66,10 @@ class Scene_Sandbox : public Scene
     sf::Sprite          m_depthSprite;
     sf::Sprite          m_colorSprite;
 
+    sf::Image           m_transformedImage;
+    sf::Texture         m_transformedTexture;
+    sf::Sprite          m_transformedSprite;
+
     sf::Vector2i        m_mouseScreen;
     sf::Vector2f        m_mouseWorld;
     

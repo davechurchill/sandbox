@@ -111,7 +111,7 @@ void Scene_Image::sRender()
 
 void Scene_Image::updateSprite()
 {
-    m_calibration.transform(m_imageMatrix);
+    //m_calibration.transform(m_imageMatrix);
     sf::Image i;
     i.create(m_imageMatrix.cols, m_imageMatrix.rows, m_imageMatrix.ptr());
     m_sfTexture.loadFromImage(i);

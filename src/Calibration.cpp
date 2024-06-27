@@ -75,16 +75,21 @@ void Calibration::imgui()
     if (m_calibrationComplete)
     {
         ImGui::Checkbox("Apply Transform", &m_applyTransform);
+        ImGui::Checkbox("Apply Transform2", &m_applyTransform2);
     }
 }
 
-void Calibration::transform(cv::Mat & image)
+void Calibration::transform(cv::Mat& input, cv::Mat& output)
 {
     if (m_applyTransform && m_calibrationComplete)
     {
-        cv::warpPerspective(image, image, m_operator, cv::Size(m_width, m_height));
+        cv::warpPerspective(input, output, m_operator, cv::Size(m_width, m_height));
+    }   
+
+    if (m_applyTransform2 && m_calibrationBoxComplete) 
+    {
+        cv::warpPerspective(output, output, m_boxOperator, cv::Size(m_boxWidth, m_boxHeight));
     }
-    
 }
 
 void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
@@ -173,7 +178,7 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
 
 void Calibration::render(sf::RenderWindow & window)
 {
-    if (!m_applyTransform)
+    //if (!m_applyTransform)
     {
         int n = m_calibrationComplete ? m_pointCircles.size() : m_currentPoint;
         for (int i = 0; i < n; ++i)
@@ -188,7 +193,7 @@ void Calibration::render(sf::RenderWindow & window)
         }
     }
 
-    if (m_pointCircles[1].getPosition().x != -3247 && !m_applyTransform)
+    if (m_pointCircles[1].getPosition().x != -3247)
     {
         sf::Vertex line[] =
         {
@@ -198,7 +203,7 @@ void Calibration::render(sf::RenderWindow & window)
         window.draw(line, 2, sf::Lines);
     }
 
-    if (m_pointBoxCircles[1].getPosition().x != -3247 && !m_applyTransform)
+    if (m_pointBoxCircles[1].getPosition().x != -3247 )
     {
         sf::Vertex line[] =
         {
@@ -208,7 +213,7 @@ void Calibration::render(sf::RenderWindow & window)
         window.draw(line, 2, sf::Lines);
     }
 
-    if (m_pointCircles[2].getPosition().x != -3247 && !m_applyTransform)
+    if (m_pointCircles[2].getPosition().x != -3247)
     {
         sf::Vertex line[] =
         {
@@ -218,7 +223,7 @@ void Calibration::render(sf::RenderWindow & window)
         window.draw(line, 2, sf::Lines);
     }
 
-    if (m_pointBoxCircles[2].getPosition().x != -3247 && !m_applyTransform)
+    if (m_pointBoxCircles[2].getPosition().x != -3247)
     {
         sf::Vertex line[] =
         {
@@ -228,7 +233,7 @@ void Calibration::render(sf::RenderWindow & window)
         window.draw(line, 2, sf::Lines);
     }
 
-    if (m_calibrationComplete && !m_applyTransform)
+    if (m_calibrationComplete )
     {
         sf::Vertex line[] =
         {
@@ -240,7 +245,7 @@ void Calibration::render(sf::RenderWindow & window)
         window.draw(line, 4, sf::Lines);
     }
 
-    if (m_calibrationBoxComplete && !m_applyTransform)
+    if (m_calibrationBoxComplete )
     {
         sf::Vertex line[] =
         {
@@ -359,12 +364,47 @@ void Calibration::loadConfiguration()
 
 void Calibration::generateWarpMatrix()
 {
-    //cv::Point2f dstPoints[] = {
-    //        //cv::Point2f(0, 0),
-    //        //cv::Point2f(m_width, 0),
-    //        //cv::Point2f(0, m_height),
-    //        //cv::Point2f(m_width, m_height),
-    //};
-    //m_operator = cv::getPerspectiveTransform(m_points, dstPoints);
-    m_operator = cv::getPerspectiveTransform(m_points, m_boxPoints);
+    cv::Point2f dstPoints[] = {
+            cv::Point2f(0, 0),
+            cv::Point2f(m_width, 0),
+            cv::Point2f(0, m_height),
+            cv::Point2f(m_width, m_height),
+    };
+
+    m_operator = cv::getPerspectiveTransform(m_points, dstPoints);
+
+    tempX = m_boxPoints[0].x;
+    tempY = m_boxPoints[0].y;
+    float maxX = m_boxPoints[0].x;
+    float maxY = m_boxPoints[0].y;
+    for (int i = 0; i < 4; i++)
+    {
+        if (m_boxPoints[i].x < tempX)
+        {
+            tempX = m_boxPoints[i].x;
+        }
+        if (m_boxPoints[i].x > maxX)
+        {
+            maxX = m_boxPoints[i].x;
+        }
+
+        if (m_boxPoints[i].y < tempY)
+        {
+            tempY = m_boxPoints[i].y;
+        }
+
+        if (m_boxPoints[i].y > maxY)
+        {
+            maxY = m_boxPoints[i].y;
+        }
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        m_boxPoints[i].x -= tempX;
+        m_boxPoints[i].y -= tempY;
+    }
+    m_boxWidth = maxX - tempX;
+    m_boxHeight = maxY - tempY;
+    m_boxOperator = cv::getPerspectiveTransform(dstPoints, m_boxPoints);
 }

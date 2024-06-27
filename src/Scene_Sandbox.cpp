@@ -59,7 +59,7 @@ void Scene_Sandbox::captureImage()
     {
         m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void *)color.get_data(), cv::Mat::AUTO_STEP);
         cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
-        m_calibration.transform(m_cvColorImage);
+        //m_calibration.transform(m_cvColorImage);
         m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
         m_sfColorTexture.loadFromImage(m_sfColorImage);
         m_colorSprite.setTexture(m_sfColorTexture);
@@ -126,8 +126,9 @@ void Scene_Sandbox::captureImage()
         }
     }
 
+    cv::Mat output(m_calibration.m_boxWidth, m_calibration.m_boxHeight, CV_32F);
     // Calibration
-    m_calibration.transform(m_cvRawDepthImage);
+    m_calibration.transform(m_cvRawDepthImage, output);
     dw = m_cvRawDepthImage.cols;
     dh = m_cvRawDepthImage.rows;
 
@@ -175,6 +176,28 @@ void Scene_Sandbox::captureImage()
                 m_sfDepthImage.setPixel(i, j, colorize(height));
             }
         }
+
+        dw = output.cols;
+        dh = output.rows;
+
+        m_transformedImage.create(dw, dh);
+        for (int i = 0; i < dw; ++i)
+        {
+            for (int j = 0; j < dh; ++j)
+            {
+                float height = (output.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance);
+                if (height < 0.00001f)
+                {
+                    m_transformedImage.setPixel(i, j, sf::Color::Black);
+                    continue;
+                }
+
+                m_transformedImage.setPixel(i, j, colorize(height));
+            }
+        }
+        m_transformedTexture.loadFromImage(m_transformedImage);
+        m_transformedSprite.setTexture(m_transformedTexture, true);
+        m_transformedSprite.setPosition(m_calibration.tempX, m_calibration.tempY);
 
         // Create the SFML sprites to be rendered
 
@@ -295,6 +318,8 @@ void Scene_Sandbox::sRender()
     m_colorSprite.setColor(sf::Color(255, 255, 255, m_colorAlpha));
     m_colorSprite.setPosition(m_colorPos[0], m_colorPos[1]);
     m_colorSprite.setScale(m_colorScale, m_colorScale);
+
+    m_game->window().draw(m_transformedSprite);
 
     if (m_drawDepth) { m_game->window().draw(m_depthSprite); }
     if (m_drawColor) { m_game->window().draw(m_colorSprite); }
@@ -536,7 +561,9 @@ void Scene_Sandbox::loadConfig()
 sf::Color Scene_Sandbox::colorize(float height)
 {
     int dNormal = height * 1529.f;
-    int pR, pG, pB;
+    int pR = 0;
+    int pG = 0;
+    int pB = 0;
     int i = dNormal / 255;
     switch (i)
     {
