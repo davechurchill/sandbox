@@ -25,7 +25,7 @@ Calibration::Calibration()
     {
         sf::CircleShape c(radius2);
         c.setOrigin(radius2, radius2);
-        c.setFillColor(sf::Color::Black);
+        c.setFillColor(sf::Color::Magenta);
         c.setPosition(-3247, -3247);
         m_pointBoxCircles.push_back(c);
     }
@@ -167,11 +167,13 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
     if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
     {
         m_dragPoint = -1;
+        generateWarpMatrix();
     }
 
     if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
     {
         m_dragBoxPoint = -1;
+        generateWarpMatrix();
     }
 
 }
