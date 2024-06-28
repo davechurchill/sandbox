@@ -106,6 +106,9 @@
     <ClInclude Include="..\src\BlockGeneration.h">
       <Filter>minecraft</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Colorizer.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="engine">

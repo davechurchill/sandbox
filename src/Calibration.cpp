@@ -375,38 +375,40 @@ void Calibration::generateWarpMatrix()
 
     m_operator = cv::getPerspectiveTransform(m_points, dstPoints);
 
-    tempX = m_boxPoints[0].x;
-    tempY = m_boxPoints[0].y;
-    float maxX = m_boxPoints[0].x;
-    float maxY = m_boxPoints[0].y;
+    cv::Point2f boxPoints[] = { m_boxPoints [0], m_boxPoints[1], m_boxPoints[2], m_boxPoints[3]};
+
+    tempX = boxPoints[0].x;
+    tempY = boxPoints[0].y;
+    float maxX = boxPoints[0].x;
+    float maxY = boxPoints[0].y;
     for (int i = 0; i < 4; i++)
     {
-        if (m_boxPoints[i].x < tempX)
+        if (boxPoints[i].x < tempX)
         {
-            tempX = m_boxPoints[i].x;
+            tempX = boxPoints[i].x;
         }
-        if (m_boxPoints[i].x > maxX)
+        if (boxPoints[i].x > maxX)
         {
-            maxX = m_boxPoints[i].x;
-        }
-
-        if (m_boxPoints[i].y < tempY)
-        {
-            tempY = m_boxPoints[i].y;
+            maxX = boxPoints[i].x;
         }
 
-        if (m_boxPoints[i].y > maxY)
+        if (boxPoints[i].y < tempY)
         {
-            maxY = m_boxPoints[i].y;
+            tempY = boxPoints[i].y;
+        }
+
+        if (boxPoints[i].y > maxY)
+        {
+            maxY = boxPoints[i].y;
         }
     }
 
     for (int i = 0; i < 4; i++)
     {
-        m_boxPoints[i].x -= tempX;
-        m_boxPoints[i].y -= tempY;
+        boxPoints[i].x -= tempX;
+        boxPoints[i].y -= tempY;
     }
     m_boxWidth = maxX - tempX;
     m_boxHeight = maxY - tempY;
-    m_boxOperator = cv::getPerspectiveTransform(dstPoints, m_boxPoints);
+    m_boxOperator = cv::getPerspectiveTransform(dstPoints, boxPoints);
 }

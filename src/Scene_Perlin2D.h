@@ -6,6 +6,7 @@
 #include "Grid.hpp"
 #include "Perlin.hpp"
 #include "ContourLines.hpp"
+#include "Colorizer.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -46,6 +47,12 @@ class Scene_Perlin2D : public Scene
     ViewController      m_viewController;
 
     sf::Sprite          m_contourSprite;
+
+    sf::Image           m_image;
+    sf::Texture         m_texture;
+    sf::Sprite          m_sprite;
+
+    Colorizer           m_colorizer;
     
     void init();  
 

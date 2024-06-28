@@ -39,8 +39,12 @@ void Scene_Perlin2D::calculateNoise()
 {
     m_perlin = Perlin2DNew((int)(1 << m_seedSize), (int)(1 << m_seedSize), m_seed);
     m_grid = m_perlin.GeneratePerlinNoise(m_octaves, m_persistance);
+
+    // Contour Lines
     m_contour.init((int)(1 << m_seedSize), (int)(1 << m_seedSize));
     m_contour.calculate(m_grid);
+    m_contourSprite.setTexture(m_contour.generateTexture(), true);
+    m_contourSprite.setScale(m_gridSize, m_gridSize);
 }
 
 void Scene_Perlin2D::onFrame()
@@ -131,66 +135,19 @@ void Scene_Perlin2D::sRender()
     m_quadArray.clear();
     float gs = (float)m_gridSize;
 
-    // draw grid cells with the associated colors
-    for (size_t x = 0; x < m_grid.width(); x++)
-    {
-        for (size_t y = 0; y < m_grid.height(); y++)
-        {
-            if (m_drawGrey)
-            {
-                // get the value from the grid
-                int val = (int)(m_grid.get(x, y) * 255);
-                
-                // create a greyscale color to display
-                sf::Color c(val, val, val);
-
-                // draw the tile as a greyscale color
-                drawRect<float>(x * m_gridSize, y * m_gridSize, m_gridSize, m_gridSize, c);
-            }
-            else
-            {
-                // get the value from the grid
-                int val = (int)(m_grid.get(x, y) * 255);
-
-                // the color of the tile
-                sf::Color c;
-
-                // if the value is less than some intuitive value
-                if (val < m_waterLevel)
-                { 
-                    // color the tile like water from blue->black
-                    c = sf::Color(0, 0, 255 - m_waterLevel + val);
-                }
-                // if the value is above that, it's not water
-                else 
-                { 
-                    // color tile like grass getting brighter
-                    c = sf::Color(0, val, 0);
-                }
-
-                drawRect<float>(x * m_gridSize, y * m_gridSize, m_gridSize, m_gridSize, c);
-            }
-        }
-    }
-
-    for (int x = 0; m_drawGrid && x <= (int)m_grid.width(); x++)
-    {
-        drawLine<float>(x*m_gridSize, 0, x*m_gridSize, m_grid.height() * m_gridSize, gridColor);
-    }
-
-    for (int y = 0; m_drawGrid && y <= (int)m_grid.height(); y++)
-    {
-        drawLine<float>(0, y*m_gridSize, m_grid.width() * m_gridSize, y*m_gridSize, gridColor);
-    }
-
     m_game->window().draw(m_quadArray);
     m_game->window().draw(m_lineStrip);
     m_game->window().draw(m_text);
 
+    m_colorizer.color(m_image, m_grid);
+    m_texture.loadFromImage(m_image);
+    m_sprite.setTexture(m_texture);
+    m_sprite.setScale(m_gridSize, m_gridSize);
+
+    m_game->window().draw(m_sprite);
+
     if (m_drawContours)
     {
-        m_contourSprite.setTexture(m_contour.generateTexture(), true);
-        m_contourSprite.setScale(m_gridSize, m_gridSize);
         m_game->window().draw(m_contourSprite);
     }
 }
@@ -229,7 +186,7 @@ void Scene_Perlin2D::renderUI()
             
 
             // PC Display Options
-            ImGui::Checkbox("Greyscale", &m_drawGrey);
+            m_colorizer.imgui();
             ImGui::Checkbox("Contours", &m_drawContours);
 
             if (ImGui::InputInt("Contour Lines", &m_numberOfContourLines, 1, 10))
@@ -237,12 +194,6 @@ void Scene_Perlin2D::renderUI()
                 m_contour.setNumberofContourLines(m_numberOfContourLines);
                 m_contour.calculate(m_grid);
             }
-
-            /*if (ImGui::SliderFloat("Contour Lines", &m_contourLevel, 0, 1))
-            {
-                m_contour.setContourLevel(m_contourLevel);
-                m_contour.calculate(m_grid);
-            }*/
 
             ImGui::EndTabItem();
         }

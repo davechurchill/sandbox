@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Action.hpp"
-
 #include <vector>
 #include <algorithm>
+
+#include "Action.hpp"
 
 
 template <class T>
