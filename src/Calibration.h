@@ -15,6 +15,7 @@ class Calibration
     bool                            m_calibrationBoxComplete = false;
     bool                            m_applyTransform = false;
     bool                            m_applyTransform2 = false;
+    bool                            m_drawSanboxAreaLines = true;
     int                             m_width = 1200;
     int                             m_height = 780;
     cv::Point2f                     m_points[4];

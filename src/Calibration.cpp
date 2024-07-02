@@ -77,6 +77,11 @@ void Calibration::imgui()
         ImGui::Checkbox("Apply Transform", &m_applyTransform);
         ImGui::Checkbox("Apply Transform2", &m_applyTransform2);
     }
+
+    if (m_applyTransform2)
+    {
+        ImGui::Checkbox("Sandbox Lines", &m_drawSanboxAreaLines);
+    }
 }
 
 void Calibration::transform(cv::Mat& input, cv::Mat& output)
@@ -191,7 +196,10 @@ void Calibration::render(sf::RenderWindow & window)
         int nBox = m_calibrationBoxComplete ? m_pointBoxCircles.size() : m_currentBoxPoint;
         for (int i = 0; i < nBox; ++i)
         {
-            window.draw(m_pointBoxCircles[i]);
+            if (m_drawSanboxAreaLines)
+            {
+                window.draw(m_pointBoxCircles[i]);
+            }
         }
     }
 
@@ -205,7 +213,7 @@ void Calibration::render(sf::RenderWindow & window)
         window.draw(line, 2, sf::Lines);
     }
 
-    if (m_pointBoxCircles[1].getPosition().x != -3247 )
+    if (m_pointBoxCircles[1].getPosition().x != -3247  && m_drawSanboxAreaLines)
     {
         sf::Vertex line[] =
         {
@@ -225,7 +233,7 @@ void Calibration::render(sf::RenderWindow & window)
         window.draw(line, 2, sf::Lines);
     }
 
-    if (m_pointBoxCircles[2].getPosition().x != -3247)
+    if (m_pointBoxCircles[2].getPosition().x != -3247 && m_drawSanboxAreaLines)
     {
         sf::Vertex line[] =
         {
@@ -247,7 +255,7 @@ void Calibration::render(sf::RenderWindow & window)
         window.draw(line, 4, sf::Lines);
     }
 
-    if (m_calibrationBoxComplete )
+    if (m_calibrationBoxComplete && m_drawSanboxAreaLines)
     {
         sf::Vertex line[] =
         {
