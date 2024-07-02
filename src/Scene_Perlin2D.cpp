@@ -85,8 +85,6 @@ void Scene_Perlin2D::sUserInput()
                 case sf::Keyboard::A: { m_persistance -= 0.1f; if (m_persistance < 0.1f) { m_persistance = 0.1f; } calculateNoise();  break; }
                 case sf::Keyboard::D: { m_persistance += 0.1f; calculateNoise();  break; }
                 case sf::Keyboard::G: { m_drawGrey = !m_drawGrey; break; }
-                case sf::Keyboard::Num2: { m_waterLevel++; break; }
-                case sf::Keyboard::Num1: { m_waterLevel--; break; }
             }
         }
 
@@ -141,7 +139,7 @@ void Scene_Perlin2D::sRender()
 
     m_colorizer.color(m_image, m_grid);
     m_texture.loadFromImage(m_image);
-    m_sprite.setTexture(m_texture);
+    m_sprite.setTexture(m_texture, true);
     m_sprite.setScale(m_gridSize, m_gridSize);
 
     m_game->window().draw(m_sprite);
@@ -181,8 +179,6 @@ void Scene_Perlin2D::renderUI()
             {
                 calculateNoise();
             }
-
-            ImGui::SliderInt("Water Level", &m_waterLevel, 0, 255);
             
 
             // PC Display Options

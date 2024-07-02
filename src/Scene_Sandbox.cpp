@@ -128,9 +128,6 @@ void Scene_Sandbox::captureImage()
         }
     }
 
-    cv::Mat output(m_calibration.m_boxWidth, m_calibration.m_boxHeight, CV_32F);
-    // Calibration
-    m_calibration.transform(m_cvRawDepthImage, output);
     dw = m_cvRawDepthImage.cols;
     dh = m_cvRawDepthImage.rows;
 
@@ -151,58 +148,48 @@ void Scene_Sandbox::captureImage()
         }
     }
 
-    // Calculate Contour Lines
-    if (m_drawContours)
-    {
-        m_contour.init(dw, dh);
-        m_contour.calculate(m_depthGrid);
-    }
+    // Calibration
+    cv::Mat output(m_calibration.m_boxWidth, m_calibration.m_boxHeight, CV_32F);
+    m_calibration.transform(m_cvRawDepthImage, output);
 
     if (m_drawDepth)
     {
-        // Create colorized depth image, scaling to the size of the video so they can align
-        //cv::resize(m_cvRawDepthImage, m_cvRawDepthImage, cv::Size(cw, ch), (0, 0), (0, 0), cv::InterpolationFlags::INTER_NEAREST);
-
-        m_sfDepthImage.create(dw, dh);
-        for (int i = 0; i < dw; ++i)
-        {
-            for (int j = 0; j < dh; ++j)
-            {
-                float height = (m_cvRawDepthImage.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance);
-                if (height < 0.0f)
-                {
-                    m_sfDepthImage.setPixel(i, j, sf::Color::Black);
-                    continue;
-                }
-                
-                m_sfDepthImage.setPixel(i, j, colorize(height));
-            }
-        }
-
+        // Draw warped depth image
         dw = output.cols;
         dh = output.rows;
 
-        m_transformedImage.create(dw, dh);
-        for (int i = 0; i < dw; ++i)
+        if (dw > 0 && dh > 0)
         {
-            for (int j = 0; j < dh; ++j)
+            // Create warped data grid
+            m_depthWarpedGrid.refill(dw, dh, 0.0f);
+            if (m_maxDistance > m_minDistance)
             {
-                float height = (output.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance);
-                if (height < 0.00001f)
+                for (int i = 0; i < dw; ++i)
                 {
-                    m_transformedImage.setPixel(i, j, sf::Color::Black);
-                    continue;
+                    for (int j = 0; j < dh; ++j)
+                    {
+                        // Scale data to 0-1 range, where 1 is the highest point 
+                        m_depthWarpedGrid.set(i, j, 1 - ((output.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance)));
+                    }
                 }
+            }
 
-                m_transformedImage.setPixel(i, j, colorize(height));
+            // Colorize and draw warped data grid
+            m_colorizer.color(m_transformedImage, m_depthWarpedGrid);
+            m_transformedTexture.loadFromImage(m_transformedImage);
+            m_transformedSprite.setTexture(m_transformedTexture, true);
+            m_transformedSprite.setPosition(m_calibration.tempX, m_calibration.tempY);
+
+            // Calculate Contour Lines from warped data grid
+            if (m_drawContours)
+            {
+                m_contour.init(dw, dh);
+                m_contour.calculate(m_depthWarpedGrid);
             }
         }
-        m_transformedTexture.loadFromImage(m_transformedImage);
-        m_transformedSprite.setTexture(m_transformedTexture, true);
-        m_transformedSprite.setPosition(m_calibration.tempX, m_calibration.tempY);
 
-        // Create the SFML sprites to be rendered
-
+        // Draw original depth image
+        m_colorizer.color(m_sfDepthImage, m_depthGrid);
         m_sfDepthTexture.loadFromImage(m_sfDepthImage);
         m_depthSprite.setTexture(m_sfDepthTexture, true);
     }
@@ -336,6 +323,7 @@ void Scene_Sandbox::sRender()
         float scaleX = m_depthScaleX * (float)m_sfDepthImage.getSize().x / m_depthGrid.width();
         float scaleY = m_depthScaleY * (float)m_sfDepthImage.getSize().y / m_depthGrid.height();
         m_contourSprite.setScale(scaleX, scaleY);
+        m_contourSprite.setPosition(m_transformedSprite.getPosition());
         m_game->window().draw(m_contourSprite);
     }
 
@@ -410,13 +398,13 @@ void Scene_Sandbox::renderUI()
                 ImGui::Indent();
                 ImGui::Text("Distance from Mouse %f", m_mouseDepth);
 
-                ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 7.0);
+                ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 2.0);
                 if (ImGui::Button("Select Max Distance"))
                 {
                     m_mouseSelection = MouseSelections::MaxDistance;
                 }
 
-                ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 7.0);
+                ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 2.0);
                 if (ImGui::Button("Select Min Distance"))
                 {
                     m_mouseSelection = MouseSelections::MinDistance;
@@ -436,6 +424,7 @@ void Scene_Sandbox::renderUI()
         }
         if (ImGui::BeginTabItem("View"))
         {
+            m_colorizer.imgui();
             ImGui::Checkbox("Depth", &m_drawDepth);
             if (ImGui::Button("Match Color"))
             {
@@ -562,23 +551,4 @@ void Scene_Sandbox::loadConfig()
         if (temp == "HoleFill") { fin >> m_holeFill; }
     }
     m_calibration.loadConfiguration();
-}
-
-sf::Color Scene_Sandbox::colorize(float height)
-{
-    int dNormal = height * 1529.f;
-    int pR = 0;
-    int pG = 0;
-    int pB = 0;
-    int i = dNormal / 255;
-    switch (i)
-    {
-    case 0: { pR = 255; pG = dNormal; pB = dNormal; } break;
-    case 1: { pR = dNormal - 255; pG = 255; pB = dNormal;} break;
-    case 2: { pR = 0; pG = 765 - dNormal; pB = dNormal; } break;
-    case 3: { pR = 0; pG = 0; pB = dNormal - 765; } break;
-    case 4: { pR = dNormal - 1020; pG = 0; pB = 255; } break;
-    case 5: { pR = 255;pG = 0;pB = 1529 - dNormal; } break;
-    }
-    return sf::Color(pR, pG, pB);
 }

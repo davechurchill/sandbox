@@ -5,6 +5,7 @@
 #include "Grid.hpp"
 #include "Calibration.h"
 #include "ContourLines.hpp"
+#include "Colorizer.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -77,7 +78,10 @@ class Scene_Sandbox : public Scene
 
     Calibration         m_calibration;
 
+    Colorizer           m_colorizer;
+
     Grid<float>         m_depthGrid;
+    Grid<float>         m_depthWarpedGrid;
     float               m_mouseDepth;
 
     int                 m_decimation = 1;
@@ -117,8 +121,6 @@ class Scene_Sandbox : public Scene
     void attemptCameraConnection();
     void saveConfig();
     void loadConfig();
-
-    sf::Color colorize(float height);
     
 public:
 

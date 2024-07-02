@@ -11,7 +11,8 @@ struct Colorizer
     {
         Greyscale,
         RedWhite,
-        Popsicle
+        Popsicle,
+        Terrain
     };
 
     Modes mode = Greyscale;
@@ -26,6 +27,7 @@ struct Colorizer
         case Greyscale: func = &Colorizer::greyscale; break;
         case RedWhite: func = &Colorizer::redwhite; break;
         case Popsicle: func = &Colorizer::popsicle; break;
+        case Terrain: func = &Colorizer::terrain; break;
         }
 
         output.create(input.width(), input.height());
@@ -34,7 +36,7 @@ struct Colorizer
             for (int j = 0; j < input.height(); ++j)
             {
                 float height = input.get(i,j);
-                if (height < 0.0f)
+                if (height < 0.000001f || height > 0.999999f)
                 {
                     output.setPixel(i, j, sf::Color::Black);
                     continue;
@@ -47,8 +49,15 @@ struct Colorizer
 
     void imgui()
     {
-        const char * options[] = { "Greyscale", "RedWhite", "Popsicle" };
-        ImGui::Combo("ColorMode", (int *)&mode, options, 3);
+        const char * options[] = { "Greyscale", "RedWhite", "Popsicle", "Terrain"};
+        ImGui::Combo("ColorMode", (int *)&mode, options, 4);
+        if (mode == 3)
+        {
+            ImGui::Indent();
+            ImGui::SliderFloat("Water Level", &water, 0.0f, 1.0f);
+            ImGui::SliderFloat("Snow Level", &snow, 0.0f, 1.0f);
+            ImGui::Unindent();
+        }
     }
 
 private:
@@ -61,10 +70,10 @@ private:
         {
         case 0: { pR = 255; pG = dNormal; pB = dNormal; } break;
         case 1: { pR = 510 - dNormal; pG = 255; pB = 510 - dNormal; } break;
-        case 2: { pR = 0; pG = 765 - dNormal; pB = dNormal - 510; } break;
-        case 3: { pR = dNormal - 765; pG = 0; pB = 255; } break;
-        case 4: { pR = dNormal - 1020; pG = 0; pB = 255; } break;
-        case 5: { pR = 255; pG = 0; pB = 1529 - dNormal; } break;
+        case 2: { pR = dNormal - 510; pG = 765 - dNormal; pB = dNormal - 510; } break;
+        case 3: { pR = 1020 - dNormal; pG = dNormal - 765; pB = 255; } break;
+        case 4: { pR = 0; pG = 1275 - dNormal; pB = 255; } break;
+        case 5: { pR = 0; pG = 0; pB = 1529 - dNormal; } break;
         }
         return sf::Color(pR, pG, pB);
     }
@@ -79,11 +88,18 @@ private:
         return sf::Color(255, 255.f * height, 255.f * height);
     }
 
-   /* sf::Color terrain(float height)
+    sf::Color terrain(float height)
     {
-        if (height > snow)
+        if (height >= snow)
         {
-            return sf::Color()
+            int s = 255 * height;
+            return sf::Color(s, s, s);  // White snow
         }
-    }*/
+        if (height >= water)
+        {
+            return sf::Color(0, 255.f * height, 0); // Green ground
+        }
+        float w = 1.0f - (water - height) / water;
+        return sf::Color(0,0, 255.f * w); // Blue Water
+    }
 };
