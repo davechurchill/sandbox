@@ -382,14 +382,15 @@ void Scene_Sandbox::renderUI()
                 ImGui::Indent();
                 ImGui::SliderFloat("Temporal Alpha", &m_smoothAlphaTemporal, 0.0, 1.0);
                 ImGui::SliderInt("Temporal Delta", &m_smoothDeltaTemporal, 1, 100);
-                if (ImGui::CollapsingHeader("Persistance"))
-                {
-                    ImGui::Indent();
-                    const char* persistance_options[] = { "Disabled", "Valid in 8/8", "Valid in 2/last 3", "Valid in 2/last 4", "Valid in 2/8", 
-                                                          "Valid in 1/last 2", "Valid in 1/last 5", "Valid in 1/last 8", "Persist Indefinitely"};
-                    ImGui::Combo("options", &m_persistanceTemporal, persistance_options, 9);
-                    ImGui::Unindent();
-                }
+                ImGui::Unindent();
+            }
+
+            if (ImGui::CollapsingHeader("Persistance"))
+            {
+                ImGui::Indent();
+                const char* persistance_options[] = { "Disabled", "Valid in 8/8", "Valid in 2/last 3", "Valid in 2/last 4", "Valid in 2/8",
+                                                      "Valid in 1/last 2", "Valid in 1/last 5", "Valid in 1/last 8", "Persist Indefinitely" };
+                ImGui::Combo("options", &m_persistanceTemporal, persistance_options, 9);
                 ImGui::Unindent();
             }
 
@@ -507,6 +508,9 @@ void Scene_Sandbox::saveConfig()
 
     fout << "Decimation" << " " << m_decimation << "\n";
     fout << "temporalAlpha" << " " << m_smoothAlphaTemporal << "\n";
+    fout << "temporalDelta" << " " << m_smoothDeltaTemporal << "\n";
+    fout << "temporalPersistance" << " " << m_persistanceTemporal << "\n";
+
     fout << "Magnitude" << " " << m_spatialMagnitude << "\n";
     fout << "Alpha" << " " << m_smoothAlpha << "\n";
     fout << "Delta" << " " << m_smoothDelta << "\n";
@@ -551,6 +555,8 @@ void Scene_Sandbox::loadConfig()
     {
         if (temp == "Decimation") { fin >> m_decimation; }
         if (temp == "temporalAlpha") { fin >> m_smoothAlphaTemporal; }
+        if (temp == "temporalDelta") { fin >> m_smoothDeltaTemporal; }
+        if (temp == "temporalPersistance") { fin >> m_persistanceTemporal; }
         if (temp == "Magnitude") { fin >> m_spatialMagnitude; }
         if (temp == "Alpha") { fin >> m_smoothAlpha; }
         if (temp == "SHole") { fin >> m_spatialHoleFill; }
