@@ -497,6 +497,14 @@ void Scene_Sandbox::attemptCameraConnection()
 void Scene_Sandbox::saveConfig()
 {
     std::ofstream fout("config.txt");
+
+    fout << "m_applyTransform" << " " << m_calibration.m_applyTransform << "\n";
+    fout << "m_applyTransform2" << " " << m_calibration.m_applyTransform2 << "\n";
+    fout << "m_drawSanboxAreaLines" << " " << m_calibration.m_drawSanboxAreaLines << "\n";
+
+    fout << "m_calibrationComplete" << " " << m_calibration.m_calibrationComplete << "\n";
+    fout << "m_calibrationBoxComplete" << " " << m_calibration.m_calibrationBoxComplete << "\n";
+
     fout << "Decimation" << " " << m_decimation << "\n";
     fout << "temporalAlpha" << " " << m_smoothAlphaTemporal << "\n";
     fout << "Magnitude" << " " << m_spatialMagnitude << "\n";

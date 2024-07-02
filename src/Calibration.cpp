@@ -482,11 +482,36 @@ void Calibration::loadConfiguration()
             fin >> x >> y;
             m_pointBoxCircles[3].setPosition(x, y);
         }
+
+        if (temp == "m_applyTransform")
+        {
+            fin >> m_applyTransform;
+        }
+
+        if (temp == "m_applyTransform2")
+        {
+            fin >> m_applyTransform2;
+        }
+
+        if (temp == "m_drawSanboxAreaLines")
+        {
+            fin >> m_drawSanboxAreaLines;
+        }
+        if (temp == "m_calibrationComplete")
+        {
+            fin >> m_calibrationComplete;
+        }
+
+        if (temp == "m_calibrationBoxComplete")
+        {
+            fin >> m_calibrationBoxComplete;
+        }
     }
-    m_calibrationComplete = true;
-    m_calibrationBoxComplete = true;
-    m_applyTransform = true;
-    m_applyTransform2 = true;
+
+    //m_calibrationComplete = true;
+    //m_calibrationBoxComplete = true;
+    //m_applyTransform = true;
+    //m_applyTransform2 = true;
     generateWarpMatrix();
 }
 

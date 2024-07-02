@@ -11,11 +11,6 @@ class Calibration
     int                             m_currentBoxPoint = -1;
     int                             m_dragPoint = -1;
     int                             m_dragBoxPoint = -1;
-    bool                            m_calibrationComplete = false;
-    bool                            m_calibrationBoxComplete = false;
-    bool                            m_applyTransform = false;
-    bool                            m_applyTransform2 = false;
-    bool                            m_drawSanboxAreaLines = true;
     int                             m_width = 1200;
     int                             m_height = 780;
     cv::Point2f                     m_points[4];
@@ -31,6 +26,11 @@ public:
     int                             m_boxHeight = 780;
     float                           tempX = 0.0;
     float                           tempY = 0.0;
+    bool                            m_applyTransform = false;
+    bool                            m_applyTransform2 = false;
+    bool                            m_drawSanboxAreaLines = true;
+    bool                            m_calibrationComplete = false;
+    bool                            m_calibrationBoxComplete = false;
     Calibration();
     void imgui();
     std::vector<cv::Point2f>  getConfig();
