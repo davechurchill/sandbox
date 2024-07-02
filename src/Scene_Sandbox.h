@@ -94,10 +94,12 @@ class Scene_Sandbox : public Scene
     rs2::spatial_filter m_spatialFilter;
 
    
-    float m_smoothAlphaTemporal = 0.4;
+    float               m_smoothAlphaTemporal = 0.4;
+    int                 m_smoothDeltaTemporal = 20;
+    int                 m_persistanceTemporal = 3;
     rs2::temporal_filter m_temporalFilter;
 
-    int                 m_holeFill = 1;
+    int                 m_holeFill = 3;
     rs2::hole_filling_filter m_holeFilter;
 
     bool                m_drawContours = false;

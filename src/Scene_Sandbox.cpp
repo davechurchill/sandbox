@@ -94,6 +94,8 @@ void Scene_Sandbox::captureImage()
     if (m_smoothAlphaTemporal < 1.0f)
     {
         m_temporalFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlphaTemporal);
+        m_temporalFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, m_smoothDeltaTemporal);
+        m_temporalFilter.set_option(RS2_OPTION_HOLES_FILL, m_persistanceTemporal);
         rawDepth = m_temporalFilter.process(rawDepth);
     }
 
@@ -390,7 +392,16 @@ void Scene_Sandbox::renderUI()
             if (ImGui::CollapsingHeader("Temporal Filter"))
             {
                 ImGui::Indent();
-                ImGui::SliderFloat("Filter Smooth Alpha", &m_smoothAlphaTemporal, 0.0, 1.0);
+                ImGui::SliderFloat("Temporal Alpha", &m_smoothAlphaTemporal, 0.0, 1.0);
+                ImGui::SliderInt("Temporal Delta", &m_smoothDeltaTemporal, 1, 100);
+                if (ImGui::CollapsingHeader("Persistance"))
+                {
+                    ImGui::Indent();
+                    const char* persistance_options[] = { "Disabled", "Valid in 8/8", "Valid in 2/last 3", "Valid in 2/last 4", "Valid in 2/8", 
+                                                          "Valid in 1/last 2", "Valid in 1/last 5", "Valid in 1/last 8", "Persist Indefinitely"};
+                    ImGui::Combo("options", &m_persistanceTemporal, persistance_options, 9);
+                    ImGui::Unindent();
+                }
                 ImGui::Unindent();
             }
 
