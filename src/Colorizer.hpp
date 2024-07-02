@@ -15,6 +15,8 @@ struct Colorizer
     };
 
     Modes mode = Greyscale;
+    float water = 0.4f;
+    float snow = 0.9f;
 
     void color(sf::Image & output, const Grid<float> & input)
     {
@@ -52,15 +54,15 @@ struct Colorizer
 private:
     sf::Color popsicle(float height)
     {
-        int dNormal = height * 1529.f;
+        int dNormal = (1.0f - height) * 1529.f;
         int pR, pG, pB;
         int i = dNormal / 255;
         switch (i)
         {
         case 0: { pR = 255; pG = dNormal; pB = dNormal; } break;
-        case 1: { pR = dNormal - 255; pG = 255; pB = dNormal; } break;
+        case 1: { pR = 510 - dNormal; pG = 255; pB = 510 - dNormal; } break;
         case 2: { pR = 0; pG = 765 - dNormal; pB = dNormal - 510; } break;
-        case 3: { pR = 0; pG = 0; pB = dNormal - 765; } break;
+        case 3: { pR = dNormal - 765; pG = 0; pB = 255; } break;
         case 4: { pR = dNormal - 1020; pG = 0; pB = 255; } break;
         case 5: { pR = 255; pG = 0; pB = 1529 - dNormal; } break;
         }
@@ -76,4 +78,12 @@ private:
     {
         return sf::Color(255, 255.f * height, 255.f * height);
     }
+
+   /* sf::Color terrain(float height)
+    {
+        if (height > snow)
+        {
+            return sf::Color()
+        }
+    }*/
 };

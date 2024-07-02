@@ -84,7 +84,7 @@ void Scene_Perlin2D::sUserInput()
                 case sf::Keyboard::S: { m_octaves--; calculateNoise();  break; }
                 case sf::Keyboard::A: { m_persistance -= 0.1f; if (m_persistance < 0.1f) { m_persistance = 0.1f; } calculateNoise();  break; }
                 case sf::Keyboard::D: { m_persistance += 0.1f; calculateNoise();  break; }
-                case sf::Keyboard::G: m_drawGrey = !m_drawGrey; break;
+                case sf::Keyboard::G: { m_drawGrey = !m_drawGrey; break; }
                 case sf::Keyboard::Num2: { m_waterLevel++; break; }
                 case sf::Keyboard::Num1: { m_waterLevel--; break; }
             }
