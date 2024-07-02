@@ -474,7 +474,7 @@ void Scene_Sandbox::renderUI()
 
         if (ImGui::BeginTabItem("Minecraft"))
         {
-            m_game->minecraft().imgui(m_depthGrid);
+            m_game->minecraft().imgui(m_depthGrid, 0.4);
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -507,21 +507,32 @@ void Scene_Sandbox::saveConfig()
     fout << "MinDistance" << " " << m_minDistance << "\n";
     fout << "HoleFill" << " " << m_holeFill << "\n";
 
-    fout << "ViewCenter" << " " << m_game->window().getView().getCenter().x << " "
-        << m_game->window().getView().getCenter().y << "\n";
-
-    fout << "ViewSize" << " " << m_game->window().getView().getSize().x << " "
-        << m_game->window().getView().getSize().y << "\n";
-
     fout << "m_points[0]" << " " << m_calibration.getConfig()[0].x << " " << m_calibration.getConfig()[0].y << "\n";
     fout << "m_points[1]" << " " << m_calibration.getConfig()[1].x << " " << m_calibration.getConfig()[1].y << "\n";
     fout << "m_points[2]" << " " << m_calibration.getConfig()[2].x << " " << m_calibration.getConfig()[2].y << "\n";
     fout << "m_points[3]" << " " << m_calibration.getConfig()[3].x << " " << m_calibration.getConfig()[3].y << "\n";
 
+    fout << "m_pointCircles[0]" << " " << m_calibration.getPointCircle()[0].getPosition().x << " " << m_calibration.getPointCircle()[0].getPosition().y << "\n";
+    fout << "m_pointCircles[1]" << " " << m_calibration.getPointCircle()[1].getPosition().x << " " << m_calibration.getPointCircle()[1].getPosition().y << "\n";
+    fout << "m_pointCircles[2]" << " " << m_calibration.getPointCircle()[2].getPosition().x << " " << m_calibration.getPointCircle()[2].getPosition().y << "\n";
+    fout << "m_pointCircles[3]" << " " << m_calibration.getPointCircle()[3].getPosition().x << " " << m_calibration.getPointCircle()[3].getPosition().y << "\n";
+
+
+    fout << "m_boxPoints[0]" << " " << m_calibration.getBoxConfig()[0].x << " " << m_calibration.getBoxConfig()[0].y << "\n";
+    fout << "m_boxPoints[1]" << " " << m_calibration.getBoxConfig()[1].x << " " << m_calibration.getBoxConfig()[1].y << "\n";
+    fout << "m_boxPoints[2]" << " " << m_calibration.getBoxConfig()[2].x << " " << m_calibration.getBoxConfig()[2].y << "\n";
+    fout << "m_boxPoints[3]" << " " << m_calibration.getBoxConfig()[3].x << " " << m_calibration.getBoxConfig()[3].y << "\n";
+
+    fout << "m_pointBoxCircles[0]" << " " << m_calibration.getPointBoxCircle()[0].getPosition().x << " " << m_calibration.getPointBoxCircle()[0].getPosition().y << "\n";
+    fout << "m_pointBoxCircles[1]" << " " << m_calibration.getPointBoxCircle()[1].getPosition().x << " " << m_calibration.getPointBoxCircle()[1].getPosition().y << "\n";
+    fout << "m_pointBoxCircles[2]" << " " << m_calibration.getPointBoxCircle()[2].getPosition().x << " " << m_calibration.getPointBoxCircle()[2].getPosition().y << "\n";
+    fout << "m_pointBoxCircles[3]" << " " << m_calibration.getPointBoxCircle()[3].getPosition().x << " " << m_calibration.getPointBoxCircle()[3].getPosition().y << "\n";
+
     fout << "m_width" << " " << m_calibration.getDimension().x << "\n";
     fout << "m_height" << " " << m_calibration.getDimension().y << "\n";
-    fout << "m_drawContours" << " " << m_drawContours << "\n";
-    fout << "m_numberOfContourLines" << " " << m_numberOfContourLines << "\n";
+
+    fout << "m_boxWidth" << " " << m_calibration.getBoxDimension().x << "\n";
+    fout << "m_boxHeight" << " " << m_calibration.getBoxDimension().y << "\n";
 }
 
 void Scene_Sandbox::loadConfig()
@@ -538,22 +549,6 @@ void Scene_Sandbox::loadConfig()
         if (temp == "MaxDistance") { fin >> m_maxDistance; }
         if (temp == "MinDistance") { fin >> m_minDistance; }
         if (temp == "HoleFill") { fin >> m_holeFill; }
-        if (temp == "ViewCenter")
-        {
-            float x, y;
-            fin >> x;
-            fin >> y;
-            sf::View view = m_game->window().getView();
-            view.setCenter(x, y);
-            fin >> temp;
-            float sizeX, sizeY;
-            fin >> sizeX;
-            fin >> sizeY;
-            view.setSize(sizeX, sizeY);
-            m_game->window().setView(view);
-        }
-        if (temp == "m_drawContours") { fin >> m_drawContours; }
-        if (temp == "m_numberOfContourLines") { fin >> m_numberOfContourLines; }
     }
     m_calibration.loadConfiguration();
 }

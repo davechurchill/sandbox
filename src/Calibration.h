@@ -33,7 +33,11 @@ public:
     Calibration();
     void imgui();
     std::vector<cv::Point2f>  getConfig();
+    std::vector<cv::Point2f>  getBoxConfig();
+    std::vector<sf::CircleShape> getPointCircle();
+    std::vector<sf::CircleShape> getPointBoxCircle();
     cv::Point2f getDimension();
+    cv::Point2f getBoxDimension();
     void loadConfiguration();
     void transform(cv::Mat & input, cv::Mat& output);
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);

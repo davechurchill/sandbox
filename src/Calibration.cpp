@@ -314,9 +314,35 @@ std::vector<cv::Point2f>  Calibration::getConfig()
     return points;
 }
 
+std::vector<sf::CircleShape> Calibration::getPointCircle()
+{
+    return m_pointCircles;
+}
+
+std::vector<cv::Point2f>  Calibration::getBoxConfig()
+{
+    std::vector<cv::Point2f> boxPoints;
+    boxPoints.push_back(m_boxPoints[0]);
+    boxPoints.push_back(m_boxPoints[1]);
+    boxPoints.push_back(m_boxPoints[2]);
+    boxPoints.push_back(m_boxPoints[3]);
+    return boxPoints;
+}
+
+std::vector<sf::CircleShape> Calibration::getPointBoxCircle()
+{
+    return m_pointBoxCircles;
+}
+
+
 cv::Point2f Calibration::getDimension()
 {
     return cv::Point2f(m_width, m_height);
+}
+
+cv::Point2f Calibration::getBoxDimension()
+{
+    return cv::Point2f(m_boxWidth, m_boxHeight);
 }
 
 void Calibration::loadConfiguration()
@@ -331,10 +357,22 @@ void Calibration::loadConfiguration()
             fin >> m_points[0].y;
         }
 
+        if (temp == "m_boxPoints[0]")
+        {
+            fin >> m_boxPoints[0].x;
+            fin >> m_boxPoints[0].y;
+        }
+
         if (temp == "m_points[1]")
         {
             fin >> m_points[1].x;
             fin >> m_points[1].y;
+        }
+
+        if (temp == "m_boxPoints[1]")
+        {
+            fin >> m_boxPoints[1].x;
+            fin >> m_boxPoints[1].y;
         }
 
         if (temp == "m_points[2]")
@@ -343,10 +381,22 @@ void Calibration::loadConfiguration()
             fin >> m_points[2].y;
         }
 
+        if (temp == "m_boxPoints[2]")
+        {
+            fin >> m_boxPoints[2].x;
+            fin >> m_boxPoints[2].y;
+        }
+
         if (temp == "m_points[3]")
         {
             fin >> m_points[3].x;
             fin >> m_points[3].y;
+        }
+
+        if (temp == "m_boxPoints[3]")
+        {
+            fin >> m_boxPoints[3].x;
+            fin >> m_boxPoints[3].y;
         }
 
         if (temp == "m_width")
@@ -354,13 +404,81 @@ void Calibration::loadConfiguration()
             fin >> m_width;
         }
 
+        if (temp == "m_boxWidth")
+        {
+            fin >> m_boxWidth;
+        }
+
         if (temp == "m_height")
         {
             fin >> m_height;
         }
+
+        if (temp == "m_boxHeight")
+        {
+            fin >> m_boxHeight;
+        }
+
+        if (temp == "m_pointCircles[0]")
+        {
+            float x, y;
+            fin >> x >> y;
+            m_pointCircles[0].setPosition(x, y);
+        }
+
+        if (temp == "m_pointCircles[1]")
+        {
+            float x, y;
+            fin >> x >> y;
+            m_pointCircles[1].setPosition(x, y);
+        }
+
+        if (temp == "m_pointCircles[2]")
+        {
+            float x, y;
+            fin >> x >> y;
+            m_pointCircles[2].setPosition(x, y);
+        }
+
+        if (temp == "m_pointCircles[3]")
+        {
+            float x, y;
+            fin >> x >> y;
+            m_pointCircles[3].setPosition(x, y);
+        }
+
+        if (temp == "m_pointBoxCircles[0]")
+        {
+            float x, y;
+            fin >> x >> y;
+            m_pointBoxCircles[0].setPosition(x, y);
+        }
+
+        if (temp == "m_pointBoxCircles[1]")
+        {
+            float x, y;
+            fin >> x >> y;
+            m_pointBoxCircles[1].setPosition(x, y);
+        }
+
+        if (temp == "m_pointBoxCircles[2]")
+        {
+            float x, y;
+            fin >> x >> y;
+            m_pointBoxCircles[2].setPosition(x, y);
+        }
+
+        if (temp == "m_pointBoxCircles[3]")
+        {
+            float x, y;
+            fin >> x >> y;
+            m_pointBoxCircles[3].setPosition(x, y);
+        }
     }
     m_calibrationComplete = true;
+    m_calibrationBoxComplete = true;
     m_applyTransform = true;
+    m_applyTransform2 = true;
     generateWarpMatrix();
 }
 
@@ -372,6 +490,17 @@ void Calibration::generateWarpMatrix()
             cv::Point2f(0, m_height),
             cv::Point2f(m_width, m_height),
     };
+    std::cout <<"m_point print kortesi" << "\n";
+    std::cout << m_points[0].x << " " << m_points[0].y << "\n";
+    std::cout << m_points[1].x << " " << m_points[1].y << "\n";
+    std::cout << m_points[2].x << " " << m_points[2].y << "\n";
+    std::cout << m_points[3].x << " " << m_points[3].y << "\n";
+
+    std::cout << "m_boxPoint print kortesi" << "\n";
+    std::cout << m_boxPoints[0].x << " " << m_boxPoints[0].y << "\n";
+    std::cout << m_boxPoints[1].x << " " << m_boxPoints[1].y << "\n";
+    std::cout << m_boxPoints[2].x << " " << m_boxPoints[2].y << "\n";
+    std::cout << m_boxPoints[3].x << " " << m_boxPoints[3].y << "\n";
 
     m_operator = cv::getPerspectiveTransform(m_points, dstPoints);
 
