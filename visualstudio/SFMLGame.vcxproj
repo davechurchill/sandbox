@@ -42,6 +42,7 @@
     <ClInclude Include="..\src\Assets.h" />
     <ClInclude Include="..\src\BlockGeneration.h" />
     <ClInclude Include="..\src\Calibration.h" />
+    <ClInclude Include="..\src\CameraFilters.hpp" />
     <ClInclude Include="..\src\Colorizer.hpp" />
     <ClInclude Include="..\src\ContourLines.hpp" />
     <ClInclude Include="..\src\Cube.hpp" />

@@ -107,10 +107,7 @@ void Calibration::transformProjection(const cv::Mat & input, cv::Mat & output)
 {
     if (m_applyTransform2 && m_calibrationBoxComplete)
     {
-        float ratio = (float) m_boxHeight / m_boxWidth;
-        int width = m_width * 1.5f;
-        int height = width * ratio;
-        cv::warpPerspective(input, output, m_boxOperator, cv::Size(width, height));
+        cv::warpPerspective(input, output, m_boxOperator, cv::Size(m_finalWidth, m_finalHeight));
     }
 }
 
@@ -148,13 +145,12 @@ void Calibration::heightAdjustment(cv::Mat & matrix)
 
         //plane equation
         float d = -(cross_P[0] * secondPoint.x + cross_P[1] * secondPoint.y + cross_P[2] * secondPointZ);
-
         for (size_t i = 0; i < width; i++)
         {
             for (size_t j = 0; j < height; j++)
             {
                 float newZ = (-d - cross_P[0] * i - cross_P[1] * j) / cross_P[2];
-                matrix.at<float>(j, i) = newZ;
+                matrix.at<float>(j, i) += secondPointZ - newZ;
             }
         }
     }
@@ -260,13 +256,13 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
         }
     }
 
-    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+    if (m_dragPoint != -1 && event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
     {
         m_dragPoint = -1;
         generateWarpMatrix();
     }
 
-    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+    if (m_dragBoxPoint != -1 && event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
     {
         m_dragBoxPoint = -1;
         generateWarpMatrix();
@@ -616,40 +612,53 @@ void Calibration::generateWarpMatrix()
     };
     m_operator = cv::getPerspectiveTransform(m_points, dstPoints);
 
-    cv::Point2f boxPoints[] = { m_boxPoints [0], m_boxPoints[1], m_boxPoints[2], m_boxPoints[3]};
-
-    tempX = boxPoints[0].x;
-    tempY = boxPoints[0].y;
-    float maxX = boxPoints[0].x;
-    float maxY = boxPoints[0].y;
-    for (int i = 0; i < 4; i++)
+    if (m_calibrationBoxComplete)
     {
-        if (boxPoints[i].x < tempX)
+        cv::Point2f boxPoints[] = { m_boxPoints[0], m_boxPoints[1], m_boxPoints[2], m_boxPoints[3] };
+
+        tempX = boxPoints[0].x;
+        tempY = boxPoints[0].y;
+        float maxX = boxPoints[0].x;
+        float maxY = boxPoints[0].y;
+        for (int i = 0; i < 4; i++)
         {
-            tempX = boxPoints[i].x;
-        }
-        if (boxPoints[i].x > maxX)
-        {
-            maxX = boxPoints[i].x;
+            if (boxPoints[i].x < tempX)
+            {
+                tempX = boxPoints[i].x;
+            }
+            if (boxPoints[i].x > maxX)
+            {
+                maxX = boxPoints[i].x;
+            }
+            if (boxPoints[i].y < tempY)
+            {
+                tempY = boxPoints[i].y;
+            }
+            if (boxPoints[i].y > maxY)
+            {
+                maxY = boxPoints[i].y;
+            }
         }
 
-        if (boxPoints[i].y < tempY)
+        for (int i = 0; i < 4; i++)
         {
-            tempY = boxPoints[i].y;
+            boxPoints[i].x -= tempX;
+            boxPoints[i].y -= tempY;
+        }
+        m_boxWidth = maxX - tempX;
+        m_boxHeight = maxY - tempY;
+
+        float ratio = (float)m_boxHeight / m_boxWidth;
+        m_finalWidth = m_width * 1.5f;
+        m_finalHeight = m_finalWidth * ratio;
+        m_boxScale = sf::Vector2f(m_finalWidth / m_boxWidth, m_finalHeight / m_boxHeight);
+
+        for (int i = 0; i < 4; i++)
+        {
+            boxPoints[i].x *= m_boxScale.x;
+            boxPoints[i].y *= m_boxScale.y;
         }
 
-        if (boxPoints[i].y > maxY)
-        {
-            maxY = boxPoints[i].y;
-        }
+        m_boxOperator = cv::getPerspectiveTransform(dstPoints, boxPoints);
     }
-
-    for (int i = 0; i < 4; i++)
-    {
-        boxPoints[i].x -= tempX;
-        boxPoints[i].y -= tempY;
-    }
-    m_boxWidth = maxX - tempX;
-    m_boxHeight = maxY - tempY;
-    m_boxOperator = cv::getPerspectiveTransform(dstPoints, boxPoints);
 }

@@ -1,36 +1,36 @@
-m_applyTransform 1
-m_applyTransform2 1
-m_drawSanboxAreaLines 0
+m_applyTransform 0
+m_applyTransform2 0
+m_drawSanboxAreaLines 1
 m_calibrationComplete 1
 m_calibrationBoxComplete 1
 Decimation 1
-temporalAlpha 0.355
-temporalDelta 15
-temporalPersistance 5
-Magnitude 0
-Alpha 0.345
-Delta 13
+temporalAlpha 0.4
+temporalDelta 20
+temporalPersistance 3
+Magnitude 2
+Alpha 0.5
+Delta 20
 SHole 0
-MaxDistance 1.125
-MinDistance 0.871
-HoleFill 1
-m_points[0] 173 127
-m_points[1] 688 120
-m_points[2] 167 412
-m_points[3] 704 398
-m_pointCircles[0] 173.416 127.472
-m_pointCircles[1] 688.488 120.304
-m_pointCircles[2] 167.784 412.656
-m_pointCircles[3] 704.872 398.32
-m_boxPoints[0] 22 1336
-m_boxPoints[1] 2177 1338
-m_boxPoints[2] 85 2500
-m_boxPoints[3] 2137 2477
-m_pointBoxCircles[0] 22.0114 1336.88
-m_pointBoxCircles[1] 2177.04 1338.11
-m_pointBoxCircles[2] 85.6105 2500.01
-m_pointBoxCircles[3] 2137.9 2478
+MaxDistance 5
+MinDistance 0
+HoleFill 3
+m_points[0] 292 118
+m_points[1] 828 62
+m_points[2] 292 409
+m_points[3] 807 455
+m_pointCircles[0] 292 118
+m_pointCircles[1] 828 62
+m_pointCircles[2] 292 409
+m_pointCircles[3] 807 455
+m_boxPoints[0] 69 672
+m_boxPoints[1] 469 592
+m_boxPoints[2] 171 851
+m_boxPoints[3] 527 793
+m_pointBoxCircles[0] 69 672
+m_pointBoxCircles[1] 469 592
+m_pointBoxCircles[2] 171 851
+m_pointBoxCircles[3] 527 793
 m_width 1200
 m_height 780
-m_boxWidth 2155
-m_boxHeight 1164
+m_boxWidth 458
+m_boxHeight 259

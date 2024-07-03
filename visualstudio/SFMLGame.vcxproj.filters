@@ -109,6 +109,9 @@
     <ClInclude Include="..\src\Colorizer.hpp">
       <Filter>engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\CameraFilters.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="engine">

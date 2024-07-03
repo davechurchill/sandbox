@@ -13,6 +13,8 @@ class Calibration
     int                             m_dragBoxPoint = -1;
     int                             m_width = 1200;
     int                             m_height = 780;
+    int                             m_finalWidth = 0;
+    int                             m_finalHeight = 0;
     cv::Point2f                     m_points[4];
     cv::Point2f                     m_boxPoints[4];
     std::vector<sf::CircleShape>    m_pointCircles;
@@ -22,8 +24,8 @@ class Calibration
     void generateWarpMatrix();
 
 public:
-    int                             m_boxWidth = 1200;
-    int                             m_boxHeight = 780;
+    int                             m_boxWidth = 500;
+    int                             m_boxHeight = 400;
     float                           tempX = 0.0;
     float                           tempY = 0.0;
     bool                            m_applyTransform = false;
@@ -37,6 +39,7 @@ public:
     cv::Point                       secondPoint;
     cv::Point                       thirdPoint;
 
+    sf::Vector2f                    m_boxScale;
     Calibration();
     void imgui();
     std::vector<cv::Point2f>  getConfig();

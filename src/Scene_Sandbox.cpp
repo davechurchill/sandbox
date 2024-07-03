@@ -148,7 +148,7 @@ void Scene_Sandbox::captureImage()
     }
 
     // Calibration
-    cv::Mat output(m_calibration.m_boxWidth, m_calibration.m_boxHeight, CV_32F);
+    cv::Mat output;
     m_calibration.transformRect(m_cvRawDepthImage, output);
     m_calibration.heightAdjustment(output);
     m_calibration.transformProjection(output, output);
@@ -181,9 +181,6 @@ void Scene_Sandbox::captureImage()
             m_colorizer.color(m_transformedImage, m_depthWarpedGrid);
             m_transformedTexture.loadFromImage(m_transformedImage);
             m_transformedSprite.setTexture(m_transformedTexture, true);
-            m_transformedSprite.setPosition(m_calibration.tempX, m_calibration.tempY);
-            float scale = (float) m_calibration.m_boxWidth / dw;
-            //m_transformedSprite.setScale(scale, scale);
 
             // Calculate Contour Lines from warped data grid
             if (m_drawContours)
@@ -313,6 +310,9 @@ void Scene_Sandbox::sRender()
     m_colorSprite.setPosition(m_colorPos[0], m_colorPos[1]);
     m_colorSprite.setScale(m_colorScale, m_colorScale);
 
+    m_transformedSprite.setPosition(m_calibration.tempX, m_calibration.tempY);
+    float scale = 1.f / m_calibration.m_boxScale.x;
+    m_transformedSprite.setScale(scale, scale);
     m_game->window().draw(m_transformedSprite);
 
     if (m_drawDepth) { m_game->window().draw(m_depthSprite); }
@@ -325,9 +325,7 @@ void Scene_Sandbox::sRender()
     if (m_drawContours)
     {
         m_contourSprite.setTexture(m_contour.generateTexture(), true);
-        float scaleX = m_depthScaleX * (float)m_sfDepthImage.getSize().x / m_depthGrid.width();
-        float scaleY = m_depthScaleY * (float)m_sfDepthImage.getSize().y / m_depthGrid.height();
-        m_contourSprite.setScale(scaleX, scaleY);
+        m_contourSprite.setScale(scale, scale);
         m_contourSprite.setPosition(m_transformedSprite.getPosition());
         m_game->window().draw(m_contourSprite);
     }
