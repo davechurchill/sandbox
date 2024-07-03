@@ -49,7 +49,7 @@ void Scene_Sandbox::captureImage()
 
     m_thresholdFilter.set_option(RS2_OPTION_MAX_DISTANCE, m_maxDistance);
     m_thresholdFilter.set_option(RS2_OPTION_MIN_DISTANCE, m_minDistance);
-    data = m_thresholdFilter.process(data);
+    //data = m_thresholdFilter.process(data);
 
     // Handle regular video footage
     rs2::frame color = data.get_color_frame();
@@ -149,37 +149,10 @@ void Scene_Sandbox::captureImage()
 
     // Calibration
     cv::Mat output(m_calibration.m_boxWidth, m_calibration.m_boxHeight, CV_32F);
-    m_calibration.transform(m_cvRawDepthImage, output);
+    m_calibration.transformRect(m_cvRawDepthImage, output);
+    m_calibration.heightAdjustment(output);
+    m_calibration.transformProjection(output, output);
 
-    // Adjust Height data
-    float topLeft = output.at<float>(0, 0);
-
-    int centerX = m_calibration.m_boxWidth / 2;
-    int centerY = m_calibration.m_boxHeight / 2;
- 
-    float centerValue = output.at<float>(centerX, centerY);
-    
-    float bottomRight = output.at<float>(m_calibration.m_boxWidth - 1, m_calibration.m_boxHeight - 1);
-
-    float vect_A[]  = { centerX, centerY, centerValue - topLeft };
-    float vect_B[]  = { m_calibration.m_boxWidth - 1, m_calibration.m_boxHeight - 1, bottomRight - topLeft };
-    float cross_P[] = { 0.0, 0.0, 0.0 };
-
-    cross_P[0] = vect_A[1] * vect_B[2] - vect_A[2] * vect_B[1];
-    cross_P[1] = vect_A[2] * vect_B[0] - vect_A[0] * vect_B[2];
-    cross_P[2] = vect_A[0] * vect_B[1] - vect_A[1] * vect_B[0];
-
-    //plane equation
-    float d = -(cross_P[0] * centerX + cross_P[1] * centerY + cross_P[2] * centerValue);
-    
-    for (size_t i = 0; i < m_calibration.m_boxWidth; i++)
-    {
-        for (size_t j = 0; j < m_calibration.m_boxHeight; j++)
-        {
-            float newZ = (-d - cross_P[0] * i - cross_P[1] * j) / cross_P[2];
-            output.at<float>(i, j) = newZ;
-        }
-    }
 
     if (m_drawDepth)
     {
@@ -189,6 +162,7 @@ void Scene_Sandbox::captureImage()
 
         if (dw > 0 && dh > 0)
         {
+
             // Create warped data grid
             m_depthWarpedGrid.refill(dw, dh, 0.0f);
             if (m_maxDistance > m_minDistance)
@@ -208,6 +182,8 @@ void Scene_Sandbox::captureImage()
             m_transformedTexture.loadFromImage(m_transformedImage);
             m_transformedSprite.setTexture(m_transformedTexture, true);
             m_transformedSprite.setPosition(m_calibration.tempX, m_calibration.tempY);
+            float scale = (float) m_calibration.m_boxWidth / dw;
+            //m_transformedSprite.setScale(scale, scale);
 
             // Calculate Contour Lines from warped data grid
             if (m_drawContours)
@@ -411,15 +387,9 @@ void Scene_Sandbox::renderUI()
                 ImGui::Indent();
                 ImGui::SliderFloat("Temporal Alpha", &m_smoothAlphaTemporal, 0.0, 1.0);
                 ImGui::SliderInt("Temporal Delta", &m_smoothDeltaTemporal, 1, 100);
-                ImGui::Unindent();
-            }
-
-            if (ImGui::CollapsingHeader("Persistance"))
-            {
-                ImGui::Indent();
-                const char* persistance_options[] = { "Disabled", "Valid in 8/8", "Valid in 2/last 3", "Valid in 2/last 4", "Valid in 2/8",
+                const char * persistance_options[] = { "Disabled", "Valid in 8/8", "Valid in 2/last 3", "Valid in 2/last 4", "Valid in 2/8",
                                                       "Valid in 1/last 2", "Valid in 1/last 5", "Valid in 1/last 8", "Persist Indefinitely" };
-                ImGui::Combo("options", &m_persistanceTemporal, persistance_options, 9);
+                ImGui::Combo("Persistance", &m_persistanceTemporal, persistance_options, 9);
                 ImGui::Unindent();
             }
 

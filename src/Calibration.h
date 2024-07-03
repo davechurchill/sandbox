@@ -28,6 +28,7 @@ public:
     float                           tempY = 0.0;
     bool                            m_applyTransform = false;
     bool                            m_applyTransform2 = false;
+    bool                            m_applyAdjustment = false;
     bool                            m_drawSanboxAreaLines = true;
     bool                            m_calibrationComplete = false;
     bool                            m_calibrationBoxComplete = false;
@@ -40,7 +41,9 @@ public:
     cv::Point2f getDimension();
     cv::Point2f getBoxDimension();
     void loadConfiguration();
-    void transform(cv::Mat & input, cv::Mat& output);
+    void transformRect(const cv::Mat & input, cv::Mat & output);
+    void transformProjection(const cv::Mat & input, cv::Mat & output);
+    void heightAdjustment(cv::Mat & matrix);
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void render(sf::RenderWindow & window);
 };

@@ -76,6 +76,7 @@ void Calibration::imgui()
     {
         ImGui::Checkbox("Apply Transform", &m_applyTransform);
         ImGui::Checkbox("Apply Transform2", &m_applyTransform2);
+        ImGui::Checkbox("Apply Height Adjustment", &m_applyAdjustment);
     }
 
     if (m_applyTransform2)
@@ -84,16 +85,60 @@ void Calibration::imgui()
     }
 }
 
-void Calibration::transform(cv::Mat& input, cv::Mat& output)
+void Calibration::transformRect(const cv::Mat& input, cv::Mat& output)
 {
     if (m_applyTransform && m_calibrationComplete)
     {
         cv::warpPerspective(input, output, m_operator, cv::Size(m_width, m_height));
-    }   
+    }
+}
 
-    if (m_applyTransform2 && m_calibrationBoxComplete) 
+void Calibration::transformProjection(const cv::Mat & input, cv::Mat & output)
+{
+    if (m_applyTransform2 && m_calibrationBoxComplete)
     {
-        cv::warpPerspective(output, output, m_boxOperator, cv::Size(m_boxWidth, m_boxHeight));
+        float ratio = (float) m_boxHeight / m_boxWidth;
+        int width = m_width * 1.5f;
+        int height = width * ratio;
+        cv::warpPerspective(input, output, m_boxOperator, cv::Size(width, height));
+    }
+}
+
+void Calibration::heightAdjustment(cv::Mat & matrix)
+{
+    if (m_applyTransform && m_calibrationComplete && m_applyAdjustment)
+    {
+        int width = matrix.cols;
+        int height = matrix.rows;
+
+        float topLeft = matrix.at<float>(0, 0);
+
+        int centerX = width / 2;
+        int centerY = height / 2;
+
+        float centerValue = matrix.at<float>(centerY, centerX);
+
+        float bottomRight = matrix.at<float>(0, width - 1);
+
+        float vect_A[] = { centerX, centerY, centerValue - topLeft };
+        float vect_B[] = { width - 1, 0, bottomRight - topLeft };
+        float cross_P[] = { 0.0, 0.0, 0.0 };
+
+        cross_P[0] = vect_A[1] * vect_B[2] - vect_A[2] * vect_B[1];
+        cross_P[1] = vect_A[2] * vect_B[0] - vect_A[0] * vect_B[2];
+        cross_P[2] = vect_A[0] * vect_B[1] - vect_A[1] * vect_B[0];
+
+        //plane equation
+        float d = -(cross_P[0] * centerX + cross_P[1] * centerY + cross_P[2] * centerValue);
+
+        for (size_t i = 0; i < width; i++)
+        {
+            for (size_t j = 0; j < height; j++)
+            {
+                float newZ = (-d - cross_P[0] * i - cross_P[1] * j) / cross_P[2];
+                matrix.at<float>(j, i) = newZ;
+            }
+        }
     }
 }
 

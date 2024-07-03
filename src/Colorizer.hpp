@@ -15,9 +15,9 @@ struct Colorizer
         Terrain
     };
 
-    Modes mode = Greyscale;
+    Modes mode = RedWhite;
     float water = 0.4f;
-    float snow = 0.9f;
+    float snow = 0.8f;
 
     void color(sf::Image & output, const Grid<float> & input)
     {
