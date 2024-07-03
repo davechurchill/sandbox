@@ -59,7 +59,6 @@ void Scene_Sandbox::captureImage()
     {
         m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void *)color.get_data(), cv::Mat::AUTO_STEP);
         cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
-        //m_calibration.transform(m_cvColorImage);
         m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
         m_sfColorTexture.loadFromImage(m_sfColorImage);
         m_colorSprite.setTexture(m_sfColorTexture);
@@ -151,6 +150,9 @@ void Scene_Sandbox::captureImage()
     // Calibration
     cv::Mat output(m_calibration.m_boxWidth, m_calibration.m_boxHeight, CV_32F);
     m_calibration.transform(m_cvRawDepthImage, output);
+
+    // Adjust Height data
+
 
     if (m_drawDepth)
     {
