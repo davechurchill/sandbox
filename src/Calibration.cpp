@@ -57,6 +57,16 @@ void Calibration::imgui()
             }
         }
 
+        if (ImGui::Button("Select Height Points"))
+        {
+            m_heightPointsSelected = true;
+
+            firstPoint.x = -3247;
+            secondPoint.x = -3247;
+            thirdPoint.x = -3247;
+        }
+
+
         if (m_calibrationComplete && ImGui::Button("Auto Sort Corners"))
         {
             orderPoints();
@@ -111,7 +121,7 @@ void Calibration::heightAdjustment(cv::Mat & matrix)
         int width = matrix.cols;
         int height = matrix.rows;
 
-        float topLeft = matrix.at<float>(0, 0);
+        /*float topLeft = matrix.at<float>(0, 0);
 
         int centerX = width / 2;
         int centerY = height / 2;
@@ -122,6 +132,14 @@ void Calibration::heightAdjustment(cv::Mat & matrix)
 
         float vect_A[] = { centerX, centerY, centerValue - topLeft };
         float vect_B[] = { width - 1, 0, bottomRight - topLeft };
+        float cross_P[] = { 0.0, 0.0, 0.0 };*/
+
+        float firstPointZ = matrix.at<float>(firstPoint.y, firstPoint.x);
+        float secondPointZ = matrix.at<float>(secondPoint.y, secondPoint.x);
+        float thirdPointZ = matrix.at<float>(thirdPoint.y, thirdPoint.x);
+
+        float vect_A[] = { secondPoint.x - firstPoint.x, secondPoint.y - firstPoint.y, secondPointZ - firstPointZ };
+        float vect_B[] = { thirdPoint.x - firstPoint.x, thirdPoint.y - firstPoint.y,   thirdPointZ - firstPointZ };
         float cross_P[] = { 0.0, 0.0, 0.0 };
 
         cross_P[0] = vect_A[1] * vect_B[2] - vect_A[2] * vect_B[1];
@@ -129,7 +147,7 @@ void Calibration::heightAdjustment(cv::Mat & matrix)
         cross_P[2] = vect_A[0] * vect_B[1] - vect_A[1] * vect_B[0];
 
         //plane equation
-        float d = -(cross_P[0] * centerX + cross_P[1] * centerY + cross_P[2] * centerValue);
+        float d = -(cross_P[0] * secondPoint.x + cross_P[1] * secondPoint.y + cross_P[2] * secondPointZ);
 
         for (size_t i = 0; i < width; i++)
         {
@@ -211,6 +229,34 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
             m_currentBoxPoint = -1;
             m_calibrationBoxComplete = true;
             generateWarpMatrix();
+        }
+    }
+    if (m_heightPointsSelected == true && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+    {
+        std::cout << mouse.x << " " << mouse.y << std::endl;
+
+        if (firstPoint.x == -3247)
+        {
+            firstPoint.x = mouse.x;
+            firstPoint.y = mouse.y;
+        }
+
+        else if (secondPoint.x == -3247)
+        {
+            secondPoint.x = mouse.x;
+            secondPoint.y = mouse.y;
+        }
+
+        else 
+        {
+            thirdPoint.x = mouse.x;
+            thirdPoint.y = mouse.y;
+            m_heightPointsSelected = false;
+
+            // Print the coordinates of each point
+            std::cout << "First Point: x = " << firstPoint.x << ", y = " << firstPoint.y << std::endl;
+            std::cout << "Second Point: x = " << secondPoint.x << ", y = " << secondPoint.y << std::endl;
+            std::cout << "Third Point: x = " << thirdPoint.x << ", y = " << thirdPoint.y << std::endl;
         }
     }
 
@@ -568,18 +614,6 @@ void Calibration::generateWarpMatrix()
             cv::Point2f(0, m_height),
             cv::Point2f(m_width, m_height),
     };
-    std::cout <<"m_point print kortesi" << "\n";
-    std::cout << m_points[0].x << " " << m_points[0].y << "\n";
-    std::cout << m_points[1].x << " " << m_points[1].y << "\n";
-    std::cout << m_points[2].x << " " << m_points[2].y << "\n";
-    std::cout << m_points[3].x << " " << m_points[3].y << "\n";
-
-    std::cout << "m_boxPoint print kortesi" << "\n";
-    std::cout << m_boxPoints[0].x << " " << m_boxPoints[0].y << "\n";
-    std::cout << m_boxPoints[1].x << " " << m_boxPoints[1].y << "\n";
-    std::cout << m_boxPoints[2].x << " " << m_boxPoints[2].y << "\n";
-    std::cout << m_boxPoints[3].x << " " << m_boxPoints[3].y << "\n";
-
     m_operator = cv::getPerspectiveTransform(m_points, dstPoints);
 
     cv::Point2f boxPoints[] = { m_boxPoints [0], m_boxPoints[1], m_boxPoints[2], m_boxPoints[3]};

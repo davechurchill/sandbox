@@ -32,6 +32,11 @@ public:
     bool                            m_drawSanboxAreaLines = true;
     bool                            m_calibrationComplete = false;
     bool                            m_calibrationBoxComplete = false;
+    bool                            m_heightPointsSelected = false;
+    cv::Point                       firstPoint;
+    cv::Point                       secondPoint;
+    cv::Point                       thirdPoint;
+
     Calibration();
     void imgui();
     std::vector<cv::Point2f>  getConfig();
