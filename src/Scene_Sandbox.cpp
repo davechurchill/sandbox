@@ -152,7 +152,34 @@ void Scene_Sandbox::captureImage()
     m_calibration.transform(m_cvRawDepthImage, output);
 
     // Adjust Height data
+    float topLeft = output.at<float>(0, 0);
 
+    int centerX = m_calibration.m_boxWidth / 2;
+    int centerY = m_calibration.m_boxHeight / 2;
+ 
+    float centerValue = output.at<float>(centerX, centerY);
+    
+    float bottomRight = output.at<float>(m_calibration.m_boxWidth - 1, m_calibration.m_boxHeight - 1);
+
+    float vect_A[]  = { centerX, centerY, centerValue - topLeft };
+    float vect_B[]  = { m_calibration.m_boxWidth - 1, m_calibration.m_boxHeight - 1, bottomRight - topLeft };
+    float cross_P[] = { 0.0, 0.0, 0.0 };
+
+    cross_P[0] = vect_A[1] * vect_B[2] - vect_A[2] * vect_B[1];
+    cross_P[1] = vect_A[2] * vect_B[0] - vect_A[0] * vect_B[2];
+    cross_P[2] = vect_A[0] * vect_B[1] - vect_A[1] * vect_B[0];
+
+    //plane equation
+    float d = -(cross_P[0] * centerX + cross_P[1] * centerY + cross_P[2] * centerValue);
+    
+    for (size_t i = 0; i < m_calibration.m_boxWidth; i++)
+    {
+        for (size_t j = 0; j < m_calibration.m_boxHeight; j++)
+        {
+            float newZ = (-d - cross_P[0] * i - cross_P[1] * j) / cross_P[2];
+            output.at<float>(i, j) = newZ;
+        }
+    }
 
     if (m_drawDepth)
     {
