@@ -17,7 +17,7 @@ Calibration::Calibration()
         c.setOrigin(radius, radius);
         c.setFillColor(sf::Color::Green);
         c.setPosition(-3247, -3247);
-        m_pointCircles.push_back(c);
+        m_boxInteriorCircles.push_back(c);
     }
 
     float radius2 = 5.0;
@@ -27,7 +27,7 @@ Calibration::Calibration()
         c.setOrigin(radius2, radius2);
         c.setFillColor(sf::Color::Magenta);
         c.setPosition(-3247, -3247);
-        m_pointBoxCircles.push_back(c);
+        m_boxProjectionCircles.push_back(c);
     }
 }
 
@@ -42,7 +42,17 @@ void Calibration::imgui()
 
             for (int i = 0; i < 4; ++i)
             {
-               m_pointCircles[i].setPosition(-3247, -3247);
+               m_boxInteriorCircles[i].setPosition(-3247, -3247);
+            }
+        }
+        if (m_calibrationComplete)
+        {
+
+            ImGui::SameLine();
+            if (ImGui::Button("Auto Sort Corners"))
+            {
+                orderPoints();
+                generateWarpMatrix();
             }
         }
 
@@ -53,7 +63,7 @@ void Calibration::imgui()
 
             for (int i = 0; i < 4; ++i)
             {
-                m_pointBoxCircles[i].setPosition(-3247, -3247);
+                m_boxProjectionCircles[i].setPosition(-3247, -3247);
             }
         }
 
@@ -66,21 +76,13 @@ void Calibration::imgui()
             thirdPoint.x = -3247;
         }
 
-
-        if (m_calibrationComplete && ImGui::Button("Auto Sort Corners"))
+        bool w = ImGui::InputInt("Width", &m_width);
+        bool h = ImGui::InputInt("Height", &m_height);
+        if (w || h)
         {
-            orderPoints();
             generateWarpMatrix();
         }
     }
-    bool w = ImGui::InputInt("Width", &m_width);
-    bool h = ImGui::InputInt("Height", &m_height);
-    if (w || h)
-    {
-        generateWarpMatrix();
-    }
-    ImGui::Text("Width: %d", m_width);
-    ImGui::Text("Height: %d", m_height);
 
     if (m_calibrationComplete)
     {
@@ -89,7 +91,7 @@ void Calibration::imgui()
         ImGui::Checkbox("Apply Height Adjustment", &m_applyAdjustment);
     }
 
-    if (m_applyTransform2)
+    if (m_calibrationBoxComplete)
     {
         ImGui::Checkbox("Sandbox Lines", &m_drawSanboxAreaLines);
     }
@@ -159,13 +161,15 @@ void Calibration::heightAdjustment(cv::Mat & matrix)
 void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
     if (m_dragPoint != -1) {
-        m_points[m_dragPoint] = cv::Point(mouse.x, mouse.y);
-        m_pointCircles[m_dragPoint].setPosition(mouse);
+        m_boxInteriorPoints[m_dragPoint] = cv::Point(mouse.x, mouse.y);
+        m_boxInteriorCircles[m_dragPoint].setPosition(mouse);
+        generateWarpMatrix();
     }
 
     if (m_dragBoxPoint != -1) {
-        m_boxPoints[m_dragBoxPoint] = cv::Point(mouse.x, mouse.y);
-        m_pointBoxCircles[m_dragBoxPoint].setPosition(mouse);
+        m_boxProjectionPoints[m_dragBoxPoint] = cv::Point(mouse.x, mouse.y);
+        m_boxProjectionCircles[m_dragBoxPoint].setPosition(mouse);
+        generateWarpMatrix();
     }
 
     if (m_calibrationComplete == true && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
@@ -173,11 +177,11 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
         int i = 0;
         while (i < 4)
         {
-            float xDistance = mouse.x - m_pointCircles[i].getPosition().x;
-            float yDistance = mouse.y - m_pointCircles[i].getPosition().y;
+            float xDistance = mouse.x - m_boxInteriorCircles[i].getPosition().x;
+            float yDistance = mouse.y - m_boxInteriorCircles[i].getPosition().y;
             float pointsDistance = sqrt((xDistance * xDistance) + (yDistance * yDistance));
 
-            if (pointsDistance <= m_pointCircles[i].getRadius())
+            if (pointsDistance <= m_boxInteriorCircles[i].getRadius())
             {
                 m_dragPoint = i;
             }
@@ -190,11 +194,11 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
         int i = 0;
         while (i < 4)
         {
-            float xDistance = mouse.x - m_pointBoxCircles[i].getPosition().x;
-            float yDistance = mouse.y - m_pointBoxCircles[i].getPosition().y;
+            float xDistance = mouse.x - m_boxProjectionCircles[i].getPosition().x;
+            float yDistance = mouse.y - m_boxProjectionCircles[i].getPosition().y;
             float pointsDistance = sqrt((xDistance * xDistance) + (yDistance * yDistance));
 
-            if (pointsDistance <= m_pointBoxCircles[i].getRadius())
+            if (pointsDistance <= m_boxProjectionCircles[i].getRadius())
             {
                 m_dragBoxPoint = i;
             }
@@ -205,8 +209,8 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
     if (m_currentPoint > -1 && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
         std::cout << mouse.x << " " << mouse.y << std::endl;
-        m_points[m_currentPoint] = cv::Point(mouse.x, mouse.y);
-        m_pointCircles[m_currentPoint].setPosition(mouse);
+        m_boxInteriorPoints[m_currentPoint] = cv::Point(mouse.x, mouse.y);
+        m_boxInteriorCircles[m_currentPoint].setPosition(mouse);
         if (++m_currentPoint > 3)
         {
             m_currentPoint = -1;
@@ -218,8 +222,8 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
     if (m_currentBoxPoint > -1 && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
         std::cout << mouse.x << " " << mouse.y << std::endl;
-        m_boxPoints[m_currentBoxPoint] = cv::Point(mouse.x, mouse.y);
-        m_pointBoxCircles[m_currentBoxPoint].setPosition(mouse);
+        m_boxProjectionPoints[m_currentBoxPoint] = cv::Point(mouse.x, mouse.y);
+        m_boxProjectionCircles[m_currentBoxPoint].setPosition(mouse);
         if (++m_currentBoxPoint > 3)
         {
             m_currentBoxPoint = -1;
@@ -274,58 +278,58 @@ void Calibration::render(sf::RenderWindow & window)
 {
     //if (!m_applyTransform)
     {
-        int n = m_calibrationComplete ? m_pointCircles.size() : m_currentPoint;
-        for (int i = 0; i < n; ++i)
+        for (size_t i = 0; i < m_boxInteriorCircles.size(); ++i)
         {
-            window.draw(m_pointCircles[i]);
+            m_boxInteriorCircles[i].setPosition({ m_boxInteriorPoints[i].x, m_boxInteriorPoints[i].y });
+            window.draw(m_boxInteriorCircles[i]);
         }
 
-        int nBox = m_calibrationBoxComplete ? m_pointBoxCircles.size() : m_currentBoxPoint;
+        int nBox = m_calibrationBoxComplete ? m_boxProjectionCircles.size() : m_currentBoxPoint;
         for (int i = 0; i < nBox; ++i)
         {
             if (m_drawSanboxAreaLines)
             {
-                window.draw(m_pointBoxCircles[i]);
+                window.draw(m_boxProjectionCircles[i]);
             }
         }
     }
 
-    if (m_pointCircles[1].getPosition().x != -3247)
+    if (m_boxInteriorCircles[1].getPosition().x != -3247)
     {
         sf::Vertex line[] =
         {
-            sf::Vertex(sf::Vector2f(m_pointCircles[0].getPosition().x, m_pointCircles[0].getPosition().y)),
-            sf::Vertex(sf::Vector2f(m_pointCircles[1].getPosition().x, m_pointCircles[1].getPosition().y))
+            sf::Vertex(sf::Vector2f(m_boxInteriorCircles[0].getPosition().x, m_boxInteriorCircles[0].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_boxInteriorCircles[1].getPosition().x, m_boxInteriorCircles[1].getPosition().y))
         };
         window.draw(line, 2, sf::Lines);
     }
 
-    if (m_pointBoxCircles[1].getPosition().x != -3247  && m_drawSanboxAreaLines)
+    if (m_boxProjectionCircles[1].getPosition().x != -3247  && m_drawSanboxAreaLines)
     {
         sf::Vertex line[] =
         {
-            sf::Vertex(sf::Vector2f(m_pointBoxCircles[0].getPosition().x, m_pointBoxCircles[0].getPosition().y)),
-            sf::Vertex(sf::Vector2f(m_pointBoxCircles[1].getPosition().x, m_pointBoxCircles[1].getPosition().y))
+            sf::Vertex(sf::Vector2f(m_boxProjectionCircles[0].getPosition().x, m_boxProjectionCircles[0].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_boxProjectionCircles[1].getPosition().x, m_boxProjectionCircles[1].getPosition().y))
         };
         window.draw(line, 2, sf::Lines);
     }
 
-    if (m_pointCircles[2].getPosition().x != -3247)
+    if (m_boxInteriorCircles[2].getPosition().x != -3247)
     {
         sf::Vertex line[] =
         {
-            sf::Vertex(sf::Vector2f(m_pointCircles[0].getPosition().x, m_pointCircles[0].getPosition().y)),
-            sf::Vertex(sf::Vector2f(m_pointCircles[2].getPosition().x, m_pointCircles[2].getPosition().y))
+            sf::Vertex(sf::Vector2f(m_boxInteriorCircles[0].getPosition().x, m_boxInteriorCircles[0].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_boxInteriorCircles[2].getPosition().x, m_boxInteriorCircles[2].getPosition().y))
         };
         window.draw(line, 2, sf::Lines);
     }
 
-    if (m_pointBoxCircles[2].getPosition().x != -3247 && m_drawSanboxAreaLines)
+    if (m_boxProjectionCircles[2].getPosition().x != -3247 && m_drawSanboxAreaLines)
     {
         sf::Vertex line[] =
         {
-            sf::Vertex(sf::Vector2f(m_pointBoxCircles[0].getPosition().x, m_pointBoxCircles[0].getPosition().y)),
-            sf::Vertex(sf::Vector2f(m_pointBoxCircles[2].getPosition().x, m_pointBoxCircles[2].getPosition().y))
+            sf::Vertex(sf::Vector2f(m_boxProjectionCircles[0].getPosition().x, m_boxProjectionCircles[0].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_boxProjectionCircles[2].getPosition().x, m_boxProjectionCircles[2].getPosition().y))
         };
         window.draw(line, 2, sf::Lines);
     }
@@ -334,10 +338,10 @@ void Calibration::render(sf::RenderWindow & window)
     {
         sf::Vertex line[] =
         {
-            sf::Vertex(sf::Vector2f(m_pointCircles[1].getPosition().x, m_pointCircles[1].getPosition().y)),
-            sf::Vertex(sf::Vector2f(m_pointCircles[3].getPosition().x, m_pointCircles[3].getPosition().y)),
-            sf::Vertex(sf::Vector2f(m_pointCircles[2].getPosition().x, m_pointCircles[2].getPosition().y)),
-            sf::Vertex(sf::Vector2f(m_pointCircles[3].getPosition().x, m_pointCircles[3].getPosition().y))
+            sf::Vertex(sf::Vector2f(m_boxInteriorCircles[1].getPosition().x, m_boxInteriorCircles[1].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_boxInteriorCircles[3].getPosition().x, m_boxInteriorCircles[3].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_boxInteriorCircles[2].getPosition().x, m_boxInteriorCircles[2].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_boxInteriorCircles[3].getPosition().x, m_boxInteriorCircles[3].getPosition().y))
         };
         window.draw(line, 4, sf::Lines);
     }
@@ -346,10 +350,10 @@ void Calibration::render(sf::RenderWindow & window)
     {
         sf::Vertex line[] =
         {
-            sf::Vertex(sf::Vector2f(m_pointBoxCircles[1].getPosition().x, m_pointBoxCircles[1].getPosition().y)),
-            sf::Vertex(sf::Vector2f(m_pointBoxCircles[3].getPosition().x, m_pointBoxCircles[3].getPosition().y)),
-            sf::Vertex(sf::Vector2f(m_pointBoxCircles[2].getPosition().x, m_pointBoxCircles[2].getPosition().y)),
-            sf::Vertex(sf::Vector2f(m_pointBoxCircles[3].getPosition().x, m_pointBoxCircles[3].getPosition().y))
+            sf::Vertex(sf::Vector2f(m_boxProjectionCircles[1].getPosition().x, m_boxProjectionCircles[1].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_boxProjectionCircles[3].getPosition().x, m_boxProjectionCircles[3].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_boxProjectionCircles[2].getPosition().x, m_boxProjectionCircles[2].getPosition().y)),
+            sf::Vertex(sf::Vector2f(m_boxProjectionCircles[3].getPosition().x, m_boxProjectionCircles[3].getPosition().y))
         };
         window.draw(line, 4, sf::Lines);
     }
@@ -362,10 +366,10 @@ void Calibration::orderPoints()
     int  n = sizeof(a) / sizeof(a[0]);
     std::sort(a, a + n);
 
-    cv::Point2f firstPoint(m_points[a[0]]);
-    cv::Point2f secondPoint(m_points[a[1]]);
-    cv::Point2f thirdPoint(m_points[a[2]]);
-    cv::Point2f fourthPoint(m_points[a[3]]);
+    cv::Point2f firstPoint(m_boxInteriorPoints[a[0]]);
+    cv::Point2f secondPoint(m_boxInteriorPoints[a[1]]);
+    cv::Point2f thirdPoint(m_boxInteriorPoints[a[2]]);
+    cv::Point2f fourthPoint(m_boxInteriorPoints[a[3]]);
 
     while (std::next_permutation(a, a + n))
     {
@@ -383,21 +387,21 @@ void Calibration::orderPoints()
         }
         else
         {
-            firstPoint.x = m_points[a[0]].x;
-            firstPoint.y = m_points[a[0]].y;
-            secondPoint.x = m_points[a[1]].x;
-            secondPoint.y = m_points[a[1]].y;
-            thirdPoint.x = m_points[a[2]].x;
-            thirdPoint.y = m_points[a[2]].y;
-            fourthPoint.x = m_points[a[3]].x;
-            fourthPoint.y = m_points[a[3]].y;
+            firstPoint.x = m_boxInteriorPoints[a[0]].x;
+            firstPoint.y = m_boxInteriorPoints[a[0]].y;
+            secondPoint.x = m_boxInteriorPoints[a[1]].x;
+            secondPoint.y = m_boxInteriorPoints[a[1]].y;
+            thirdPoint.x = m_boxInteriorPoints[a[2]].x;
+            thirdPoint.y = m_boxInteriorPoints[a[2]].y;
+            fourthPoint.x = m_boxInteriorPoints[a[3]].x;
+            fourthPoint.y = m_boxInteriorPoints[a[3]].y;
         }
     }
 
-    m_points[0] = firstPoint;
-    m_points[1] = secondPoint;
-    m_points[2] = thirdPoint;
-    m_points[3] = fourthPoint;
+    m_boxInteriorPoints[0] = firstPoint;
+    m_boxInteriorPoints[1] = secondPoint;
+    m_boxInteriorPoints[2] = thirdPoint;
+    m_boxInteriorPoints[3] = fourthPoint;
 }
 
 void Calibration::generateWarpMatrix()
@@ -408,11 +412,11 @@ void Calibration::generateWarpMatrix()
             cv::Point2f(0, m_height),
             cv::Point2f(m_width, m_height),
     };
-    m_operator = cv::getPerspectiveTransform(m_points, dstPoints);
+    m_operator = cv::getPerspectiveTransform(m_boxInteriorPoints, dstPoints);
 
     if (m_calibrationBoxComplete)
     {
-        cv::Point2f boxPoints[] = { m_boxPoints[0], m_boxPoints[1], m_boxPoints[2], m_boxPoints[3] };
+        cv::Point2f boxPoints[] = { m_boxProjectionPoints[0], m_boxProjectionPoints[1], m_boxProjectionPoints[2], m_boxProjectionPoints[3] };
 
         m_minXY.x = boxPoints[0].x;
         m_minXY.y = boxPoints[0].y;
@@ -449,7 +453,7 @@ void Calibration::generateWarpMatrix()
         float ratio = (float)m_boxHeight / m_boxWidth;
         m_finalWidth = m_width * 1.5f;
         m_finalHeight = m_finalWidth * ratio;
-        m_boxScale = sf::Vector2f(m_finalWidth / m_boxWidth, m_finalHeight / m_boxHeight);
+        m_boxScale = sf::Vector2f((float)m_finalWidth / m_boxWidth, (float)m_finalHeight / m_boxHeight);
 
         for (int i = 0; i < 4; i++)
         {
@@ -469,50 +473,50 @@ void Calibration::loadConfiguration()
     {
         if (temp == "m_points[0]")
         {
-            fin >> m_points[0].x;
-            fin >> m_points[0].y;
+            fin >> m_boxInteriorPoints[0].x;
+            fin >> m_boxInteriorPoints[0].y;
         }
 
         if (temp == "m_boxPoints[0]")
         {
-            fin >> m_boxPoints[0].x;
-            fin >> m_boxPoints[0].y;
+            fin >> m_boxProjectionPoints[0].x;
+            fin >> m_boxProjectionPoints[0].y;
         }
 
         if (temp == "m_points[1]")
         {
-            fin >> m_points[1].x;
-            fin >> m_points[1].y;
+            fin >> m_boxInteriorPoints[1].x;
+            fin >> m_boxInteriorPoints[1].y;
         }
 
         if (temp == "m_boxPoints[1]")
         {
-            fin >> m_boxPoints[1].x;
-            fin >> m_boxPoints[1].y;
+            fin >> m_boxProjectionPoints[1].x;
+            fin >> m_boxProjectionPoints[1].y;
         }
 
         if (temp == "m_points[2]")
         {
-            fin >> m_points[2].x;
-            fin >> m_points[2].y;
+            fin >> m_boxInteriorPoints[2].x;
+            fin >> m_boxInteriorPoints[2].y;
         }
 
         if (temp == "m_boxPoints[2]")
         {
-            fin >> m_boxPoints[2].x;
-            fin >> m_boxPoints[2].y;
+            fin >> m_boxProjectionPoints[2].x;
+            fin >> m_boxProjectionPoints[2].y;
         }
 
         if (temp == "m_points[3]")
         {
-            fin >> m_points[3].x;
-            fin >> m_points[3].y;
+            fin >> m_boxInteriorPoints[3].x;
+            fin >> m_boxInteriorPoints[3].y;
         }
 
         if (temp == "m_boxPoints[3]")
         {
-            fin >> m_boxPoints[3].x;
-            fin >> m_boxPoints[3].y;
+            fin >> m_boxProjectionPoints[3].x;
+            fin >> m_boxProjectionPoints[3].y;
         }
 
         if (temp == "m_width")
@@ -539,56 +543,56 @@ void Calibration::loadConfiguration()
         {
             float x, y;
             fin >> x >> y;
-            m_pointCircles[0].setPosition(x, y);
+            m_boxInteriorCircles[0].setPosition(x, y);
         }
 
         if (temp == "m_pointCircles[1]")
         {
             float x, y;
             fin >> x >> y;
-            m_pointCircles[1].setPosition(x, y);
+            m_boxInteriorCircles[1].setPosition(x, y);
         }
 
         if (temp == "m_pointCircles[2]")
         {
             float x, y;
             fin >> x >> y;
-            m_pointCircles[2].setPosition(x, y);
+            m_boxInteriorCircles[2].setPosition(x, y);
         }
 
         if (temp == "m_pointCircles[3]")
         {
             float x, y;
             fin >> x >> y;
-            m_pointCircles[3].setPosition(x, y);
+            m_boxInteriorCircles[3].setPosition(x, y);
         }
 
         if (temp == "m_pointBoxCircles[0]")
         {
             float x, y;
             fin >> x >> y;
-            m_pointBoxCircles[0].setPosition(x, y);
+            m_boxProjectionCircles[0].setPosition(x, y);
         }
 
         if (temp == "m_pointBoxCircles[1]")
         {
             float x, y;
             fin >> x >> y;
-            m_pointBoxCircles[1].setPosition(x, y);
+            m_boxProjectionCircles[1].setPosition(x, y);
         }
 
         if (temp == "m_pointBoxCircles[2]")
         {
             float x, y;
             fin >> x >> y;
-            m_pointBoxCircles[2].setPosition(x, y);
+            m_boxProjectionCircles[2].setPosition(x, y);
         }
 
         if (temp == "m_pointBoxCircles[3]")
         {
             float x, y;
             fin >> x >> y;
-            m_pointBoxCircles[3].setPosition(x, y);
+            m_boxProjectionCircles[3].setPosition(x, y);
         }
 
         if (temp == "m_applyTransform")
@@ -628,25 +632,25 @@ void Calibration::save(std::ofstream & fout)
     fout << "m_calibrationComplete" << " " << m_calibrationComplete << "\n";
     fout << "m_calibrationBoxComplete" << " " << m_calibrationBoxComplete << "\n";
 
-    fout << "m_points[0]" << " " << m_points[0].x << " " << m_points[0].y << "\n";
-    fout << "m_points[1]" << " " << m_points[1].x << " " << m_points[1].y << "\n";
-    fout << "m_points[2]" << " " << m_points[2].x << " " << m_points[2].y << "\n";
-    fout << "m_points[3]" << " " << m_points[3].x << " " << m_points[3].y << "\n";
+    fout << "m_points[0]" << " " << m_boxInteriorPoints[0].x << " " << m_boxInteriorPoints[0].y << "\n";
+    fout << "m_points[1]" << " " << m_boxInteriorPoints[1].x << " " << m_boxInteriorPoints[1].y << "\n";
+    fout << "m_points[2]" << " " << m_boxInteriorPoints[2].x << " " << m_boxInteriorPoints[2].y << "\n";
+    fout << "m_points[3]" << " " << m_boxInteriorPoints[3].x << " " << m_boxInteriorPoints[3].y << "\n";
 
-    fout << "m_pointCircles[0]" << " " << m_pointCircles[0].getPosition().x << " " << m_pointCircles[0].getPosition().y << "\n";
-    fout << "m_pointCircles[1]" << " " << m_pointCircles[1].getPosition().x << " " << m_pointCircles[1].getPosition().y << "\n";
-    fout << "m_pointCircles[2]" << " " << m_pointCircles[2].getPosition().x << " " << m_pointCircles[2].getPosition().y << "\n";
-    fout << "m_pointCircles[3]" << " " << m_pointCircles[3].getPosition().x << " " << m_pointCircles[3].getPosition().y << "\n";
+    fout << "m_pointCircles[0]" << " " << m_boxInteriorCircles[0].getPosition().x << " " << m_boxInteriorCircles[0].getPosition().y << "\n";
+    fout << "m_pointCircles[1]" << " " << m_boxInteriorCircles[1].getPosition().x << " " << m_boxInteriorCircles[1].getPosition().y << "\n";
+    fout << "m_pointCircles[2]" << " " << m_boxInteriorCircles[2].getPosition().x << " " << m_boxInteriorCircles[2].getPosition().y << "\n";
+    fout << "m_pointCircles[3]" << " " << m_boxInteriorCircles[3].getPosition().x << " " << m_boxInteriorCircles[3].getPosition().y << "\n";
 
-    fout << "m_boxPoints[0]" << " " << m_boxPoints[0].x << " " << m_boxPoints[0].y << "\n";
-    fout << "m_boxPoints[1]" << " " << m_boxPoints[1].x << " " << m_boxPoints[1].y << "\n";
-    fout << "m_boxPoints[2]" << " " << m_boxPoints[2].x << " " << m_boxPoints[2].y << "\n";
-    fout << "m_boxPoints[3]" << " " << m_boxPoints[3].x << " " << m_boxPoints[3].y << "\n";
+    fout << "m_boxPoints[0]" << " " << m_boxProjectionPoints[0].x << " " << m_boxProjectionPoints[0].y << "\n";
+    fout << "m_boxPoints[1]" << " " << m_boxProjectionPoints[1].x << " " << m_boxProjectionPoints[1].y << "\n";
+    fout << "m_boxPoints[2]" << " " << m_boxProjectionPoints[2].x << " " << m_boxProjectionPoints[2].y << "\n";
+    fout << "m_boxPoints[3]" << " " << m_boxProjectionPoints[3].x << " " << m_boxProjectionPoints[3].y << "\n";
 
-    fout << "m_pointBoxCircles[0]" << " " << m_pointBoxCircles[0].getPosition().x << " " << m_pointBoxCircles[0].getPosition().y << "\n";
-    fout << "m_pointBoxCircles[1]" << " " << m_pointBoxCircles[1].getPosition().x << " " << m_pointBoxCircles[1].getPosition().y << "\n";
-    fout << "m_pointBoxCircles[2]" << " " << m_pointBoxCircles[2].getPosition().x << " " << m_pointBoxCircles[2].getPosition().y << "\n";
-    fout << "m_pointBoxCircles[3]" << " " << m_pointBoxCircles[3].getPosition().x << " " << m_pointBoxCircles[3].getPosition().y << "\n";
+    fout << "m_pointBoxCircles[0]" << " " << m_boxProjectionCircles[0].getPosition().x << " " << m_boxProjectionCircles[0].getPosition().y << "\n";
+    fout << "m_pointBoxCircles[1]" << " " << m_boxProjectionCircles[1].getPosition().x << " " << m_boxProjectionCircles[1].getPosition().y << "\n";
+    fout << "m_pointBoxCircles[2]" << " " << m_boxProjectionCircles[2].getPosition().x << " " << m_boxProjectionCircles[2].getPosition().y << "\n";
+    fout << "m_pointBoxCircles[3]" << " " << m_boxProjectionCircles[3].getPosition().x << " " << m_boxProjectionCircles[3].getPosition().y << "\n";
 
     fout << "m_width" << " " << m_width << "\n";
     fout << "m_height" << " " << m_height << "\n";

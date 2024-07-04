@@ -13,13 +13,13 @@ struct CameraFilters
     rs2::decimation_filter m_decimationFilter;
 
     int                 m_spatialMagnitude = 2;
-    float               m_smoothAlpha = 0.5;
+    float               m_smoothAlpha = 0.5f;
     int                 m_smoothDelta = 20;
     int                 m_spatialHoleFill = 0;
     rs2::spatial_filter m_spatialFilter;
 
 
-    float               m_smoothAlphaTemporal = 0.4;
+    float               m_smoothAlphaTemporal = 0.4f;
     int                 m_smoothDeltaTemporal = 20;
     int                 m_persistanceTemporal = 3;
     rs2::temporal_filter m_temporalFilter;
@@ -34,31 +34,30 @@ public:
 
         if (m_decimation > 0)
         {
-            m_decimationFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_decimation);
+            m_decimationFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, (float)m_decimation);
             temp = m_decimationFilter.process(temp);
         }
 
         if (m_spatialMagnitude > 0)
         {
-            m_spatialFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_spatialMagnitude);
+            m_spatialFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, (float)m_spatialMagnitude);
             m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlpha);
-            m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, m_smoothDelta);
-            m_spatialFilter.set_option(RS2_OPTION_HOLES_FILL, m_spatialHoleFill);
-
+            m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, (float)m_smoothDelta);
+            m_spatialFilter.set_option(RS2_OPTION_HOLES_FILL, (float)m_spatialHoleFill);
             temp = m_spatialFilter.process(temp);
         }
 
         if (m_holeFill < 3)
         {
-            m_holeFilter.set_option(RS2_OPTION_HOLES_FILL, m_holeFill);
+            m_holeFilter.set_option(RS2_OPTION_HOLES_FILL, (float)m_holeFill);
             temp = m_holeFilter.process(temp);
         }
 
         if (m_smoothAlphaTemporal < 1.0f)
         {
             m_temporalFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlphaTemporal);
-            m_temporalFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, m_smoothDeltaTemporal);
-            m_temporalFilter.set_option(RS2_OPTION_HOLES_FILL, m_persistanceTemporal);
+            m_temporalFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, (float)m_smoothDeltaTemporal);
+            m_temporalFilter.set_option(RS2_OPTION_HOLES_FILL, (float)m_persistanceTemporal);
             temp = m_temporalFilter.process(temp);
         }
         return temp;

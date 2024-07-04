@@ -53,15 +53,14 @@ class Scene_Sandbox : public Scene
     cv::Mat             m_cvColorImage;
 
     sf::Image           m_sfDepthImage;
+    sf::Image           m_transformedImage;
     sf::Image           m_sfColorImage;
     sf::Texture         m_sfDepthTexture;
+    sf::Texture         m_transformedTexture;
     sf::Texture         m_sfColorTexture;
     sf::Sprite          m_depthSprite;
-    sf::Sprite          m_colorSprite;
-
-    sf::Image           m_transformedImage;
-    sf::Texture         m_transformedTexture;
     sf::Sprite          m_transformedSprite;
+    sf::Sprite          m_colorSprite;
 
     sf::Vector2i        m_mouseScreen;
     sf::Vector2f        m_mouseWorld;
@@ -76,8 +75,8 @@ class Scene_Sandbox : public Scene
     Grid<float>         m_depthWarpedGrid;
     float               m_mouseDepth;
 
-    float               m_maxDistance = 5.0;
-    float               m_minDistance = 0.0;
+    float               m_maxDistance = 1.13f;
+    float               m_minDistance = 0.90f;
 
     CameraFilters       m_filters;
 
@@ -92,14 +91,17 @@ class Scene_Sandbox : public Scene
     void init();  
     void renderUI();
     void sUserInput();  
+    void sProcessEvent(const sf::Event & event);
     void sRender();
     void attemptCameraConnection();
     void saveConfig();
     void loadConfig();
+    void thresholdFromMouse();
     
 public:
 
     Scene_Sandbox(GameEngine * game);
 
     void onFrame();
+    void endScene();
 };

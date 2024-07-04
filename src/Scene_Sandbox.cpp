@@ -31,6 +31,10 @@ void Scene_Sandbox::init()
     m_text.setCharacterSize(10);
 
     m_contour.setContourLevel(0.5);
+
+    loadConfig();
+    //m_game->displayWindow().create(sf::VideoMode(1920, 1080), "Sandbox", sf::Style::Default);
+
 }
 
 void Scene_Sandbox::captureImage()
@@ -122,42 +126,42 @@ void Scene_Sandbox::captureImage()
     m_calibration.transformProjection(output, output);
 
 
-    if (m_drawDepth)
+    // Draw warped depth image
+    dw = output.cols;
+    dh = output.rows;
+
+    if (dw > 0 && dh > 0)
     {
-        // Draw warped depth image
-        dw = output.cols;
-        dh = output.rows;
 
-        if (dw > 0 && dh > 0)
+        // Create warped data grid
+        m_depthWarpedGrid.refill(dw, dh, 0.0f);
+        if (m_maxDistance > m_minDistance)
         {
-
-            // Create warped data grid
-            m_depthWarpedGrid.refill(dw, dh, 0.0f);
-            if (m_maxDistance > m_minDistance)
+            for (int i = 0; i < dw; ++i)
             {
-                for (int i = 0; i < dw; ++i)
+                for (int j = 0; j < dh; ++j)
                 {
-                    for (int j = 0; j < dh; ++j)
-                    {
-                        // Scale data to 0-1 range, where 1 is the highest point 
-                        m_depthWarpedGrid.set(i, j, 1 - ((output.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance)));
-                    }
+                    // Scale data to 0-1 range, where 1 is the highest point 
+                    m_depthWarpedGrid.set(i, j, 1 - ((output.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance)));
                 }
-            }
-
-            // Colorize and draw warped data grid
-            m_colorizer.color(m_transformedImage, m_depthWarpedGrid);
-            m_transformedTexture.loadFromImage(m_transformedImage);
-            m_transformedSprite.setTexture(m_transformedTexture, true);
-
-            // Calculate Contour Lines from warped data grid
-            if (m_drawContours)
-            {
-                m_contour.init(dw, dh);
-                m_contour.calculate(m_depthWarpedGrid);
             }
         }
 
+        // Colorize and draw warped data grid
+        m_colorizer.color(m_transformedImage, m_depthWarpedGrid);
+        m_transformedTexture.loadFromImage(m_transformedImage);
+        m_transformedSprite.setTexture(m_transformedTexture, true);
+
+        // Calculate Contour Lines from warped data grid
+        if (m_drawContours)
+        {
+            m_contour.init(dw, dh);
+            m_contour.calculate(m_depthWarpedGrid);
+        }
+    }
+
+    if (m_drawDepth)
+    {
         // Draw original depth image
         m_colorizer.color(m_sfDepthImage, m_depthGrid);
         m_sfDepthTexture.loadFromImage(m_sfDepthImage);
@@ -184,104 +188,113 @@ void Scene_Sandbox::onFrame()
     m_currentFrame++;
 }
 
+void Scene_Sandbox::sProcessEvent(const sf::Event& event)
+{
+    ImGui::SFML::ProcessEvent(m_game->window(), event);
+    m_viewController.processEvent(m_game->window(), event);
+    m_calibration.processEvent(event, m_mouseWorld);
+
+    // this event triggers when the window is closed
+    if (event.type == sf::Event::Closed)
+    {
+        endScene();
+        m_game->quit();
+    }
+
+    // this event is triggered when a key is pressed
+    if (event.type == sf::Event::KeyPressed)
+    {
+        switch (event.key.code)
+        {
+        
+        case sf::Keyboard::Escape:
+        {
+            endScene();
+            break;
+        }
+
+        case sf::Keyboard::I:
+        {
+            m_drawUI = !m_drawUI;
+            break;
+        }
+
+        case sf::Keyboard::F:
+        {
+            if (!m_game->displayWindow().isOpen())
+            {
+                m_game->displayWindow().create(sf::VideoMode(1920, 1080), "Sandbox", sf::Style::None);
+                m_game->displayWindow().setPosition({ -1920, 0 });
+            }
+            else
+            {
+                m_game->displayWindow().close();
+            }
+        }
+        }
+    }
+
+    if (event.type == sf::Event::MouseButtonPressed)
+    {
+        // happens when the left mouse button is pressed
+        if (event.mouseButton.button == sf::Mouse::Left)
+        {
+            thresholdFromMouse();
+        }
+        if (event.mouseButton.button == sf::Mouse::Right) {}
+    }
+
+    // happens when the mouse button is released
+    if (event.type == sf::Event::MouseButtonReleased)
+    {
+        if (event.mouseButton.button == sf::Mouse::Left) {}
+        if (event.mouseButton.button == sf::Mouse::Right) {}
+    }
+
+    // happens whenever the mouse is being moved
+    if (event.type == sf::Event::MouseMoved)
+    {
+        m_mouseScreen = { event.mouseMove.x, event.mouseMove.y };
+        m_mouseWorld = m_game->window().mapPixelToCoords(m_mouseScreen);
+    }
+}
+
 void Scene_Sandbox::sUserInput()
 {
     sf::Event event;
     while (m_game->window().pollEvent(event))
     {
-        ImGui::SFML::ProcessEvent(m_game->window(), event);
-        m_viewController.processEvent(m_game->window(), event);
-        m_calibration.processEvent(event, m_mouseWorld);
-
-        // this event triggers when the window is closed
-        if (event.type == sf::Event::Closed)
-        {
-            m_game->quit();
-        }
-
-        // this event is triggered when a key is pressed
-        if (event.type == sf::Event::KeyPressed)
-        {
-            switch (event.key.code)
-            {
-                case sf::Keyboard::Escape:
-                {
-                    m_game->changeScene<Scene_Menu>("Menu");
-                    break;
-                }
-
-                case sf::Keyboard::I:
-                {
-                    m_drawUI = !m_drawUI;
-                    break;
-                }
-            }
-        }
-
-        if (event.type == sf::Event::MouseButtonPressed)
-        {
-            // happens when the left mouse button is pressed
-            if (event.mouseButton.button == sf::Mouse::Left) 
-            {
-                switch (m_mouseSelection)
-                {
-                case MouseSelections::MaxDistance: 
-                    {
-                        if (m_mouseDepth >= 0.0)
-                        {
-                            m_maxDistance = m_mouseDepth;
-                        }
-                    } break;
-                case MouseSelections::MinDistance: 
-                    {
-                        if (m_mouseDepth >= 0.0)
-                        {
-                            m_minDistance = m_mouseDepth;
-                        }
-                    } break;
-                }
-                m_mouseSelection = MouseSelections::None;
-            }
-            if (event.mouseButton.button == sf::Mouse::Right) {}
-        }
-
-        // happens when the mouse button is released
-        if (event.type == sf::Event::MouseButtonReleased)
-        {
-            if (event.mouseButton.button == sf::Mouse::Left) {}
-            if (event.mouseButton.button == sf::Mouse::Right) {}
-        }
-
-        // happens whenever the mouse is being moved
-        if (event.type == sf::Event::MouseMoved)
-        {
-            m_mouseScreen = { event.mouseMove.x, event.mouseMove.y };
-            m_mouseWorld = m_game->window().mapPixelToCoords(m_mouseScreen);
-        }
+        sProcessEvent(event);
     }
+    /*while (m_game->displayWindow().pollEvent(event))
+    {
+        sProcessEvent(event);
+    }*/
 }
 
 // renders the scene
 void Scene_Sandbox::sRender()
 {
-    const sf::Color gridColor(64, 64, 64);
-
     m_game->window().clear();
-    m_lineStrip.clear();
-    m_quadArray.clear();
+    m_game->displayWindow().clear();
+
+    if (m_drawDepth)
+    {
+        m_game->window().draw(m_depthSprite);
+    }
 
     m_transformedSprite.setPosition(m_calibration.getTransformedPosition());
     float scale = m_calibration.getTransformedScale();
     m_transformedSprite.setScale(scale, scale);
-    m_game->window().draw(m_transformedSprite);
 
-    if (m_drawDepth) { m_game->window().draw(m_depthSprite); }
-    if (m_drawColor) { m_game->window().draw(m_colorSprite); }
-    
-    m_game->window().draw(m_quadArray);
-    m_game->window().draw(m_lineStrip);
-    m_game->window().draw(m_text);
-
+    if (m_game->displayWindow().isOpen())
+    {
+        m_game->displayWindow().draw(m_transformedSprite);
+    }
+    else
+    {
+        m_game->window().draw(m_transformedSprite);
+    }
     if (m_drawContours)
     {
         m_contourSprite.setTexture(m_contour.generateTexture(), true);
@@ -290,14 +303,34 @@ void Scene_Sandbox::sRender()
         m_game->window().draw(m_contourSprite);
     }
 
+    if (m_drawColor) { m_game->window().draw(m_colorSprite); }
+    
+    m_lineStrip.clear();
+    m_quadArray.clear();
+    m_game->window().draw(m_quadArray);
+    m_game->window().draw(m_lineStrip);
+    m_game->window().draw(m_text);
+
     m_calibration.render(m_game->window());
 }
 
 void Scene_Sandbox::renderUI()
 {
-    const char vals[7] = { '.', 'G', '@', 'O', 'T', 'S', 'W' };
-   
-    ImGui::Begin("Options");
+    ImGui::Begin("Options", &m_drawUI, ImGuiWindowFlags_MenuBar);
+
+    if (ImGui::BeginMenuBar())
+    {
+        if (ImGui::Button("Save"))
+        {
+            saveConfig();
+        }
+        if (ImGui::Button("Load"))
+        {
+            loadConfig();
+        }
+
+        ImGui::EndMenuBar();
+    }
 
     if (!m_cameraConnected)
     {
@@ -306,23 +339,11 @@ void Scene_Sandbox::renderUI()
 
     ImGui::Text("Framerate: %d", (int)m_game->framerate());
 
-    ImGui::SameLine();
-    if (ImGui::Button("Save"))
-    {
-        saveConfig();
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Load"))
-    {
-        loadConfig();
-    }
 
     if (ImGui::BeginTabBar("MyTabBar"))
     {
-        if (ImGui::BeginTabItem("Camera"))
+        if (ImGui::BeginTabItem("Filters"))
         {
-            // PC Display Options
-
             m_filters.imgui();
 
             ImGui::EndTabItem();
@@ -423,6 +444,7 @@ void Scene_Sandbox::saveConfig()
 void Scene_Sandbox::loadConfig()
 {
     std::ifstream fin("config.txt");
+    if (!fin.good()) { return; }
     std::string temp;
     while (fin >> temp)
     {
@@ -431,4 +453,33 @@ void Scene_Sandbox::loadConfig()
         m_filters.loadTerm(temp, fin);
     }
     m_calibration.loadConfiguration();
+}
+
+void Scene_Sandbox::thresholdFromMouse()
+{
+    switch (m_mouseSelection)
+    {
+    case MouseSelections::MaxDistance:
+    {
+        if (m_mouseDepth >= 0.0)
+        {
+            m_maxDistance = m_mouseDepth;
+        }
+    } break;
+    case MouseSelections::MinDistance:
+    {
+        if (m_mouseDepth >= 0.0)
+        {
+            m_minDistance = m_mouseDepth;
+        }
+    } break;
+    }
+    m_mouseSelection = MouseSelections::None;
+}
+
+void Scene_Sandbox::endScene()
+{
+    m_game->changeScene<Scene_Menu>("Menu");
+
+    saveConfig();
 }

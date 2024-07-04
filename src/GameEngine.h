@@ -18,6 +18,7 @@ class GameEngine
 
 protected:
     
+    sf::RenderWindow    m_displayWindow;
     sf::RenderWindow    m_window;
     sf::Clock           m_deltaClock;
     std::string         m_currentScene;
@@ -66,6 +67,7 @@ public:
     float        framerate() const;
 
     sf::RenderWindow & window();
+    sf::RenderWindow & displayWindow();
     mc::MinecraftInterface & minecraft();
     bool isRunning();
     void toggleFullscreen();

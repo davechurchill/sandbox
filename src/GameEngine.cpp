@@ -46,6 +46,11 @@ sf::RenderWindow & GameEngine::window()
     return m_window;
 }
 
+sf::RenderWindow & GameEngine::displayWindow()
+{
+    return m_displayWindow;
+}
+
 mc::MinecraftInterface & GameEngine::minecraft()
 {
     return m_mcInterface;
@@ -71,6 +76,11 @@ void GameEngine::update()
     ImGui::SFML::Render(m_window);
 
     m_window.display();
+
+    if (m_displayWindow.isOpen())
+    {
+        m_displayWindow.display();
+    }
 }
 
 void GameEngine::run()

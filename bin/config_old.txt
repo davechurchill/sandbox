@@ -1,0 +1,36 @@
+MaxDistance 1.018
+MinDistance 0.8
+Decimation 1
+temporalAlpha 0.4
+temporalDelta 20
+temporalPersistance 3
+Magnitude 2
+Alpha 0.5
+Delta 20
+SHole 0
+HoleFill 3
+m_applyTransform 0
+m_applyTransform2 0
+m_drawSanboxAreaLines 1
+m_calibrationComplete 0
+m_calibrationBoxComplete 0
+m_points[0] 0 0
+m_points[1] 0 0
+m_points[2] 0 0
+m_points[3] 0 0
+m_pointCircles[0] -3247 -3247
+m_pointCircles[1] -3247 -3247
+m_pointCircles[2] -3247 -3247
+m_pointCircles[3] -3247 -3247
+m_boxPoints[0] 0 0
+m_boxPoints[1] 0 0
+m_boxPoints[2] 0 0
+m_boxPoints[3] 0 0
+m_pointBoxCircles[0] -3247 -3247
+m_pointBoxCircles[1] -3247 -3247
+m_pointBoxCircles[2] -3247 -3247
+m_pointBoxCircles[3] -3247 -3247
+m_width 1200
+m_height 780
+m_boxWidth 500
+m_boxHeight 400
