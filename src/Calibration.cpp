@@ -355,6 +355,7 @@ void Calibration::render(sf::RenderWindow & window)
     }
 }
 
+
 void Calibration::orderPoints()
 {
     int a[] = { 0, 1, 2, 3 };
@@ -399,45 +400,65 @@ void Calibration::orderPoints()
     m_points[3] = fourthPoint;
 }
 
-std::vector<cv::Point2f>  Calibration::getConfig()
+void Calibration::generateWarpMatrix()
 {
-    std::vector<cv::Point2f> points;
-    points.push_back(m_points[0]);
-    points.push_back(m_points[1]);
-    points.push_back(m_points[2]);
-    points.push_back(m_points[3]);
-    return points;
-}
+    cv::Point2f dstPoints[] = {
+            cv::Point2f(0, 0),
+            cv::Point2f(m_width, 0),
+            cv::Point2f(0, m_height),
+            cv::Point2f(m_width, m_height),
+    };
+    m_operator = cv::getPerspectiveTransform(m_points, dstPoints);
 
-std::vector<sf::CircleShape> Calibration::getPointCircle()
-{
-    return m_pointCircles;
-}
+    if (m_calibrationBoxComplete)
+    {
+        cv::Point2f boxPoints[] = { m_boxPoints[0], m_boxPoints[1], m_boxPoints[2], m_boxPoints[3] };
 
-std::vector<cv::Point2f>  Calibration::getBoxConfig()
-{
-    std::vector<cv::Point2f> boxPoints;
-    boxPoints.push_back(m_boxPoints[0]);
-    boxPoints.push_back(m_boxPoints[1]);
-    boxPoints.push_back(m_boxPoints[2]);
-    boxPoints.push_back(m_boxPoints[3]);
-    return boxPoints;
-}
+        m_minXY.x = boxPoints[0].x;
+        m_minXY.y = boxPoints[0].y;
+        float maxX = boxPoints[0].x;
+        float maxY = boxPoints[0].y;
+        for (int i = 0; i < 4; i++)
+        {
+            if (boxPoints[i].x < m_minXY.x)
+            {
+                m_minXY.x = boxPoints[i].x;
+            }
+            if (boxPoints[i].x > maxX)
+            {
+                maxX = boxPoints[i].x;
+            }
+            if (boxPoints[i].y < m_minXY.y)
+            {
+                m_minXY.y = boxPoints[i].y;
+            }
+            if (boxPoints[i].y > maxY)
+            {
+                maxY = boxPoints[i].y;
+            }
+        }
 
-std::vector<sf::CircleShape> Calibration::getPointBoxCircle()
-{
-    return m_pointBoxCircles;
-}
+        for (int i = 0; i < 4; i++)
+        {
+            boxPoints[i].x -= m_minXY.x;
+            boxPoints[i].y -= m_minXY.y;
+        }
+        m_boxWidth = maxX - m_minXY.x;
+        m_boxHeight = maxY - m_minXY.y;
 
+        float ratio = (float)m_boxHeight / m_boxWidth;
+        m_finalWidth = m_width * 1.5f;
+        m_finalHeight = m_finalWidth * ratio;
+        m_boxScale = sf::Vector2f(m_finalWidth / m_boxWidth, m_finalHeight / m_boxHeight);
 
-cv::Point2f Calibration::getDimension()
-{
-    return cv::Point2f(m_width, m_height);
-}
+        for (int i = 0; i < 4; i++)
+        {
+            boxPoints[i].x *= m_boxScale.x;
+            boxPoints[i].y *= m_boxScale.y;
+        }
 
-cv::Point2f Calibration::getBoxDimension()
-{
-    return cv::Point2f(m_boxWidth, m_boxHeight);
+        m_boxOperator = cv::getPerspectiveTransform(dstPoints, boxPoints);
+    }
 }
 
 void Calibration::loadConfiguration()
@@ -595,70 +616,41 @@ void Calibration::loadConfiguration()
         }
     }
 
-    //m_calibrationComplete = true;
-    //m_calibrationBoxComplete = true;
-    //m_applyTransform = true;
-    //m_applyTransform2 = true;
     generateWarpMatrix();
 }
 
-void Calibration::generateWarpMatrix()
+void Calibration::save(std::ofstream & fout)
 {
-    cv::Point2f dstPoints[] = {
-            cv::Point2f(0, 0),
-            cv::Point2f(m_width, 0),
-            cv::Point2f(0, m_height),
-            cv::Point2f(m_width, m_height),
-    };
-    m_operator = cv::getPerspectiveTransform(m_points, dstPoints);
+    fout << "m_applyTransform" << " " << m_applyTransform << "\n";
+    fout << "m_applyTransform2" << " " << m_applyTransform2 << "\n";
+    fout << "m_drawSanboxAreaLines" << " " << m_drawSanboxAreaLines << "\n";
 
-    if (m_calibrationBoxComplete)
-    {
-        cv::Point2f boxPoints[] = { m_boxPoints[0], m_boxPoints[1], m_boxPoints[2], m_boxPoints[3] };
+    fout << "m_calibrationComplete" << " " << m_calibrationComplete << "\n";
+    fout << "m_calibrationBoxComplete" << " " << m_calibrationBoxComplete << "\n";
 
-        tempX = boxPoints[0].x;
-        tempY = boxPoints[0].y;
-        float maxX = boxPoints[0].x;
-        float maxY = boxPoints[0].y;
-        for (int i = 0; i < 4; i++)
-        {
-            if (boxPoints[i].x < tempX)
-            {
-                tempX = boxPoints[i].x;
-            }
-            if (boxPoints[i].x > maxX)
-            {
-                maxX = boxPoints[i].x;
-            }
-            if (boxPoints[i].y < tempY)
-            {
-                tempY = boxPoints[i].y;
-            }
-            if (boxPoints[i].y > maxY)
-            {
-                maxY = boxPoints[i].y;
-            }
-        }
+    fout << "m_points[0]" << " " << m_points[0].x << " " << m_points[0].y << "\n";
+    fout << "m_points[1]" << " " << m_points[1].x << " " << m_points[1].y << "\n";
+    fout << "m_points[2]" << " " << m_points[2].x << " " << m_points[2].y << "\n";
+    fout << "m_points[3]" << " " << m_points[3].x << " " << m_points[3].y << "\n";
 
-        for (int i = 0; i < 4; i++)
-        {
-            boxPoints[i].x -= tempX;
-            boxPoints[i].y -= tempY;
-        }
-        m_boxWidth = maxX - tempX;
-        m_boxHeight = maxY - tempY;
+    fout << "m_pointCircles[0]" << " " << m_pointCircles[0].getPosition().x << " " << m_pointCircles[0].getPosition().y << "\n";
+    fout << "m_pointCircles[1]" << " " << m_pointCircles[1].getPosition().x << " " << m_pointCircles[1].getPosition().y << "\n";
+    fout << "m_pointCircles[2]" << " " << m_pointCircles[2].getPosition().x << " " << m_pointCircles[2].getPosition().y << "\n";
+    fout << "m_pointCircles[3]" << " " << m_pointCircles[3].getPosition().x << " " << m_pointCircles[3].getPosition().y << "\n";
 
-        float ratio = (float)m_boxHeight / m_boxWidth;
-        m_finalWidth = m_width * 1.5f;
-        m_finalHeight = m_finalWidth * ratio;
-        m_boxScale = sf::Vector2f(m_finalWidth / m_boxWidth, m_finalHeight / m_boxHeight);
+    fout << "m_boxPoints[0]" << " " << m_boxPoints[0].x << " " << m_boxPoints[0].y << "\n";
+    fout << "m_boxPoints[1]" << " " << m_boxPoints[1].x << " " << m_boxPoints[1].y << "\n";
+    fout << "m_boxPoints[2]" << " " << m_boxPoints[2].x << " " << m_boxPoints[2].y << "\n";
+    fout << "m_boxPoints[3]" << " " << m_boxPoints[3].x << " " << m_boxPoints[3].y << "\n";
 
-        for (int i = 0; i < 4; i++)
-        {
-            boxPoints[i].x *= m_boxScale.x;
-            boxPoints[i].y *= m_boxScale.y;
-        }
+    fout << "m_pointBoxCircles[0]" << " " << m_pointBoxCircles[0].getPosition().x << " " << m_pointBoxCircles[0].getPosition().y << "\n";
+    fout << "m_pointBoxCircles[1]" << " " << m_pointBoxCircles[1].getPosition().x << " " << m_pointBoxCircles[1].getPosition().y << "\n";
+    fout << "m_pointBoxCircles[2]" << " " << m_pointBoxCircles[2].getPosition().x << " " << m_pointBoxCircles[2].getPosition().y << "\n";
+    fout << "m_pointBoxCircles[3]" << " " << m_pointBoxCircles[3].getPosition().x << " " << m_pointBoxCircles[3].getPosition().y << "\n";
 
-        m_boxOperator = cv::getPerspectiveTransform(dstPoints, boxPoints);
-    }
+    fout << "m_width" << " " << m_width << "\n";
+    fout << "m_height" << " " << m_height << "\n";
+
+    fout << "m_boxWidth" << " " << m_boxWidth << "\n";
+    fout << "m_boxHeight" << " " << m_boxHeight << "\n";
 }

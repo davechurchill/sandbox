@@ -2,6 +2,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
+#include <fstream>
 
 class Calibration
 {
@@ -19,15 +20,9 @@ class Calibration
     cv::Point2f                     m_boxPoints[4];
     std::vector<sf::CircleShape>    m_pointCircles;
     std::vector<sf::CircleShape>    m_pointBoxCircles;
-
-    void orderPoints();
-    void generateWarpMatrix();
-
-public:
     int                             m_boxWidth = 500;
     int                             m_boxHeight = 400;
-    float                           tempX = 0.0;
-    float                           tempY = 0.0;
+    sf::Vector2f                    m_minXY;
     bool                            m_applyTransform = false;
     bool                            m_applyTransform2 = false;
     bool                            m_applyAdjustment = false;
@@ -39,19 +34,29 @@ public:
     cv::Point                       secondPoint;
     cv::Point                       thirdPoint;
 
+    void orderPoints();
+    void generateWarpMatrix();
+
+public:
+
     sf::Vector2f                    m_boxScale;
     Calibration();
     void imgui();
-    std::vector<cv::Point2f>  getConfig();
-    std::vector<cv::Point2f>  getBoxConfig();
-    std::vector<sf::CircleShape> getPointCircle();
-    std::vector<sf::CircleShape> getPointBoxCircle();
-    cv::Point2f getDimension();
-    cv::Point2f getBoxDimension();
     void loadConfiguration();
+    void save(std::ofstream & fout);
     void transformRect(const cv::Mat & input, cv::Mat & output);
     void transformProjection(const cv::Mat & input, cv::Mat & output);
     void heightAdjustment(cv::Mat & matrix);
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void render(sf::RenderWindow & window);
+
+    inline float getTransformedScale() const
+    {
+        return 1.f / m_boxScale.x;
+    }
+
+    inline sf::Vector2f getTransformedPosition() const
+    {
+        return m_minXY;
+    }
 };

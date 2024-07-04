@@ -6,6 +6,7 @@
 #include "Calibration.h"
 #include "ContourLines.hpp"
 #include "Colorizer.hpp"
+#include "CameraFilters.hpp"
 
 #include <chrono>
 #include <iostream>
@@ -41,18 +42,9 @@ class Scene_Sandbox : public Scene
     bool                m_drawColor = false; 
     bool                m_drawUI = true;
 
-    int                 m_depthAlpha = 255;
-    float               m_depthPos[2] = { 0, 0 };
-    float               m_depthScaleX = 1.0f;
-    float               m_depthScaleY = 1.0f;
-    int                 m_colorAlpha = 255;
-    float               m_colorPos[2] = { 0, 0 };
-    float               m_colorScale = 1.0f;
-
     alignment           m_alignment = alignment::nothing;
     MouseSelections     m_mouseSelection = MouseSelections::None;
 
-    rs2::colorizer      m_colorMap;
     rs2::pipeline       m_pipe;
     rs2::align          m_alignment_depth = rs2::align(RS2_STREAM_DEPTH);
     rs2::align          m_alignment_color = rs2::align(RS2_STREAM_COLOR);
@@ -84,27 +76,10 @@ class Scene_Sandbox : public Scene
     Grid<float>         m_depthWarpedGrid;
     float               m_mouseDepth;
 
-    int                 m_decimation = 1;
-    rs2::decimation_filter m_decimationFilter;
-
     float               m_maxDistance = 5.0;
     float               m_minDistance = 0.0;
-    rs2::threshold_filter m_thresholdFilter;
 
-    int                 m_spatialMagnitude = 2;
-    float               m_smoothAlpha = 0.5;
-    int                 m_smoothDelta = 20;
-    int                 m_spatialHoleFill = 0;
-    rs2::spatial_filter m_spatialFilter;
-
-   
-    float               m_smoothAlphaTemporal = 0.4;
-    int                 m_smoothDeltaTemporal = 20;
-    int                 m_persistanceTemporal = 3;
-    rs2::temporal_filter m_temporalFilter;
-
-    int                 m_holeFill = 3;
-    rs2::hole_filling_filter m_holeFilter;
+    CameraFilters       m_filters;
 
     bool                m_drawContours = false;
     ContourLines        m_contour;

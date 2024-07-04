@@ -47,10 +47,6 @@ void Scene_Sandbox::captureImage()
         data = m_alignment_color.process(data);
     }
 
-    m_thresholdFilter.set_option(RS2_OPTION_MAX_DISTANCE, m_maxDistance);
-    m_thresholdFilter.set_option(RS2_OPTION_MIN_DISTANCE, m_minDistance);
-    //data = m_thresholdFilter.process(data);
-
     // Handle regular video footage
     rs2::frame color = data.get_color_frame();
     const int cw = color.as<rs2::video_frame>().get_width();
@@ -61,42 +57,14 @@ void Scene_Sandbox::captureImage()
         cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
         m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
         m_sfColorTexture.loadFromImage(m_sfColorImage);
-        m_colorSprite.setTexture(m_sfColorTexture);
+        m_colorSprite.setTexture(m_sfColorTexture, true);
     }
 
 
     // Handle depth feed
     rs2::depth_frame rawDepth = data.get_depth_frame();
 
-    if (m_decimation > 0)
-    {
-        m_decimationFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_decimation);
-        rawDepth = m_decimationFilter.process(rawDepth);
-    }
-
-    if (m_spatialMagnitude > 0)
-    {
-        m_spatialFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, m_spatialMagnitude);
-        m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlpha);
-        m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, m_smoothDelta);
-        m_spatialFilter.set_option(RS2_OPTION_HOLES_FILL, m_spatialHoleFill);
-
-        rawDepth = m_spatialFilter.process(rawDepth);
-    }
-
-    if (m_holeFill < 3)
-    {
-        m_holeFilter.set_option(RS2_OPTION_HOLES_FILL, m_holeFill);
-        rawDepth = m_holeFilter.process(rawDepth);
-    }
-
-    if (m_smoothAlphaTemporal < 1.0f)
-    {
-        m_temporalFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlphaTemporal);
-        m_temporalFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, m_smoothDeltaTemporal);
-        m_temporalFilter.set_option(RS2_OPTION_HOLES_FILL, m_persistanceTemporal);
-        rawDepth = m_temporalFilter.process(rawDepth);
-    }
+    rawDepth = m_filters.apply(rawDepth);
 
     // Query frame size (width and height)
     int dw = rawDepth.as<rs2::video_frame>().get_width();
@@ -302,16 +270,8 @@ void Scene_Sandbox::sRender()
     m_lineStrip.clear();
     m_quadArray.clear();
 
-    m_depthSprite.setColor(sf::Color(255, 255, 255, m_depthAlpha));
-    m_depthSprite.setPosition(m_depthPos[0], m_depthPos[1]);
-    m_depthSprite.setScale(m_depthScaleX, m_depthScaleY);
-
-    m_colorSprite.setColor(sf::Color(255, 255, 255, m_colorAlpha));
-    m_colorSprite.setPosition(m_colorPos[0], m_colorPos[1]);
-    m_colorSprite.setScale(m_colorScale, m_colorScale);
-
-    m_transformedSprite.setPosition(m_calibration.tempX, m_calibration.tempY);
-    float scale = 1.f / m_calibration.m_boxScale.x;
+    m_transformedSprite.setPosition(m_calibration.getTransformedPosition());
+    float scale = m_calibration.getTransformedScale();
     m_transformedSprite.setScale(scale, scale);
     m_game->window().draw(m_transformedSprite);
 
@@ -362,92 +322,49 @@ void Scene_Sandbox::renderUI()
         if (ImGui::BeginTabItem("Camera"))
         {
             // PC Display Options
-            const char * items[] = { "Depth", "Color", "Nothing" };
-            ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
 
-            ImGui::SliderInt("Decimation", &m_decimation, 0, 5);
-
-            if (ImGui::CollapsingHeader("Spatial Filter"))
-            {
-                ImGui::Indent();
-                ImGui::SliderInt("Magnitude", &m_spatialMagnitude, 0, 5);
-                if (m_spatialMagnitude > 0)
-                {
-                    ImGui::SliderFloat("Smooth Alpha", &m_smoothAlpha, 0.25, 1.0);
-                    ImGui::SliderInt("Smooth Delta", &m_smoothDelta, 1, 50);
-                    ImGui::SliderInt("Hole Filling", &m_spatialHoleFill, 0, 5);
-                }
-                ImGui::Unindent();
-            }
-
-            if (ImGui::CollapsingHeader("Temporal Filter"))
-            {
-                ImGui::Indent();
-                ImGui::SliderFloat("Temporal Alpha", &m_smoothAlphaTemporal, 0.0, 1.0);
-                ImGui::SliderInt("Temporal Delta", &m_smoothDeltaTemporal, 1, 100);
-                const char * persistance_options[] = { "Disabled", "Valid in 8/8", "Valid in 2/last 3", "Valid in 2/last 4", "Valid in 2/8",
-                                                      "Valid in 1/last 2", "Valid in 1/last 5", "Valid in 1/last 8", "Persist Indefinitely" };
-                ImGui::Combo("Persistance", &m_persistanceTemporal, persistance_options, 9);
-                ImGui::Unindent();
-            }
-
-            if (ImGui::CollapsingHeader("Threshold Filter"))
-            {
-                ImGui::Indent();
-                ImGui::Text("Distance from Mouse %f", m_mouseDepth);
-
-                ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 2.0);
-                if (ImGui::Button("Select Max Distance"))
-                {
-                    m_mouseSelection = MouseSelections::MaxDistance;
-                }
-
-                ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 2.0);
-                if (ImGui::Button("Select Min Distance"))
-                {
-                    m_mouseSelection = MouseSelections::MinDistance;
-                }
-                ImGui::Unindent();
-            }
-
-            if (ImGui::CollapsingHeader("Hole Filling Filter"))
-            {
-                ImGui::Indent();
-                const char* hole_options[] = { "Fill from left", "Farthest from around", "Nearest from around", "Off"};
-                ImGui::Combo("Fill Setting", &m_holeFill, hole_options, 4);
-                ImGui::Unindent();
-            }
+            m_filters.imgui();
 
             ImGui::EndTabItem();
         }
         if (ImGui::BeginTabItem("View"))
         {
+            const char * items[] = { "Depth", "Color", "Nothing" };
+            ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
+
             m_colorizer.imgui();
-            ImGui::Checkbox("Depth", &m_drawDepth);
-            if (ImGui::Button("Match Color"))
+            if (ImGui::CollapsingHeader("Thresholds"))
             {
-                m_depthAlpha = m_colorAlpha;
-                m_depthPos[0] = m_colorPos[0];
-                m_depthPos[1] = m_colorPos[1];
-                m_depthScaleX = m_colorScale;
-                m_depthScaleY = m_colorScale;
+                ImGui::Indent();
+                if (m_mouseSelection == MouseSelections::None)
+                {
+                    ImGui::Text("Select from Mouse:");
+                    ImGui::SameLine();
+                    if (ImGui::Button("Max"))
+                    {
+                        m_mouseSelection = MouseSelections::MaxDistance;
+                    }
+                    ImGui::SameLine();
+                    if (ImGui::Button("Min"))
+                    {
+                        m_mouseSelection = MouseSelections::MinDistance;
+                    }
+                } else {
+                    ImGui::Text("Distance from Mouse %f", m_mouseDepth);
+                }
+
+                ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 2.0);
+                ImGui::SameLine();
+                ImGui::InputFloat("#maxfloat", &m_maxDistance);
+
+                ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 2.0);
+                ImGui::SameLine();
+                ImGui::InputFloat("#minfloat", &m_minDistance);
+                ImGui::Unindent();
             }
-            ImGui::SliderInt("DAlpha", &m_depthAlpha, 0, 255);
-            ImGui::SliderFloat2("DPos", m_depthPos, -1000, 1000);
-            ImGui::SliderFloat("DScale X", &m_depthScaleX, 0, 5);
-            ImGui::SliderFloat("DScale Y", &m_depthScaleY, 0, 5);
+            ImGui::Checkbox("Depth", &m_drawDepth);
 
             ImGui::Checkbox("Color", &m_drawColor);
-            if (ImGui::Button("Match Depth"))
-            {
-                m_colorAlpha = m_depthAlpha;
-                m_colorPos[0] = m_depthPos[0];
-                m_colorPos[1] = m_depthPos[1];
-                m_colorScale = m_depthScaleX;
-            }
-            ImGui::SliderInt("CAlpha", &m_colorAlpha, 0, 255);
-            ImGui::SliderFloat2("CPos", m_colorPos, -1000, 1000);
-            ImGui::SliderFloat("CScale", &m_colorScale, 0, 2);
 
             ImGui::Spacing();
 
@@ -496,52 +413,11 @@ void Scene_Sandbox::saveConfig()
 {
     std::ofstream fout("config.txt");
 
-    fout << "m_applyTransform" << " " << m_calibration.m_applyTransform << "\n";
-    fout << "m_applyTransform2" << " " << m_calibration.m_applyTransform2 << "\n";
-    fout << "m_drawSanboxAreaLines" << " " << m_calibration.m_drawSanboxAreaLines << "\n";
-
-    fout << "m_calibrationComplete" << " " << m_calibration.m_calibrationComplete << "\n";
-    fout << "m_calibrationBoxComplete" << " " << m_calibration.m_calibrationBoxComplete << "\n";
-
-    fout << "Decimation" << " " << m_decimation << "\n";
-    fout << "temporalAlpha" << " " << m_smoothAlphaTemporal << "\n";
-    fout << "temporalDelta" << " " << m_smoothDeltaTemporal << "\n";
-    fout << "temporalPersistance" << " " << m_persistanceTemporal << "\n";
-
-    fout << "Magnitude" << " " << m_spatialMagnitude << "\n";
-    fout << "Alpha" << " " << m_smoothAlpha << "\n";
-    fout << "Delta" << " " << m_smoothDelta << "\n";
-    fout << "SHole" << " " << m_spatialHoleFill << "\n";
     fout << "MaxDistance" << " " << m_maxDistance << "\n";
     fout << "MinDistance" << " " << m_minDistance << "\n";
-    fout << "HoleFill" << " " << m_holeFill << "\n";
 
-    fout << "m_points[0]" << " " << m_calibration.getConfig()[0].x << " " << m_calibration.getConfig()[0].y << "\n";
-    fout << "m_points[1]" << " " << m_calibration.getConfig()[1].x << " " << m_calibration.getConfig()[1].y << "\n";
-    fout << "m_points[2]" << " " << m_calibration.getConfig()[2].x << " " << m_calibration.getConfig()[2].y << "\n";
-    fout << "m_points[3]" << " " << m_calibration.getConfig()[3].x << " " << m_calibration.getConfig()[3].y << "\n";
-
-    fout << "m_pointCircles[0]" << " " << m_calibration.getPointCircle()[0].getPosition().x << " " << m_calibration.getPointCircle()[0].getPosition().y << "\n";
-    fout << "m_pointCircles[1]" << " " << m_calibration.getPointCircle()[1].getPosition().x << " " << m_calibration.getPointCircle()[1].getPosition().y << "\n";
-    fout << "m_pointCircles[2]" << " " << m_calibration.getPointCircle()[2].getPosition().x << " " << m_calibration.getPointCircle()[2].getPosition().y << "\n";
-    fout << "m_pointCircles[3]" << " " << m_calibration.getPointCircle()[3].getPosition().x << " " << m_calibration.getPointCircle()[3].getPosition().y << "\n";
-
-
-    fout << "m_boxPoints[0]" << " " << m_calibration.getBoxConfig()[0].x << " " << m_calibration.getBoxConfig()[0].y << "\n";
-    fout << "m_boxPoints[1]" << " " << m_calibration.getBoxConfig()[1].x << " " << m_calibration.getBoxConfig()[1].y << "\n";
-    fout << "m_boxPoints[2]" << " " << m_calibration.getBoxConfig()[2].x << " " << m_calibration.getBoxConfig()[2].y << "\n";
-    fout << "m_boxPoints[3]" << " " << m_calibration.getBoxConfig()[3].x << " " << m_calibration.getBoxConfig()[3].y << "\n";
-
-    fout << "m_pointBoxCircles[0]" << " " << m_calibration.getPointBoxCircle()[0].getPosition().x << " " << m_calibration.getPointBoxCircle()[0].getPosition().y << "\n";
-    fout << "m_pointBoxCircles[1]" << " " << m_calibration.getPointBoxCircle()[1].getPosition().x << " " << m_calibration.getPointBoxCircle()[1].getPosition().y << "\n";
-    fout << "m_pointBoxCircles[2]" << " " << m_calibration.getPointBoxCircle()[2].getPosition().x << " " << m_calibration.getPointBoxCircle()[2].getPosition().y << "\n";
-    fout << "m_pointBoxCircles[3]" << " " << m_calibration.getPointBoxCircle()[3].getPosition().x << " " << m_calibration.getPointBoxCircle()[3].getPosition().y << "\n";
-
-    fout << "m_width" << " " << m_calibration.getDimension().x << "\n";
-    fout << "m_height" << " " << m_calibration.getDimension().y << "\n";
-
-    fout << "m_boxWidth" << " " << m_calibration.getBoxDimension().x << "\n";
-    fout << "m_boxHeight" << " " << m_calibration.getBoxDimension().y << "\n";
+    m_filters.save(fout);
+    m_calibration.save(fout);
 }
 
 void Scene_Sandbox::loadConfig()
@@ -550,16 +426,9 @@ void Scene_Sandbox::loadConfig()
     std::string temp;
     while (fin >> temp)
     {
-        if (temp == "Decimation") { fin >> m_decimation; }
-        if (temp == "temporalAlpha") { fin >> m_smoothAlphaTemporal; }
-        if (temp == "temporalDelta") { fin >> m_smoothDeltaTemporal; }
-        if (temp == "temporalPersistance") { fin >> m_persistanceTemporal; }
-        if (temp == "Magnitude") { fin >> m_spatialMagnitude; }
-        if (temp == "Alpha") { fin >> m_smoothAlpha; }
-        if (temp == "SHole") { fin >> m_spatialHoleFill; }
         if (temp == "MaxDistance") { fin >> m_maxDistance; }
         if (temp == "MinDistance") { fin >> m_minDistance; }
-        if (temp == "HoleFill") { fin >> m_holeFill; }
+        m_filters.loadTerm(temp, fin);
     }
     m_calibration.loadConfiguration();
 }
