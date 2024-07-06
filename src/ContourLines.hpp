@@ -103,7 +103,7 @@ public:
     {
         size_t width = m_onContour.width();
         size_t height = m_onContour.height();
-        m_linesImage.create(width, height, sf::Color::Transparent);
+        m_linesImage.create((int)width, (int)height, sf::Color::Transparent);
 
         for (int i = 0; i < width; ++i)
         {

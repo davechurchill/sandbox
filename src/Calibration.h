@@ -26,13 +26,13 @@ class Calibration
     cv::Point                       firstPoint;
     cv::Point                       secondPoint;
     cv::Point                       thirdPoint;
+    sf::Vector2f                    m_boxScale;
 
     void generateWarpMatrix();
-    int getClickedCircleIndex(int mx, int my, std::vector<sf::CircleShape>& circles);
+    int getClickedCircleIndex(float mx, float my, std::vector<sf::CircleShape>& circles);
 
 public:
 
-    sf::Vector2f                    m_boxScale;
     Calibration();
     void imgui();
     void loadConfiguration();

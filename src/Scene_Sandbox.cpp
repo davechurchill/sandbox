@@ -33,7 +33,6 @@ void Scene_Sandbox::init()
     m_contour.setContourLevel(0.5);
 
     loadConfig();
-    //m_game->displayWindow().create(sf::VideoMode(1920, 1080), "Sandbox", sf::Style::Default);
 
 }
 
@@ -177,6 +176,9 @@ void Scene_Sandbox::sProcessEvent(const sf::Event& event)
 {
     ImGui::SFML::ProcessEvent(m_game->window(), event);
     m_viewController.processEvent(m_game->window(), event);
+
+    // process the event within the calibration system
+    // this will handle the moving of calibration quadrilaterals
     m_calibration.processEvent(event, m_mouseWorld);
 
     // this event triggers when the window is closed
@@ -209,7 +211,7 @@ void Scene_Sandbox::sProcessEvent(const sf::Event& event)
             if (!m_game->displayWindow().isOpen())
             {
                 m_game->displayWindow().create(sf::VideoMode(1920, 1080), "Display", sf::Style::None);
-                m_game->displayWindow().setPosition({ 0, 0 });
+                m_game->displayWindow().setPosition({ -1920, 0 });
             }
             else
             {
@@ -248,10 +250,12 @@ void Scene_Sandbox::sUserInput()
     {
         sProcessEvent(event);
     }
-    /*while (m_game->displayWindow().pollEvent(event))
+
+    sf::Event displayEvent;
+    while (m_game->displayWindow().pollEvent(displayEvent))
     {
-        sProcessEvent(event);
-    }*/
+        sProcessEvent(displayEvent);
+    }
 }
 
 // renders the scene
@@ -293,6 +297,7 @@ void Scene_Sandbox::sRender()
     m_game->window().draw(m_lineStrip);
     m_game->window().draw(m_text);
 
+    // render the calibration debug information
     m_calibration.render(m_game->window());
 }
 

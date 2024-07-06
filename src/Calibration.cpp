@@ -58,12 +58,12 @@ void Calibration::heightAdjustment(cv::Mat & matrix)
     float vect_B[] = { width - 1, 0, bottomRight - topLeft };
     float cross_P[] = { 0.0, 0.0, 0.0 };*/
 
-    float firstPointZ = matrix.at<float>(firstPoint.y, firstPoint.x);
+    float firstPointZ  = matrix.at<float>(firstPoint.y,  firstPoint.x);
     float secondPointZ = matrix.at<float>(secondPoint.y, secondPoint.x);
-    float thirdPointZ = matrix.at<float>(thirdPoint.y, thirdPoint.x);
+    float thirdPointZ  = matrix.at<float>(thirdPoint.y,  thirdPoint.x);
 
-    float vect_A[] = { secondPoint.x - firstPoint.x, secondPoint.y - firstPoint.y, secondPointZ - firstPointZ };
-    float vect_B[] = { thirdPoint.x - firstPoint.x, thirdPoint.y - firstPoint.y,   thirdPointZ - firstPointZ };
+    float vect_A[] = { (float)(secondPoint.x - firstPoint.x), (float)(secondPoint.y - firstPoint.y), secondPointZ - firstPointZ };
+    float vect_B[] = { (float)(thirdPoint.x - firstPoint.x), (float)(thirdPoint.y - firstPoint.y),   thirdPointZ - firstPointZ };
     float cross_P[] = { 0.0, 0.0, 0.0 };
 
     cross_P[0] = vect_A[1] * vect_B[2] - vect_A[2] * vect_B[1];
@@ -72,9 +72,9 @@ void Calibration::heightAdjustment(cv::Mat & matrix)
 
     //plane equation
     float d = -(cross_P[0] * secondPoint.x + cross_P[1] * secondPoint.y + cross_P[2] * secondPointZ);
-    for (size_t i = 0; i < width; i++)
+    for (int i = 0; i < width; i++)
     {
-        for (size_t j = 0; j < height; j++)
+        for (int j = 0; j < height; j++)
         {
             float newZ = (-d - cross_P[0] * i - cross_P[1] * j) / cross_P[2];
             matrix.at<float>(j, i) += secondPointZ - newZ;
@@ -84,7 +84,7 @@ void Calibration::heightAdjustment(cv::Mat & matrix)
 
 // given an (mx, my) mouse position, return the index of the first circle the contains the position
 // returns -1 if the mouse position is not inside any circle
-int Calibration::getClickedCircleIndex(int mx, int my, std::vector<sf::CircleShape>& circles)
+int Calibration::getClickedCircleIndex(float mx, float my, std::vector<sf::CircleShape>& circles)
 {
     for (int i = 0; i < circles.size(); i++)
     {
@@ -119,14 +119,14 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
     {
         if (m_dragPoint != -1) 
         {
-            m_boxInteriorPoints[m_dragPoint] = cv::Point(mouse.x, mouse.y);
+            m_boxInteriorPoints[m_dragPoint] = cv::Point((int)mouse.x, (int)mouse.y);
             m_boxInteriorCircles[m_dragPoint].setPosition(mouse);
             generateWarpMatrix();
         }
 
         if (m_dragBoxPoint != -1) 
         {
-            m_boxProjectionPoints[m_dragBoxPoint] = cv::Point(mouse.x, mouse.y);
+            m_boxProjectionPoints[m_dragBoxPoint] = cv::Point((int)mouse.x, (int)mouse.y);
             m_boxProjectionCircles[m_dragBoxPoint].setPosition(mouse);
             generateWarpMatrix();
         }
@@ -172,9 +172,9 @@ void Calibration::generateWarpMatrix()
 {
     cv::Point2f dstPoints[] = {
             cv::Point2f(0, 0),
-            cv::Point2f(m_width, 0),
-            cv::Point2f(0, m_height),
-            cv::Point2f(m_width, m_height),
+            cv::Point2f((float)m_width, 0),
+            cv::Point2f(0, (float)m_height),
+            cv::Point2f((float)m_width, (float)m_height),
     };
     m_operator = cv::getPerspectiveTransform(m_boxInteriorPoints, dstPoints);
 
@@ -209,12 +209,12 @@ void Calibration::generateWarpMatrix()
         boxPoints[i].x -= m_minXY.x;
         boxPoints[i].y -= m_minXY.y;
     }
-    m_boxWidth = maxX - m_minXY.x;
-    m_boxHeight = maxY - m_minXY.y;
+    m_boxWidth = (int)(maxX - m_minXY.x);
+    m_boxHeight = (int)(maxY - m_minXY.y);
 
     float ratio = (float)m_boxHeight / m_boxWidth;
-    m_finalWidth = m_width * 1.5f;
-    m_finalHeight = m_finalWidth * ratio;
+    m_finalWidth = (int)(m_width * 1.5f);
+    m_finalHeight = (int)(m_finalWidth * ratio);
     m_boxScale = sf::Vector2f((float)m_finalWidth / m_boxWidth, (float)m_finalHeight / m_boxHeight);
 
     for (int i = 0; i < 4; i++)

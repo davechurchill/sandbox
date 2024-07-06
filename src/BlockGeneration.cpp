@@ -16,19 +16,19 @@ namespace mc
 
     void BasicGrassProfile::generate(Cube<uint8_t> & output, const Grid<float> & input, int blockScale)
     {
-        int wx = input.width();
-        int wz = input.height();
-        int water = std::ceil(blockScale * m_waterLevel);
+        int wx = (int)(input.width());
+        int wz = (int)(input.height());
+        int water = (int)(std::ceil(blockScale * m_waterLevel));
 
         if (wx <= 0 || wz <= 0) { return; }
 
         output.refill(wx, blockScale, wz, 0);
 
-        for (size_t i = 0; i < wx; ++i)
+        for (int i = 0; i < wx; ++i)
         {
-            for (size_t j = 0; j < wz; ++j)
+            for (int j = 0; j < wz; ++j)
             {
-                int height = input.get(i, j) * blockScale;
+                int height = (int)(input.get(i, j) * blockScale);
                 if (height >= water)
                 {
                     output.fill(i, height, j, i, height, j, 3);
@@ -60,18 +60,18 @@ namespace mc
     }
     void MonochromeProfile::generate(Cube<uint8_t> & output, const Grid<float> & input, int blockScale)
     {
-        int wx = input.width();
-        int wz = input.height();
+        int wx = (int)(input.width());
+        int wz = (int)(input.height());
 
         if (wx <= 0 || wz <= 0) { return; }
 
         output.refill(wx, blockScale, wz, 0);
 
-        for (size_t i = 0; i < wx; ++i)
+        for (int i = 0; i < wx; ++i)
         {
-            for (size_t j = 0; j < wz; ++j)
+            for (int j = 0; j < wz; ++j)
             {
-                int height = input.get(i, j) * blockScale;
+                int height = (int)(input.get(i, j) * blockScale);
                 output.fill(i, 0, j, i, height, j, height * 4 / blockScale + 1);
             }
         }
