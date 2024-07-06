@@ -40,6 +40,7 @@ public:
         m_lineStrip.append(sf::Vertex(v2.position, sf::Color(0, 0, 0, 0)));
     }
 
+    
     template <class T>
     void drawRect(T x, T y, T w, T h, sf::Color color)
     {

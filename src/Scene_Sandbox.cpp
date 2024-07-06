@@ -223,8 +223,8 @@ void Scene_Sandbox::sProcessEvent(const sf::Event& event)
         {
             if (!m_game->displayWindow().isOpen())
             {
-                m_game->displayWindow().create(sf::VideoMode(1920, 1080), "Sandbox", sf::Style::None);
-                m_game->displayWindow().setPosition({ -1920, 0 });
+                m_game->displayWindow().create(sf::VideoMode(1920, 1080), "Display", sf::Style::None);
+                m_game->displayWindow().setPosition({ 0, 0 });
             }
             else
             {

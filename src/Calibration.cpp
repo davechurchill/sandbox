@@ -276,21 +276,19 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
 
 void Calibration::render(sf::RenderWindow & window)
 {
-    //if (!m_applyTransform)
+    // draw the circles used to calibrate the interior of the sandbox for the depth camera
+    for (size_t i = 0; i < m_boxInteriorCircles.size(); ++i)
     {
-        for (size_t i = 0; i < m_boxInteriorCircles.size(); ++i)
-        {
-            m_boxInteriorCircles[i].setPosition({ m_boxInteriorPoints[i].x, m_boxInteriorPoints[i].y });
-            window.draw(m_boxInteriorCircles[i]);
-        }
+        m_boxInteriorCircles[i].setPosition({ m_boxInteriorPoints[i].x, m_boxInteriorPoints[i].y });
+        window.draw(m_boxInteriorCircles[i]);
+    }
 
-        int nBox = m_calibrationBoxComplete ? m_boxProjectionCircles.size() : m_currentBoxPoint;
-        for (int i = 0; i < nBox; ++i)
+    // draw the circles outlining where the box should be 
+    if (m_drawSanboxAreaLines)
+    {
+        for (size_t i = 0; i < m_boxProjectionCircles.size(); ++i)
         {
-            if (m_drawSanboxAreaLines)
-            {
-                window.draw(m_boxProjectionCircles[i]);
-            }
+            window.draw(m_boxProjectionCircles[i]);
         }
     }
 
@@ -469,155 +467,34 @@ void Calibration::loadConfiguration()
 {
     std::ifstream fin("config.txt");
     std::string temp;
+    float x, y;
     while (fin >> temp)
     {
-        if (temp == "m_points[0]")
-        {
-            fin >> m_boxInteriorPoints[0].x;
-            fin >> m_boxInteriorPoints[0].y;
-        }
-
-        if (temp == "m_boxPoints[0]")
-        {
-            fin >> m_boxProjectionPoints[0].x;
-            fin >> m_boxProjectionPoints[0].y;
-        }
-
-        if (temp == "m_points[1]")
-        {
-            fin >> m_boxInteriorPoints[1].x;
-            fin >> m_boxInteriorPoints[1].y;
-        }
-
-        if (temp == "m_boxPoints[1]")
-        {
-            fin >> m_boxProjectionPoints[1].x;
-            fin >> m_boxProjectionPoints[1].y;
-        }
-
-        if (temp == "m_points[2]")
-        {
-            fin >> m_boxInteriorPoints[2].x;
-            fin >> m_boxInteriorPoints[2].y;
-        }
-
-        if (temp == "m_boxPoints[2]")
-        {
-            fin >> m_boxProjectionPoints[2].x;
-            fin >> m_boxProjectionPoints[2].y;
-        }
-
-        if (temp == "m_points[3]")
-        {
-            fin >> m_boxInteriorPoints[3].x;
-            fin >> m_boxInteriorPoints[3].y;
-        }
-
-        if (temp == "m_boxPoints[3]")
-        {
-            fin >> m_boxProjectionPoints[3].x;
-            fin >> m_boxProjectionPoints[3].y;
-        }
-
-        if (temp == "m_width")
-        {
-            fin >> m_width;
-        }
-
-        if (temp == "m_boxWidth")
-        {
-            fin >> m_boxWidth;
-        }
-
-        if (temp == "m_height")
-        {
-            fin >> m_height;
-        }
-
-        if (temp == "m_boxHeight")
-        {
-            fin >> m_boxHeight;
-        }
-
-        if (temp == "m_pointCircles[0]")
-        {
-            float x, y;
-            fin >> x >> y;
-            m_boxInteriorCircles[0].setPosition(x, y);
-        }
-
-        if (temp == "m_pointCircles[1]")
-        {
-            float x, y;
-            fin >> x >> y;
-            m_boxInteriorCircles[1].setPosition(x, y);
-        }
-
-        if (temp == "m_pointCircles[2]")
-        {
-            float x, y;
-            fin >> x >> y;
-            m_boxInteriorCircles[2].setPosition(x, y);
-        }
-
-        if (temp == "m_pointCircles[3]")
-        {
-            float x, y;
-            fin >> x >> y;
-            m_boxInteriorCircles[3].setPosition(x, y);
-        }
-
-        if (temp == "m_pointBoxCircles[0]")
-        {
-            float x, y;
-            fin >> x >> y;
-            m_boxProjectionCircles[0].setPosition(x, y);
-        }
-
-        if (temp == "m_pointBoxCircles[1]")
-        {
-            float x, y;
-            fin >> x >> y;
-            m_boxProjectionCircles[1].setPosition(x, y);
-        }
-
-        if (temp == "m_pointBoxCircles[2]")
-        {
-            float x, y;
-            fin >> x >> y;
-            m_boxProjectionCircles[2].setPosition(x, y);
-        }
-
-        if (temp == "m_pointBoxCircles[3]")
-        {
-            float x, y;
-            fin >> x >> y;
-            m_boxProjectionCircles[3].setPosition(x, y);
-        }
-
-        if (temp == "m_applyTransform")
-        {
-            fin >> m_applyTransform;
-        }
-
-        if (temp == "m_applyTransform2")
-        {
-            fin >> m_applyTransform2;
-        }
-
-        if (temp == "m_drawSanboxAreaLines")
-        {
-            fin >> m_drawSanboxAreaLines;
-        }
-        if (temp == "m_calibrationComplete")
-        {
-            fin >> m_calibrationComplete;
-        }
-
-        if (temp == "m_calibrationBoxComplete")
-        {
-            fin >> m_calibrationBoxComplete;
-        }
+        if (temp == "m_points[0]")              { fin >> m_boxInteriorPoints[0].x >> m_boxInteriorPoints[0].y; }
+        else if (temp == "m_boxPoints[0]")      { fin >> m_boxProjectionPoints[0].x >> m_boxProjectionPoints[0].y; }
+        else if (temp == "m_points[1]")         { fin >> m_boxInteriorPoints[1].x >> m_boxInteriorPoints[1].y; }
+        else if (temp == "m_boxPoints[1]")      { fin >> m_boxProjectionPoints[1].x >> m_boxProjectionPoints[1].y; }
+        else if (temp == "m_points[2]")         { fin >> m_boxInteriorPoints[2].x >> m_boxInteriorPoints[2].y; }
+        else if (temp == "m_boxPoints[2]")      { fin >> m_boxProjectionPoints[2].x >> m_boxProjectionPoints[2].y; }
+        else if (temp == "m_points[3]")         { fin >> m_boxInteriorPoints[3].x >> m_boxInteriorPoints[3].y; }
+        else if (temp == "m_boxPoints[3]")      { fin >> m_boxProjectionPoints[3].x >> m_boxProjectionPoints[3].y; }
+        else if (temp == "m_width")             { fin >> m_width; }
+        else if (temp == "m_boxWidth")          { fin >> m_boxWidth; }
+        else if (temp == "m_height")            { fin >> m_height; }
+        else if (temp == "m_boxHeight")         { fin >> m_boxHeight; }
+        else if (temp == "m_pointCircles[0]")   { fin >> x >> y; m_boxInteriorCircles[0].setPosition(x, y); }
+        else if (temp == "m_pointCircles[1]")   { fin >> x >> y; m_boxInteriorCircles[1].setPosition(x, y); }
+        else if (temp == "m_pointCircles[2]")   { fin >> x >> y; m_boxInteriorCircles[2].setPosition(x, y); }
+        else if (temp == "m_pointCircles[3]")   { fin >> x >> y; m_boxInteriorCircles[3].setPosition(x, y); }
+        else if (temp == "m_pointBoxCircles[0]") { fin >> x >> y; m_boxProjectionCircles[0].setPosition(x, y); }
+        else if (temp == "m_pointBoxCircles[1]") { fin >> x >> y; m_boxProjectionCircles[1].setPosition(x, y); }
+        else if (temp == "m_pointBoxCircles[2]") { fin >> x >> y; m_boxProjectionCircles[2].setPosition(x, y); }
+        else if (temp == "m_pointBoxCircles[3]") { fin >> x >> y; m_boxProjectionCircles[3].setPosition(x, y); }
+        else if (temp == "m_applyTransform")    { fin >> m_applyTransform; }
+        else if (temp == "m_applyTransform2")   { fin >> m_applyTransform2; }
+        else if (temp == "m_drawSanboxAreaLines") { fin >> m_drawSanboxAreaLines; }
+        else if (temp == "m_calibrationComplete") { fin >> m_calibrationComplete; }
+        else if (temp == "m_calibrationBoxComplete") { fin >> m_calibrationBoxComplete; }
     }
 
     generateWarpMatrix();
