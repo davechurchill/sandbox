@@ -23,18 +23,12 @@ class Calibration
     int                             m_boxWidth = 500;
     int                             m_boxHeight = 400;
     sf::Vector2f                    m_minXY;
-    bool                            m_applyTransform = false;
-    bool                            m_applyTransform2 = false;
     bool                            m_applyAdjustment = false;
     bool                            m_drawSanboxAreaLines = true;
-    bool                            m_calibrationComplete = true;
-    bool                            m_calibrationBoxComplete = false;
-    bool                            m_heightPointsSelected = false;
     cv::Point                       firstPoint;
     cv::Point                       secondPoint;
     cv::Point                       thirdPoint;
 
-    void orderPoints();
     void generateWarpMatrix();
 
 public:
