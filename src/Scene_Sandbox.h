@@ -24,13 +24,6 @@ enum class alignment
     nothing
 };
 
-enum class MouseSelections
-{
-    None,
-    MaxDistance,
-    MinDistance
-};
-
 class Scene_Sandbox : public Scene
 {   
     bool                m_cameraConnected = false;
@@ -43,7 +36,6 @@ class Scene_Sandbox : public Scene
     bool                m_drawUI = true;
 
     alignment           m_alignment = alignment::nothing;
-    MouseSelections     m_mouseSelection = MouseSelections::None;
 
     rs2::pipeline       m_pipe;
     rs2::align          m_alignment_depth = rs2::align(RS2_STREAM_DEPTH);
@@ -73,7 +65,6 @@ class Scene_Sandbox : public Scene
 
     Grid<float>         m_depthGrid;
     Grid<float>         m_depthWarpedGrid;
-    float               m_mouseDepth;
 
     float               m_maxDistance = 1.13f;
     float               m_minDistance = 0.90f;
@@ -96,7 +87,6 @@ class Scene_Sandbox : public Scene
     void attemptCameraConnection();
     void saveConfig();
     void loadConfig();
-    void thresholdFromMouse();
     
 public:
 

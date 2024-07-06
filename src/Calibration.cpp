@@ -10,25 +10,17 @@
 
 Calibration::Calibration()
 {
-    float radius = 5.0;
-    for (int i = 0; i < 4; ++i)
-    {
-        sf::CircleShape c(radius);
-        c.setOrigin(radius, radius);
-        c.setFillColor(sf::Color::Green);
-        c.setPosition(-3247, -3247);
-        m_boxInteriorCircles.push_back(c);
-    }
+    float radius = 10.0;
+    sf::CircleShape circle(radius, 64);
+    circle.setOrigin(radius, radius);
+    circle.setFillColor(sf::Color::Green);
+    
+    // create the circles for the interior box selection
+    m_boxInteriorCircles = std::vector<sf::CircleShape>(4, circle);
 
-    float radius2 = 5.0;
-    for (int i = 0; i < 4; ++i)
-    {
-        sf::CircleShape c(radius2);
-        c.setOrigin(radius2, radius2);
-        c.setFillColor(sf::Color::Magenta);
-        c.setPosition(-3247, -3247);
-        m_boxProjectionCircles.push_back(c);
-    }
+    // create the circles for the display correction
+    circle.setFillColor(sf::Color::Magenta);
+    m_boxProjectionCircles = std::vector<sf::CircleShape>(4, circle);
 }
 
 void Calibration::imgui()
@@ -90,112 +82,55 @@ void Calibration::heightAdjustment(cv::Mat & matrix)
     }
 }
 
+// given an (mx, my) mouse position, return the index of the first circle the contains the position
+// returns -1 if the mouse position is not inside any circle
+int Calibration::getClickedCircleIndex(int mx, int my, std::vector<sf::CircleShape>& circles)
+{
+    for (int i = 0; i < circles.size(); i++)
+    {
+        float dx = mx - circles[i].getPosition().x;
+        float dy = my - circles[i].getPosition().y;
+        float d2 = dx * dx + dy * dy;
+        float rad2 = circles[i].getRadius() * circles[i].getRadius();
+        if (d2 <= rad2) { return i; }
+    }
+
+    return -1;
+}
+
 void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
-    if (m_dragPoint != -1) {
-        m_boxInteriorPoints[m_dragPoint] = cv::Point(mouse.x, mouse.y);
-        m_boxInteriorCircles[m_dragPoint].setPosition(mouse);
-        generateWarpMatrix();
-    }
-
-    if (m_dragBoxPoint != -1) {
-        m_boxProjectionPoints[m_dragBoxPoint] = cv::Point(mouse.x, mouse.y);
-        m_boxProjectionCircles[m_dragBoxPoint].setPosition(mouse);
-        generateWarpMatrix();
-    }
-
+    // detect if we have clicked a circle
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
-        int i = 0;
-        while (i < 4)
-        {
-            float xDistance = mouse.x - m_boxInteriorCircles[i].getPosition().x;
-            float yDistance = mouse.y - m_boxInteriorCircles[i].getPosition().y;
-            float pointsDistance = sqrt((xDistance * xDistance) + (yDistance * yDistance));
-
-            if (pointsDistance <= m_boxInteriorCircles[i].getRadius())
-            {
-                m_dragPoint = i;
-            }
-            i++;
-        }
+        m_dragPoint = getClickedCircleIndex(mouse.x, mouse.y, m_boxInteriorCircles);
+        m_dragBoxPoint = getClickedCircleIndex(mouse.x, mouse.y, m_boxProjectionCircles);
     }
 
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
-    {
-        int i = 0;
-        while (i < 4)
-        {
-            float xDistance = mouse.x - m_boxProjectionCircles[i].getPosition().x;
-            float yDistance = mouse.y - m_boxProjectionCircles[i].getPosition().y;
-            float pointsDistance = sqrt((xDistance * xDistance) + (yDistance * yDistance));
-
-            if (pointsDistance <= m_boxProjectionCircles[i].getRadius())
-            {
-                m_dragBoxPoint = i;
-            }
-            i++;
-        }
-    }
-
-    if (m_currentPoint > -1 && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
-    {
-        std::cout << mouse.x << " " << mouse.y << std::endl;
-        m_boxInteriorPoints[m_currentPoint] = cv::Point(mouse.x, mouse.y);
-        m_boxInteriorCircles[m_currentPoint].setPosition(mouse);
-        if (++m_currentPoint > 3)
-        {
-            m_currentPoint = -1;
-            generateWarpMatrix();
-        }
-    }
-
-    if (m_currentBoxPoint > -1 && event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
-    {
-        std::cout << mouse.x << " " << mouse.y << std::endl;
-        m_boxProjectionPoints[m_currentBoxPoint] = cv::Point(mouse.x, mouse.y);
-        m_boxProjectionCircles[m_currentBoxPoint].setPosition(mouse);
-        if (++m_currentBoxPoint > 3)
-        {
-            m_currentBoxPoint = -1;
-            generateWarpMatrix();
-        }
-    }
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
-    {
-        std::cout << mouse.x << " " << mouse.y << std::endl;
-
-        if (firstPoint.x == -3247)
-        {
-            firstPoint.x = mouse.x;
-            firstPoint.y = mouse.y;
-        }
-
-        else if (secondPoint.x == -3247)
-        {
-            secondPoint.x = mouse.x;
-            secondPoint.y = mouse.y;
-        }
-
-        else 
-        {
-            thirdPoint.x = mouse.x;
-            thirdPoint.y = mouse.y;
-        }
-    }
-
-    if (m_dragPoint != -1 && event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+    // if we have released the mouse button
+    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
     {
         m_dragPoint = -1;
-        generateWarpMatrix();
-    }
-
-    if (m_dragBoxPoint != -1 && event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
-    {
         m_dragBoxPoint = -1;
-        generateWarpMatrix();
     }
 
+    // if the mouse moved and we are dragging something, update its position and regenerate the matrix
+    if (event.type == sf::Event::MouseMoved)
+    {
+        if (m_dragPoint != -1) 
+        {
+            m_boxInteriorPoints[m_dragPoint] = cv::Point(mouse.x, mouse.y);
+            m_boxInteriorCircles[m_dragPoint].setPosition(mouse);
+            generateWarpMatrix();
+        }
+
+        if (m_dragBoxPoint != -1) 
+        {
+            m_boxProjectionPoints[m_dragBoxPoint] = cv::Point(mouse.x, mouse.y);
+            m_boxProjectionCircles[m_dragBoxPoint].setPosition(mouse);
+            generateWarpMatrix();
+        }
+    }
 }
 
 void Calibration::render(sf::RenderWindow & window)

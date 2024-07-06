@@ -74,21 +74,6 @@ void Scene_Sandbox::captureImage()
     int dw = rawDepth.as<rs2::video_frame>().get_width();
     int dh = rawDepth.as<rs2::video_frame>().get_height();
 
-    // Save depth at current mouse location
-    Vec2 pos;
-    pos.x = m_mouseWorld.x / m_depthSprite.getGlobalBounds().width;
-    pos.y = m_mouseWorld.y / m_depthSprite.getGlobalBounds().height;
-    if (pos.x < 1 && pos.y < 1 && pos.x >= 0 && pos.y >= 0)
-    {
-        pos.x *= dw;
-        pos.y *= dh;
-        m_mouseDepth = rawDepth.get_distance(pos.x, pos.y);
-    }
-    else
-    {
-        m_mouseDepth = -1.0;
-    }
-
     // Make OpenCV matrix from raw depth data
     m_cvRawDepthImage.create(cv::Size(dw, dh), CV_32F);
     for (int i = 0; i < dw; ++i)
@@ -237,10 +222,7 @@ void Scene_Sandbox::sProcessEvent(const sf::Event& event)
     if (event.type == sf::Event::MouseButtonPressed)
     {
         // happens when the left mouse button is pressed
-        if (event.mouseButton.button == sf::Mouse::Left)
-        {
-            thresholdFromMouse();
-        }
+        if (event.mouseButton.button == sf::Mouse::Left) { }
         if (event.mouseButton.button == sf::Mouse::Right) {}
     }
 
@@ -357,23 +339,7 @@ void Scene_Sandbox::renderUI()
             if (ImGui::CollapsingHeader("Thresholds"))
             {
                 ImGui::Indent();
-                if (m_mouseSelection == MouseSelections::None)
-                {
-                    ImGui::Text("Select from Mouse:");
-                    ImGui::SameLine();
-                    if (ImGui::Button("Max"))
-                    {
-                        m_mouseSelection = MouseSelections::MaxDistance;
-                    }
-                    ImGui::SameLine();
-                    if (ImGui::Button("Min"))
-                    {
-                        m_mouseSelection = MouseSelections::MinDistance;
-                    }
-                } else {
-                    ImGui::Text("Distance from Mouse %f", m_mouseDepth);
-                }
-
+                
                 ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 2.0);
                 ImGui::SameLine();
                 ImGui::InputFloat("#maxfloat", &m_maxDistance);
@@ -453,28 +419,6 @@ void Scene_Sandbox::loadConfig()
         m_filters.loadTerm(temp, fin);
     }
     m_calibration.loadConfiguration();
-}
-
-void Scene_Sandbox::thresholdFromMouse()
-{
-    switch (m_mouseSelection)
-    {
-    case MouseSelections::MaxDistance:
-    {
-        if (m_mouseDepth >= 0.0)
-        {
-            m_maxDistance = m_mouseDepth;
-        }
-    } break;
-    case MouseSelections::MinDistance:
-    {
-        if (m_mouseDepth >= 0.0)
-        {
-            m_minDistance = m_mouseDepth;
-        }
-    } break;
-    }
-    m_mouseSelection = MouseSelections::None;
 }
 
 void Scene_Sandbox::endScene()

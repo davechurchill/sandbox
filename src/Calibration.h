@@ -8,8 +8,6 @@ class Calibration
 {
     cv::Mat                         m_operator;
     cv::Mat                         m_boxOperator;
-    int                             m_currentPoint = -1;
-    int                             m_currentBoxPoint = -1;
     int                             m_dragPoint = -1;
     int                             m_dragBoxPoint = -1;
     int                             m_width = 500;
@@ -17,7 +15,7 @@ class Calibration
     int                             m_finalWidth = 0;
     int                             m_finalHeight = 0;
     cv::Point2f                     m_boxInteriorPoints[4] = { {100, 100}, {200, 100}, {100, 200}, {200, 200} };
-    cv::Point2f                     m_boxProjectionPoints[4];
+    cv::Point2f                     m_boxProjectionPoints[4] = { {400, 400}, {500, 400}, {400, 500}, {500, 500} };
     std::vector<sf::CircleShape>    m_boxInteriorCircles;
     std::vector<sf::CircleShape>    m_boxProjectionCircles;
     int                             m_boxWidth = 500;
@@ -30,6 +28,7 @@ class Calibration
     cv::Point                       thirdPoint;
 
     void generateWarpMatrix();
+    int getClickedCircleIndex(int mx, int my, std::vector<sf::CircleShape>& circles);
 
 public:
 
