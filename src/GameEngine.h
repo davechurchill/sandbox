@@ -27,7 +27,6 @@ protected:
     bool                m_running = true;
     ImGuiStyle          m_originalStyle;
     mc::MinecraftInterface  m_mcInterface;
-    bool                m_isFullscreen = false;
     float               m_framerate;
 
     void update();
@@ -70,5 +69,4 @@ public:
     sf::RenderWindow & displayWindow();
     mc::MinecraftInterface & minecraft();
     bool isRunning();
-    void toggleFullscreen();
 };

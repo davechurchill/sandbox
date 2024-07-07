@@ -27,20 +27,6 @@ bool GameEngine::isRunning()
     return m_running && m_window.isOpen();
 }
 
-void GameEngine::toggleFullscreen()
-{
-    if (m_isFullscreen)
-    {
-        m_window.create(sf::VideoMode(1600, 900), "Sandbox");
-        m_isFullscreen = false;
-    }
-    else
-    {
-        m_window.create(sf::VideoMode(), "Sandbox", sf::Style::Fullscreen);
-        m_isFullscreen = true;
-    }
-}
-
 sf::RenderWindow & GameEngine::window()
 {
     return m_window;

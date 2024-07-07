@@ -49,6 +49,7 @@
     <ClInclude Include="..\src\GameEngine.h" />
     <ClInclude Include="..\src\MinecraftInterface.h" />
     <ClInclude Include="..\src\Perlin.hpp" />
+    <ClInclude Include="..\src\Profiler.hpp" />
     <ClInclude Include="..\src\Scene.h" />
     <ClInclude Include="..\src\Grid.hpp" />
     <ClInclude Include="..\src\Scene_Image.h" />

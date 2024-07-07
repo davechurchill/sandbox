@@ -2,6 +2,7 @@
 #include "Scene_Menu.h"
 #include "Scene_Perlin2D.h"
 #include "Scene_Sandbox.h"
+#include "Profiler.hpp"
 
 #include <sstream>
 #include <iostream>
@@ -16,6 +17,8 @@ bool isCameraConnected() {
 
 int main()
 {
+    PROFILE_FUNCTION();
+
     GameEngine engine;
     engine.changeScene<Scene_Menu>("Menu");
     engine.run();

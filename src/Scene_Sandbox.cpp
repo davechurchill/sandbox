@@ -3,6 +3,7 @@
 #include "GameEngine.h"
 #include "Assets.h"
 #include "Calibration.h"
+#include "Profiler.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -38,76 +39,105 @@ void Scene_Sandbox::init()
 
 void Scene_Sandbox::captureImage()
 {
-    // Wait for next set of frames from the camera
-    rs2::frameset data = m_pipe.wait_for_frames();
+    PROFILE_FUNCTION();
 
-    if (m_alignment == alignment::depth)
+    rs2::frameset data;
+    // Wait for next set of frames from the camera
     {
-        data = m_alignment_depth.process(data);
+        PROFILE_SCOPE("rs2::wait_for_frames");
+        data = m_pipe.wait_for_frames();
     }
-    else if (m_alignment == alignment::color)
+
     {
-        data = m_alignment_color.process(data);
+        PROFILE_SCOPE("rs2::alignment");
+        if (m_alignment == alignment::depth) { data = m_alignment_depth.process(data); }
+        else if (m_alignment == alignment::color) { data = m_alignment_color.process(data); }
     }
 
     // Handle regular video footage
-    rs2::frame color = data.get_color_frame();
-    const int cw = color.as<rs2::video_frame>().get_width();
-    const int ch = color.as<rs2::video_frame>().get_height();
-    if (m_drawColor)
+    rs2::frame colorFrame;
     {
-        m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void *)color.get_data(), cv::Mat::AUTO_STEP);
-        cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
-        m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
-        m_sfColorTexture.loadFromImage(m_sfColorImage);
-        m_colorSprite.setTexture(m_sfColorTexture, true);
+        PROFILE_SCOPE("rs2::get_color_frame");
+        colorFrame = data.get_color_frame();
+    }
+
+    {
+        PROFILE_SCOPE("Process Color Frame");
+        const int cw = colorFrame.as<rs2::video_frame>().get_width();
+        const int ch = colorFrame.as<rs2::video_frame>().get_height();
+        if (m_drawColor)
+        {
+            m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void*)colorFrame.get_data(), cv::Mat::AUTO_STEP);
+            cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
+            m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
+            m_sfColorTexture.loadFromImage(m_sfColorImage);
+            m_colorSprite.setTexture(m_sfColorTexture, true);
+        }
     }
 
 
     // Handle depth feed
-    rs2::depth_frame rawDepth = data.get_depth_frame();
+    rs2::depth_frame depthFrame = data.get_depth_frame();
 
-    rawDepth = m_filters.apply(rawDepth);
+    {
+        PROFILE_SCOPE("Apply Depth Filters");
+        depthFrame = m_filters.apply(depthFrame);
+    }
 
     // Query frame size (width and height)
-    int dw = rawDepth.as<rs2::video_frame>().get_width();
-    int dh = rawDepth.as<rs2::video_frame>().get_height();
+    int dw = depthFrame.as<rs2::video_frame>().get_width();
+    int dh = depthFrame.as<rs2::video_frame>().get_height();
 
-    // Make OpenCV matrix from raw depth data
-    m_cvRawDepthImage.create(cv::Size(dw, dh), CV_32F);
-    for (int i = 0; i < dw; ++i)
     {
-        for (int j = 0; j < dh; ++j)
+        PROFILE_SCOPE("Make OpenCV from Depth");
+        // create an opencv image from the raw depth frame data, which is 16-bit unsigned int
+        cv::Mat depthImage16u(cv::Size(dw, dh), CV_16U, (void*)depthFrame.get_data(), cv::Mat::AUTO_STEP);
+
+        // convert the 16u image to a 32 bit floating point representation
+        depthImage16u.convertTo(m_cvDepthImage32f, CV_32F);
+
+        // multiply the image values by the unit type to get the data in meters like we want
+        m_cvDepthImage32f = m_cvDepthImage32f * depthFrame.get_units();
+    }
+
+    dw = m_cvDepthImage32f.cols;
+    dh = m_cvDepthImage32f.rows;
+
+    {
+        PROFILE_SCOPE("Copy Depth Data to Grid");
+        // Copy data to depth grid
+        if (m_depthGrid.width() != dw || m_depthGrid.height() != dh)
         {
-            m_cvRawDepthImage.at<float>(j, i) = rawDepth.get_distance(i, j);
+            m_depthGrid.refill(dw, dh, 0.0);
         }
-    }
-
-    dw = m_cvRawDepthImage.cols;
-    dh = m_cvRawDepthImage.rows;
-
-    // Copy data to depth grid
-    if (m_depthGrid.width() != dw || m_depthGrid.height() != dh)
-    {
-        m_depthGrid.refill(dw, dh, 0.0);
-    }
-    if (m_maxDistance > m_minDistance)
-    {
-        for (int i = 0; i < dw; ++i)
+        if (m_maxDistance > m_minDistance)
         {
-            for (int j = 0; j < dh; ++j)
+            for (int i = 0; i < dw; ++i)
             {
-                // Scale data to 0-1 range, where 1 is the highest point 
-                m_depthGrid.set(i, j, 1 - ((m_cvRawDepthImage.at<float>(j,i) - m_minDistance) / (m_maxDistance - m_minDistance)));
+                for (int j = 0; j < dh; ++j)
+                {
+                    // Scale data to 0-1 range, where 1 is the highest point 
+                    m_depthGrid.set(i, j, 1 - ((m_cvDepthImage32f.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance)));
+                }
             }
         }
     }
 
     // Calibration
     cv::Mat output;
-    m_calibration.transformRect(m_cvRawDepthImage, output);
-    m_calibration.heightAdjustment(output);
-    m_calibration.transformProjection(output, output);
+
+    {
+        PROFILE_SCOPE("Calibration TransformRect");
+        m_calibration.transformRect(m_cvDepthImage32f, output);
+    }
+
+
+        //m_calibration.heightAdjustment(output);
+
+    {
+        PROFILE_SCOPE("Calibration TransformProjection");
+        m_calibration.transformProjection(output, output);
+    }
 
 
     // Draw warped depth image
@@ -116,29 +146,38 @@ void Scene_Sandbox::captureImage()
 
     if (dw > 0 && dh > 0)
     {
-
         // Create warped data grid
-        m_depthWarpedGrid.refill(dw, dh, 0.0f);
-        if (m_maxDistance > m_minDistance)
         {
-            for (int i = 0; i < dw; ++i)
+            PROFILE_SCOPE("Create Warped Data Grid");
+            m_depthWarpedGrid.refill(dw, dh, 0.0f);
+            if (m_maxDistance > m_minDistance)
             {
-                for (int j = 0; j < dh; ++j)
+                for (int i = 0; i < dw; ++i)
                 {
-                    // Scale data to 0-1 range, where 1 is the highest point 
-                    m_depthWarpedGrid.set(i, j, 1 - ((output.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance)));
+                    for (int j = 0; j < dh; ++j)
+                    {
+                        // Scale data to 0-1 range, where 1 is the highest point 
+                        m_depthWarpedGrid.set(i, j, 1 - ((output.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance)));
+                    }
                 }
             }
         }
 
-        // Colorize and draw warped data grid
-        m_colorizer.color(m_transformedImage, m_depthWarpedGrid);
-        m_transformedTexture.loadFromImage(m_transformedImage);
-        m_transformedSprite.setTexture(m_transformedTexture, true);
+        {
+            PROFILE_SCOPE("Transformed Image Colorization");
+            m_colorizer.color(m_transformedImage, m_depthWarpedGrid);
+        }
+
+        {
+            PROFILE_SCOPE("Transformed Image to Texture");
+            m_transformedTexture.loadFromImage(m_transformedImage);
+            m_transformedSprite.setTexture(m_transformedTexture, true);
+        }
 
         // Calculate Contour Lines from warped data grid
         if (m_drawContours)
         {
+            PROFILE_SCOPE("Calculate Contour Lines");
             m_contour.init(dw, dh);
             m_contour.calculate(m_depthWarpedGrid);
         }
@@ -146,10 +185,16 @@ void Scene_Sandbox::captureImage()
 
     if (m_drawDepth)
     {
-        // Draw original depth image
-        m_colorizer.color(m_sfDepthImage, m_depthGrid);
-        m_sfDepthTexture.loadFromImage(m_sfDepthImage);
-        m_depthSprite.setTexture(m_sfDepthTexture, true);
+        {
+            PROFILE_SCOPE("Depth Image Colorization");
+            m_colorizer.color(m_sfDepthImage, m_depthGrid);
+        }
+        
+        {
+            PROFILE_SCOPE("Depth Image to Texture");
+            m_sfDepthTexture.loadFromImage(m_sfDepthImage);
+            m_depthSprite.setTexture(m_sfDepthTexture, true);
+        }   
     }
 }
 
@@ -251,11 +296,11 @@ void Scene_Sandbox::sUserInput()
         sProcessEvent(event);
     }
 
-    sf::Event displayEvent;
-    while (m_game->displayWindow().pollEvent(displayEvent))
-    {
-        sProcessEvent(displayEvent);
-    }
+    //sf::Event displayEvent;
+    //while (m_game->displayWindow().pollEvent(displayEvent))
+    //{
+    //    sProcessEvent(displayEvent);
+    //}
 }
 
 // renders the scene
@@ -264,31 +309,29 @@ void Scene_Sandbox::sRender()
     m_game->window().clear();
     m_game->displayWindow().clear();
 
-    if (m_drawDepth)
-    {
-        m_game->window().draw(m_depthSprite);
-    }
+    // draw the depth image
+    if (m_drawDepth) { m_game->window().draw(m_depthSprite); }
 
     m_transformedSprite.setPosition(m_calibration.getTransformedPosition());
     float scale = m_calibration.getTransformedScale();
     m_transformedSprite.setScale(scale, scale);
 
-    if (m_game->displayWindow().isOpen())
-    {
-        m_game->displayWindow().draw(m_transformedSprite);
-    }
-    else
-    {
-        m_game->window().draw(m_transformedSprite);
-    }
+    // draw the final transformed image in the chosen window
+    if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_transformedSprite); }
+    else                                  { m_game->window().draw(m_transformedSprite); }
+
+    // draw the contour lines 
     if (m_drawContours)
     {
         m_contourSprite.setTexture(m_contour.generateTexture(), true);
         m_contourSprite.setScale(scale, scale);
         m_contourSprite.setPosition(m_transformedSprite.getPosition());
-        m_game->window().draw(m_contourSprite);
+
+        if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_contourSprite); }
+        else                                  { m_game->window().draw(m_contourSprite); }
     }
 
+    // draw the color camera image 
     if (m_drawColor) { m_game->window().draw(m_colorSprite); }
     
     m_lineStrip.clear();
@@ -307,15 +350,8 @@ void Scene_Sandbox::renderUI()
 
     if (ImGui::BeginMenuBar())
     {
-        if (ImGui::Button("Save"))
-        {
-            saveConfig();
-        }
-        if (ImGui::Button("Load"))
-        {
-            loadConfig();
-        }
-
+        if (ImGui::Button("Save")) { saveConfig(); }
+        if (ImGui::Button("Load")) { loadConfig(); }
         ImGui::EndMenuBar();
     }
 
@@ -326,32 +362,20 @@ void Scene_Sandbox::renderUI()
 
     ImGui::Text("Framerate: %d", (int)m_game->framerate());
 
-
     if (ImGui::BeginTabBar("MyTabBar"))
     {
-        if (ImGui::BeginTabItem("Filters"))
-        {
-            m_filters.imgui();
-
-            ImGui::EndTabItem();
-        }
         if (ImGui::BeginTabItem("View"))
         {
-            const char * items[] = { "Depth", "Color", "Nothing" };
-            ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
+            const char* items[] = { "Depth", "Color", "Nothing" };
+            ImGui::Combo("Alignment", (int*)&m_alignment, items, 3);
 
             m_colorizer.imgui();
             if (ImGui::CollapsingHeader("Thresholds"))
             {
                 ImGui::Indent();
-                
-                ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 2.0);
-                ImGui::SameLine();
-                ImGui::InputFloat("#maxfloat", &m_maxDistance);
 
+                ImGui::SliderFloat("Max Distance", &m_maxDistance, 0.0, 2.0);
                 ImGui::SliderFloat("Min Distance", &m_minDistance, 0.0, 2.0);
-                ImGui::SameLine();
-                ImGui::InputFloat("#minfloat", &m_minDistance);
                 ImGui::Unindent();
             }
             ImGui::Checkbox("Depth", &m_drawDepth);
@@ -365,13 +389,16 @@ void Scene_Sandbox::renderUI()
             {
                 m_contour.setNumberofContourLines(m_numberOfContourLines);
             }
-            if (ImGui::Button("Toggle Fullscreen"))
-            {
-                m_game->toggleFullscreen();
-            }
 
             ImGui::EndTabItem();
         }
+        if (ImGui::BeginTabItem("Filters"))
+        {
+            m_filters.imgui();
+
+            ImGui::EndTabItem();
+        }
+        
 
         if (ImGui::BeginTabItem("Calibration"))
         {

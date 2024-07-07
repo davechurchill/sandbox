@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>   // Include OpenCV API
 #include "imgui.h"
 #include "imgui-SFML.h"
+#include "Profiler.hpp"
 
 #include <fstream>
 
@@ -34,12 +35,14 @@ public:
 
         if (m_decimation > 0)
         {
+            PROFILE_SCOPE("Decimation");
             m_decimationFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, (float)m_decimation);
             temp = m_decimationFilter.process(temp);
         }
 
         if (m_spatialMagnitude > 0)
         {
+            PROFILE_SCOPE("Spatial");
             m_spatialFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, (float)m_spatialMagnitude);
             m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlpha);
             m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, (float)m_smoothDelta);
@@ -49,12 +52,14 @@ public:
 
         if (m_holeFill < 3)
         {
+            PROFILE_SCOPE("Hole");
             m_holeFilter.set_option(RS2_OPTION_HOLES_FILL, (float)m_holeFill);
             temp = m_holeFilter.process(temp);
         }
 
         if (m_smoothAlphaTemporal < 1.0f)
         {
+            PROFILE_SCOPE("Temporal");
             m_temporalFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlphaTemporal);
             m_temporalFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, (float)m_smoothDeltaTemporal);
             m_temporalFilter.set_option(RS2_OPTION_HOLES_FILL, (float)m_persistanceTemporal);
