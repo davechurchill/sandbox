@@ -34,7 +34,42 @@ void Scene_Sandbox::init()
     m_contour.setContourLevel(0.5);
 
     loadConfig();
+}
 
+
+void Scene_Sandbox::connectToCamera()
+{
+    rs2::context ctx;  // Create a context object, which is used to manage devices
+    rs2::device_list devices = ctx.query_devices();  // Get a list of connected RealSense devices
+    if (devices.size() > 0) // If at least one device is connected start pipe
+    {
+        m_cameraConnected = true;
+
+        //int depthWidth = 1280, depthHeight = 720, depthFPS = 30; // depth camera hi res
+        int depthWidth = 848,  depthHeight = 480, depthFPS = 90; // depth camera hi fps
+        int colorWidth = 1280, colorHeight = 720, colorFPS = 30; // color camera
+
+        rs2::config cfg;
+        cfg.enable_stream(RS2_STREAM_DEPTH, depthWidth, depthHeight, RS2_FORMAT_Z16,  depthFPS);  
+        cfg.enable_stream(RS2_STREAM_COLOR, colorWidth, colorHeight, RS2_FORMAT_RGB8, colorFPS); 
+
+        // start the rs2 pipe and get the profile
+        rs2::pipeline_profile profile = m_pipe.start(cfg);
+
+        // Get the active depth stream profile
+        rs2::stream_profile depthStreamProfile = profile.get_stream(RS2_STREAM_DEPTH);
+        //rs2::stream_profile colorStreamProfile = profile.get_stream(RS2_STREAM_COLOR);
+
+        // Extract the video stream profile
+        auto dVideoStreamProfile = depthStreamProfile.as<rs2::video_stream_profile>();
+        //auto cVideoStreamProfile = colorStreamProfile.as<rs2::video_stream_profile>();
+
+        // Print the resolution and frame rate
+        std::cout << "Depth res: " << dVideoStreamProfile.width() << "x" << dVideoStreamProfile.height() << std::endl;
+        std::cout << "Depth fps: " << dVideoStreamProfile.fps() << " FPS" << std::endl;
+        //std::cout << "Color res: " << cVideoStreamProfile.width() << "x" << cVideoStreamProfile.height() << std::endl;
+        //std::cout << "Color fps: " << cVideoStreamProfile.fps() << " FPS" << std::endl;
+    }
 }
 
 void Scene_Sandbox::captureImage()
@@ -63,10 +98,10 @@ void Scene_Sandbox::captureImage()
 
     {
         PROFILE_SCOPE("Process Color Frame");
-        const int cw = colorFrame.as<rs2::video_frame>().get_width();
-        const int ch = colorFrame.as<rs2::video_frame>().get_height();
         if (m_drawColor)
         {
+            const int cw = colorFrame.as<rs2::video_frame>().get_width();
+            const int ch = colorFrame.as<rs2::video_frame>().get_height();
             m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void*)colorFrame.get_data(), cv::Mat::AUTO_STEP);
             cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
             m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
@@ -206,7 +241,7 @@ void Scene_Sandbox::onFrame()
     }
     else
     {
-        attemptCameraConnection();
+        connectToCamera();
     }
     sUserInput();
     sRender();
@@ -415,17 +450,6 @@ void Scene_Sandbox::renderUI()
 
     }
     ImGui::End();
-}
-
-void Scene_Sandbox::attemptCameraConnection()
-{
-    rs2::context ctx;  // Create a context object, which is used to manage devices
-    rs2::device_list devices = ctx.query_devices();  // Get a list of connected RealSense devices
-    if (devices.size() > 0) // If at least one device is connected start pipe
-    {
-        m_pipe.start();
-        m_cameraConnected = true;
-    }
 }
 
 void Scene_Sandbox::saveConfig()

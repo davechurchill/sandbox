@@ -84,7 +84,7 @@ class Scene_Sandbox : public Scene
     void sUserInput();  
     void sProcessEvent(const sf::Event & event);
     void sRender();
-    void attemptCameraConnection();
+    void connectToCamera();
     void saveConfig();
     void loadConfig();
     
