@@ -28,7 +28,8 @@ void Scene_Image::init()
     m_text.setFont(m_font);
     m_text.setPosition(10, 5);
     m_text.setCharacterSize(10);
-
+    m_shader.loadFromFile("shaders/shader_contour.frag", sf::Shader::Fragment);
+    m_imageClock.restart();
 }
 
 void Scene_Image::onFrame()
@@ -101,7 +102,9 @@ void Scene_Image::sRender()
     m_lineStrip.clear();
     m_quadArray.clear();
 
-    m_game->window().draw(m_Sprite);
+    float elapsedTime = m_imageClock.getElapsedTime().asSeconds();
+    m_shader.setUniform("time", elapsedTime);
+    m_game->window().draw(m_Sprite, &m_shader);
     
     m_game->window().draw(m_quadArray);
     m_game->window().draw(m_lineStrip);

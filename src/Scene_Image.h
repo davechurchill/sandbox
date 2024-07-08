@@ -29,6 +29,9 @@ class Scene_Image : public Scene
     ViewController      m_viewController;
     Calibration         m_calibration;
 
+    sf::Shader          m_shader;
+    sf::Clock           m_imageClock;
+
     char                m_filename[128] = "test.png";
 
     void init();  
