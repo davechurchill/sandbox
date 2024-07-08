@@ -24,10 +24,10 @@ struct Colorizer
         sf::Color (Colorizer::* func)(float);
         switch (mode)
         {
-        case Greyscale: func = &Colorizer::greyscale; break;
-        case RedWhite: func = &Colorizer::redwhite; break;
-        case Popsicle: func = &Colorizer::popsicle; break;
-        case Terrain: func = &Colorizer::terrain; break;
+            case Greyscale: func = &Colorizer::greyscale; break;
+            case RedWhite: func = &Colorizer::redwhite; break;
+            case Popsicle: func = &Colorizer::popsicle; break;
+            case Terrain: func = &Colorizer::terrain; break;
         }
 
         output.create((unsigned int)input.width(), (unsigned int)input.height());

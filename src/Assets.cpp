@@ -26,7 +26,7 @@ void Assets::addTexture(const std::string & textureName, const std::string & pat
     else
     {
         m_textureMap[textureName].setSmooth(smooth);
-        std::cout << "Loaded Texture: " << path << std::endl;
+        //std::cout << "Loaded Texture: " << path << std::endl;
     }
 }
 
@@ -46,7 +46,7 @@ void Assets::addFont(const std::string & fontName, const std::string & path)
     }
     else
     {
-        std::cout << "Loaded Font:    " << path << std::endl;
+        //std::cout << "Loaded Font:    " << path << std::endl;
     }
 }
 
@@ -66,7 +66,7 @@ void Assets::addSound(const std::string& soundName, const std::string& path)
     }
     else
     {
-        std::cout << "Loaded Sound:    " << path << std::endl;
+        //std::cout << "Loaded Sound:    " << path << std::endl;
         m_soundMap[soundName] = sf::Sound(m_soundBufferMap[soundName]);
         m_soundMap[soundName].setVolume(25);
     }

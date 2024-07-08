@@ -43,13 +43,13 @@
     <ClInclude Include="..\src\BlockGeneration.h" />
     <ClInclude Include="..\src\Calibration.h" />
     <ClInclude Include="..\src\CameraFilters.hpp" />
-    <ClInclude Include="..\src\Colorizer.hpp" />
     <ClInclude Include="..\src\ContourLines.hpp" />
     <ClInclude Include="..\src\Cube.hpp" />
     <ClInclude Include="..\src\GameEngine.h" />
     <ClInclude Include="..\src\MinecraftInterface.h" />
     <ClInclude Include="..\src\Perlin.hpp" />
     <ClInclude Include="..\src\Profiler.hpp" />
+    <ClInclude Include="..\src\RealSenseTools.hpp" />
     <ClInclude Include="..\src\Scene.h" />
     <ClInclude Include="..\src\Grid.hpp" />
     <ClInclude Include="..\src\Scene_Image.h" />

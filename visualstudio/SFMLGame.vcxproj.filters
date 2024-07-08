@@ -38,9 +38,6 @@
     <ClCompile Include="..\src\Scene_Menu.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Calibration.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Scene_Image.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
@@ -49,6 +46,9 @@
     </ClCompile>
     <ClCompile Include="..\src\BlockGeneration.cpp">
       <Filter>minecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Calibration.cpp">
+      <Filter>sandbox</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -88,12 +88,6 @@
     <ClInclude Include="..\src\Scene_Menu.h">
       <Filter>scenes</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ContourLines.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Calibration.h">
-      <Filter>engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Scene_Image.h">
       <Filter>scenes</Filter>
     </ClInclude>
@@ -106,14 +100,20 @@
     <ClInclude Include="..\src\BlockGeneration.h">
       <Filter>minecraft</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Colorizer.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\CameraFilters.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Profiler.hpp">
       <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ContourLines.hpp">
+      <Filter>sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\CameraFilters.hpp">
+      <Filter>sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Calibration.h">
+      <Filter>sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\RealSenseTools.hpp">
+      <Filter>sandbox</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -128,6 +128,9 @@
     </Filter>
     <Filter Include="minecraft">
       <UniqueIdentifier>{1129600a-c15c-4492-9aa1-6c0056e70bf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sandbox">
+      <UniqueIdentifier>{2da31b36-3cf6-482f-a351-25836cb25a3d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

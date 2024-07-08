@@ -4,6 +4,7 @@
 #include "Assets.h"
 #include "Calibration.h"
 #include "Profiler.hpp"
+#include "RealSenseTools.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -33,20 +34,23 @@ void Scene_Sandbox::init()
 
     m_contour.setContourLevel(0.5);
 
+    m_shader.loadFromFile("shaders/shader_terrain.frag", sf::Shader::Fragment);
+
     loadConfig();
 }
 
-
 void Scene_Sandbox::connectToCamera()
 {
+    //RealSenseTools::PrintAvailableCameraModes();
+
     rs2::context ctx;  // Create a context object, which is used to manage devices
     rs2::device_list devices = ctx.query_devices();  // Get a list of connected RealSense devices
     if (devices.size() > 0) // If at least one device is connected start pipe
     {
         m_cameraConnected = true;
 
-        //int depthWidth = 1280, depthHeight = 720, depthFPS = 30; // depth camera hi res
-        int depthWidth = 848,  depthHeight = 480, depthFPS = 90; // depth camera hi fps
+        int depthWidth = 1280, depthHeight = 720, depthFPS = 30; // depth camera hi res
+        //int depthWidth = 848,  depthHeight = 480, depthFPS = 90; // depth camera hi fps
         int colorWidth = 1280, colorHeight = 720, colorFPS = 30; // color camera
 
         rs2::config cfg;
@@ -56,64 +60,74 @@ void Scene_Sandbox::connectToCamera()
         // start the rs2 pipe and get the profile
         rs2::pipeline_profile profile = m_pipe.start(cfg);
 
-        // Get the active depth stream profile
-        rs2::stream_profile depthStreamProfile = profile.get_stream(RS2_STREAM_DEPTH);
-        //rs2::stream_profile colorStreamProfile = profile.get_stream(RS2_STREAM_COLOR);
-
         // Extract the video stream profile
-        auto dVideoStreamProfile = depthStreamProfile.as<rs2::video_stream_profile>();
-        //auto cVideoStreamProfile = colorStreamProfile.as<rs2::video_stream_profile>();
+        auto depthStreamProfile = profile.get_stream(RS2_STREAM_DEPTH).as<rs2::video_stream_profile>();
+        auto colorStreamProfile = profile.get_stream(RS2_STREAM_COLOR).as<rs2::video_stream_profile>();
 
         // Print the resolution and frame rate
-        std::cout << "Depth res: " << dVideoStreamProfile.width() << "x" << dVideoStreamProfile.height() << std::endl;
-        std::cout << "Depth fps: " << dVideoStreamProfile.fps() << " FPS" << std::endl;
-        //std::cout << "Color res: " << cVideoStreamProfile.width() << "x" << cVideoStreamProfile.height() << std::endl;
-        //std::cout << "Color fps: " << cVideoStreamProfile.fps() << " FPS" << std::endl;
+        std::cout << "\nDepth Camera: " << depthStreamProfile.width() << " x " << depthStreamProfile.height() << " @ " << depthStreamProfile.fps() << " FPS\n";
+        std::cout << "\nColor Camera: " << colorStreamProfile.width() << " x " << colorStreamProfile.height() << " @ " << colorStreamProfile.fps() << " FPS\n";
     }
 }
 
-void Scene_Sandbox::captureImage()
+sf::Image Scene_Sandbox::matToSfImage(const cv::Mat& mat) 
 {
     PROFILE_FUNCTION();
 
-    rs2::frameset data;
+    // Ensure the input image is in the correct format (CV_32F)
+    cv::Mat normalized;
+    mat.convertTo(normalized, CV_8U, 255.0); // Scale float [0, 1] to [0, 255]
+
+    // Convert to RGB (SFML requires RGB format)
+    cv::Mat rgb;
+    cv::cvtColor(normalized, rgb, cv::COLOR_GRAY2RGBA);
+
+    // Create SFML image
+    sf::Image image;
+    image.create(rgb.cols, rgb.rows, rgb.ptr());
+
+    return image;
+}
+
+void Scene_Sandbox::captureImages()
+{
+    PROFILE_FUNCTION();
+
     // Wait for next set of frames from the camera
+    rs2::frameset data;
     {
         PROFILE_SCOPE("rs2::wait_for_frames");
         data = m_pipe.wait_for_frames();
     }
 
+    // align the color and depth images if we have chosen to
     {
         PROFILE_SCOPE("rs2::alignment");
         if (m_alignment == alignment::depth) { data = m_alignment_depth.process(data); }
         else if (m_alignment == alignment::color) { data = m_alignment_color.process(data); }
     }
 
-    // Handle regular video footage
-    rs2::frame colorFrame;
+    // capture the color image
+    if (m_drawColor)
     {
-        PROFILE_SCOPE("rs2::get_color_frame");
-        colorFrame = data.get_color_frame();
-    }
-
-    {
-        PROFILE_SCOPE("Process Color Frame");
-        if (m_drawColor)
+        rs2::frame colorFrame;
         {
-            const int cw = colorFrame.as<rs2::video_frame>().get_width();
-            const int ch = colorFrame.as<rs2::video_frame>().get_height();
-            m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void*)colorFrame.get_data(), cv::Mat::AUTO_STEP);
-            cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
-            m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
-            m_sfColorTexture.loadFromImage(m_sfColorImage);
-            m_colorSprite.setTexture(m_sfColorTexture, true);
+            PROFILE_SCOPE("rs2::get_color_frame");
+            colorFrame = data.get_color_frame();
         }
-    }
 
+        PROFILE_SCOPE("Process Color Frame");
+        const int cw = colorFrame.as<rs2::video_frame>().get_width();
+        const int ch = colorFrame.as<rs2::video_frame>().get_height();
+        m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void*)colorFrame.get_data(), cv::Mat::AUTO_STEP);
+        cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
+        m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
+        m_sfColorTexture.loadFromImage(m_sfColorImage);
+        m_colorSprite.setTexture(m_sfColorTexture, true);
+    }
 
     // Handle depth feed
     rs2::depth_frame depthFrame = data.get_depth_frame();
-
     {
         PROFILE_SCOPE("Apply Depth Filters");
         depthFrame = m_filters.apply(depthFrame);
@@ -126,108 +140,75 @@ void Scene_Sandbox::captureImage()
     {
         PROFILE_SCOPE("Make OpenCV from Depth");
         // create an opencv image from the raw depth frame data, which is 16-bit unsigned int
-        cv::Mat depthImage16u(cv::Size(dw, dh), CV_16U, (void*)depthFrame.get_data(), cv::Mat::AUTO_STEP);
+        m_cvDepthImage16u = cv::Mat(cv::Size(dw, dh), CV_16U, (void*)depthFrame.get_data(), cv::Mat::AUTO_STEP);
 
         // convert the 16u image to a 32 bit floating point representation
-        depthImage16u.convertTo(m_cvDepthImage32f, CV_32F);
+        m_cvDepthImage16u.convertTo(m_cvDepthImage32f, CV_32F);
 
         // multiply the image values by the unit type to get the data in meters like we want
         m_cvDepthImage32f = m_cvDepthImage32f * depthFrame.get_units();
     }
-
-    dw = m_cvDepthImage32f.cols;
-    dh = m_cvDepthImage32f.rows;
-
+        
+    // set everything to 0 that's below min distance or above max distance
+    // then scale the remaining values between min and max distance 0 to 1 (normalize)
+    // store these values in a new 'normalized' cv::mat
     {
-        PROFILE_SCOPE("Copy Depth Data to Grid");
-        // Copy data to depth grid
-        if (m_depthGrid.width() != dw || m_depthGrid.height() != dh)
-        {
-            m_depthGrid.refill(dw, dh, 0.0);
-        }
-        if (m_maxDistance > m_minDistance)
-        {
-            for (int i = 0; i < dw; ++i)
-            {
-                for (int j = 0; j < dh; ++j)
-                {
-                    // Scale data to 0-1 range, where 1 is the highest point 
-                    m_depthGrid.set(i, j, 1 - ((m_cvDepthImage32f.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance)));
-                }
-            }
-        }
+        PROFILE_SCOPE("Threshold and Normalize");
+        cv::threshold(m_cvDepthImage32f, m_cvNormalizedDepthImage32f, m_minDistance, 255, cv::THRESH_TOZERO);
+        cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, m_maxDistance, 255, cv::THRESH_TOZERO_INV);
+        m_cvNormalizedDepthImage32f = (m_cvNormalizedDepthImage32f - m_minDistance) / m_maxDistance;
     }
 
     // Calibration
-    cv::Mat output;
-
     {
         PROFILE_SCOPE("Calibration TransformRect");
-        m_calibration.transformRect(m_cvDepthImage32f, output);
+        m_calibration.transformRect(m_cvNormalizedDepthImage32f, m_cvTransformedDepthImage32f);
     }
 
-
-        //m_calibration.heightAdjustment(output);
+    //m_calibration.heightAdjustment(output);
 
     {
         PROFILE_SCOPE("Calibration TransformProjection");
-        m_calibration.transformProjection(output, output);
+        m_calibration.transformProjection(m_cvTransformedDepthImage32f, m_cvTransformedDepthImage32f);
+    }
+    
+    // Draw warped depth image
+    dw = m_cvTransformedDepthImage32f.cols;
+    dh = m_cvTransformedDepthImage32f.rows;
+
+    // if something went wrong above, quit the function
+    if (dw == 0 || dh == 0) { return; }
+
+    {
+        int kernelSize = 5; // Example kernel size
+        double sigmaX = 3.5; // Example standard deviation in X direction
+        double sigmaY = 3.5; // Example standard deviation in Y direction
+
+        cv::Mat blurredImage;
+        cv::GaussianBlur(m_cvTransformedDepthImage32f, blurredImage, cv::Size(kernelSize, kernelSize), sigmaX, sigmaY);
+
+        PROFILE_SCOPE("Transformed Image to Texture");
+        m_sfTransformedDepthImage = matToSfImage(blurredImage);
+        m_sfTransformedDepthTexture.loadFromImage(m_sfTransformedDepthImage);
+        m_sfTransformedDepthSprite.setTexture(m_sfTransformedDepthTexture, true);
     }
 
-
-    // Draw warped depth image
-    dw = output.cols;
-    dh = output.rows;
-
-    if (dw > 0 && dh > 0)
+    // Calculate Contour Lines from warped data grid
+    if (m_drawContours)
     {
-        // Create warped data grid
-        {
-            PROFILE_SCOPE("Create Warped Data Grid");
-            m_depthWarpedGrid.refill(dw, dh, 0.0f);
-            if (m_maxDistance > m_minDistance)
-            {
-                for (int i = 0; i < dw; ++i)
-                {
-                    for (int j = 0; j < dh; ++j)
-                    {
-                        // Scale data to 0-1 range, where 1 is the highest point 
-                        m_depthWarpedGrid.set(i, j, 1 - ((output.at<float>(j, i) - m_minDistance) / (m_maxDistance - m_minDistance)));
-                    }
-                }
-            }
-        }
-
-        {
-            PROFILE_SCOPE("Transformed Image Colorization");
-            m_colorizer.color(m_transformedImage, m_depthWarpedGrid);
-        }
-
-        {
-            PROFILE_SCOPE("Transformed Image to Texture");
-            m_transformedTexture.loadFromImage(m_transformedImage);
-            m_transformedSprite.setTexture(m_transformedTexture, true);
-        }
-
-        // Calculate Contour Lines from warped data grid
-        if (m_drawContours)
-        {
-            PROFILE_SCOPE("Calculate Contour Lines");
-            m_contour.init(dw, dh);
-            m_contour.calculate(m_depthWarpedGrid);
-        }
+        PROFILE_SCOPE("Calculate Contour Lines");
+        m_contour.init(dw, dh);
+        m_contour.calculate(m_depthWarpedGrid);
     }
 
     if (m_drawDepth)
     {
         {
-            PROFILE_SCOPE("Depth Image Colorization");
-            m_colorizer.color(m_sfDepthImage, m_depthGrid);
-        }
-        
-        {
+            // Create SFML image
+            sf::Image image = matToSfImage(m_cvNormalizedDepthImage32f);
+            
             PROFILE_SCOPE("Depth Image to Texture");
-            m_sfDepthTexture.loadFromImage(m_sfDepthImage);
+            m_sfDepthTexture.loadFromImage(image);
             m_depthSprite.setTexture(m_sfDepthTexture, true);
         }   
     }
@@ -237,7 +218,7 @@ void Scene_Sandbox::onFrame()
 {
     if (m_cameraConnected)
     {
-        captureImage();
+        captureImages();
     }
     else
     {
@@ -341,26 +322,31 @@ void Scene_Sandbox::sUserInput()
 // renders the scene
 void Scene_Sandbox::sRender()
 {
+    PROFILE_FUNCTION();
+
     m_game->window().clear();
     m_game->displayWindow().clear();
 
     // draw the depth image
     if (m_drawDepth) { m_game->window().draw(m_depthSprite); }
 
-    m_transformedSprite.setPosition(m_calibration.getTransformedPosition());
+    m_sfTransformedDepthSprite.setPosition(m_calibration.getTransformedPosition());
     float scale = m_calibration.getTransformedScale();
-    m_transformedSprite.setScale(scale, scale);
+    m_sfTransformedDepthSprite.setScale(scale, scale);
+
+    m_shader.setUniform("texture", m_sfTransformedDepthSprite.getTexture());
 
     // draw the final transformed image in the chosen window
-    if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_transformedSprite); }
-    else                                  { m_game->window().draw(m_transformedSprite); }
+    if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_sfTransformedDepthSprite, &m_shader); }
+    else                                  { m_game->window().draw(m_sfTransformedDepthSprite, &m_noShader); }
 
     // draw the contour lines 
     if (m_drawContours)
     {
         m_contourSprite.setTexture(m_contour.generateTexture(), true);
         m_contourSprite.setScale(scale, scale);
-        m_contourSprite.setPosition(m_transformedSprite.getPosition());
+        m_contourSprite.setPosition(m_sfTransformedDepthSprite.getPosition());
+
 
         if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_contourSprite); }
         else                                  { m_game->window().draw(m_contourSprite); }
@@ -404,7 +390,6 @@ void Scene_Sandbox::renderUI()
             const char* items[] = { "Depth", "Color", "Nothing" };
             ImGui::Combo("Alignment", (int*)&m_alignment, items, 3);
 
-            m_colorizer.imgui();
             if (ImGui::CollapsingHeader("Thresholds"))
             {
                 ImGui::Indent();

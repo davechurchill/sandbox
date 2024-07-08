@@ -1,5 +1,5 @@
-MaxDistance 1.13
-MinDistance 0.9
+MaxDistance 1.849
+MinDistance 0.367
 Decimation 1
 temporalAlpha 0.205
 temporalDelta 72

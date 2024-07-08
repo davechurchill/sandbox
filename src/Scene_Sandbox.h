@@ -5,7 +5,6 @@
 #include "Grid.hpp"
 #include "Calibration.h"
 #include "ContourLines.hpp"
-#include "Colorizer.hpp"
 #include "CameraFilters.hpp"
 
 #include <chrono>
@@ -37,21 +36,26 @@ class Scene_Sandbox : public Scene
 
     alignment           m_alignment = alignment::nothing;
 
+    sf::Shader          m_noShader;
+    sf::Shader          m_shader;
     rs2::pipeline       m_pipe;
     rs2::align          m_alignment_depth = rs2::align(RS2_STREAM_DEPTH);
     rs2::align          m_alignment_color = rs2::align(RS2_STREAM_COLOR);
 
+    cv::Mat             m_cvDepthImage16u;
     cv::Mat             m_cvDepthImage32f;
+    cv::Mat             m_cvNormalizedDepthImage32f;
+    cv::Mat             m_cvTransformedDepthImage32f;
     cv::Mat             m_cvColorImage;
 
     sf::Image           m_sfDepthImage;
-    sf::Image           m_transformedImage;
+    sf::Image           m_sfTransformedDepthImage;
     sf::Image           m_sfColorImage;
     sf::Texture         m_sfDepthTexture;
-    sf::Texture         m_transformedTexture;
+    sf::Texture         m_sfTransformedDepthTexture;
     sf::Texture         m_sfColorTexture;
     sf::Sprite          m_depthSprite;
-    sf::Sprite          m_transformedSprite;
+    sf::Sprite          m_sfTransformedDepthSprite;
     sf::Sprite          m_colorSprite;
 
     sf::Vector2i        m_mouseScreen;
@@ -60,8 +64,6 @@ class Scene_Sandbox : public Scene
     ViewController      m_viewController;
 
     Calibration         m_calibration;
-
-    Colorizer           m_colorizer;
 
     Grid<float>         m_depthGrid;
     Grid<float>         m_depthWarpedGrid;
@@ -77,7 +79,8 @@ class Scene_Sandbox : public Scene
 
     int                 m_numberOfContourLines = 5;
     
-    void captureImage();
+    void captureImages();
+    void processImages();
 
     void init();  
     void renderUI();
@@ -87,6 +90,8 @@ class Scene_Sandbox : public Scene
     void connectToCamera();
     void saveConfig();
     void loadConfig();
+
+    sf::Image matToSfImage(const cv::Mat& mat);
     
 public:
 

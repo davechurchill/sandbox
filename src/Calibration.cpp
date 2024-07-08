@@ -186,22 +186,10 @@ void Calibration::generateWarpMatrix()
     float maxY = boxPoints[0].y;
     for (int i = 0; i < 4; i++)
     {
-        if (boxPoints[i].x < m_minXY.x)
-        {
-            m_minXY.x = boxPoints[i].x;
-        }
-        if (boxPoints[i].x > maxX)
-        {
-            maxX = boxPoints[i].x;
-        }
-        if (boxPoints[i].y < m_minXY.y)
-        {
-            m_minXY.y = boxPoints[i].y;
-        }
-        if (boxPoints[i].y > maxY)
-        {
-            maxY = boxPoints[i].y;
-        }
+        if (boxPoints[i].x < m_minXY.x) { m_minXY.x = boxPoints[i].x; }
+        if (boxPoints[i].x > maxX)      { maxX = boxPoints[i].x; }
+        if (boxPoints[i].y < m_minXY.y) { m_minXY.y = boxPoints[i].y; }
+        if (boxPoints[i].y > maxY)      { maxY = boxPoints[i].y; }
     }
 
     for (int i = 0; i < 4; i++)
