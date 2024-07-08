@@ -9,10 +9,10 @@ void main() {
 	float waterLevel = 0.8;
 	float c = pixel_color[0];
 	
-	if (c < 0.2 || c > 0.8) {
+	if (c < 0.02 || c > 0.99) {
 	    gl_FragColor = vec4( 0.0, 0.0, 0.0, 0.0);
 	} else if (c < 0.2) {
-		gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0);
+		gl_FragColor = vec4( 1.0-5*c, 1.0, 1.0-5*c, 1.0);
 	} else if (c < 0.6) {
 	    gl_FragColor = vec4( 0.0, 1-c, 0.0, 1.0);
 	} else {
