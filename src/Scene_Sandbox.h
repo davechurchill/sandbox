@@ -62,13 +62,11 @@ class Scene_Sandbox : public Scene
 
     sf::Vector2i        m_mouseScreen;
     sf::Vector2f        m_mouseWorld;
+    sf::Vector2f        m_mouseDisplay;
     
     ViewController      m_viewController;
 
     Calibration         m_calibration;
-
-    Grid<float>         m_depthGrid;
-    Grid<float>         m_depthWarpedGrid;
 
     float               m_maxDistance = 1.13f;
     float               m_minDistance = 0.90f;
@@ -80,6 +78,8 @@ class Scene_Sandbox : public Scene
     sf::Sprite          m_contourSprite;
 
     int                 m_numberOfContourLines = 5;
+
+    cv::Mat             m_data;
     
     void captureImages();
     void processImages();

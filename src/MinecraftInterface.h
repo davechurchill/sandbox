@@ -7,7 +7,8 @@
 #endif
 
 #include <sstream>
-#include "Grid.hpp"
+#include <opencv2/opencv.hpp>
+#include <SFML/Graphics.hpp>
 #include "Cube.hpp"
 #include "BlockGeneration.h"
 
@@ -39,6 +40,10 @@ namespace mc
         int m_z = 0;
         Cube<uint8_t> m_cubes[2];
 
+        int m_countdown = 30;
+        int m_updateDelay = 30;
+        bool m_autoUpdate = false;
+
         std::shared_ptr <GenerationProfile> m_profile;
 
     public:
@@ -56,13 +61,13 @@ namespace mc
 
         void command(const std::string & command, int x = 0, int y = 0, int z = 0, Dimension dimension = Dimension::Overworld);
 
-        void projectHeightmap(const Grid<float> & heightMap, int blockScale);
-        void projectHeightmapChanges(const Grid<float> & heightMap, int blockScale);
+        void projectHeightmap(const cv::Mat & heightMap, int blockScale);
+        void projectHeightmapChanges(const cv::Mat & heightMap, int blockScale);
 
         inline void setCoords(int x = 0, int y = 0, int z = 0) { m_x = x; m_y = y; m_z = z; }
 
         inline void fill(int x1, int y1, int z1, int x2, int y2, int z2, const std::string & block, const std::string & args = "");
 
-        void imgui(const Grid<float> & grid);
+        void imgui(const cv::Mat & grid);
     };
 }

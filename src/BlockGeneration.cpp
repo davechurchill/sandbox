@@ -14,10 +14,10 @@ namespace mc
         ImGui::SliderFloat("MC Water Level", &m_waterLevel, 0.0f, 1.0f);
     }
 
-    void BasicGrassProfile::generate(Cube<uint8_t> & output, const Grid<float> & input, int blockScale)
+    void BasicGrassProfile::generate(Cube<uint8_t> & output, const cv::Mat & input, int blockScale)
     {
-        int wx = (int)(input.width());
-        int wz = (int)(input.height());
+        int wx = input.cols;
+        int wz = input.rows;
         int water = (int)(std::ceil(blockScale * m_waterLevel));
 
         if (wx <= 0 || wz <= 0) { return; }
@@ -28,7 +28,7 @@ namespace mc
         {
             for (int j = 0; j < wz; ++j)
             {
-                int height = (int)(input.get(i, j) * blockScale);
+                int height = (int)(input.at<float>(j, i) * blockScale);
                 if (height >= water)
                 {
                     output.fill(i, height, j, i, height, j, 3);
@@ -58,10 +58,10 @@ namespace mc
     void MonochromeProfile::imgui()
     {
     }
-    void MonochromeProfile::generate(Cube<uint8_t> & output, const Grid<float> & input, int blockScale)
+    void MonochromeProfile::generate(Cube<uint8_t> & output, const cv::Mat & input, int blockScale)
     {
-        int wx = (int)(input.width());
-        int wz = (int)(input.height());
+        int wx = input.cols;
+        int wz = input.rows;
 
         if (wx <= 0 || wz <= 0) { return; }
 
@@ -71,7 +71,7 @@ namespace mc
         {
             for (int j = 0; j < wz; ++j)
             {
-                int height = (int)(input.get(i, j) * blockScale);
+                int height = (int)(input.at<float>(j, i) * blockScale);
                 output.fill(i, 0, j, i, height, j, height * 4 / blockScale + 1);
             }
         }

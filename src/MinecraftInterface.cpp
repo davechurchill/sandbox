@@ -2,7 +2,8 @@
 
 #include <format>
 #include <sstream>
-#include <imgui.h>
+#include "imgui.h"
+#include "imgui-SFML.h"
 
 #ifdef Use_Minecraft
 #include<curlpp/Easy.hpp>
@@ -50,13 +51,13 @@ void MinecraftInterface::command(const std::string & command, int x, int y, int 
     }
 }
 
-void MinecraftInterface::projectHeightmap(const Grid<float> & heightMap, int blockScale)
+void MinecraftInterface::projectHeightmap(const cv::Mat & heightMap, int blockScale)
 {
     int nextCubeId = (m_currentCube + 1) % 2;
     m_profile->generate(m_cubes[nextCubeId], heightMap, blockScale);
     
-    int wx = heightMap.width();
-    int wz = heightMap.height();
+    int wx = heightMap.cols;
+    int wz = heightMap.rows;
     // Clear space
     fill(m_x - 1, m_y - 1, m_z - 1, m_x + wx, m_y + blockScale, m_z + wz, "minecraft:spruce_planks", "outline");
     fill(m_x, m_y, m_z, m_x + wx - 1, m_y + blockScale, m_z + wz - 1, "minecraft:air");
@@ -83,13 +84,13 @@ void MinecraftInterface::projectHeightmap(const Grid<float> & heightMap, int blo
     placer.send(m_handle);
 }
 
-void MinecraftInterface::projectHeightmapChanges(const Grid<float> & heightMap, int blockScale)
+void MinecraftInterface::projectHeightmapChanges(const cv::Mat & heightMap, int blockScale)
 {
     int nextCubeId = (m_currentCube + 1) % 2;
     m_profile->generate(m_cubes[nextCubeId], heightMap, blockScale);
 
-    int wx = heightMap.width();
-    int wz = heightMap.height();
+    int wx = heightMap.cols;
+    int wz = heightMap.rows;
 
     const Cube<uint8_t> & cube = m_cubes[nextCubeId];
     const Cube<uint8_t> & pastCube = m_cubes[m_currentCube];
@@ -126,22 +127,22 @@ inline void MinecraftInterface::fill(int x1, int y1, int z1, int x2, int y2, int
     }
 }
 
-void MinecraftInterface::imgui(const Grid<float> & grid)
+void MinecraftInterface::imgui(const cv::Mat & grid)
 {
     if (ImGui::Button("Test Connection"))
     {
         command("say testing testing");
     }
 
-    ImGui::Text("Size: %d, %d, %d", grid.width(), m_mcHeight, grid.height());
+    ImGui::Text("Size: %d, %d, %d", grid.cols, m_mcHeight, grid.rows);
     ImGui::SliderInt("Block Height", &m_mcHeight, 10, 100);
 
-    if (ImGui::Button("Project Perlin Noise"))
+    if (ImGui::Button("Project Data"))
     {
         projectHeightmap(grid, m_mcHeight);
     }
 
-    if (ImGui::Button("Update Perlin Noise"))
+    if (ImGui::Button("Update Data"))
     {
         projectHeightmapChanges(grid, m_mcHeight);
     }
@@ -149,6 +150,14 @@ void MinecraftInterface::imgui(const Grid<float> & grid)
     if (ImGui::CollapsingHeader("Generation Profile Settings"))
     {
         m_profile->imgui();
+    }
+
+    ImGui::Checkbox("Auto Update", &m_autoUpdate);
+    ImGui::SliderInt("Update Delay", &m_updateDelay, 1, 60);
+    if (m_autoUpdate && --m_countdown == 0)
+    {
+        m_countdown = m_updateDelay;
+        projectHeightmapChanges(grid, m_mcHeight);
     }
 }
 
@@ -210,7 +219,7 @@ void MinecraftInterface::BlockPlacer::send(curlpp::Easy & m_handle)
 using namespace mc;
 MinecraftInterface::MinecraftInterface(){}
 
-void MinecraftInterface::imgui(const Grid<float> & grid)
+void MinecraftInterface::imgui(const cv::Mat & grid)
 {
     ImGui::Text("Minecraft connection not compiled, please define Use_Minecraft in MinecraftInterface.h");
 }

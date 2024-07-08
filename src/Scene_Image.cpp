@@ -46,7 +46,8 @@ void Scene_Image::sUserInput()
     {
         ImGui::SFML::ProcessEvent(m_game->window(), event);
         m_viewController.processEvent(m_game->window(), event);
-        m_calibration.processEvent(event, m_mouseWorld);
+        m_calibration.processDebugEvent(event, m_mouseWorld);
+        m_calibration.processDisplayEvent(event, m_mouseWorld);
 
         // this event triggers when the window is closed
         if (event.type == sf::Event::Closed)
@@ -106,7 +107,7 @@ void Scene_Image::sRender()
     m_game->window().draw(m_quadArray);
     m_game->window().draw(m_lineStrip);
     m_game->window().draw(m_text);
-    m_calibration.render(m_game->window());
+    m_calibration.render(m_game->window(), m_game->window());
 }
 
 void Scene_Image::updateSprite()

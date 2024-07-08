@@ -2,8 +2,7 @@
 
 #include <vector>
 #include <string>
-
-#include "Grid.hpp"
+#include <opencv2/opencv.hpp>
 #include "Cube.hpp"
 
 namespace mc
@@ -14,7 +13,7 @@ namespace mc
         std::vector<std::string> m_blockNames;
     public:
         virtual void imgui() = 0;
-        virtual void generate(Cube<uint8_t> & output, const Grid<float> & input, int blockScale) = 0;
+        virtual void generate(Cube<uint8_t> & output, const cv::Mat & input, int blockScale) = 0;
         inline const std::string & blockName(uint8_t id) const { return m_blockNames[id]; };
     };
 
@@ -24,7 +23,7 @@ namespace mc
     public:
         BasicGrassProfile();
         void imgui();
-        void generate(Cube<uint8_t> & output, const Grid<float> & input, int blockScale);
+        void generate(Cube<uint8_t> & output, const cv::Mat & input, int blockScale);
     };
 
     class MonochromeProfile : public GenerationProfile
@@ -32,6 +31,6 @@ namespace mc
     public:
         MonochromeProfile();
         void imgui();
-        void generate(Cube<uint8_t> & output, const Grid<float> & input, int blockScale);
+        void generate(Cube<uint8_t> & output, const cv::Mat & input, int blockScale);
     };
 }

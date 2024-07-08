@@ -28,6 +28,15 @@ void Calibration::imgui()
     ImGui::Checkbox("Apply Height Adjustment", &m_applyAdjustment);
  
     ImGui::Checkbox("Sandbox Lines", &m_drawSanboxAreaLines);
+
+    if (ImGui::SliderInt("Rectangle Width", &m_width, 1, 1280))
+    {
+        generateWarpMatrix();
+    }
+    if (ImGui::SliderInt("Rectangle Height", &m_height, 1, 1280))
+    {
+        generateWarpMatrix();
+    }
 }
 
 void Calibration::transformRect(const cv::Mat& input, cv::Mat& output)
@@ -98,20 +107,18 @@ int Calibration::getClickedCircleIndex(float mx, float my, std::vector<sf::Circl
     return -1;
 }
 
-void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
+void Calibration::processDebugEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
     // detect if we have clicked a circle
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
         m_dragPoint = getClickedCircleIndex(mouse.x, mouse.y, m_boxInteriorCircles);
-        m_dragBoxPoint = getClickedCircleIndex(mouse.x, mouse.y, m_boxProjectionCircles);
     }
 
     // if we have released the mouse button
     if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
     {
         m_dragPoint = -1;
-        m_dragBoxPoint = -1;
     }
 
     // if the mouse moved and we are dragging something, update its position and regenerate the matrix
@@ -123,8 +130,27 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
             m_boxInteriorCircles[m_dragPoint].setPosition(mouse);
             generateWarpMatrix();
         }
+    }
+}
 
-        if (m_dragBoxPoint != -1) 
+void Calibration::processDisplayEvent(const sf::Event & event, const sf::Vector2f & mouse)
+{
+    // detect if we have clicked a circle
+    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+    {
+        m_dragBoxPoint = getClickedCircleIndex(mouse.x, mouse.y, m_boxProjectionCircles);
+    }
+
+    // if we have released the mouse button
+    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+    {
+        m_dragBoxPoint = -1;
+    }
+
+    // if the mouse moved and we are dragging something, update its position and regenerate the matrix
+    if (event.type == sf::Event::MouseMoved)
+    {
+        if (m_dragBoxPoint != -1)
         {
             m_boxProjectionPoints[m_dragBoxPoint] = cv::Point((int)mouse.x, (int)mouse.y);
             m_boxProjectionCircles[m_dragBoxPoint].setPosition(mouse);
@@ -133,7 +159,7 @@ void Calibration::processEvent(const sf::Event & event, const sf::Vector2f & mou
     }
 }
 
-void Calibration::render(sf::RenderWindow & window)
+void Calibration::render(sf::RenderWindow & window, sf::RenderWindow & displayWindow)
 {
     // draw the circles and lines used to calibrate the interior of the sandbox for the depth camera
     for (size_t i = 0; i < m_boxInteriorCircles.size(); ++i)
@@ -155,7 +181,7 @@ void Calibration::render(sf::RenderWindow & window)
     {
         for (size_t i = 0; i < m_boxProjectionCircles.size(); ++i)
         {
-            window.draw(m_boxProjectionCircles[i]);
+            displayWindow.draw(m_boxProjectionCircles[i]);
         }
 
         sf::VertexArray boxProjectionVertices(sf::LinesStrip);
@@ -164,7 +190,7 @@ void Calibration::render(sf::RenderWindow & window)
         boxProjectionVertices.append(sf::Vertex(m_boxProjectionCircles[3].getPosition()));
         boxProjectionVertices.append(sf::Vertex(m_boxProjectionCircles[2].getPosition()));
         boxProjectionVertices.append(sf::Vertex(m_boxProjectionCircles[0].getPosition()));
-        window.draw(boxProjectionVertices);
+        displayWindow.draw(boxProjectionVertices);
     }
 }
 

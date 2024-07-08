@@ -40,8 +40,9 @@ public:
     void transformRect(const cv::Mat & input, cv::Mat & output);
     void transformProjection(const cv::Mat & input, cv::Mat & output);
     void heightAdjustment(cv::Mat & matrix);
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
-    void render(sf::RenderWindow & window);
+    void processDebugEvent(const sf::Event & event, const sf::Vector2f & mouse);
+    void processDisplayEvent(const sf::Event & event, const sf::Vector2f & mouse);
+    void render(sf::RenderWindow & window, sf::RenderWindow & displayWindow);
 
     inline float getTransformedScale() const { return 1.f / m_boxScale.x; }
 

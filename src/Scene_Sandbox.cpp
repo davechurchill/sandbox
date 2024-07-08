@@ -163,6 +163,7 @@ void Scene_Sandbox::captureImages()
     {
         PROFILE_SCOPE("Calibration TransformRect");
         m_calibration.transformRect(m_cvNormalizedDepthImage32f, m_cvTransformedDepthImage32f);
+        m_data = m_cvTransformedDepthImage32f;
     }
 
     //m_calibration.heightAdjustment(output);
@@ -191,14 +192,6 @@ void Scene_Sandbox::captureImages()
         m_sfTransformedDepthImage = matToSfImage(blurredImage);
         m_sfTransformedDepthTexture.loadFromImage(m_sfTransformedDepthImage);
         m_sfTransformedDepthSprite.setTexture(m_sfTransformedDepthTexture, true);
-    }
-
-    // Calculate Contour Lines from warped data grid
-    if (m_drawContours)
-    {
-        PROFILE_SCOPE("Calculate Contour Lines");
-        m_contour.init(dw, dh);
-        m_contour.calculate(m_depthWarpedGrid);
     }
 
     if (m_drawDepth)
@@ -235,13 +228,6 @@ void Scene_Sandbox::onFrame()
 
 void Scene_Sandbox::sProcessEvent(const sf::Event& event)
 {
-    ImGui::SFML::ProcessEvent(m_game->window(), event);
-    m_viewController.processEvent(m_game->window(), event);
-
-    // process the event within the calibration system
-    // this will handle the moving of calibration quadrilaterals
-    m_calibration.processEvent(event, m_mouseWorld);
-
     // this event triggers when the window is closed
     if (event.type == sf::Event::Closed)
     {
@@ -296,12 +282,6 @@ void Scene_Sandbox::sProcessEvent(const sf::Event& event)
         if (event.mouseButton.button == sf::Mouse::Right) {}
     }
 
-    // happens whenever the mouse is being moved
-    if (event.type == sf::Event::MouseMoved)
-    {
-        m_mouseScreen = { event.mouseMove.x, event.mouseMove.y };
-        m_mouseWorld = m_game->window().mapPixelToCoords(m_mouseScreen);
-    }
 }
 
 void Scene_Sandbox::sUserInput()
@@ -309,14 +289,41 @@ void Scene_Sandbox::sUserInput()
     sf::Event event;
     while (m_game->window().pollEvent(event))
     {
+        ImGui::SFML::ProcessEvent(m_game->window(), event);
+        m_viewController.processEvent(m_game->window(), event);
         sProcessEvent(event);
+
+        // process the event within the calibration system
+        // this will handle the moving of calibration quadrilaterals
+        m_calibration.processDebugEvent(event, m_mouseWorld);
+        if (!m_game->displayWindow().isOpen())
+        {
+            m_calibration.processDisplayEvent(event, m_mouseWorld);
+        }
+
+        // happens whenever the mouse is being moved
+        if (event.type == sf::Event::MouseMoved)
+        {
+            m_mouseScreen = { event.mouseMove.x, event.mouseMove.y };
+            m_mouseWorld = m_game->window().mapPixelToCoords(m_mouseScreen);
+        }
     }
 
-    //sf::Event displayEvent;
-    //while (m_game->displayWindow().pollEvent(displayEvent))
-    //{
-    //    sProcessEvent(displayEvent);
-    //}
+    sf::Event displayEvent;
+    while (m_game->displayWindow().pollEvent(displayEvent))
+    {
+        sProcessEvent(displayEvent);
+
+        // process the event within the calibration system
+        // this will handle the moving of calibration quadrilaterals
+        m_calibration.processDisplayEvent(displayEvent, m_mouseDisplay);
+
+        // happens whenever the mouse is being moved
+        if (displayEvent.type == sf::Event::MouseMoved)
+        {
+            m_mouseDisplay = { (float)displayEvent.mouseMove.x, (float)displayEvent.mouseMove.y };
+        }
+    }
 }
 
 // renders the scene
@@ -362,7 +369,8 @@ void Scene_Sandbox::sRender()
     m_game->window().draw(m_text);
 
     // render the calibration debug information
-    m_calibration.render(m_game->window());
+    if (m_game->displayWindow().isOpen()) { m_calibration.render(m_game->window(), m_game->displayWindow()); }
+    else { m_calibration.render(m_game->window(), m_game->window()); }
 }
 
 void Scene_Sandbox::renderUI()
@@ -428,7 +436,7 @@ void Scene_Sandbox::renderUI()
 
         if (ImGui::BeginTabItem("Minecraft"))
         {
-            m_game->minecraft().imgui(m_depthGrid);
+            m_game->minecraft().imgui(m_data);
             ImGui::EndTabItem();
         }
         ImGui::EndTabBar();
@@ -465,6 +473,6 @@ void Scene_Sandbox::loadConfig()
 void Scene_Sandbox::endScene()
 {
     m_game->changeScene<Scene_Menu>("Menu");
-
+    m_game->displayWindow().close();
     saveConfig();
 }
