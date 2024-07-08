@@ -36,6 +36,8 @@ class Scene_Sandbox : public Scene
 
     alignment           m_alignment = alignment::nothing;
 
+    std::vector<sf::Shader> m_shaders;
+
     sf::Shader          m_noShader;
     sf::Shader          m_shader;
     rs2::pipeline       m_pipe;

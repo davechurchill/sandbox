@@ -47,7 +47,7 @@ public:
             m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlpha);
             m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, (float)m_smoothDelta);
             m_spatialFilter.set_option(RS2_OPTION_HOLES_FILL, (float)m_spatialHoleFill);
-            temp = m_spatialFilter.process(temp);
+            //temp = m_spatialFilter.process(temp);
         }
 
         if (m_holeFill < 3)

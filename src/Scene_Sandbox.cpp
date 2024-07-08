@@ -34,7 +34,7 @@ void Scene_Sandbox::init()
 
     m_contour.setContourLevel(0.5);
 
-    m_shader.loadFromFile("shaders/shader_terrain.frag", sf::Shader::Fragment);
+    m_shader.loadFromFile("shaders/shader_popsicle.frag", sf::Shader::Fragment);
 
     loadConfig();
 }
@@ -156,7 +156,7 @@ void Scene_Sandbox::captureImages()
         PROFILE_SCOPE("Threshold and Normalize");
         cv::threshold(m_cvDepthImage32f, m_cvNormalizedDepthImage32f, m_minDistance, 255, cv::THRESH_TOZERO);
         cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, m_maxDistance, 255, cv::THRESH_TOZERO_INV);
-        m_cvNormalizedDepthImage32f = (m_cvNormalizedDepthImage32f - m_minDistance) / m_maxDistance;
+        m_cvNormalizedDepthImage32f = (m_cvNormalizedDepthImage32f - m_minDistance) / (m_maxDistance - m_minDistance);
     }
 
     // Calibration
@@ -180,9 +180,9 @@ void Scene_Sandbox::captureImages()
     if (dw == 0 || dh == 0) { return; }
 
     {
-        int kernelSize = 5; // Example kernel size
-        double sigmaX = 3.5; // Example standard deviation in X direction
-        double sigmaY = 3.5; // Example standard deviation in Y direction
+        int kernelSize = 17; // Example kernel size
+        double sigmaX = 9.5; // Example standard deviation in X direction
+        double sigmaY = 9.5; // Example standard deviation in Y direction
 
         cv::Mat blurredImage;
         cv::GaussianBlur(m_cvTransformedDepthImage32f, blurredImage, cv::Size(kernelSize, kernelSize), sigmaX, sigmaY);
@@ -334,7 +334,7 @@ void Scene_Sandbox::sRender()
     float scale = m_calibration.getTransformedScale();
     m_sfTransformedDepthSprite.setScale(scale, scale);
 
-    m_shader.setUniform("texture", m_sfTransformedDepthSprite.getTexture());
+    //m_shader.setUniform("texture", m_sfTransformedDepthSprite.getTexture());
 
     // draw the final transformed image in the chosen window
     if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_sfTransformedDepthSprite, &m_shader); }
