@@ -40,3 +40,5 @@ bin/maps/weighted-map
 *.exe
 *.out
 *.app
+bin/depthImage_normalized.png
+bin/depthImage_raw.png

@@ -35,11 +35,13 @@ void Scene_Sandbox::init()
 
     m_shaderPaths = 
     {
-        "",
         "shaders/shader_popsicle.frag",
         "shaders/shader_red.frag",
-        "shaders/shader_terrain.frag"
+        "shaders/shader_terrain.frag",
+        ""
     };
+
+    m_shader.loadFromFile(m_shaderPaths[0], sf::Shader::Fragment);
 
     loadConfig();
 }
@@ -151,7 +153,8 @@ void Scene_Sandbox::captureImages()
         m_cvDepthImage16u.convertTo(m_cvDepthImage32f, CV_32F);
 
         // multiply the image values by the unit type to get the data in meters like we want
-        m_cvDepthImage32f = m_cvDepthImage32f * depthFrame.get_units();
+        m_depthFrameUnits = depthFrame.get_units();
+        m_cvDepthImage32f = m_cvDepthImage32f * m_depthFrameUnits;
     }
         
     // set everything to 0 that's below min distance or above max distance
@@ -225,8 +228,6 @@ void Scene_Sandbox::captureImages()
 
 void Scene_Sandbox::onFrame()
 {
-    PROFILE_FUNCTION();
-
     if (m_cameraConnected)
     {
         captureImages();
@@ -373,7 +374,7 @@ void Scene_Sandbox::sRender()
     {
         PROFILE_SCOPE("Draw Transformed Image");
         if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_sfTransformedDepthSprite, &m_shader); }
-        else { m_game->window().draw(m_sfTransformedDepthSprite); }
+        else { m_game->window().draw(m_sfTransformedDepthSprite, &m_shader); }
     }
 
     {
@@ -415,7 +416,7 @@ void Scene_Sandbox::renderUI()
             const char* items[] = { "Depth", "Color", "Nothing" };
             ImGui::Combo("Alignment", (int*)&m_alignment, items, 3);
 
-            const char* shaders[] = { "None", "Popsicle", "Red", "Terrain"};
+            const char* shaders[] = { "Popsicle", "Red", "Terrain", "None"};
             if (ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 4))
             {
                 m_shader.loadFromFile(m_shaderPaths[m_selectedShaderIndex], sf::Shader::Fragment);
@@ -436,6 +437,21 @@ void Scene_Sandbox::renderUI()
             ImGui::Spacing();
 
             ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
+
+            if (ImGui::Button("Screenshot Raw Depth"))
+            {
+                cv::Mat depthImage8u;
+                m_cvDepthImage32f.convertTo(depthImage8u, CV_8U, 255.0 / m_depthFrameUnits);
+                cv::normalize(m_cvDepthImage32f, depthImage8u, 0, 255, cv::NORM_MINMAX, CV_8U);
+                cv::imwrite("depthImage_raw.png", depthImage8u);
+            }
+            if (ImGui::Button("Screenshot Normalized Depth"))
+            {
+                cv::Mat depthImage8u;
+                m_cvNormalizedDepthImage32f.convertTo(depthImage8u, CV_8U, 255.0);
+                cv::normalize(m_cvNormalizedDepthImage32f, depthImage8u, 0, 255, cv::NORM_MINMAX, CV_8U);
+                cv::imwrite("depthImage_normalized.png", depthImage8u);
+            }
 
             ImGui::EndTabItem();
         }

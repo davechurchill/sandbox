@@ -113,7 +113,7 @@ public:
         m_result.start = std::chrono::time_point_cast<std::chrono::microseconds>(m_startTimepoint).time_since_epoch().count();
 
         // if it's the same as the previous start time, add 1 to it 
-        m_result.start += (m_result.start == lastStartTime ? 1 : 0);
+        m_result.start += (m_result.start == lastStartTime ? 2 : 0);
 
         // record the fixed time as the previous start time
         lastStartTime = m_result.start;

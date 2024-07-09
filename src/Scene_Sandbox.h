@@ -72,6 +72,7 @@ class Scene_Sandbox : public Scene
 
     float               m_maxDistance = 1.13f;
     float               m_minDistance = 0.90f;
+    float               m_depthFrameUnits = 0.0f;
 
     CameraFilters       m_filters;
 

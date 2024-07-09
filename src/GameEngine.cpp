@@ -1,5 +1,6 @@
 #include "GameEngine.h"
 #include "Assets.h"
+#include "Profiler.hpp"
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -55,17 +56,24 @@ void GameEngine::update()
 
     sf::Time dt = m_deltaClock.restart();
     m_framerate = m_framerate * 0.75f + 0.25f / dt.asSeconds();
-    ImGui::SFML::Update(m_window, dt);
+
+    {
+        PROFILE_SCOPE("ImGui::Update");
+        ImGui::SFML::Update(m_window, dt);
+    }
 
     currentScene()->onFrame();
 
     ImGui::SFML::Render(m_window);
 
-    m_window.display();
-
-    if (m_displayWindow.isOpen())
     {
-        m_displayWindow.display();
+        PROFILE_SCOPE("window.display()");
+        m_window.display();
+
+        if (m_displayWindow.isOpen())
+        {
+            m_displayWindow.display();
+        }
     }
 }
 
