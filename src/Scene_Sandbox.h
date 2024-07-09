@@ -94,6 +94,9 @@ class Scene_Sandbox : public Scene
     void loadConfig();
 
     sf::Image matToSfImage(const cv::Mat& mat);
+
+    void saveDepthData(const std::string & filename, const uint16_t * depth_data, int width, int height);
+    void loadDepthData(const std::string & filename, uint16_t * depth_data, int width, int height);
     
 public:
 

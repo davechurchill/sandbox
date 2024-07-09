@@ -438,7 +438,7 @@ void Scene_Sandbox::renderUI()
 
             ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
 
-            if (ImGui::Button("Screenshot Raw Depth"))
+            if (ImGui::Button("Screenshot Raw Depth Data"))
             {
                 cv::Mat depthImage8u;
                 m_cvDepthImage32f.convertTo(depthImage8u, CV_8U, 255.0 / m_depthFrameUnits);
@@ -451,6 +451,20 @@ void Scene_Sandbox::renderUI()
                 m_cvNormalizedDepthImage32f.convertTo(depthImage8u, CV_8U, 255.0);
                 cv::normalize(m_cvNormalizedDepthImage32f, depthImage8u, 0, 255, cv::NORM_MINMAX, CV_8U);
                 cv::imwrite("depthImage_normalized.png", depthImage8u);
+            }
+
+            if (ImGui::Button("Save Raw Depth Data"))
+            {
+                rs2::frameset data = m_pipe.wait_for_frames();
+                rs2::depth_frame depth_frame = data.get_depth_frame();
+                const uint16_t * depth_data = reinterpret_cast<const uint16_t *>(depth_frame.get_data());
+                saveDepthData("depth_data.bin", depth_data, 1280, 720);
+            }
+
+            if (ImGui::Button("Load Raw Depth Data"))
+            {
+                uint16_t * depth_data = new uint16_t[1280 * 720];
+                loadDepthData("depth_data.bin", depth_data, 1280, 720);
             }
 
             ImGui::EndTabItem();
@@ -510,4 +524,30 @@ void Scene_Sandbox::endScene()
     m_game->changeScene<Scene_Menu>("Menu");
     m_game->displayWindow().close();
     saveConfig();
+}
+
+void Scene_Sandbox::saveDepthData(const std::string & filename, const uint16_t * depth_data, int width, int height)
+{
+    std::ofstream file(filename, std::ios::binary);
+    if (!file)
+    {
+        std::cerr << "Failed to open file for writing: " << filename << std::endl;
+        return;
+    }
+    file.write(reinterpret_cast<const char *>(depth_data), width * height * sizeof(uint16_t));
+    file.close();
+    std::cout << "Depth data saved to file: " << filename << std::endl;
+}
+
+void Scene_Sandbox::loadDepthData(const std::string & filename, uint16_t * depth_data, int width, int height)
+{
+    std::ifstream file(filename, std::ios::binary);
+    if (!file)
+    {
+        std::cerr << "Failed to open file for reading: " << filename << std::endl;
+        return;
+    }
+    file.read(reinterpret_cast<char *>(depth_data), width * height * sizeof(uint16_t));
+    file.close();
+    std::cout << "Depth data loaded from file: " << filename << std::endl;
 }
