@@ -40,6 +40,7 @@ class Scene_Sandbox : public Scene
 
     sf::Shader          m_noShader;
     sf::Shader          m_shader;
+    sf::Shader          m_shaderContour;
     rs2::pipeline       m_pipe;
     rs2::align          m_alignment_depth = rs2::align(RS2_STREAM_DEPTH);
     rs2::align          m_alignment_color = rs2::align(RS2_STREAM_COLOR);
@@ -78,6 +79,7 @@ class Scene_Sandbox : public Scene
     sf::Sprite          m_contourSprite;
 
     int                 m_numberOfContourLines = 5;
+    int                 m_selectedShader       = 0;
 
     cv::Mat             m_data;
     

@@ -34,8 +34,7 @@ void Scene_Sandbox::init()
 
     m_contour.setContourLevel(0.5);
 
-    m_shader.loadFromFile("shaders/shader_popsicle.frag", sf::Shader::Fragment);
-
+    m_shader.loadFromFile("shaders/shader_popsicle.frag", sf::Shader::Fragment); 
     loadConfig();
 }
 
@@ -343,10 +342,23 @@ void Scene_Sandbox::sRender()
 
     //m_shader.setUniform("texture", m_sfTransformedDepthSprite.getTexture());
 
+    //Change color scheme
+    const std::vector<std::string> shaders = {
+                                                "shaders/shader_breathe.frag",
+                                                "shaders/shader_Fade.frag",
+                                                "shaders/shader_popsicle.frag",
+                                                "shaders/shader_red.frag",
+                                                "shaders/shader_shake.frag",
+                                                "shaders/shader_terrain.frag"
+                                             };
+    m_shader.loadFromFile(shaders[m_selectedShader], sf::Shader::Fragment);
+    m_shader.setUniform("contour", m_drawContours);
+    m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
     // draw the final transformed image in the chosen window
     if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_sfTransformedDepthSprite, &m_shader); }
     else                                  { m_game->window().draw(m_sfTransformedDepthSprite, &m_noShader); }
 
+ 
     // draw the contour lines 
     if (m_drawContours)
     {
@@ -398,6 +410,9 @@ void Scene_Sandbox::renderUI()
             const char* items[] = { "Depth", "Color", "Nothing" };
             ImGui::Combo("Alignment", (int*)&m_alignment, items, 3);
 
+            const char* shaders[] = { "Breathe", "Fade", "Popsicle", "Red", "Shake", "Terrain"};
+            ImGui::Combo("Color Scheme", (int*)&m_selectedShader, shaders, 6);
+           
             if (ImGui::CollapsingHeader("Thresholds"))
             {
                 ImGui::Indent();
