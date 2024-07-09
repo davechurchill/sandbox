@@ -70,6 +70,8 @@ public:
 
     void imgui()
     {
+        PROFILE_FUNCTION();
+
         ImGui::SliderInt("Decimation", &m_decimation, 0, 5);
 
         if (ImGui::CollapsingHeader("Spatial Filter"))

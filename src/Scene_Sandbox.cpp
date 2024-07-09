@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <string>
 
+#include <SFML/Graphics.hpp>
 #include "imgui.h"
 #include "imgui-SFML.h"
 
@@ -32,9 +33,14 @@ void Scene_Sandbox::init()
     m_text.setPosition(10, 5);
     m_text.setCharacterSize(10);
 
-    m_contour.setContourLevel(0.5);
+    m_shaderPaths = 
+    {
+        "",
+        "shaders/shader_popsicle.frag",
+        "shaders/shader_red.frag",
+        "shaders/shader_terrain.frag"
+    };
 
-    m_shader.loadFromFile("shaders/shader_popsicle.frag", sf::Shader::Fragment); 
     loadConfig();
 }
 
@@ -185,29 +191,42 @@ void Scene_Sandbox::captureImages()
         double sigmaY = 9.5; // Example standard deviation in Y direction
 
         cv::Mat blurredImage;
-        cv::GaussianBlur(m_cvTransformedDepthImage32f, blurredImage, cv::Size(kernelSize, kernelSize), sigmaX, sigmaY);
+        {
+            PROFILE_SCOPE("OpenCV Gaussian Blur");
+            cv::GaussianBlur(m_cvTransformedDepthImage32f, blurredImage, cv::Size(kernelSize, kernelSize), sigmaX, sigmaY);
+        }
 
-        PROFILE_SCOPE("Transformed Image to Texture");
-        m_sfTransformedDepthImage = matToSfImage(blurredImage);
-        m_sfTransformedDepthTexture.loadFromImage(m_sfTransformedDepthImage);
-        m_sfTransformedDepthSprite.setTexture(m_sfTransformedDepthTexture, true);
+        {
+            PROFILE_SCOPE("Transformed Image SFML Image");
+            m_sfTransformedDepthImage = matToSfImage(blurredImage);
+
+            {
+                PROFILE_SCOPE("SFML Texture From Image");
+                m_sfTransformedDepthTexture.loadFromImage(m_sfTransformedDepthImage);
+                m_sfTransformedDepthSprite.setTexture(m_sfTransformedDepthTexture, true);
+            }
+        }
     }
 
     if (m_drawDepth)
     {
         {
-            // Create SFML image
+            PROFILE_SCOPE("Depth Image to SFML Image");
             sf::Image image = matToSfImage(m_cvNormalizedDepthImage32f);
-            
-            PROFILE_SCOPE("Depth Image to Texture");
-            m_sfDepthTexture.loadFromImage(image);
-            m_depthSprite.setTexture(m_sfDepthTexture, true);
+
+            {
+                PROFILE_SCOPE("SFML Texture From Image");
+                m_sfDepthTexture.loadFromImage(image);
+                m_depthSprite.setTexture(m_sfDepthTexture, true);
+            }
         }   
     }
 }
 
 void Scene_Sandbox::onFrame()
 {
+    PROFILE_FUNCTION();
+
     if (m_cameraConnected)
     {
         captureImages();
@@ -285,6 +304,8 @@ void Scene_Sandbox::sProcessEvent(const sf::Event& event)
 
 void Scene_Sandbox::sUserInput()
 {
+    PROFILE_FUNCTION();
+
     sf::Event event;
     while (m_game->window().pollEvent(event))
     {
@@ -333,8 +354,10 @@ void Scene_Sandbox::sRender()
     m_game->window().clear();
     m_game->displayWindow().clear();
 
-    // draw the depth image
-    if (m_drawDepth) { m_game->window().draw(m_depthSprite); }
+    {
+        PROFILE_SCOPE("Draw Depth Image");
+        if (m_drawDepth) { m_game->window().draw(m_depthSprite); }
+    }
 
     m_sfTransformedDepthSprite.setPosition(m_calibration.getTransformedPosition());
     float scale = m_calibration.getTransformedScale();
@@ -343,41 +366,21 @@ void Scene_Sandbox::sRender()
     //m_shader.setUniform("texture", m_sfTransformedDepthSprite.getTexture());
 
     //Change color scheme
-    const std::vector<std::string> shaders = {
-                                                "shaders/shader_breathe.frag",
-                                                "shaders/shader_Fade.frag",
-                                                "shaders/shader_popsicle.frag",
-                                                "shaders/shader_red.frag",
-                                                "shaders/shader_shake.frag",
-                                                "shaders/shader_terrain.frag"
-                                             };
-    m_shader.loadFromFile(shaders[m_selectedShader], sf::Shader::Fragment);
+    
     m_shader.setUniform("contour", m_drawContours);
     m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
-    // draw the final transformed image in the chosen window
-    if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_sfTransformedDepthSprite, &m_shader); }
-    else                                  { m_game->window().draw(m_sfTransformedDepthSprite, &m_noShader); }
 
- 
-    // draw the contour lines 
-    if (m_drawContours)
     {
-        m_contourSprite.setTexture(m_contour.generateTexture(), true);
-        m_contourSprite.setScale(scale, scale);
-        m_contourSprite.setPosition(m_sfTransformedDepthSprite.getPosition());
-
-
-        if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_contourSprite); }
-        else                                  { m_game->window().draw(m_contourSprite); }
+        PROFILE_SCOPE("Draw Transformed Image");
+        if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_sfTransformedDepthSprite, &m_shader); }
+        else { m_game->window().draw(m_sfTransformedDepthSprite); }
     }
 
-    // draw the color camera image 
-    if (m_drawColor) { m_game->window().draw(m_colorSprite); }
+    {
+        PROFILE_SCOPE("Draw Color Image");
+        if (m_drawColor) { m_game->window().draw(m_colorSprite); }
+    }
     
-    m_lineStrip.clear();
-    m_quadArray.clear();
-    m_game->window().draw(m_quadArray);
-    m_game->window().draw(m_lineStrip);
     m_game->window().draw(m_text);
 
     // render the calibration debug information
@@ -387,6 +390,8 @@ void Scene_Sandbox::sRender()
 
 void Scene_Sandbox::renderUI()
 {
+    PROFILE_FUNCTION();
+
     ImGui::Begin("Options", &m_drawUI, ImGuiWindowFlags_MenuBar);
 
     if (ImGui::BeginMenuBar())
@@ -410,8 +415,11 @@ void Scene_Sandbox::renderUI()
             const char* items[] = { "Depth", "Color", "Nothing" };
             ImGui::Combo("Alignment", (int*)&m_alignment, items, 3);
 
-            const char* shaders[] = { "Breathe", "Fade", "Popsicle", "Red", "Shake", "Terrain"};
-            ImGui::Combo("Color Scheme", (int*)&m_selectedShader, shaders, 6);
+            const char* shaders[] = { "None", "Popsicle", "Red", "Terrain"};
+            if (ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 4))
+            {
+                m_shader.loadFromFile(m_shaderPaths[m_selectedShaderIndex], sf::Shader::Fragment);
+            }
            
             if (ImGui::CollapsingHeader("Thresholds"))
             {
@@ -428,10 +436,6 @@ void Scene_Sandbox::renderUI()
             ImGui::Spacing();
 
             ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
-            if (ImGui::InputInt("Contour Lines", &m_numberOfContourLines, 1, 10))
-            {
-                m_contour.setNumberofContourLines(m_numberOfContourLines);
-            }
 
             ImGui::EndTabItem();
         }

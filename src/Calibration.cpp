@@ -1,4 +1,5 @@
 #include "Calibration.h"
+#include "Profiler.hpp"
 #include "imgui-SFML.h"
 #include "imgui.h"
 #include <fstream>
@@ -25,6 +26,8 @@ Calibration::Calibration()
 
 void Calibration::imgui()
 {
+    PROFILE_FUNCTION();
+
     ImGui::Checkbox("Apply Height Adjustment", &m_applyAdjustment);
  
     ImGui::Checkbox("Sandbox Lines", &m_drawSanboxAreaLines);
@@ -51,6 +54,8 @@ void Calibration::transformProjection(const cv::Mat & input, cv::Mat & output)
 
 void Calibration::heightAdjustment(cv::Mat & matrix)
 {
+    PROFILE_FUNCTION();
+
     int width = matrix.cols;
     int height = matrix.rows;
 
@@ -109,6 +114,8 @@ int Calibration::getClickedCircleIndex(float mx, float my, std::vector<sf::Circl
 
 void Calibration::processDebugEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
+    PROFILE_FUNCTION();
+
     // detect if we have clicked a circle
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
@@ -135,6 +142,8 @@ void Calibration::processDebugEvent(const sf::Event & event, const sf::Vector2f 
 
 void Calibration::processDisplayEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
+    PROFILE_FUNCTION();
+
     // detect if we have clicked a circle
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
@@ -161,6 +170,8 @@ void Calibration::processDisplayEvent(const sf::Event & event, const sf::Vector2
 
 void Calibration::render(sf::RenderWindow & window, sf::RenderWindow & displayWindow)
 {
+    PROFILE_FUNCTION();
+
     // draw the circles and lines used to calibrate the interior of the sandbox for the depth camera
     for (size_t i = 0; i < m_boxInteriorCircles.size(); ++i)
     {
@@ -196,6 +207,8 @@ void Calibration::render(sf::RenderWindow & window, sf::RenderWindow & displayWi
 
 void Calibration::generateWarpMatrix()
 {
+    PROFILE_FUNCTION();
+
     cv::Point2f dstPoints[] = {
             cv::Point2f(0, 0),
             cv::Point2f((float)m_width, 0),

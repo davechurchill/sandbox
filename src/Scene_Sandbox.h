@@ -9,6 +9,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <string>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -36,10 +37,10 @@ class Scene_Sandbox : public Scene
 
     alignment           m_alignment = alignment::nothing;
 
-    std::vector<sf::Shader> m_shaders;
-
-    sf::Shader          m_noShader;
+    std::vector<std::string> m_shaderPaths;
     sf::Shader          m_shader;
+    int                 m_selectedShaderIndex = 0;
+
     sf::Shader          m_shaderContour;
     rs2::pipeline       m_pipe;
     rs2::align          m_alignment_depth = rs2::align(RS2_STREAM_DEPTH);
@@ -74,17 +75,13 @@ class Scene_Sandbox : public Scene
 
     CameraFilters       m_filters;
 
-    bool                m_drawContours = false;
-    ContourLines        m_contour;
+    bool                m_drawContours = true;
     sf::Sprite          m_contourSprite;
-
-    int                 m_numberOfContourLines = 5;
-    int                 m_selectedShader       = 0;
+    int                 m_numberOfContourLines = 16;
 
     cv::Mat             m_data;
     
     void captureImages();
-    void processImages();
 
     void init();  
     void renderUI();
