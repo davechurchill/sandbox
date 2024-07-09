@@ -7,7 +7,7 @@
 #include <string>
 #include <algorithm>
 
-#define PROFILING 1
+//#define PROFILING 1
 #ifdef PROFILING
     #define PROFILE_SCOPE(name) \
         ProfileTimer timer##__LINE__(name)
