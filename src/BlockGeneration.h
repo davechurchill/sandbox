@@ -15,6 +15,7 @@ namespace mc
         virtual void imgui() = 0;
         virtual void generate(Cube<uint8_t> & output, const cv::Mat & input, int blockScale) = 0;
         inline const std::string & blockName(uint8_t id) const { return m_blockNames[id]; };
+        inline const size_t numberOfBlocks() const { return m_blockNames.size(); }
     };
 
     class BasicGrassProfile : public GenerationProfile

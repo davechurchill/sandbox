@@ -44,6 +44,7 @@ namespace mc
         int m_updateDelay = 30;
         bool m_autoUpdate = false;
 
+        int m_currentProfile;
         std::shared_ptr <GenerationProfile> m_profile;
 
     public:

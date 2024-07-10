@@ -158,7 +158,8 @@ void Scene_Sandbox::captureImages()
         m_cvDepthImage32f = m_cvDepthImage32f * m_depthFrameUnits;
     }
 
-    if (m_calibration.shouldAdjustHeight()) {
+    if (m_calibration.shouldAdjustHeight())
+    {
         PROFILE_SCOPE("Height Adjustment");
         m_calibration.heightAdjustment(m_cvDepthImage32f);
     }

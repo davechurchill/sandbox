@@ -6,7 +6,7 @@ void main() {
     vec2 coord = gl_TexCoord[0].xy;   
     vec4 pixel_color = texture2D(currentTexture, coord);
 	
-	float c = pixel_color[0];
+	float c = 1.0 - pixel_color[0];
 	
 	if (c < 0.02 || c > 0.99) {
 	    gl_FragColor = vec4( 0.0, 0.0, 0.0, 0.0);

@@ -71,8 +71,8 @@ void MinecraftInterface::projectHeightmap(const cv::Mat & heightMap, int blockSc
             for (size_t z = 0; z < wz; ++z)
             {
                 uint8_t block = cube.get(x, y, z);
-                if (block != 0)
-                {  
+                if (block > 0 && block < m_profile->numberOfBlocks())
+                {
                     placer.addBlock(x + m_x, y + m_y, z + m_z, m_profile->blockName(block));
                 }
             }
@@ -102,7 +102,7 @@ void MinecraftInterface::projectHeightmapChanges(const cv::Mat & heightMap, int 
             for (size_t z = 0; z < wz; ++z)
             {
                 uint8_t block = cube.get(x, y, z);
-                if (block != pastCube.get(x,y,z))
+                if (block != pastCube.get(x,y,z) && block < m_profile->numberOfBlocks())
                 {
                     placer.addBlock(x + m_x, y + m_y, z + m_z, m_profile->blockName(block));
                 }
@@ -145,6 +145,16 @@ void MinecraftInterface::imgui(const cv::Mat & grid)
     if (ImGui::Button("Update Data"))
     {
         projectHeightmapChanges(grid, m_mcHeight);
+    }
+
+    const static char * profiles[] = { "Monochrome", "Basic Grass"};
+    if (ImGui::Combo("Generation Profile", &m_currentProfile, profiles, 2))
+    {
+        switch (m_currentProfile)
+        {
+        case 0: m_profile = std::make_shared<MonochromeProfile>(); break;
+        case 1: m_profile = std::make_shared<BasicGrassProfile>(); break;
+        }
     }
 
     if (ImGui::CollapsingHeader("Generation Profile Settings"))
