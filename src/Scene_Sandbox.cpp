@@ -33,15 +33,16 @@ void Scene_Sandbox::init()
     m_text.setPosition(10, 5);
     m_text.setCharacterSize(10);
 
-    m_shaderPaths = 
+    /*m_shaderPaths = 
     {
         "shaders/shader_popsicle.frag",
         "shaders/shader_red.frag",
         "shaders/shader_terrain.frag",
         ""
-    };
+    };*/
 
-    m_shader.loadFromFile(m_shaderPaths[0], sf::Shader::Fragment);
+    //m_shader.loadFromFile(m_shaderPaths[0], sf::Shader::Fragment);
+    m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
 
     loadConfig();
 }
@@ -372,6 +373,7 @@ void Scene_Sandbox::sRender()
 
     //Change color scheme
     
+    m_shader.setUniform("shaderIndex", m_selectedShaderIndex);
     m_shader.setUniform("contour", m_drawContours);
     m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
 
@@ -422,10 +424,7 @@ void Scene_Sandbox::renderUI()
             ImGui::Combo("Alignment", (int*)&m_alignment, items, 3);
 
             const char* shaders[] = { "Popsicle", "Red", "Terrain", "None"};
-            if (ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 4))
-            {
-                m_shader.loadFromFile(m_shaderPaths[m_selectedShaderIndex], sf::Shader::Fragment);
-            }
+            ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 4);
            
             if (ImGui::CollapsingHeader("Thresholds"))
             {
