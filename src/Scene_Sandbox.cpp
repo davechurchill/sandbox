@@ -156,7 +156,11 @@ void Scene_Sandbox::captureImages()
         m_depthFrameUnits = depthFrame.get_units();
         m_cvDepthImage32f = m_cvDepthImage32f * m_depthFrameUnits;
     }
-        
+
+    if (m_calibration.shouldAdjustHeight()) {
+        PROFILE_SCOPE("Height Adjustment");
+        m_calibration.heightAdjustment(m_cvDepthImage32f);
+    }
     // set everything to 0 that's below min distance or above max distance
     // then scale the remaining values between min and max distance 0 to 1 (normalize)
     // store these values in a new 'normalized' cv::mat
@@ -164,21 +168,18 @@ void Scene_Sandbox::captureImages()
         PROFILE_SCOPE("Threshold and Normalize");
         cv::threshold(m_cvDepthImage32f, m_cvNormalizedDepthImage32f, m_minDistance, 255, cv::THRESH_TOZERO);
         cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, m_maxDistance, 255, cv::THRESH_TOZERO_INV);
-        m_cvNormalizedDepthImage32f = (m_cvNormalizedDepthImage32f - m_minDistance) / (m_maxDistance - m_minDistance);
+        m_cvNormalizedDepthImage32f = 1.f - (m_cvNormalizedDepthImage32f - m_minDistance) / (m_maxDistance - m_minDistance);
     }
 
     // Calibration
     {
         PROFILE_SCOPE("Calibration TransformRect");
-        m_calibration.transformRect(m_cvNormalizedDepthImage32f, m_cvTransformedDepthImage32f);
-        m_data = m_cvTransformedDepthImage32f;
+        m_calibration.transformRect(m_cvNormalizedDepthImage32f, m_data);
     }
-
-    //m_calibration.heightAdjustment(output);
 
     {
         PROFILE_SCOPE("Calibration TransformProjection");
-        m_calibration.transformProjection(m_cvTransformedDepthImage32f, m_cvTransformedDepthImage32f);
+        m_calibration.transformProjection(m_data, m_cvTransformedDepthImage32f);
     }
     
     // Draw warped depth image
@@ -186,7 +187,7 @@ void Scene_Sandbox::captureImages()
     dh = m_cvTransformedDepthImage32f.rows;
 
     // if something went wrong above, quit the function
-    if (dw == 0 || dh == 0) { return; }
+    if (m_drawTransformed && dw == 0 || dh == 0) { return; }
 
     {
         int kernelSize = 17; // Example kernel size
@@ -194,9 +195,13 @@ void Scene_Sandbox::captureImages()
         double sigmaY = 9.5; // Example standard deviation in Y direction
 
         cv::Mat blurredImage;
-        {
+        if (m_gaussianBlur) {
             PROFILE_SCOPE("OpenCV Gaussian Blur");
             cv::GaussianBlur(m_cvTransformedDepthImage32f, blurredImage, cv::Size(kernelSize, kernelSize), sigmaX, sigmaY);
+        }
+        else
+        {
+            blurredImage = m_cvTransformedDepthImage32f;
         }
 
         {
@@ -364,13 +369,13 @@ void Scene_Sandbox::sRender()
     float scale = m_calibration.getTransformedScale();
     m_sfTransformedDepthSprite.setScale(scale, scale);
 
-    //m_shader.setUniform("texture", m_sfTransformedDepthSprite.getTexture());
 
     //Change color scheme
     
     m_shader.setUniform("contour", m_drawContours);
     m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
 
+    if (m_drawTransformed)
     {
         PROFILE_SCOPE("Draw Transformed Image");
         if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_sfTransformedDepthSprite, &m_shader); }
@@ -434,9 +439,12 @@ void Scene_Sandbox::renderUI()
 
             ImGui::Checkbox("Color", &m_drawColor);
 
+            ImGui::Checkbox("Transformed", &m_drawTransformed);
+
             ImGui::Spacing();
 
             ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
+            ImGui::InputInt("Contour Lines", &m_numberOfContourLines, 1, 10);
 
             if (ImGui::Button("Screenshot Raw Depth Data"))
             {
@@ -469,13 +477,14 @@ void Scene_Sandbox::renderUI()
 
             ImGui::EndTabItem();
         }
+
         if (ImGui::BeginTabItem("Filters"))
         {
+            ImGui::Checkbox("Gaussian Blur", &m_gaussianBlur);
             m_filters.imgui();
 
             ImGui::EndTabItem();
         }
-        
 
         if (ImGui::BeginTabItem("Calibration"))
         {

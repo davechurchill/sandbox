@@ -22,14 +22,22 @@ Calibration::Calibration()
     // create the circles for the display correction
     circle.setFillColor(sf::Color::Magenta);
     m_boxProjectionCircles = std::vector<sf::CircleShape>(4, circle);
+
+    // create the circles for height adjustment
+    circle.setFillColor(sf::Color::Cyan);
+    m_planarCircles = std::vector<sf::CircleShape>(3, circle);
 }
 
 void Calibration::imgui()
 {
     PROFILE_FUNCTION();
-
-    ImGui::Checkbox("Apply Height Adjustment", &m_applyAdjustment);
  
+    ImGui::Checkbox("Apply Height Adjust", &m_applyHeightAdjustment);
+    if (ImGui::Button("Update Height Adjustment"))
+    {
+        m_updatePlane = true;
+    }
+
     ImGui::Checkbox("Sandbox Lines", &m_drawSanboxAreaLines);
 
     if (ImGui::SliderInt("Rectangle Width", &m_width, 1, 1280))
@@ -56,42 +64,31 @@ void Calibration::heightAdjustment(cv::Mat & matrix)
 {
     PROFILE_FUNCTION();
 
+    if (m_updatePlane)
+    {
+        float firstPointZ = matrix.at<float>(m_planarPoints[0].y, m_planarPoints[0].x);
+        m_baseHeight = matrix.at<float>(m_planarPoints[1].y, m_planarPoints[1].x);
+        float thirdPointZ = matrix.at<float>(m_planarPoints[2].y, m_planarPoints[2].x);
+
+        float vect_A[] = { m_planarPoints[1].x - m_planarPoints[0].x, m_planarPoints[1].y - m_planarPoints[0].y, m_baseHeight - firstPointZ };
+        float vect_B[] = { m_planarPoints[2].x - m_planarPoints[0].x, m_planarPoints[2].y - m_planarPoints[0].y,   thirdPointZ - firstPointZ };
+
+        m_plane[0] = vect_A[1] * vect_B[2] - vect_A[2] * vect_B[1];
+        m_plane[1] = vect_A[2] * vect_B[0] - vect_A[0] * vect_B[2];
+        m_plane[2] = vect_A[0] * vect_B[1] - vect_A[1] * vect_B[0];
+
+        m_plane[3] = -(m_plane[0] * m_planarPoints[1].x + m_plane[1] * m_planarPoints[1].y + m_plane[2] * m_baseHeight);
+        m_updatePlane = false;
+    }
+
     int width = matrix.cols;
     int height = matrix.rows;
-
-    /*float topLeft = matrix.at<float>(0, 0);
-
-    int centerX = width / 2;
-    int centerY = height / 2;
-
-    float centerValue = matrix.at<float>(centerY, centerX);
-
-    float bottomRight = matrix.at<float>(0, width - 1);
-
-    float vect_A[] = { centerX, centerY, centerValue - topLeft };
-    float vect_B[] = { width - 1, 0, bottomRight - topLeft };
-    float cross_P[] = { 0.0, 0.0, 0.0 };*/
-
-    float firstPointZ  = matrix.at<float>(firstPoint.y,  firstPoint.x);
-    float secondPointZ = matrix.at<float>(secondPoint.y, secondPoint.x);
-    float thirdPointZ  = matrix.at<float>(thirdPoint.y,  thirdPoint.x);
-
-    float vect_A[] = { (float)(secondPoint.x - firstPoint.x), (float)(secondPoint.y - firstPoint.y), secondPointZ - firstPointZ };
-    float vect_B[] = { (float)(thirdPoint.x - firstPoint.x), (float)(thirdPoint.y - firstPoint.y),   thirdPointZ - firstPointZ };
-    float cross_P[] = { 0.0, 0.0, 0.0 };
-
-    cross_P[0] = vect_A[1] * vect_B[2] - vect_A[2] * vect_B[1];
-    cross_P[1] = vect_A[2] * vect_B[0] - vect_A[0] * vect_B[2];
-    cross_P[2] = vect_A[0] * vect_B[1] - vect_A[1] * vect_B[0];
-
-    //plane equation
-    float d = -(cross_P[0] * secondPoint.x + cross_P[1] * secondPoint.y + cross_P[2] * secondPointZ);
     for (int i = 0; i < width; i++)
     {
         for (int j = 0; j < height; j++)
         {
-            float newZ = (-d - cross_P[0] * i - cross_P[1] * j) / cross_P[2];
-            matrix.at<float>(j, i) += secondPointZ - newZ;
+            float newZ = (-m_plane[3] - m_plane[0] * i - m_plane[1] * j) / m_plane[2];
+            matrix.at<float>(j, i) += m_baseHeight - newZ;
         }
     }
 }
@@ -120,12 +117,14 @@ void Calibration::processDebugEvent(const sf::Event & event, const sf::Vector2f 
     if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
     {
         m_dragPoint = getClickedCircleIndex(mouse.x, mouse.y, m_boxInteriorCircles);
+        m_dragPlanarPoint = getClickedCircleIndex(mouse.x, mouse.y, m_planarCircles);
     }
 
     // if we have released the mouse button
     if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
     {
         m_dragPoint = -1;
+        m_dragPlanarPoint = -1;
     }
 
     // if the mouse moved and we are dragging something, update its position and regenerate the matrix
@@ -136,6 +135,12 @@ void Calibration::processDebugEvent(const sf::Event & event, const sf::Vector2f 
             m_boxInteriorPoints[m_dragPoint] = cv::Point((int)mouse.x, (int)mouse.y);
             m_boxInteriorCircles[m_dragPoint].setPosition(mouse);
             generateWarpMatrix();
+        }
+
+        if (m_dragPlanarPoint != -1)
+        {
+            m_planarPoints[m_dragPlanarPoint] = cv::Point((int)mouse.x, (int)mouse.y);
+            m_planarCircles[m_dragPlanarPoint].setPosition(mouse);
         }
     }
 }
@@ -202,6 +207,23 @@ void Calibration::render(sf::RenderWindow & window, sf::RenderWindow & displayWi
         boxProjectionVertices.append(sf::Vertex(m_boxProjectionCircles[2].getPosition()));
         boxProjectionVertices.append(sf::Vertex(m_boxProjectionCircles[0].getPosition()));
         displayWindow.draw(boxProjectionVertices);
+    }
+
+    if (m_applyHeightAdjustment)
+    {
+        // draw the circles and lines used to calibrate the height adjustment
+        for (size_t i = 0; i < m_planarCircles.size(); ++i)
+        {
+            m_planarCircles[i].setPosition({ m_planarPoints[i].x, m_planarPoints[i].y });
+            window.draw(m_planarCircles[i]);
+        }
+
+        sf::VertexArray planarVertices(sf::LinesStrip);
+        planarVertices.append(sf::Vertex(m_planarCircles[0].getPosition()));
+        planarVertices.append(sf::Vertex(m_planarCircles[1].getPosition()));
+        planarVertices.append(sf::Vertex(m_planarCircles[2].getPosition()));
+        planarVertices.append(sf::Vertex(m_planarCircles[0].getPosition()));
+        window.draw(planarVertices);
     }
 }
 

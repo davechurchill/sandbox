@@ -10,8 +10,6 @@
 
 struct CameraFilters
 {
-    int                 m_decimation = 1;
-    rs2::decimation_filter m_decimationFilter;
 
     int                 m_spatialMagnitude = 2;
     float               m_smoothAlpha = 0.5f;
@@ -32,13 +30,6 @@ public:
     rs2::frame apply(const rs2::frame & frame)
     {
         rs2::frame temp = frame;
-
-        if (m_decimation > 0)
-        {
-            PROFILE_SCOPE("Decimation");
-            m_decimationFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, (float)m_decimation);
-            temp = m_decimationFilter.process(temp);
-        }
 
         if (m_spatialMagnitude > 0)
         {
@@ -71,8 +62,6 @@ public:
     void imgui()
     {
         PROFILE_FUNCTION();
-
-        ImGui::SliderInt("Decimation", &m_decimation, 0, 5);
 
         if (ImGui::CollapsingHeader("Spatial Filter"))
         {
@@ -109,7 +98,6 @@ public:
 
     void save(std::ofstream & fout)
     {
-        fout << "Decimation" << " " << m_decimation << "\n";
         fout << "temporalAlpha" << " " << m_smoothAlphaTemporal << "\n";
         fout << "temporalDelta" << " " << m_smoothDeltaTemporal << "\n";
         fout << "temporalPersistance" << " " << m_persistanceTemporal << "\n";
@@ -123,7 +111,6 @@ public:
 
     void loadTerm(const std::string & term, std::ifstream & fin)
     {
-        if (term == "Decimation") { fin >> m_decimation; }
         if (term == "temporalAlpha") { fin >> m_smoothAlphaTemporal; }
         if (term == "temporalDelta") { fin >> m_smoothDeltaTemporal; }
         if (term == "temporalPersistance") { fin >> m_persistanceTemporal; }

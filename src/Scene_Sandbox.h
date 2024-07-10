@@ -34,8 +34,11 @@ class Scene_Sandbox : public Scene
     bool                m_drawDepth = true;
     bool                m_drawColor = false; 
     bool                m_drawUI = true;
+    bool                m_drawTransformed = true;
 
-    alignment           m_alignment = alignment::nothing;
+    bool                m_gaussianBlur = true;
+
+    alignment           m_alignment = alignment::depth;
 
     std::vector<std::string> m_shaderPaths;
     sf::Shader          m_shader;
@@ -78,7 +81,7 @@ class Scene_Sandbox : public Scene
 
     bool                m_drawContours = true;
     sf::Sprite          m_contourSprite;
-    int                 m_numberOfContourLines = 16;
+    int                 m_numberOfContourLines = 5;
 
     cv::Mat             m_data;
     
