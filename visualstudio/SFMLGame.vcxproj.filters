@@ -133,4 +133,9 @@
       <UniqueIdentifier>{2da31b36-3cf6-482f-a351-25836cb25a3d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\shaders\shader_contour_color.frag">
+      <Filter>sandbox</Filter>
+    </None>
+  </ItemGroup>
 </Project>

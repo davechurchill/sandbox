@@ -60,6 +60,9 @@
     <ClInclude Include="..\src\Vec2.hpp" />
     <ClInclude Include="..\src\ViewController.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\shaders\shader_contour_color.frag" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{08A10BC2-2DCF-4F95-A0B2-BA931971AEEA}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

@@ -66,9 +66,9 @@ void Calibration::heightAdjustment(cv::Mat & matrix)
 
     if (m_updatePlane)
     {
-        float firstPointZ = matrix.at<float>(m_planarPoints[0].y, m_planarPoints[0].x);
-        m_baseHeight = matrix.at<float>(m_planarPoints[1].y, m_planarPoints[1].x);
-        float thirdPointZ = matrix.at<float>(m_planarPoints[2].y, m_planarPoints[2].x);
+        float firstPointZ = matrix.at<float>((int)m_planarPoints[0].y, (int)m_planarPoints[0].x);
+        m_baseHeight = matrix.at<float>((int)m_planarPoints[1].y, (int)m_planarPoints[1].x);
+        float thirdPointZ = matrix.at<float>((int)m_planarPoints[2].y, (int)m_planarPoints[2].x);
 
         float vect_A[] = { m_planarPoints[1].x - m_planarPoints[0].x, m_planarPoints[1].y - m_planarPoints[0].y, m_baseHeight - firstPointZ };
         float vect_B[] = { m_planarPoints[2].x - m_planarPoints[0].x, m_planarPoints[2].y - m_planarPoints[0].y,   thirdPointZ - firstPointZ };
