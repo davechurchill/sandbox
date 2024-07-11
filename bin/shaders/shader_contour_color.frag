@@ -126,12 +126,12 @@ void terrain(float c)
 	else if (c < 0.3) 
 	{
 		// Blue color for lower depths (water)
-		gl_FragColor = vec4( 0.0, 0.0, 1.0, 1.0 - 2*c); 
+		gl_FragColor = vec4( 0.0, 0.0, 3.3*c-0.1, 1.0); 
 	} 
 	else if (c < 0.5) 
 	{
-		// Transition from blue to green (surface level)
-		gl_FragColor = vec4( 0.0, (c - 0.3) * 5.0, 0.0, 1.0); 
+		// green (surface level)
+		gl_FragColor = vec4( 0.0, 1-c, 0.0, 1.0); 
 	} 
 	else if (c < 0.7) 
 	{
