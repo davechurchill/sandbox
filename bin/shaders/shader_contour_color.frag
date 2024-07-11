@@ -113,7 +113,7 @@ void popsicle(float c) {
 
 void red(vec4 pixel_color)
 {
-	gl_FragColor = vec4( 1.0, pixel_color[1], pixel_color[2], pixel_color[3]);
+	gl_FragColor = vec4(  pixel_color[0], pixel_color[1], 1, pixel_color[3]);
 }
 
 void terrain(float c)
@@ -126,7 +126,7 @@ void terrain(float c)
 	else if (c < 0.3) 
 	{
 		// Blue color for lower depths (water)
-		gl_FragColor = vec4( 0.0, 0.0, 3.3*c-0.1, 1.0); 
+		gl_FragColor = vec4( 0.2, 0.2, 3.3*c-0.1, 1.0); 
 	} 
 	else if (c < 0.5) 
 	{
@@ -141,7 +141,8 @@ void terrain(float c)
 	else 
 	{
 		// Mountain color for higher elevations
-		gl_FragColor = vec4( 0.9-c/1.5, 0.6-c/1.5, 0.0, 1.0); 
+        gl_FragColor = vec4( c+0.2, c*c, c*c*c*c*c, 1.0); 
+		//gl_FragColor = vec4( 0.9-c/1.5, 0.6-c/1.5, 0.0, 1.0); 
 	}
 
 }
