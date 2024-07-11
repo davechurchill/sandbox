@@ -9,23 +9,23 @@ Delta 20
 SHole 0
 HoleFill 1
 m_drawSanboxAreaLines 1
-m_points[0] 255 130
-m_points[1] 1032 131
-m_points[2] 266 547
-m_points[3] 1036 537
-m_pointCircles[0] 255 130
-m_pointCircles[1] 1032 131
-m_pointCircles[2] 266 547
-m_pointCircles[3] 1036 537
+m_points[0] 272 134
+m_points[1] 1067 113
+m_points[2] 290 545
+m_points[3] 1071 537
+m_pointCircles[0] 272 134
+m_pointCircles[1] 1067 113
+m_pointCircles[2] 290 545
+m_pointCircles[3] 1071 537
 m_boxPoints[0] 82 134
 m_boxPoints[1] 1841 123
-m_boxPoints[2] 137 1079
-m_boxPoints[3] 1807 1061
+m_boxPoints[2] 134 1076
+m_boxPoints[3] 1804 1055
 m_pointBoxCircles[0] 82 134
 m_pointBoxCircles[1] 1841 123
-m_pointBoxCircles[2] 137 1079
-m_pointBoxCircles[3] 1807 1061
+m_pointBoxCircles[2] 134 1076
+m_pointBoxCircles[3] 1804 1055
 m_width 504
 m_height 409
 m_boxWidth 1759
-m_boxHeight 956
+m_boxHeight 953

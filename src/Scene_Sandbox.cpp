@@ -33,15 +33,6 @@ void Scene_Sandbox::init()
     m_text.setPosition(10, 5);
     m_text.setCharacterSize(10);
 
-    /*m_shaderPaths = 
-    {
-        "shaders/shader_popsicle.frag",
-        "shaders/shader_red.frag",
-        "shaders/shader_terrain.frag",
-        ""
-    };*/
-
-    //m_shader.loadFromFile(m_shaderPaths[0], sf::Shader::Fragment);
     m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
 
     loadConfig();
@@ -171,6 +162,7 @@ void Scene_Sandbox::captureImages()
         cv::threshold(m_cvDepthImage32f, m_cvNormalizedDepthImage32f, m_minDistance, 255, cv::THRESH_TOZERO);
         cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, m_maxDistance, 255, cv::THRESH_TOZERO_INV);
         m_cvNormalizedDepthImage32f = 1.f - (m_cvNormalizedDepthImage32f - m_minDistance) / (m_maxDistance - m_minDistance);
+        cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, 0.99, 255, cv::THRESH_TOZERO_INV);
     }
 
     // Calibration
@@ -426,6 +418,11 @@ void Scene_Sandbox::renderUI()
 
             const char* shaders[] = { "Popsicle", "Red", "Terrain", "None"};
             ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 4);
+
+            if (ImGui::Button("Reload Shader"))
+            {
+                m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
+            }
            
             if (ImGui::CollapsingHeader("Thresholds"))
             {

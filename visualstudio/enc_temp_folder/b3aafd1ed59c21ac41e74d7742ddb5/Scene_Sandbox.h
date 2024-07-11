@@ -81,7 +81,7 @@ class Scene_Sandbox : public Scene
 
     bool                m_drawContours = true;
     sf::Sprite          m_contourSprite;
-    int                 m_numberOfContourLines = 19;
+    int                 m_numberOfContourLines = 16;
 
     cv::Mat             m_data;
     

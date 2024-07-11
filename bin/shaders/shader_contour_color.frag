@@ -120,23 +120,28 @@ void terrain(float c)
 {
 	if (c < 0.02 || c > 0.99) 
 	{
-		gl_FragColor = vec4( 1.0, 1.0, 1.0, 1.0); // White color for extreme heights (snowy peaks)
+		// eliminate extremely low or high values (these are thresholded or error values)
+		gl_FragColor = vec4( 0.0, 0.0, 0.0, 0.0); 
 	} 
 	else if (c < 0.3) 
 	{
-		gl_FragColor = vec4( 0.0, 0.0, 1.0, 1.0 - c); // Blue color for lower depths (water)
+		// Blue color for lower depths (water)
+		gl_FragColor = vec4( 0.0, 0.0, 1.0, 1.0 - 2*c); 
 	} 
 	else if (c < 0.5) 
 	{
-		gl_FragColor = vec4( 0.0, (c - 0.3) * 5.0, 0.0, 1.0); // Transition from blue to green (surface level)
+		// Transition from blue to green (surface level)
+		gl_FragColor = vec4( 0.0, (c - 0.3) * 5.0, 0.0, 1.0); 
 	} 
 	else if (c < 0.7) 
 	{
-		gl_FragColor = vec4( (c - 0.5) * 5.0, 0.5 + (c - 0.5) * 0.5, 0.0, 1.0); // Transition from green to mountain color
+		// Transition from green to mountain color
+		gl_FragColor = vec4( (c - 0.5) * 5.0, 0.5 + (c - 0.5) * 0.5, 0.0, 1.0); 
 	} 
 	else 
 	{
-		gl_FragColor = vec4( 0.55, 0.27, 0.07, 1.0); // Mountain color for higher elevations
+		// Mountain color for higher elevations
+		gl_FragColor = vec4( 0.9-c/1.5, 0.6-c/1.5, 0.0, 1.0); 
 	}
 
 }
