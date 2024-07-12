@@ -25,7 +25,7 @@ m_pointBoxCircles[0] 62 109
 m_pointBoxCircles[1] 1828 127
 m_pointBoxCircles[2] 131 1057
 m_pointBoxCircles[3] 1805 1054
-m_width 504
-m_height 409
+m_width 314
+m_height 161
 m_boxWidth 1766
 m_boxHeight 948

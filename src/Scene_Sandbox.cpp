@@ -365,15 +365,15 @@ void Scene_Sandbox::sRender()
     m_sfTransformedDepthSprite.setScale(scale, scale);
 
 
-    //Change color scheme
-    
-    m_shader.setUniform("shaderIndex", m_selectedShaderIndex);
-    m_shader.setUniform("contour", m_drawContours);
-    m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
-
     if (m_drawTransformed)
     {
         PROFILE_SCOPE("Draw Transformed Image");
+
+        //Change color scheme
+        m_shader.setUniform("shaderIndex", m_selectedShaderIndex);
+        m_shader.setUniform("contour", m_drawContours);
+        m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
+
         if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_sfTransformedDepthSprite, &m_shader); }
         else { m_game->window().draw(m_sfTransformedDepthSprite, &m_shader); }
     }

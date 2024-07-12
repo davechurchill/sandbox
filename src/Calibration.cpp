@@ -37,6 +37,7 @@ void Calibration::imgui()
     {
         m_updatePlane = true;
     }
+    ImGui::Text("Plane Norm: [%f, %f, %f]", m_plane[0], m_plane[1], m_plane[2]);
 
     ImGui::Checkbox("Sandbox Lines", &m_drawSanboxAreaLines);
 
@@ -50,6 +51,8 @@ void Calibration::imgui()
         m_height = (int)(h * m_dataSize);
         generateWarpMatrix();
     }
+
+    ImGui::Text("Dimensions: (%d, %d)", m_width, m_height);
 }
 
 void Calibration::transformRect(const cv::Mat& input, cv::Mat& output)

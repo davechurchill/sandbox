@@ -2,7 +2,6 @@
 #include "Scene_Menu.h"
 #include "GameEngine.h"
 #include "Assets.h"
-#include "ContourLines.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -32,6 +31,8 @@ void Scene_Perlin2D::init()
     m_text.setPosition(10, 5);
     m_text.setCharacterSize(10);
 
+    m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
+
     calculateNoise();
 }
 
@@ -39,12 +40,19 @@ void Scene_Perlin2D::calculateNoise()
 {
     m_perlin = Perlin2DNew((int)(1 << m_seedSize), (int)(1 << m_seedSize), m_seed);
     m_grid = m_perlin.GeneratePerlinNoise(m_octaves, m_persistance);
+}
 
-    // Contour Lines
-    m_contour.init((int)(1 << m_seedSize), (int)(1 << m_seedSize));
-    m_contour.calculate(m_grid);
-    m_contourSprite.setTexture(m_contour.generateTexture(), true);
-    m_contourSprite.setScale(m_gridSize, m_gridSize);
+void Scene_Perlin2D::imageFromGrid()
+{
+    m_image.create((int)m_grid.width(), (int)m_grid.height());
+    for (unsigned int i = 0; i < m_grid.width(); ++i)
+    {
+        for (unsigned int j = 0; j < m_grid.height(); ++j)
+        {
+            sf::Uint8 c = (sf::Uint8)(m_grid.get(i, j) * 255.f);
+            m_image.setPixel(i, j, sf::Color(c,c,c));
+        }
+    }
 }
 
 void Scene_Perlin2D::onFrame()
@@ -137,23 +145,20 @@ void Scene_Perlin2D::sRender()
     m_game->window().draw(m_lineStrip);
     m_game->window().draw(m_text);
 
-    m_colorizer.color(m_image, m_grid);
+    imageFromGrid();
     m_texture.loadFromImage(m_image);
     m_sprite.setTexture(m_texture, true);
     m_sprite.setScale(m_gridSize, m_gridSize);
 
-    m_game->window().draw(m_sprite);
+    m_shader.setUniform("shaderIndex", m_selectedShaderIndex);
+    m_shader.setUniform("contour", m_drawContours);
+    m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
 
-    if (m_drawContours)
-    {
-        m_game->window().draw(m_contourSprite);
-    }
+    m_game->window().draw(m_sprite, &m_shader);
 }
 
 void Scene_Perlin2D::renderUI()
-{
-    const char vals[7] = { '.', 'G', '@', 'O', 'T', 'S', 'W' };
-   
+{  
     ImGui::Begin("Options");
 
     if (ImGui::BeginTabBar("MyTabBar"))
@@ -182,14 +187,12 @@ void Scene_Perlin2D::renderUI()
             
 
             // PC Display Options
-            m_colorizer.imgui();
+            const char * shaders[] = { "Popsicle", "Red", "Terrain", "None" };
+            ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 4);
+
             ImGui::Checkbox("Contours", &m_drawContours);
 
-            if (ImGui::InputInt("Contour Lines", &m_numberOfContourLines, 1, 10))
-            {
-                m_contour.setNumberofContourLines(m_numberOfContourLines);
-                m_contour.calculate(m_grid);
-            }
+            ImGui::InputInt("Contour Lines", &m_numberOfContourLines, 1, 10);
 
             ImGui::EndTabItem();
         }

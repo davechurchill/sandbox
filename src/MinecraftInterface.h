@@ -1,6 +1,6 @@
 #pragma once
 
-#define Use_Minecraft
+//#define Use_Minecraft
 #ifdef Use_Minecraft
 #include <curlpp/Easy.hpp>
 #include <curlpp/cURLpp.hpp>
@@ -44,7 +44,7 @@ namespace mc
         int m_updateDelay = 30;
         bool m_autoUpdate = false;
 
-        int m_currentProfile;
+        int m_currentProfile = 0;
         std::shared_ptr <GenerationProfile> m_profile;
 
     public:

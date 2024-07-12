@@ -31,15 +31,15 @@ public:
     {
         rs2::frame temp = frame;
 
-        if (m_spatialMagnitude > 0)
+        /*if (m_spatialMagnitude > 0)
         {
             PROFILE_SCOPE("Spatial");
             m_spatialFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, (float)m_spatialMagnitude);
             m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlpha);
             m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, (float)m_smoothDelta);
             m_spatialFilter.set_option(RS2_OPTION_HOLES_FILL, (float)m_spatialHoleFill);
-            //temp = m_spatialFilter.process(temp);
-        }
+            temp = m_spatialFilter.process(temp);
+        }*/
 
         if (m_holeFill < 3)
         {
@@ -63,7 +63,7 @@ public:
     {
         PROFILE_FUNCTION();
 
-        if (ImGui::CollapsingHeader("Spatial Filter"))
+        /*if (ImGui::CollapsingHeader("Spatial Filter"))
         {
             ImGui::Indent();
             ImGui::SliderInt("Magnitude", &m_spatialMagnitude, 0, 5);
@@ -74,7 +74,7 @@ public:
                 ImGui::SliderInt("Hole Filling", &m_spatialHoleFill, 0, 5);
             }
             ImGui::Unindent();
-        }
+        }*/
 
         if (ImGui::CollapsingHeader("Temporal Filter"))
         {

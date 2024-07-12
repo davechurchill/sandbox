@@ -4,7 +4,6 @@
 #include "ViewController.hpp"
 #include "Grid.hpp"
 #include "Calibration.h"
-#include "ContourLines.hpp"
 #include "CameraFilters.hpp"
 
 #include <chrono>

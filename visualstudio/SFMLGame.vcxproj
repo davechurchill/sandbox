@@ -43,7 +43,6 @@
     <ClInclude Include="..\src\BlockGeneration.h" />
     <ClInclude Include="..\src\Calibration.h" />
     <ClInclude Include="..\src\CameraFilters.hpp" />
-    <ClInclude Include="..\src\ContourLines.hpp" />
     <ClInclude Include="..\src\Cube.hpp" />
     <ClInclude Include="..\src\GameEngine.h" />
     <ClInclude Include="..\src\MinecraftInterface.h" />

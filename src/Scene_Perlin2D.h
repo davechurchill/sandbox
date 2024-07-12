@@ -5,8 +5,6 @@
 #include "ViewController.hpp"
 #include "Grid.hpp"
 #include "Perlin.hpp"
-#include "ContourLines.hpp"
-#include "Colorizer.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -32,10 +30,10 @@ class Scene_Perlin2D : public Scene
     int                 m_contourSkip = 20;
     float               m_contourLevel = 0.5;
     int                 m_numberOfContourLines = 5;
+
+    int                 m_selectedShaderIndex = 0;
     
     int                 m_mcHeight = 30;
-
-    ContourLines        m_contour;
 
     Grid<float>         m_grid;
 
@@ -45,13 +43,11 @@ class Scene_Perlin2D : public Scene
     
     ViewController      m_viewController;
 
-    sf::Sprite          m_contourSprite;
-
     sf::Image           m_image;
     sf::Texture         m_texture;
     sf::Sprite          m_sprite;
 
-    Colorizer           m_colorizer;
+    sf::Shader          m_shader;
     
     void init();  
 
@@ -59,6 +55,7 @@ class Scene_Perlin2D : public Scene
     void sUserInput();  
     void sRender();
     void calculateNoise();
+    void imageFromGrid();
     
 public:
 
