@@ -40,12 +40,14 @@ void Calibration::imgui()
 
     ImGui::Checkbox("Sandbox Lines", &m_drawSanboxAreaLines);
 
-    if (ImGui::SliderInt("Rectangle Width", &m_width, 1, 1280))
+    if (ImGui::SliderFloat("Data Size", &m_dataSize, 0.1f, 1.0f))
     {
-        generateWarpMatrix();
-    }
-    if (ImGui::SliderInt("Rectangle Height", &m_height, 1, 1280))
-    {
+        cv::Point2f line1 = m_boxInteriorPoints[0] - m_boxInteriorPoints[1];
+        cv::Point2f line2 = m_boxInteriorPoints[0] - m_boxInteriorPoints[2];
+        float w = sqrtf(line1.dot(line1));
+        float h = sqrtf(line2.dot(line2));
+        m_width = (int)(w * m_dataSize);
+        m_height = (int)(h * m_dataSize);
         generateWarpMatrix();
     }
 }

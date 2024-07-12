@@ -149,11 +149,26 @@ void Scene_Sandbox::captureImages()
         m_cvDepthImage32f = m_cvDepthImage32f * m_depthFrameUnits;
     }
 
+    // Perform height adjustment if turned on
     if (m_calibration.shouldAdjustHeight())
     {
         PROFILE_SCOPE("Height Adjustment");
         m_calibration.heightAdjustment(m_cvDepthImage32f);
     }
+
+    // Perform Gaussian Blur of data if turned on
+    // Note: Guassian Blur must be applied before thresholding or else the zeros created by the threshold will blur with the real values.
+    //       It must also be applied before the transformation, or else the values in the matrix that represent black space will blur with the image.
+    if (m_gaussianBlur)
+    {
+        PROFILE_SCOPE("OpenCV Gaussian Blur");
+
+        int kernelSize = 17; // Example kernel size
+        double sigmaX = 9.5; // Example standard deviation in X direction
+        double sigmaY = 9.5; // Example standard deviation in Y direction
+        cv::GaussianBlur(m_cvDepthImage32f, m_cvDepthImage32f, cv::Size(kernelSize, kernelSize), sigmaX, sigmaY);
+    }
+
     // set everything to 0 that's below min distance or above max distance
     // then scale the remaining values between min and max distance 0 to 1 (normalize)
     // store these values in a new 'normalized' cv::mat
@@ -184,23 +199,9 @@ void Scene_Sandbox::captureImages()
     if (m_drawTransformed && dw == 0 || dh == 0) { return; }
 
     {
-        int kernelSize = 17; // Example kernel size
-        double sigmaX = 9.5; // Example standard deviation in X direction
-        double sigmaY = 9.5; // Example standard deviation in Y direction
-
-        cv::Mat blurredImage;
-        if (m_gaussianBlur) {
-            PROFILE_SCOPE("OpenCV Gaussian Blur");
-            cv::GaussianBlur(m_cvTransformedDepthImage32f, blurredImage, cv::Size(kernelSize, kernelSize), sigmaX, sigmaY);
-        }
-        else
-        {
-            blurredImage = m_cvTransformedDepthImage32f;
-        }
-
         {
             PROFILE_SCOPE("Transformed Image SFML Image");
-            m_sfTransformedDepthImage = matToSfImage(blurredImage);
+            m_sfTransformedDepthImage = matToSfImage(m_cvTransformedDepthImage32f);
 
             {
                 PROFILE_SCOPE("SFML Texture From Image");

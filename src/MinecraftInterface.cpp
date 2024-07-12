@@ -42,7 +42,7 @@ void MinecraftInterface::command(const std::string & command, int x, int y, int 
         header.push_back("Content-Type: text/plain; charset=UTF-8");
         m_handle.setOpt(curlpp::options::HttpHeader(header));
         m_handle.setOpt(curlpp::options::PostFields(command));
-        m_handle.setOpt(curlpp::options::PostFieldSize(command.length()));
+        m_handle.setOpt(curlpp::options::PostFieldSize((long)command.length()));
         std::cout << m_handle << std::endl;
     }
     catch (curlpp::LibcurlRuntimeError e) {
@@ -73,7 +73,7 @@ void MinecraftInterface::projectHeightmap(const cv::Mat & heightMap, int blockSc
                 uint8_t block = cube.get(x, y, z);
                 if (block > 0 && block < m_profile->numberOfBlocks())
                 {
-                    placer.addBlock(x + m_x, y + m_y, z + m_z, m_profile->blockName(block));
+                    placer.addBlock((int)x + m_x, (int)y + m_y, (int)z + m_z, m_profile->blockName(block));
                 }
             }
         }
@@ -104,7 +104,7 @@ void MinecraftInterface::projectHeightmapChanges(const cv::Mat & heightMap, int 
                 uint8_t block = cube.get(x, y, z);
                 if (block != pastCube.get(x,y,z) && block < m_profile->numberOfBlocks())
                 {
-                    placer.addBlock(x + m_x, y + m_y, z + m_z, m_profile->blockName(block));
+                    placer.addBlock((int)x + m_x, (int)y + m_y, (int)z + m_z, m_profile->blockName(block));
                 }
             }
         }
@@ -215,7 +215,7 @@ void MinecraftInterface::BlockPlacer::send(curlpp::Easy & m_handle)
         m_handle.setOpt(curlpp::options::HttpHeader(header));
         m_handle.setOpt(curlpp::options::CustomRequest("PUT"));
         m_handle.setOpt(curlpp::options::PostFields(total));
-        m_handle.setOpt(curlpp::options::PostFieldSize(total.length()));
+        m_handle.setOpt(curlpp::options::PostFieldSize((long)total.length()));
         std::cout << m_handle << std::endl;
     }
     catch (curlpp::LibcurlRuntimeError e)

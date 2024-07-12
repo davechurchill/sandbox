@@ -26,6 +26,7 @@ class Calibration
     sf::Vector2f                    m_minXY;
     bool                            m_drawSanboxAreaLines = true;
     sf::Vector2f                    m_boxScale;
+    float                           m_dataSize = 0.4f;
 
     // Height Adjustment
     float                           m_plane[4] = { 0.0f, 0.0f, 0.0f, 0.0f };

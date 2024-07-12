@@ -5,7 +5,7 @@ uniform bool contour;
 uniform int numberOfContourLines;
 
 void popsicle(float c);
-void red(vec4 pixel_color);
+void red(float c);
 void terrain(float c);
 
 void main() {
@@ -14,24 +14,18 @@ void main() {
 	vec4 pixel_color = texture2D(currentTexture, coord);
 	float c = pixel_color[0];
 
-	if(shaderIndex == 0)
+	if (c < 0.02 || c > 0.99) 
 	{
-		if (c < 0.02 || c > 0.99) 
-		{
-			gl_FragColor = vec4( 0.0, 0.0, 0.0, 0.0);
-			return;
-		}
-		popsicle(c);
+		gl_FragColor = vec4( 0.0, 0.0, 0.0, 0.0);
+		return;
 	}
 
-	if(shaderIndex == 1)
+	switch (shaderIndex)
 	{
-		red(pixel_color);
-	}
-
-	if(shaderIndex == 2)
-	{
-		terrain(c);
+		case 0: popsicle(c); break;
+		case 1: red(c); break;
+		case 2: terrain(c); break;
+		default: gl_FragColor = pixel_color; break;
 	}
 	
 	if(contour)
@@ -70,26 +64,7 @@ void main() {
 					break;
 				}
 			}
-
-		else 
-		{
-			if(shaderIndex == 0)
-			{
-				popsicle(c);
-			}
-
-			else if(shaderIndex == 1)
-			{
-				red(pixel_color);
-			}
-
-			else if(shaderIndex == 2)
-			{
-				terrain(c);
-			}
-			
 		}
-	}
 	} 
 }
 
@@ -111,9 +86,9 @@ void popsicle(float c) {
 	gl_FragColor = vec4( float(pR) / 255.0, float(pG) / 255.0, float(pB) / 255.0, 1.0);
 }
 
-void red(vec4 pixel_color)
+void red(float c)
 {
-	gl_FragColor = vec4(  pixel_color[0], pixel_color[1], 1, pixel_color[3]);
+	gl_FragColor = vec4(1.0, c, c, 1.0 );
 }
 
 void terrain(float c)

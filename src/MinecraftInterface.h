@@ -1,6 +1,6 @@
 #pragma once
 
-//#define Use_Minecraft
+#define Use_Minecraft
 #ifdef Use_Minecraft
 #include <curlpp/Easy.hpp>
 #include <curlpp/cURLpp.hpp>
