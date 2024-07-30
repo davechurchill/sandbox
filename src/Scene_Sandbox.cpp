@@ -369,10 +369,15 @@ void Scene_Sandbox::sRender()
     {
         PROFILE_SCOPE("Draw Transformed Image");
 
+        //Use static so that it does not get initilialized every time this function is called
+        static sf::Clock time;
+
+
         //Change color scheme
         m_shader.setUniform("shaderIndex", m_selectedShaderIndex);
         m_shader.setUniform("contour", m_drawContours);
         m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
+        m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
 
         if (m_game->displayWindow().isOpen()) { m_game->displayWindow().draw(m_sfTransformedDepthSprite, &m_shader); }
         else { m_game->window().draw(m_sfTransformedDepthSprite, &m_shader); }
@@ -405,7 +410,7 @@ void Scene_Sandbox::renderUI()
 
     if (!m_cameraConnected)
     {
-        ImGui::Text("Please Connect Camera");
+        ImGui::Text("Please Connect Camera"); 
     }
 
     ImGui::Text("Framerate: %d", (int)m_game->framerate());
@@ -417,12 +422,13 @@ void Scene_Sandbox::renderUI()
             const char* items[] = { "Depth", "Color", "Nothing" };
             ImGui::Combo("Alignment", (int*)&m_alignment, items, 3);
 
-            const char* shaders[] = { "Popsicle", "Red", "Terrain", "None"};
-            ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 4);
+            const char* shaders[] = { "Popsicle", "Red", "Terrain", "Animating Water", "None"};
+            ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 5);
 
             if (ImGui::Button("Reload Shader"))
             {
-                m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
+                //m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
+                m_shader.loadFromFile("shaders/shader_in_progress.frag", sf::Shader::Fragment);
             }
            
             if (ImGui::CollapsingHeader("Thresholds"))

@@ -3,10 +3,13 @@ uniform sampler2D currentTexture;
 uniform int shaderIndex;
 uniform bool contour;
 uniform int numberOfContourLines;
+uniform float u_time;
 
 void popsicle(float c);
 void red(float c);
 void terrain(float c);
+void animate(float b);
+void animatedWater(float c);
 
 void main() {
 
@@ -25,6 +28,7 @@ void main() {
 		case 0: popsicle(c); break;
 		case 1: red(c); break;
 		case 2: terrain(c); break;
+		case 3: animatedWater(c); break;
 		default: gl_FragColor = pixel_color; break;
 	}
 	
@@ -88,7 +92,7 @@ void popsicle(float c) {
 
 void red(float c)
 {
-	gl_FragColor = vec4(1.0, c, c, 1.0 );
+	gl_FragColor = vec4(c, c, 1.0, 1.0 );
 }
 
 void terrain(float c)
@@ -102,7 +106,8 @@ void terrain(float c)
 	{
 		// Blue color for lower depths (water)
 		gl_FragColor = vec4( 0.2, 0.2, 3.3*c-0.1, 1.0); 
-	} 
+	}
+
 	else if (c < 0.5) 
 	{
 		// green (surface level)
@@ -113,11 +118,68 @@ void terrain(float c)
 		// Transition from green to mountain color
 		gl_FragColor = vec4( (c - 0.5) * 5.0, 0.5 + (c - 0.5) * 0.5, 0.0, 1.0); 
 	} 
+	
 	else 
 	{
 		// Mountain color for higher elevations
         gl_FragColor = vec4( c+0.2, c*c, c*c*c*c*c, 1.0); 
 		//gl_FragColor = vec4( 0.9-c/1.5, 0.6-c/1.5, 0.0, 1.0); 
 	}
+}
 
+void animate(float b)
+{
+			float time = u_time * .5+23.0;
+
+		// uv should be the 0-1 uv of texture...
+		vec2 uv = gl_TexCoord[0].xy;
+		
+		vec2 p = mod(uv*6.28318530718, 6.28318530718)-250.0;
+
+		vec2 i = vec2(p);
+		float c = 1.0;
+		float inten = .005;
+
+		for (int n = 0; n < 10; n++) 
+		{
+			float t = time * (1.0 - (3.5 / float(n+1)));
+			i = p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(t + i.x));
+			c += 1.0/length(vec2(p.x / (sin(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));
+		}
+		c /= float(7);
+		c = 1.17-pow(c, 1.4);
+		vec3 colour = vec3(pow(abs(c), 8.0));
+		colour = clamp(colour + vec3(0.0, 0.35, 0.5), 0.0, 1.0);
+		
+		gl_FragColor = vec4(colour, 1.0); 
+
+}
+void animatedWater(float c)
+{
+	if (c < 0.02 || c > 0.99) 
+	{
+		// eliminate extremely low or high values (these are thresholded or error values)
+		gl_FragColor = vec4( 0.0, 0.0, 0.0, 0.0); 
+	} 
+	else if (c < 0.3) 
+	{
+		animate(0.35);
+	}
+
+	else if (c < 0.5) 
+	{
+		// green (surface level)
+		gl_FragColor = vec4( 0.0, 1-c, 0.0, 1.0); 
+	} 
+	else if (c < 0.7) 
+	{
+		// Transition from green to mountain color
+		gl_FragColor = vec4( (c - 0.5) * 5.0, 0.5 + (c - 0.5) * 0.5, 0.0, 1.0); 
+	} 
+	
+	else 
+	{
+		// Mountain color for higher elevations
+        gl_FragColor = vec4( c+0.2, c*c, c*c*c*c*c, 1.0); 
+	}
 }
