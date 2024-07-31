@@ -129,7 +129,7 @@ void terrain(float c)
 
 void animate(float b)
 {
-			float time = u_time * .5+23.0;
+		float time = u_time * .5+23.0;
 
 		// uv should be the 0-1 uv of texture...
 		vec2 uv = gl_TexCoord[0].xy;
@@ -149,7 +149,7 @@ void animate(float b)
 		c /= float(7);
 		c = 1.17-pow(c, 1.4);
 		vec3 colour = vec3(pow(abs(c), 8.0));
-		colour = clamp(colour + vec3(0.0, 0.35, 0.5), 0.0, 1.0);
+		colour = clamp(colour + vec3(0.0, b, 0.5), 0.0, 1.0);
 		
 		gl_FragColor = vec4(colour, 1.0); 
 
@@ -161,25 +161,73 @@ void animatedWater(float c)
 		// eliminate extremely low or high values (these are thresholded or error values)
 		gl_FragColor = vec4( 0.0, 0.0, 0.0, 0.0); 
 	} 
-	else if (c < 0.3) 
+
+	else if (c < 0.2) 
 	{
-		animate(0.35);
+		animate(0.30);
 	}
 
-	else if (c < 0.5) 
+	else if (c < 0.3) 
 	{
-		// green (surface level)
-		gl_FragColor = vec4( 0.0, 1-c, 0.0, 1.0); 
-	} 
+        float t = (c - 0.2) / 0.1; 
+        animate(0.30);
+        vec4 animatedColor = gl_FragColor; 
+        vec4 lightBlue = vec4(0.0, 1.0 - c, 0.9, 1.0);
+        
+        gl_FragColor = mix(animatedColor, lightBlue, t); 
+	}
+
+	else if( c < 0.4)
+	{
+        float t = (c - 0.3) / 0.1; 
+        vec4 lightBlue = vec4(0.0, 1.0 - c, 0.8, 1.0); 
+        vec4 darkGreen = vec4(0.0, 0.65 - c * 0.5, 0.0, 1.0); 
+
+        gl_FragColor = mix(lightBlue, darkGreen, t); 
+	}
+
+	else if( c < 0.5)
+	{
+        float t = (c - 0.4) / 0.1; // Normalize c to [0, 1] 
+        vec4 darkGreen = vec4(0.0, 0.65 - c * 0.5, 0.0, 1.0); 
+        vec4 lightGreen = vec4(0.698, 1.0, 0.4, 1.0);
+
+        gl_FragColor = mix(darkGreen, lightGreen, t); 
+	}
+
+	else if (c < 0.6) 
+    {
+        float t = (c - 0.5) / 0.1; 
+        vec4 lightGreen = vec4(0.698, 1.0, 0.4, 1.0); 
+        vec4 mountainColor = vec4(1.0, 0.6, 0.2, 1.0);
+        
+        gl_FragColor = mix(lightGreen, mountainColor, t); 
+    }
+
 	else if (c < 0.7) 
 	{
-		// Transition from green to mountain color
-		gl_FragColor = vec4( (c - 0.5) * 5.0, 0.5 + (c - 0.5) * 0.5, 0.0, 1.0); 
+        float t = (c - 0.6) / 0.1; 
+        vec4 mountainColor = vec4(1.0, 0.6, 0.2, 1.0); 
+        vec4 midElevationColor = vec4(1.0, 0.2, 0.2, 1.0); 
+
+        gl_FragColor = mix(mountainColor, midElevationColor, t); 
 	} 
-	
+
+	else if (c < 0.8) 
+	{
+        float t = (c - 0.7) / 0.1; // Normalize c to [0, 1] within the range [0.5, 0.6]
+        vec4 midElevationColor = vec4(1.0, 0.2, 0.2, 1.0); // sand color
+        vec4 higherElevationColor = vec4(0.8, 0.0, 0.0, 1.0); // sand color
+
+        gl_FragColor = mix(midElevationColor, higherElevationColor, t);
+	} 
+
 	else 
 	{
-		// Mountain color for higher elevations
-        gl_FragColor = vec4( c+0.2, c*c, c*c*c*c*c, 1.0); 
+        float t = (c - 0.8) / 0.2; 
+        vec4 higherElevationColor = vec4(0.8, 0.0, 0.0, 1.0);
+        vec4 peakElevationColor =vec4(0.925, 0.953, 1.0, 1.0); 
+
+        gl_FragColor = mix(higherElevationColor, peakElevationColor, t); 
 	}
 }

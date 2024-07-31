@@ -427,8 +427,7 @@ void Scene_Sandbox::renderUI()
 
             if (ImGui::Button("Reload Shader"))
             {
-                //m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
-                m_shader.loadFromFile("shaders/shader_in_progress.frag", sf::Shader::Fragment);
+                m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
             }
            
             if (ImGui::CollapsingHeader("Thresholds"))
