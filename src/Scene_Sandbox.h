@@ -35,7 +35,7 @@ class Scene_Sandbox : public Scene
     bool                m_drawUI = true;
     bool                m_drawTransformed = true;
 
-    bool                m_gaussianBlur = true;
+    bool                m_gaussianBlur = false;
 
     alignment           m_alignment = alignment::depth;
 
@@ -60,6 +60,7 @@ class Scene_Sandbox : public Scene
     sf::Texture         m_sfDepthTexture;
     sf::Texture         m_sfTransformedDepthTexture;
     sf::Texture         m_sfColorTexture;
+    sf::Texture         m_fishTexture;
     sf::Sprite          m_depthSprite;
     sf::Sprite          m_sfTransformedDepthSprite;
     sf::Sprite          m_colorSprite;
@@ -80,7 +81,7 @@ class Scene_Sandbox : public Scene
 
     bool                m_drawContours = true;
     sf::Sprite          m_contourSprite;
-    int                 m_numberOfContourLines = 19;
+    int                 m_numberOfContourLines = 15;
 
     cv::Mat             m_data;
     
