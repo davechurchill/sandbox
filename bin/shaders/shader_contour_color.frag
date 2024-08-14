@@ -162,14 +162,14 @@ void animatedWater(float c)
 		gl_FragColor = vec4( 0.0, 0.0, 0.0, 0.0); 
 	} 
 
-	else if (c < 0.2) 
+	else if (c < 0.13) 
 	{
 		animate(0.30);
 	}
 
-	else if (c < 0.3) 
+	else if (c < 0.23) 
 	{
-        float t = (c - 0.2) / 0.1; 
+        float t = (c - 0.13) / 0.1; 
         animate(0.30);
         vec4 animatedColor = gl_FragColor; 
         vec4 lightBlue = vec4(0.0, 1.0 - c, 0.9, 1.0);
@@ -177,46 +177,46 @@ void animatedWater(float c)
         gl_FragColor = mix(animatedColor, lightBlue, t); 
 	}
 
-	else if( c < 0.4)
+	else if( c < 0.33)
 	{
-        float t = (c - 0.3) / 0.1; 
+        float t = (c - 0.23) / 0.1; 
         vec4 lightBlue = vec4(0.0, 1.0 - c, 0.8, 1.0); 
         vec4 darkGreen = vec4(0.0, 0.65 - c * 0.5, 0.0, 1.0); 
 
         gl_FragColor = mix(lightBlue, darkGreen, t); 
 	}
 
-	else if( c < 0.5)
+	else if( c < 0.43)
 	{
-        float t = (c - 0.4) / 0.1; // Normalize c to [0, 1] 
+        float t = (c - 0.33) / 0.1; // Normalize c to [0, 1] 
         vec4 darkGreen = vec4(0.0, 0.65 - c * 0.5, 0.0, 1.0); 
         vec4 lightGreen = vec4(0.698, 1.0, 0.4, 1.0);
 
         gl_FragColor = mix(darkGreen, lightGreen, t); 
 	}
 
-	else if (c < 0.6) 
+	else if (c < 0.53) 
     {
-        float t = (c - 0.5) / 0.1; 
+        float t = (c - 0.43) / 0.1; 
         vec4 lightGreen = vec4(0.698, 1.0, 0.4, 1.0); 
-        vec4 mountainColor = vec4(1.0, 0.6, 0.2, 1.0);
+        vec4 mountainColor = vec4(0.8, 0.8, 0.0, 1.0);
         
         gl_FragColor = mix(lightGreen, mountainColor, t); 
     }
 
-	else if (c < 0.7) 
+	else if (c < 0.63) 
 	{
-        float t = (c - 0.6) / 0.1; 
-        vec4 mountainColor = vec4(1.0, 0.6, 0.2, 1.0); 
-        vec4 midElevationColor = vec4(1.0, 0.2, 0.2, 1.0); 
+        float t = (c - 0.53) / 0.1; 
+        vec4 mountainColor = vec4(0.8, 0.8, 0.0, 1.0);
+        vec4 midElevationColor = vec4(1.0, 0.5, 0.0, 1.0); 
 
         gl_FragColor = mix(mountainColor, midElevationColor, t); 
 	} 
 
-	else if (c < 0.8) 
+	else if (c < 0.73) 
 	{
-        float t = (c - 0.7) / 0.1; // Normalize c to [0, 1] within the range [0.5, 0.6]
-        vec4 midElevationColor = vec4(1.0, 0.2, 0.2, 1.0); // sand color
+        float t = (c - 0.63) / 0.1; // Normalize c to [0, 1] within the range [0.5, 0.6]
+        vec4 midElevationColor = vec4(1.0, 0.5, 0.0, 1.0); // sand color
         vec4 higherElevationColor = vec4(0.8, 0.0, 0.0, 1.0); // sand color
 
         gl_FragColor = mix(midElevationColor, higherElevationColor, t);
@@ -224,7 +224,7 @@ void animatedWater(float c)
 
 	else 
 	{
-        float t = (c - 0.8) / 0.2; 
+        float t = (c - 0.73) / 0.2; 
         vec4 higherElevationColor = vec4(0.8, 0.0, 0.0, 1.0);
         vec4 peakElevationColor =vec4(0.925, 0.953, 1.0, 1.0); 
 
