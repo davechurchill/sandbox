@@ -29,16 +29,7 @@
     <ClCompile Include="..\src\imgui\imgui-SFML.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Scene_Perlin2D.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Scene_Sandbox.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Scene_Menu.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Scene_Image.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
     <ClCompile Include="..\src\MinecraftInterface.cpp">
@@ -46,9 +37,6 @@
     </ClCompile>
     <ClCompile Include="..\src\BlockGeneration.cpp">
       <Filter>minecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Calibration.cpp">
-      <Filter>sandbox</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Scene_Main.cpp">
       <Filter>scenes</Filter>
@@ -74,6 +62,9 @@
     <ClCompile Include="..\src\Source_Snapshot.cpp">
       <Filter>topography sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Processor_Minecraft.cpp">
+      <Filter>topography processors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Assets.h">
@@ -97,22 +88,13 @@
     <ClInclude Include="..\src\Action.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Scene_Perlin2D.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Perlin.hpp">
-      <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Scene_Sandbox.h">
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ViewController.hpp">
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Scene_Menu.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Scene_Image.h">
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Cube.hpp">
@@ -128,9 +110,6 @@
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\CameraFilters.hpp">
-      <Filter>sandbox</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Calibration.h">
       <Filter>sandbox</Filter>
     </ClInclude>
     <ClInclude Include="..\src\RealSenseTools.hpp">
@@ -165,6 +144,9 @@
     </ClInclude>
     <ClInclude Include="..\src\Source_Snapshot.h">
       <Filter>topography sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Processor_Minecraft.h">
+      <Filter>topography processors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

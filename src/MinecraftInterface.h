@@ -34,6 +34,7 @@ namespace mc
             void send(curlpp::Easy & handle);
         };
 #endif // Use_Minecraft
+        cv::Mat m_grid;
         int m_currentCube = 0;
         int m_x = 0;
         int m_y = 0;
@@ -69,6 +70,8 @@ namespace mc
 
         inline void fill(int x1, int y1, int z1, int x2, int y2, int z2, const std::string & block, const std::string & args = "");
 
-        void imgui(const cv::Mat & grid);
+        void imgui();
+
+        void setGrid(const cv::Mat & grid);
     };
 }

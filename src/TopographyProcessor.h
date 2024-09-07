@@ -18,6 +18,7 @@ public:
     enum
     {
         Colorizer,
+        Minecraft
     };
 
 

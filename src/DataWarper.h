@@ -15,7 +15,7 @@ class DataWarper
     cv::Point2f                     m_planarPoints[3] = { {150, 0}, {75, 150}, {0, 75} };
     std::vector<sf::CircleShape>    m_warpCircles;
     std::vector<sf::CircleShape>    m_planarCircles;
-    float                           m_dataSize = 0.4f;
+    float                           m_dataSize = 1.0f;
 
     // Height Adjustment
     float                           m_plane[4] = { 0.0f, 0.0f, 0.0f, 0.0f };

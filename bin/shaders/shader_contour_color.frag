@@ -92,7 +92,7 @@ void popsicle(float c) {
 
 void red(float c)
 {
-	gl_FragColor = vec4(c, c, 1.0, 1.0 );
+	gl_FragColor = vec4(1.0, c, c, 1.0 );
 }
 
 void terrain(float c)

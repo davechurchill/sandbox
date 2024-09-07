@@ -5,6 +5,7 @@
 #include "Profiler.hpp"
 
 #include "Processor_Colorizer.h"
+#include "Processor_Minecraft.h"
 #include "Source_Camera.h"
 #include "Source_Perlin.h"
 #include "Source_Snapshot.h"
@@ -195,7 +196,7 @@ void Scene_Main::renderUI()
 
     ImGui::Begin("Processor", &m_drawUI);
 
-    const char * processors[] = {"Colorizer"};
+    const char * processors[] = {"Colorizer", "Minecraft"};
     if (ImGui::Combo("Selected Processor", &m_processorID, processors, IM_ARRAYSIZE(processors)))
     {
         setProcessor(m_processorID);
@@ -289,6 +290,7 @@ void Scene_Main::setProcessor(int processor)
     switch (processor)
     {
     case TopographyProcessor::Colorizer: { m_processor = std::make_shared<Processor_Colorizer>(); } break;
+    case TopographyProcessor::Minecraft: { m_processor = std::make_shared<Processor_Minecraft>(); } break;
     }
 
     m_processor->init();

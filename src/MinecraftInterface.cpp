@@ -127,24 +127,24 @@ inline void MinecraftInterface::fill(int x1, int y1, int z1, int x2, int y2, int
     }
 }
 
-void MinecraftInterface::imgui(const cv::Mat & grid)
+void MinecraftInterface::imgui()
 {
     if (ImGui::Button("Test Connection"))
     {
         command("say testing testing");
     }
 
-    ImGui::Text("Size: %d, %d, %d", grid.cols, m_mcHeight, grid.rows);
+    ImGui::Text("Size: %d, %d, %d", m_grid.cols, m_mcHeight, m_grid.rows);
     ImGui::SliderInt("Block Height", &m_mcHeight, 10, 100);
 
     if (ImGui::Button("Project Data"))
     {
-        projectHeightmap(grid, m_mcHeight);
+        projectHeightmap(m_grid, m_mcHeight);
     }
 
     if (ImGui::Button("Update Data"))
     {
-        projectHeightmapChanges(grid, m_mcHeight);
+        projectHeightmapChanges(m_grid, m_mcHeight);
     }
 
     const static char * profiles[] = { "Monochrome", "Basic Grass"};
@@ -167,8 +167,13 @@ void MinecraftInterface::imgui(const cv::Mat & grid)
     if (m_autoUpdate && --m_countdown == 0)
     {
         m_countdown = m_updateDelay;
-        projectHeightmapChanges(grid, m_mcHeight);
+        projectHeightmapChanges(m_grid, m_mcHeight);
     }
+}
+
+void mc::MinecraftInterface::setGrid(const cv::Mat & grid)
+{
+    m_grid = grid;
 }
 
 MinecraftInterface::BlockPlacer::BlockPlacer()

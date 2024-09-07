@@ -21,7 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\Assets.cpp" />
     <ClCompile Include="..\src\BlockGeneration.cpp" />
-    <ClCompile Include="..\src\Calibration.cpp" />
+    <ClCompile Include="..\src\Processor_Minecraft.cpp" />
     <ClCompile Include="..\src\Source_Camera.cpp" />
     <ClCompile Include="..\src\Processor_Colorizer.cpp" />
     <ClCompile Include="..\src\DataWarper.cpp" />
@@ -36,11 +36,8 @@
     <ClCompile Include="..\src\SandboxProjector.cpp" />
     <ClCompile Include="..\src\Scene.cpp" />
     <ClCompile Include="..\src\main.cpp" />
-    <ClCompile Include="..\src\Scene_Image.cpp" />
     <ClCompile Include="..\src\Scene_Main.cpp" />
     <ClCompile Include="..\src\Scene_Menu.cpp" />
-    <ClCompile Include="..\src\Scene_Perlin2D.cpp" />
-    <ClCompile Include="..\src\Scene_Sandbox.cpp" />
     <ClCompile Include="..\src\Source_Perlin.cpp" />
     <ClCompile Include="..\src\Source_Snapshot.cpp" />
     <ClCompile Include="..\src\Tools.cpp" />
@@ -49,7 +46,7 @@
     <ClInclude Include="..\src\Action.hpp" />
     <ClInclude Include="..\src\Assets.h" />
     <ClInclude Include="..\src\BlockGeneration.h" />
-    <ClInclude Include="..\src\Calibration.h" />
+    <ClInclude Include="..\src\Processor_Minecraft.h" />
     <ClInclude Include="..\src\Source_Camera.h" />
     <ClInclude Include="..\src\CameraFilters.hpp" />
     <ClInclude Include="..\src\Processor_Colorizer.h" />
@@ -63,11 +60,8 @@
     <ClInclude Include="..\src\SandboxProjector.h" />
     <ClInclude Include="..\src\Scene.h" />
     <ClInclude Include="..\src\Grid.hpp" />
-    <ClInclude Include="..\src\Scene_Image.h" />
     <ClInclude Include="..\src\Scene_Main.h" />
     <ClInclude Include="..\src\Scene_Menu.h" />
-    <ClInclude Include="..\src\Scene_Perlin2D.h" />
-    <ClInclude Include="..\src\Scene_Sandbox.h" />
     <ClInclude Include="..\src\Source_Perlin.h" />
     <ClInclude Include="..\src\Source_Snapshot.h" />
     <ClInclude Include="..\src\Timer.hpp" />
