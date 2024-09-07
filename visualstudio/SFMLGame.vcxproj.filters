@@ -50,6 +50,15 @@
     <ClCompile Include="..\src\Calibration.cpp">
       <Filter>sandbox</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Scene_Main.cpp">
+      <Filter>scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SandboxProjector.cpp">
+      <Filter>sandbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Colorizer.cpp">
+      <Filter>topography processors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Assets.h">
@@ -112,6 +121,24 @@
     <ClInclude Include="..\src\RealSenseTools.hpp">
       <Filter>sandbox</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Scene_Main.h">
+      <Filter>scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TopographySource.h">
+      <Filter>topography sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TopographyProcessor.h">
+      <Filter>topography processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SandboxProjector.h">
+      <Filter>sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Tools.hpp">
+      <Filter>sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Colorizer.h">
+      <Filter>topography processors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="engine">
@@ -128,6 +155,12 @@
     </Filter>
     <Filter Include="sandbox">
       <UniqueIdentifier>{2da31b36-3cf6-482f-a351-25836cb25a3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="topography sources">
+      <UniqueIdentifier>{ad0c4095-a702-48c6-a6cc-ce356a96b904}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="topography processors">
+      <UniqueIdentifier>{9367886d-e567-4128-803e-2168c7e93d01}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
