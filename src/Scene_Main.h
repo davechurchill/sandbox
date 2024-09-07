@@ -40,6 +40,7 @@ class Scene_Main : public Scene
     void setSource(int source);
     void setProcessor(int processor);
 
+    void saveDataDump();
     
 public:
 

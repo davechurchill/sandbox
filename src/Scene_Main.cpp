@@ -4,8 +4,10 @@
 #include "Assets.h"
 #include "Profiler.hpp"
 
-#include "Colorizer.h"
-#include "Camera.h"
+#include "Processor_Colorizer.h"
+#include "Source_Camera.h"
+#include "Source_Perlin.h"
+#include "Source_Snapshot.h"
 
 #include <fstream>
 #include <iostream>
@@ -163,6 +165,16 @@ void Scene_Main::renderUI()
 {
     PROFILE_FUNCTION();
 
+    ImGui::BeginMainMenuBar();
+
+    if (ImGui::Button("Snapshot"))
+    {
+        saveDataDump();
+    }
+
+    ImGui::Text("Framerate: %d", (int)m_game->framerate());
+    ImGui::EndMainMenuBar();
+
     // Source
 
     ImGui::Begin("Source", &m_drawUI);
@@ -188,8 +200,6 @@ void Scene_Main::renderUI()
     {
         setProcessor(m_processorID);
     }
-
-    ImGui::Text("Framerate: %d", (int)m_game->framerate());
 
     ImGui::Separator();
 
@@ -265,10 +275,12 @@ void Scene_Main::setSource(int source)
     m_sourceID = source;
     switch (source)
     {
-    case TopographySource::Camera: { m_source = std::make_shared<Camera>(); } break;
-    case TopographySource::Perlin:   {} break;
-    case TopographySource::Snapshot: {} break;
+    case TopographySource::Camera: { m_source = std::make_shared<Source_Camera>(); } break;
+    case TopographySource::Perlin: { m_source = std::make_shared<Source_Perlin>(); } break;
+    case TopographySource::Snapshot: { m_source = std::make_shared<Source_Snapshot>(); } break;
     }
+
+    m_source->init();
 }
 
 void Scene_Main::setProcessor(int processor)
@@ -276,8 +288,17 @@ void Scene_Main::setProcessor(int processor)
     m_processorID = processor;
     switch (processor)
     {
-    case TopographyProcessor::Colorizer: { m_processor = std::make_shared<Colorizer>(); } break;
+    case TopographyProcessor::Colorizer: { m_processor = std::make_shared<Processor_Colorizer>(); } break;
     }
+
+    m_processor->init();
+}
+
+void Scene_Main::saveDataDump()
+{
+    cv::FileStorage fout("dataDumps/snapshot.bin", cv::FileStorage::WRITE);
+    fout << "matrix" << m_topography;
+
 }
 
 void Scene_Main::endScene()

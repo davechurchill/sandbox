@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Grid.hpp>
+
 #include <vector>
 
 class Perlin1D

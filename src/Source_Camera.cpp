@@ -1,12 +1,12 @@
-#include "Camera.h"
+#include "Source_Camera.h"
 #include "Tools.h"
 #include "Profiler.hpp"
 
-void Camera::init()
+void Source_Camera::init()
 {
 }
 
-void Camera::connectToCamera()
+void Source_Camera::connectToCamera()
 {
     //RealSenseTools::PrintAvailableCameraModes();
 
@@ -37,7 +37,7 @@ void Camera::connectToCamera()
     }
 }
 
-void Camera::captureImages()
+void Source_Camera::captureImages()
 {
     PROFILE_FUNCTION();
 
@@ -150,7 +150,7 @@ void Camera::captureImages()
     }
 }
 
-void Camera::imgui()
+void Source_Camera::imgui()
 {
     PROFILE_FUNCTION();
     if (ImGui::BeginTabBar("CameraTabBar"))
@@ -189,19 +189,6 @@ void Camera::imgui()
                 cv::imwrite("depthImage_normalized.png", depthImage8u);
             }
 
-            if (ImGui::Button("Save Raw Depth Data"))
-            {
-                rs2::frameset data = m_pipe.wait_for_frames();
-                rs2::depth_frame depth_frame = data.get_depth_frame();
-                const uint16_t * depth_data = reinterpret_cast<const uint16_t *>(depth_frame.get_data());
-                saveDepthData("depth_data.bin", depth_data, 1280, 720);
-            }
-
-            if (ImGui::Button("Load Raw Depth Data"))
-            {
-                uint16_t * depth_data = new uint16_t[1280 * 720];
-                loadDepthData("depth_data.bin", depth_data, 1280, 720);
-            }
             ImGui::EndTabItem();
         }
 
@@ -223,7 +210,7 @@ void Camera::imgui()
     }
 }
 
-void Camera::render(sf::RenderWindow & window)
+void Source_Camera::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
     {
@@ -239,12 +226,12 @@ void Camera::render(sf::RenderWindow & window)
     m_warper.render(window);
 }
 
-void Camera::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
+void Source_Camera::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
     m_warper.processEvent(event, mouse);
 }
 
-void Camera::save(std::ofstream & fout)
+void Source_Camera::save(std::ofstream & fout)
 {
     fout << "m_alignment " << (int)m_alignment << '\n';
     fout << "m_gaussianBlur " << m_gaussianBlur << '\n';
@@ -257,7 +244,7 @@ void Camera::save(std::ofstream & fout)
     m_warper.save(fout);
 }
 
-void Camera::load(const std::string & term, std::ifstream & fin)
+void Source_Camera::load(const std::string & term, std::ifstream & fin)
 {
     if (term == "m_alignment") { int t; fin >> t; m_alignment = static_cast<alignment>(t); }
     if (term == "m_gaussianBlur") { fin >> m_gaussianBlur; }
@@ -270,7 +257,7 @@ void Camera::load(const std::string & term, std::ifstream & fin)
     m_warper.load(term, fin);
 }
 
-cv::Mat Camera::getTopography()
+cv::Mat Source_Camera::getTopography()
 {
     if (!m_cameraConnected)
     {
@@ -280,30 +267,4 @@ cv::Mat Camera::getTopography()
 
     captureImages();
     return m_data;
-}
-
-void Camera::saveDepthData(const std::string & filename, const uint16_t * depth_data, int width, int height)
-{
-    std::ofstream file(filename, std::ios::binary);
-    if (!file)
-    {
-        std::cerr << "Failed to open file for writing: " << filename << std::endl;
-        return;
-    }
-    file.write(reinterpret_cast<const char *>(depth_data), width * height * sizeof(uint16_t));
-    file.close();
-    std::cout << "Depth data saved to file: " << filename << std::endl;
-}
-
-void Camera::loadDepthData(const std::string & filename, uint16_t * depth_data, int width, int height)
-{
-    std::ifstream file(filename, std::ios::binary);
-    if (!file)
-    {
-        std::cerr << "Failed to open file for reading: " << filename << std::endl;
-        return;
-    }
-    file.read(reinterpret_cast<char *>(depth_data), width * height * sizeof(uint16_t));
-    file.close();
-    std::cout << "Depth data loaded from file: " << filename << std::endl;
 }

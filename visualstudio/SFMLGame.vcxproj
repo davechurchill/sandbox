@@ -22,8 +22,8 @@
     <ClCompile Include="..\src\Assets.cpp" />
     <ClCompile Include="..\src\BlockGeneration.cpp" />
     <ClCompile Include="..\src\Calibration.cpp" />
-    <ClCompile Include="..\src\Camera.cpp" />
-    <ClCompile Include="..\src\Colorizer.cpp" />
+    <ClCompile Include="..\src\Source_Camera.cpp" />
+    <ClCompile Include="..\src\Processor_Colorizer.cpp" />
     <ClCompile Include="..\src\DataWarper.cpp" />
     <ClCompile Include="..\src\GameEngine.cpp" />
     <ClCompile Include="..\src\imgui\imgui-SFML.cpp" />
@@ -41,6 +41,8 @@
     <ClCompile Include="..\src\Scene_Menu.cpp" />
     <ClCompile Include="..\src\Scene_Perlin2D.cpp" />
     <ClCompile Include="..\src\Scene_Sandbox.cpp" />
+    <ClCompile Include="..\src\Source_Perlin.cpp" />
+    <ClCompile Include="..\src\Source_Snapshot.cpp" />
     <ClCompile Include="..\src\Tools.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -48,9 +50,9 @@
     <ClInclude Include="..\src\Assets.h" />
     <ClInclude Include="..\src\BlockGeneration.h" />
     <ClInclude Include="..\src\Calibration.h" />
-    <ClInclude Include="..\src\Camera.h" />
+    <ClInclude Include="..\src\Source_Camera.h" />
     <ClInclude Include="..\src\CameraFilters.hpp" />
-    <ClInclude Include="..\src\Colorizer.h" />
+    <ClInclude Include="..\src\Processor_Colorizer.h" />
     <ClInclude Include="..\src\Cube.hpp" />
     <ClInclude Include="..\src\DataWarper.h" />
     <ClInclude Include="..\src\GameEngine.h" />
@@ -66,6 +68,8 @@
     <ClInclude Include="..\src\Scene_Menu.h" />
     <ClInclude Include="..\src\Scene_Perlin2D.h" />
     <ClInclude Include="..\src\Scene_Sandbox.h" />
+    <ClInclude Include="..\src\Source_Perlin.h" />
+    <ClInclude Include="..\src\Source_Snapshot.h" />
     <ClInclude Include="..\src\Timer.hpp" />
     <ClInclude Include="..\src\Tools.h" />
     <ClInclude Include="..\src\TopographyProcessor.h" />

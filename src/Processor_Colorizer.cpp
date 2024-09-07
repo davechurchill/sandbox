@@ -1,16 +1,16 @@
-#include "Colorizer.h"
+#include "Processor_Colorizer.h"
 #include "Profiler.hpp"
 #include "Tools.h"
 
 #include "imgui.h"
 #include "imgui-SFML.h"
 
-void Colorizer::init()
+void Processor_Colorizer::init()
 {
     m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
 }
 
-void Colorizer::imgui()
+void Processor_Colorizer::imgui()
 {
     PROFILE_FUNCTION();
     ImGui::Checkbox("Draw Projection", &m_drawProjection);
@@ -31,7 +31,7 @@ void Colorizer::imgui()
     m_projector.imgui();
 }
 
-void Colorizer::render(sf::RenderWindow & window)
+void Processor_Colorizer::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
     if (m_drawProjection)
@@ -58,13 +58,13 @@ void Colorizer::render(sf::RenderWindow & window)
     m_projector.render(window);
 }
 
-void Colorizer::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
+void Processor_Colorizer::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
     PROFILE_FUNCTION();
     m_projector.processEvent(event, mouse);
 }
 
-void Colorizer::save(std::ofstream & fout)
+void Processor_Colorizer::save(std::ofstream & fout)
 {
     fout << "m_drawProjection " << m_drawProjection << '\n';
     fout << "m_selectedShaderIndex " << m_selectedShaderIndex << '\n';
@@ -74,7 +74,7 @@ void Colorizer::save(std::ofstream & fout)
     m_projector.save(fout);
 }
 
-void Colorizer::load(const std::string & term, std::ifstream & fin)
+void Processor_Colorizer::load(const std::string & term, std::ifstream & fin)
 {
     if (term == "m_drawProjection") { fin >> m_drawProjection; }
     if (term == "m_selectedShaderIndex") { fin >> m_selectedShaderIndex; }
@@ -84,7 +84,7 @@ void Colorizer::load(const std::string & term, std::ifstream & fin)
     m_projector.load(term, fin);
 }
 
-void Colorizer::processTopography(const cv::Mat & data)
+void Processor_Colorizer::processTopography(const cv::Mat & data)
 {
     PROFILE_FUNCTION();
     {

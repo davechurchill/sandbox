@@ -3,7 +3,7 @@
 #include "TopographyProcessor.h"
 #include "SandboxProjector.h"
 
-class Colorizer : public TopographyProcessor 
+class Processor_Colorizer : public TopographyProcessor 
 {
     SandBoxProjector m_projector;
     cv::Mat m_cvTransformedDepthImage32f;

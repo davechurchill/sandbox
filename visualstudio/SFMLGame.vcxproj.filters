@@ -56,10 +56,10 @@
     <ClCompile Include="..\src\SandboxProjector.cpp">
       <Filter>sandbox</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Colorizer.cpp">
+    <ClCompile Include="..\src\Processor_Colorizer.cpp">
       <Filter>topography processors</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Camera.cpp">
+    <ClCompile Include="..\src\Source_Camera.cpp">
       <Filter>topography sources</Filter>
     </ClCompile>
     <ClCompile Include="..\src\DataWarper.cpp">
@@ -67,6 +67,12 @@
     </ClCompile>
     <ClCompile Include="..\src\Tools.cpp">
       <Filter>sandbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Source_Perlin.cpp">
+      <Filter>topography sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Source_Snapshot.cpp">
+      <Filter>topography sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -142,10 +148,10 @@
     <ClInclude Include="..\src\SandboxProjector.h">
       <Filter>sandbox</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Colorizer.h">
+    <ClInclude Include="..\src\Processor_Colorizer.h">
       <Filter>topography processors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Camera.h">
+    <ClInclude Include="..\src\Source_Camera.h">
       <Filter>topography sources</Filter>
     </ClInclude>
     <ClInclude Include="..\src\DataWarper.h">
@@ -153,6 +159,12 @@
     </ClInclude>
     <ClInclude Include="..\src\Tools.h">
       <Filter>sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Perlin.h">
+      <Filter>topography sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Snapshot.h">
+      <Filter>topography sources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -15,7 +15,7 @@ enum class alignment
     nothing
 };
 
-class Camera : public TopographySource
+class Source_Camera : public TopographySource
 {
     rs2::pipeline       m_pipe;
     bool                m_cameraConnected = false;
@@ -49,9 +49,6 @@ class Camera : public TopographySource
 
     void connectToCamera();
     void captureImages();
-
-    void saveDepthData(const std::string & filename, const uint16_t * depth_data, int width, int height);
-    void loadDepthData(const std::string & filename, uint16_t * depth_data, int width, int height);
 
 public:
     void init();
