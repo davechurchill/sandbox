@@ -1,0 +1,21 @@
+m_sourceID 0
+m_processorID 0
+m_alignment 0
+m_gaussianBlur 0
+m_maxDistance 1.13
+m_minDistance 0.9
+m_drawDepth 1
+m_drawColor 0
+temporalAlpha 0.047
+temporalDelta 72
+temporalPersistance 3
+HoleFill 1
+m_dataSize 0.4
+m_warpPoints 251 113 1092 105 258 554 1094 550 
+m_planarPoints 150 0 75 150 0 75 
+m_drawProjection 1
+m_selectedShaderIndex 0
+m_drawContours 1
+m_numberOfContourLines 15
+m_drawLines 1
+m_projectionPoints 90 42 1755 54 58 1001 1818 983 

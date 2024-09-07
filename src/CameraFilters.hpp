@@ -10,36 +10,18 @@
 
 struct CameraFilters
 {
-
-    int                 m_spatialMagnitude = 2;
-    float               m_smoothAlpha = 0.5f;
-    int                 m_smoothDelta = 20;
-    int                 m_spatialHoleFill = 0;
-    rs2::spatial_filter m_spatialFilter;
-
-
-    float               m_smoothAlphaTemporal = 0.4f;
-    int                 m_smoothDeltaTemporal = 20;
+    float               m_smoothAlphaTemporal = 0.047f;
+    int                 m_smoothDeltaTemporal = 72;
     int                 m_persistanceTemporal = 3;
     rs2::temporal_filter m_temporalFilter;
 
-    int                 m_holeFill = 3;
+    int                 m_holeFill = 1;
     rs2::hole_filling_filter m_holeFilter;
 
 public:
     rs2::frame apply(const rs2::frame & frame)
     {
         rs2::frame temp = frame;
-
-        /*if (m_spatialMagnitude > 0)
-        {
-            PROFILE_SCOPE("Spatial");
-            m_spatialFilter.set_option(RS2_OPTION_FILTER_MAGNITUDE, (float)m_spatialMagnitude);
-            m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_ALPHA, m_smoothAlpha);
-            m_spatialFilter.set_option(RS2_OPTION_FILTER_SMOOTH_DELTA, (float)m_smoothDelta);
-            m_spatialFilter.set_option(RS2_OPTION_HOLES_FILL, (float)m_spatialHoleFill);
-            temp = m_spatialFilter.process(temp);
-        }*/
 
         if (m_holeFill < 3)
         {
@@ -63,19 +45,6 @@ public:
     {
         PROFILE_FUNCTION();
 
-        /*if (ImGui::CollapsingHeader("Spatial Filter"))
-        {
-            ImGui::Indent();
-            ImGui::SliderInt("Magnitude", &m_spatialMagnitude, 0, 5);
-            if (m_spatialMagnitude > 0)
-            {
-                ImGui::SliderFloat("Smooth Alpha", &m_smoothAlpha, 0.25, 1.0);
-                ImGui::SliderInt("Smooth Delta", &m_smoothDelta, 1, 50);
-                ImGui::SliderInt("Hole Filling", &m_spatialHoleFill, 0, 5);
-            }
-            ImGui::Unindent();
-        }*/
-
         if (ImGui::CollapsingHeader("Temporal Filter"))
         {
             ImGui::Indent();
@@ -98,15 +67,10 @@ public:
 
     void save(std::ofstream & fout)
     {
-        fout << "temporalAlpha" << " " << m_smoothAlphaTemporal << "\n";
-        fout << "temporalDelta" << " " << m_smoothDeltaTemporal << "\n";
-        fout << "temporalPersistance" << " " << m_persistanceTemporal << "\n";
-
-        fout << "Magnitude" << " " << m_spatialMagnitude << "\n";
-        fout << "Alpha" << " " << m_smoothAlpha << "\n";
-        fout << "Delta" << " " << m_smoothDelta << "\n";
-        fout << "SHole" << " " << m_spatialHoleFill << "\n";
-        fout << "HoleFill" << " " << m_holeFill << "\n";
+        fout << "temporalAlpha " << m_smoothAlphaTemporal << "\n";
+        fout << "temporalDelta " << m_smoothDeltaTemporal << "\n";
+        fout << "temporalPersistance " << m_persistanceTemporal << "\n";
+        fout << "HoleFill " << m_holeFill << "\n";
     }
 
     void loadTerm(const std::string & term, std::ifstream & fin)
@@ -114,9 +78,6 @@ public:
         if (term == "temporalAlpha") { fin >> m_smoothAlphaTemporal; }
         if (term == "temporalDelta") { fin >> m_smoothDeltaTemporal; }
         if (term == "temporalPersistance") { fin >> m_persistanceTemporal; }
-        if (term == "Magnitude") { fin >> m_spatialMagnitude; }
-        if (term == "Alpha") { fin >> m_smoothAlpha; }
-        if (term == "SHole") { fin >> m_spatialHoleFill; }
         if (term == "HoleFill") { fin >> m_holeFill; }
     }
 };

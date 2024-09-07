@@ -2,7 +2,7 @@
 #include "Profiler.hpp"
 #include "imgui-SFML.h"
 #include "imgui.h"
-#include "Tools.hpp"
+#include "Tools.h"
 
 #include <fstream>
 #include <iostream>
@@ -27,7 +27,7 @@ void SandBoxProjector::project(const cv::Mat & input, cv::Mat & output)
     // Check to see if data matrix has changed in size and generate the projection matrix again if so
     int width = input.cols;
     int height = input.rows;
-    if (width != m_dataWidth || height != m_dataHeight)
+    if (width != m_dataWidth || height != m_dataHeight || m_projectionMatrix.rows == 0 || m_projectionMatrix.cols == 0)
     {
         m_dataWidth = width;
         m_dataHeight = height;
@@ -80,6 +80,7 @@ void SandBoxProjector::render(sf::RenderWindow & window)
     {
         for (size_t i = 0; i < m_projectionCircles.size(); ++i)
         {
+            m_projectionCircles[i].setPosition(m_projectionPoints[i].x, m_projectionPoints[i].y);
             window.draw(m_projectionCircles[i]);
         }
 
@@ -141,27 +142,23 @@ void SandBoxProjector::generateProjection()
   
 }
 
-void SandBoxProjector::load(const std::string & fileName)
+void SandBoxProjector::load(const std::string & term, std::ifstream & fin)
 {
-    std::ifstream fin(fileName);
-    std::string temp;
-    float x, y;
-    while (fin >> temp)
+    if (term == "m_drawLines") { fin >> m_drawLines; }
+    if (term == "m_projectionPoints")
     {
-        if (temp == "m_projectionPoints")
+        float x, y;
+        for (int i = 0; i < 4; ++i)
         {
-            for (int i = 0; i < 4; ++i)
-            {
-                fin >> x >> y;
-                m_projectionPoints[i] = { x,y };
-                m_projectionCircles[i].setPosition(x,y);
-            }
+            fin >> x >> y;
+            m_projectionPoints[i] = { x,y };
         }
     }
 }
 
 void SandBoxProjector::save(std::ofstream & fout)
 {
+    fout << "m_drawLines " << m_drawLines << '\n';
     fout << "m_projectionPoints ";
     for (auto p : m_projectionPoints)
     {

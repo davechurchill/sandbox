@@ -1,6 +1,7 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
+#include "Tools.h"
+#include "Profiler.hpp"
 
 namespace Tools
 {
@@ -8,6 +9,7 @@ namespace Tools
     // returns -1 if the mouse position is not inside any circle
     int getClickedCircleIndex(float mx, float my, std::vector<sf::CircleShape> & circles)
     {
+        PROFILE_FUNCTION();
         for (int i = 0; i < circles.size(); i++)
         {
             float dx = mx - circles[i].getPosition().x;

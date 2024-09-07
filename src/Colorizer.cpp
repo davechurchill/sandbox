@@ -1,6 +1,6 @@
 #include "Colorizer.h"
 #include "Profiler.hpp"
-#include "Tools.hpp"
+#include "Tools.h"
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -13,7 +13,7 @@ void Colorizer::init()
 void Colorizer::imgui()
 {
     PROFILE_FUNCTION();
-    ImGui::Checkbox("Draw Projection", &m_draw);
+    ImGui::Checkbox("Draw Projection", &m_drawProjection);
 
     if (ImGui::Button("Reload Shader"))
     {
@@ -34,7 +34,7 @@ void Colorizer::imgui()
 void Colorizer::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
-    if (m_draw)
+    if (m_drawProjection)
     {
         PROFILE_SCOPE("Draw Transformed Image");
 
@@ -66,12 +66,22 @@ void Colorizer::processEvent(const sf::Event & event, const sf::Vector2f & mouse
 
 void Colorizer::save(std::ofstream & fout)
 {
+    fout << "m_drawProjection " << m_drawProjection << '\n';
+    fout << "m_selectedShaderIndex " << m_selectedShaderIndex << '\n';
+    fout << "m_drawContours " << m_drawContours << '\n';
+    fout << "m_numberOfContourLines " << m_numberOfContourLines << '\n';
+
     m_projector.save(fout);
 }
 
-void Colorizer::load(const std::string & fileName)
+void Colorizer::load(const std::string & term, std::ifstream & fin)
 {
-    m_projector.load(fileName);
+    if (term == "m_drawProjection") { fin >> m_drawProjection; }
+    if (term == "m_selectedShaderIndex") { fin >> m_selectedShaderIndex; }
+    if (term == "m_drawContours") { fin >> m_drawContours; }
+    if (term == "m_numberOfContourLines") { fin >> m_numberOfContourLines; }
+
+    m_projector.load(term, fin);
 }
 
 void Colorizer::processTopography(const cv::Mat & data)
@@ -87,7 +97,7 @@ void Colorizer::processTopography(const cv::Mat & data)
     int dh = m_cvTransformedDepthImage32f.rows;
 
     // if something went wrong above, quit the function
-    if (m_draw && dw == 0 || dh == 0) { return; }
+    if (m_drawProjection && dw == 0 || dh == 0) { return; }
 
     {
         {

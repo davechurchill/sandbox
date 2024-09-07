@@ -5,6 +5,7 @@
 #include "Profiler.hpp"
 
 #include "Colorizer.h"
+#include "Camera.h"
 
 #include <fstream>
 #include <iostream>
@@ -36,7 +37,10 @@ void Scene_Main::init()
 void Scene_Main::onFrame()
 {
     m_topography = m_source->getTopography();
-    m_processor->processTopography(m_topography);
+    if (m_topography.rows > 0 && m_topography.cols > 0)
+    {
+        m_processor->processTopography(m_topography);
+    }
 
     sUserInput();
     sRender();
@@ -125,7 +129,7 @@ void Scene_Main::sUserInput()
         {
             sProcessEvent(displayEvent);
 
-            m_processor->processEvent(event, m_mouseDisplay);
+            m_processor->processEvent(displayEvent, m_mouseDisplay);
 
             // happens whenever the mouse is being moved
             if (displayEvent.type == sf::Event::MouseMoved)
@@ -161,7 +165,7 @@ void Scene_Main::renderUI()
 
     // Source
 
-    ImGui::Begin("Source", &m_drawUI, ImGuiWindowFlags_MenuBar);
+    ImGui::Begin("Source", &m_drawUI);
 
     const char * sources[] = {"Camera", "Perlin", "Snapshot"};
     if (ImGui::Combo("Selected Source", &m_sourceID, sources, IM_ARRAYSIZE(sources)))
@@ -169,13 +173,15 @@ void Scene_Main::renderUI()
         setSource(m_sourceID);
     }
 
+    ImGui::Separator();
+
     m_source->imgui();
     
     ImGui::End();
 
     // Processor
 
-    ImGui::Begin("Processor", &m_drawUI, ImGuiWindowFlags_MenuBar);
+    ImGui::Begin("Processor", &m_drawUI);
 
     const char * processors[] = {"Colorizer"};
     if (ImGui::Combo("Selected Processor", &m_processorID, processors, IM_ARRAYSIZE(processors)))
@@ -184,6 +190,8 @@ void Scene_Main::renderUI()
     }
 
     ImGui::Text("Framerate: %d", (int)m_game->framerate());
+
+    ImGui::Separator();
 
     m_processor->imgui();
 
@@ -220,21 +228,36 @@ void Scene_Main::load()
 
     std::string file = "saves/" + m_saveFile;
 
+    // First find and initialize the source and processor
     std::ifstream fin(file);
-    if (!fin.good()) { return; }
-    std::string temp;
-    while (fin >> temp)
+    if (fin.good())
     {
-        if (temp == "sourceID") { fin >> m_sourceID; }
-        if (temp == "processorID") { fin >> m_processorID; }
+        std::string temp;
+        while (fin >> temp)
+        {
+            if (temp == "sourceID") { fin >> m_sourceID; }
+            if (temp == "processorID") { fin >> m_processorID; }
+        }
+        fin.clear();
+        fin.seekg(0, std::ios::beg);
     }
-    fin.close();
 
+    // This initializes the source and processor, even if there was no save file
     setSource(m_sourceID);
     setProcessor(m_processorID);
 
-    m_source->load(file);
-    m_processor->load(file);
+
+    // Then load the settings for the source and processor
+    if (fin.good())
+    {
+        std::string temp;
+        while (fin >> temp)
+        {
+            m_source->load(temp, fin);
+            m_processor->load(temp, fin);
+        }
+        fin.close();
+    }
 }
 
 void Scene_Main::setSource(int source)
@@ -242,7 +265,7 @@ void Scene_Main::setSource(int source)
     m_sourceID = source;
     switch (source)
     {
-    case TopographySource::Camera:   {} break;
+    case TopographySource::Camera: { m_source = std::make_shared<Camera>(); } break;
     case TopographySource::Perlin:   {} break;
     case TopographySource::Snapshot: {} break;
     }

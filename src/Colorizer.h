@@ -7,7 +7,7 @@ class Colorizer : public TopographyProcessor
 {
     SandBoxProjector m_projector;
     cv::Mat m_cvTransformedDepthImage32f;
-    bool m_draw;
+    bool m_drawProjection = true;
     sf::Image m_sfTransformedDepthImage;
     sf::Texture m_sfTransformedDepthTexture;
     sf::Sprite m_sfTransformedDepthSprite;
@@ -22,7 +22,7 @@ public:
     void render(sf::RenderWindow & window);
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void save(std::ofstream & fout);
-    void load(const std::string & fileName);
+    void load(const std::string & term, std::ifstream & fin);
 
     void processTopography(const cv::Mat & data);
 };
