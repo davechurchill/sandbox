@@ -42,3 +42,4 @@ bin/maps/weighted-map
 *.app
 bin/depthImage_normalized.png
 bin/depthImage_raw.png
+/visualstudio/SFMLGame/x64

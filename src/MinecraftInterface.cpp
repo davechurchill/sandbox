@@ -234,8 +234,10 @@ void MinecraftInterface::BlockPlacer::send(curlpp::Easy & m_handle)
 using namespace mc;
 MinecraftInterface::MinecraftInterface(){}
 
-void MinecraftInterface::imgui(const cv::Mat & grid)
+void MinecraftInterface::imgui()
 {
     ImGui::Text("Minecraft connection not compiled, please define Use_Minecraft in MinecraftInterface.h");
 }
+
+void MinecraftInterface::setGrid(const cv::Mat& grid) {}
 #endif

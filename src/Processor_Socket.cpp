@@ -1,7 +1,5 @@
 #include "Processor_Socket.h"
 
-#include <boost/asio.hpp>
-
 void Processor_Socket::init()
 {
 }
