@@ -22,6 +22,7 @@
     <ClCompile Include="..\src\Assets.cpp" />
     <ClCompile Include="..\src\BlockGeneration.cpp" />
     <ClCompile Include="..\src\Processor_Minecraft.cpp" />
+    <ClCompile Include="..\src\Processor_Socket.cpp" />
     <ClCompile Include="..\src\Source_Camera.cpp" />
     <ClCompile Include="..\src\Processor_Colorizer.cpp" />
     <ClCompile Include="..\src\DataWarper.cpp" />
@@ -47,6 +48,7 @@
     <ClInclude Include="..\src\Assets.h" />
     <ClInclude Include="..\src\BlockGeneration.h" />
     <ClInclude Include="..\src\Processor_Minecraft.h" />
+    <ClInclude Include="..\src\Processor_Socket.h" />
     <ClInclude Include="..\src\Source_Camera.h" />
     <ClInclude Include="..\src\CameraFilters.hpp" />
     <ClInclude Include="..\src\Processor_Colorizer.h" />

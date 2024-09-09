@@ -65,6 +65,9 @@
     <ClCompile Include="..\src\Processor_Minecraft.cpp">
       <Filter>topography processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Processor_Socket.cpp">
+      <Filter>topography processors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Assets.h">
@@ -146,6 +149,9 @@
       <Filter>topography sources</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Processor_Minecraft.h">
+      <Filter>topography processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Processor_Socket.h">
       <Filter>topography processors</Filter>
     </ClInclude>
   </ItemGroup>
