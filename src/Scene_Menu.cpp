@@ -1,6 +1,5 @@
 #include "Scene_Menu.h"
-#include "Scene_Sandbox.h"
-#include "Scene_Perlin2D.h"
+#include "Scene_Main.h"
 #include "GameEngine.h"
 #include "Assets.h"
 
@@ -26,7 +25,7 @@ void Scene_Menu::init()
     m_text.setFont(m_font);
     m_text.setPosition(10, 5);
     m_text.setCharacterSize(64);
-    m_text.setString("Choose Scene:\n\n1) Perlin\n2) Sandbox");
+    m_text.setString("AR SandBox\nPress any key to continue");
 }
 
 void Scene_Menu::onFrame()
@@ -54,9 +53,8 @@ void Scene_Menu::sUserInput()
         {
             switch (event.key.code)
             {
-                case sf::Keyboard::Escape: { exit(0); }
-                case sf::Keyboard::Num1: { m_game->changeScene<Scene_Perlin2D>("Perlin"); break; }
-                case sf::Keyboard::Num2: { m_game->changeScene<Scene_Sandbox>("Sandbox"); break; }
+            case sf::Keyboard::Escape: { exit(0); } break;
+            default: m_game->changeScene<Scene_Main>("Main"); break;
             }
         }
     }

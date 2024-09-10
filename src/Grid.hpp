@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Action.hpp"
-
 #include <vector>
 #include <algorithm>
+
+#include "Action.hpp"
 
 
 template <class T>
@@ -125,5 +125,10 @@ public:
     inline size_t height() const
     {
         return m_height;
+    }
+
+    inline T * data()
+    {
+        return m_grid.data();
     }
 };
