@@ -64,24 +64,21 @@ void Processor_Colorizer::processEvent(const sf::Event & event, const sf::Vector
     m_projector.processEvent(event, mouse);
 }
 
-void Processor_Colorizer::save(std::ofstream & fout)
+void Processor_Colorizer::save(Save & save) const
 {
-    fout << "m_drawProjection " << m_drawProjection << '\n';
-    fout << "m_selectedShaderIndex " << m_selectedShaderIndex << '\n';
-    fout << "m_drawContours " << m_drawContours << '\n';
-    fout << "m_numberOfContourLines " << m_numberOfContourLines << '\n';
-
-    m_projector.save(fout);
+    save.selectedShaderIndex = m_selectedShaderIndex;
+    save.drawContours = m_drawContours;
+    save.numberOfContourLines = m_numberOfContourLines;
+    save.drawProjection = m_drawProjection;
+    m_projector.save(save);
 }
-
-void Processor_Colorizer::load(const std::string & term, std::ifstream & fin)
+void Processor_Colorizer::load(const Save & save)
 {
-    if (term == "m_drawProjection") { fin >> m_drawProjection; }
-    if (term == "m_selectedShaderIndex") { fin >> m_selectedShaderIndex; }
-    if (term == "m_drawContours") { fin >> m_drawContours; }
-    if (term == "m_numberOfContourLines") { fin >> m_numberOfContourLines; }
-
-    m_projector.load(term, fin);
+    m_selectedShaderIndex = save.selectedShaderIndex;
+    m_drawContours = save.drawContours;
+    m_numberOfContourLines = save.numberOfContourLines;
+    m_drawProjection = save.drawProjection;
+    m_projector.load(save);
 }
 
 void Processor_Colorizer::processTopography(const cv::Mat & data)

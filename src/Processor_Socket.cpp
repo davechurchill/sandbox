@@ -16,11 +16,11 @@ void Processor_Socket::processEvent(const sf::Event & event, const sf::Vector2f 
 {
 }
 
-void Processor_Socket::save(std::ofstream & fout)
+void Processor_Socket::save(Save & save) const
 {
 }
 
-void Processor_Socket::load(const std::string & term, std::ifstream & fin)
+void Processor_Socket::load(const Save & save)
 {
 }
 

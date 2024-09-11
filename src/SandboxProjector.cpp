@@ -142,27 +142,13 @@ void SandBoxProjector::generateProjection()
   
 }
 
-void SandBoxProjector::load(const std::string & term, std::ifstream & fin)
+void SandBoxProjector::save(Save & save) const
 {
-    if (term == "m_drawLines") { fin >> m_drawLines; }
-    if (term == "m_projectionPoints")
-    {
-        float x, y;
-        for (int i = 0; i < 4; ++i)
-        {
-            fin >> x >> y;
-            m_projectionPoints[i] = { x,y };
-        }
-    }
+    std::copy(std::cbegin(m_projectionPoints), std::cend(m_projectionPoints), std::begin(save.projectionPoints));
+    save.drawLines = m_drawLines;
 }
-
-void SandBoxProjector::save(std::ofstream & fout)
+void SandBoxProjector::load(const Save & save)
 {
-    fout << "m_drawLines " << m_drawLines << '\n';
-    fout << "m_projectionPoints ";
-    for (auto p : m_projectionPoints)
-    {
-        fout << p.x << " " << p.y << " ";
-    }
-    fout << '\n';
+    std::copy(std::cbegin(save.projectionPoints), std::cend(save.projectionPoints), std::begin(m_projectionPoints));
+    m_drawLines = save.drawLines;
 }

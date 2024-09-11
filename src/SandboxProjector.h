@@ -4,6 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include <fstream>
 
+#include "Save.hpp"
+
 class SandBoxProjector
 {
     cv::Mat                         m_projectionMatrix;
@@ -24,8 +26,8 @@ public:
 
     SandBoxProjector();
     void imgui();
-    void load(const std::string & term, std::ifstream & fin);
-    void save(std::ofstream & fout);
+    void save(Save & save) const;
+    void load(const Save & save);
     void project(const cv::Mat & input, cv::Mat & output);
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void render(sf::RenderWindow & window);

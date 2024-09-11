@@ -4,6 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include <fstream>
 
+#include "Save.hpp"
+
 class DataWarper
 {
     cv::Mat                         m_warpMatrix;
@@ -29,8 +31,8 @@ public:
 
     DataWarper();
     void imgui();
-    void load(const std::string & term, std::ifstream & fin);
-    void save(std::ofstream & fout);
+    void save(Save & save) const;
+    void load(const Save & save);
     void transformRect(const cv::Mat & input, cv::Mat & output);
     void heightAdjustment(cv::Mat & matrix);
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);

@@ -49,6 +49,7 @@
     <ClInclude Include="..\src\BlockGeneration.h" />
     <ClInclude Include="..\src\Processor_Minecraft.h" />
     <ClInclude Include="..\src\Processor_Socket.h" />
+    <ClInclude Include="..\src\Save.hpp" />
     <ClInclude Include="..\src\Source_Camera.h" />
     <ClInclude Include="..\src\CameraFilters.hpp" />
     <ClInclude Include="..\src\Processor_Colorizer.h" />

@@ -4,6 +4,7 @@
 #include "TopographySource.h"
 #include "TopographyProcessor.h"
 #include "ViewController.hpp"
+#include "Save.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -13,6 +14,8 @@
 class Scene_Main : public Scene
 {
     cv::Mat             m_topography;
+
+    Save                m_save;
 
     bool                m_drawUI = true;
     ViewController      m_viewController;

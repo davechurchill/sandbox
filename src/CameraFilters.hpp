@@ -5,6 +5,7 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 #include "Profiler.hpp"
+#include "Save.hpp"
 
 #include <fstream>
 
@@ -65,19 +66,19 @@ public:
         }
     }
 
-    void save(std::ofstream & fout)
+    void save(Save & save) const
     {
-        fout << "temporalAlpha " << m_smoothAlphaTemporal << "\n";
-        fout << "temporalDelta " << m_smoothDeltaTemporal << "\n";
-        fout << "temporalPersistance " << m_persistanceTemporal << "\n";
-        fout << "HoleFill " << m_holeFill << "\n";
+        save.temporalAlpha = m_smoothAlphaTemporal;
+        save.temporalDelta = m_smoothDeltaTemporal;
+        save.temporalPersistance = m_persistanceTemporal;
+        save.holeFill = m_holeFill;
     }
 
-    void loadTerm(const std::string & term, std::ifstream & fin)
+    void load(const Save & save)
     {
-        if (term == "temporalAlpha") { fin >> m_smoothAlphaTemporal; }
-        if (term == "temporalDelta") { fin >> m_smoothDeltaTemporal; }
-        if (term == "temporalPersistance") { fin >> m_persistanceTemporal; }
-        if (term == "HoleFill") { fin >> m_holeFill; }
+        m_smoothAlphaTemporal = save.temporalAlpha;
+        m_smoothDeltaTemporal = save.temporalDelta;
+        m_persistanceTemporal = save.temporalPersistance;
+        m_holeFill = save.holeFill;
     }
 };

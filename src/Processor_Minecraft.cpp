@@ -17,12 +17,13 @@ void Processor_Minecraft::processEvent(const sf::Event & event, const sf::Vector
 {
 }
 
-void Processor_Minecraft::save(std::ofstream & fout)
+void Processor_Minecraft::save(Save & save) const
 {
-}
 
-void Processor_Minecraft::load(const std::string & term, std::ifstream & fin)
+}
+void Processor_Minecraft::load(const Save & save)
 {
+
 }
 
 void Processor_Minecraft::processTopography(const cv::Mat & data)

@@ -49,11 +49,11 @@ void Source_Snapshot::loadDataDump(const std::string & filename)
     m_sprite.setTexture(m_texture, true);
 }
 
-void Source_Snapshot::save(std::ofstream & fout)
+void Source_Snapshot::save(Save & save) const
 {
 }
 
-void Source_Snapshot::load(const std::string & term, std::ifstream & fin)
+void Source_Snapshot::load(const Save & save)
 {
 
 }

@@ -231,30 +231,27 @@ void Source_Camera::processEvent(const sf::Event & event, const sf::Vector2f & m
     m_warper.processEvent(event, mouse);
 }
 
-void Source_Camera::save(std::ofstream & fout)
+void Source_Camera::save(Save & save) const
 {
-    fout << "m_alignment " << (int)m_alignment << '\n';
-    fout << "m_gaussianBlur " << m_gaussianBlur << '\n';
-    fout << "m_maxDistance " << m_maxDistance << '\n';
-    fout << "m_minDistance " << m_minDistance << '\n';
-    fout << "m_drawDepth " << m_drawDepth << '\n';
-    fout << "m_drawColor " << m_drawColor << '\n';
-
-    m_filters.save(fout);
-    m_warper.save(fout);
+    save.align = (int)m_alignment;
+    save.gaussianBlur = m_gaussianBlur;
+    save.maxDistance = m_maxDistance;
+    save.minDistance = m_minDistance;
+    save.drawColor = m_drawColor;
+    save.drawDepth = m_drawDepth;
+    m_filters.save(save);
+    m_warper.save(save);
 }
-
-void Source_Camera::load(const std::string & term, std::ifstream & fin)
+void Source_Camera::load(const Save & save)
 {
-    if (term == "m_alignment") { int t; fin >> t; m_alignment = static_cast<alignment>(t); }
-    if (term == "m_gaussianBlur") { fin >> m_gaussianBlur; }
-    if (term == "m_maxDistance") { fin >> m_maxDistance; }
-    if (term == "m_minDistance") { fin >> m_minDistance; }
-    if (term == "m_drawDepth") { fin >> m_drawDepth; }
-    if (term == "m_drawColor") { fin >> m_drawColor; }
-
-    m_filters.loadTerm(term, fin);
-    m_warper.load(term, fin);
+    m_alignment = static_cast<alignment>(save.align);
+    m_gaussianBlur = save.gaussianBlur;
+    m_maxDistance = save.maxDistance;
+    m_minDistance = save.minDistance;
+    m_drawColor = save.drawColor;
+    m_drawDepth = save.drawDepth;
+    m_filters.load(save);
+    m_warper.load(save);
 }
 
 cv::Mat Source_Camera::getTopography()

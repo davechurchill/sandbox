@@ -179,46 +179,15 @@ void DataWarper::generateWarpMatrix()
     m_warpMatrix = cv::getPerspectiveTransform(m_warpPoints, dstPoints);
 }
 
-void DataWarper::load(const std::string & term, std::ifstream & fin)
+void DataWarper::save(Save & save) const
 {
-    if (term == "m_dataSize") { fin >> m_dataSize; }
-
-    if (term == "m_warpPoints")
-    {
-        float x, y;
-        for (int i = 0; i < 4; ++i)
-        {
-            fin >> x >> y;
-            m_warpPoints[i] = { x,y };
-        }
-    }
-
-    if (term == "m_planarPoints")
-    {
-        float x, y;
-        for (int i = 0; i < 3; ++i)
-        {
-            fin >> x >> y;
-            m_planarPoints[i] = { x,y };
-        }
-    }
+    std::copy(std::cbegin(m_warpPoints), std::cend(m_warpPoints), std::begin(save.warpPoints));
+    save.applyHeightAdjustment = m_applyHeightAdjustment;
+    std::copy(std::cbegin(m_planarPoints), std::cend(m_planarPoints), std::begin(save.planarPoints));
 }
-
-void DataWarper::save(std::ofstream & fout)
+void DataWarper::load(const Save & save)
 {
-    fout << "m_dataSize " << m_dataSize << '\n';
-
-    fout << "m_warpPoints ";
-    for (auto p : m_warpPoints)
-    {
-        fout << p.x << " " << p.y << " ";
-    }
-    fout << '\n';
-
-    fout << "m_planarPoints ";
-    for (auto p : m_planarPoints)
-    {
-        fout << p.x << " " << p.y << " ";
-    }
-    fout << '\n';
+    std::copy(std::cbegin(save.warpPoints), std::cend(save.warpPoints), std::begin(m_warpPoints));
+    m_applyHeightAdjustment = save.applyHeightAdjustment;
+    std::copy(std::cbegin(save.planarPoints), std::cend(save.planarPoints), std::begin(m_planarPoints));
 }

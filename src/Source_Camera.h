@@ -55,8 +55,8 @@ public:
     void imgui();
     void render(sf::RenderWindow & window);
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
-    void save(std::ofstream & fout);
-    void load(const std::string & term, std::ifstream & fin);
+    void save(Save & save) const;
+    void load(const Save & save);
 
     cv::Mat getTopography();
 

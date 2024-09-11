@@ -15,6 +15,7 @@
 #include <sstream>
 #include <algorithm>
 #include <string>
+#include <chrono>
 
 #include <SFML/Graphics.hpp>
 #include "imgui.h"
@@ -216,15 +217,10 @@ void Scene_Main::save()
     current << m_saveFile << '\n';
     current.close();
 
-    std::ofstream fout("saves/" + m_saveFile);
+    m_source->save(m_save);
+    m_processor->save(m_save);
 
-    fout << "m_sourceID " << m_sourceID << '\n';
-    fout << "m_processorID " << m_processorID << '\n';
-
-    m_source->save(fout);
-    m_processor->save(fout);
-
-    fout.close();
+    m_save.saveToFile("saves/" + m_saveFile);
 }
 
 void Scene_Main::load()
@@ -240,39 +236,16 @@ void Scene_Main::load()
     std::string file = "saves/" + m_saveFile;
 
     // First find and initialize the source and processor
-    std::ifstream fin(file);
-    if (fin.good())
-    {
-        std::string temp;
-        while (fin >> temp)
-        {
-            if (temp == "sourceID") { fin >> m_sourceID; }
-            if (temp == "processorID") { fin >> m_processorID; }
-        }
-        fin.clear();
-        fin.seekg(0, std::ios::beg);
-    }
+    m_save.loadFromFile(file);
 
     // This initializes the source and processor, even if there was no save file
-    setSource(m_sourceID);
-    setProcessor(m_processorID);
-
-
-    // Then load the settings for the source and processor
-    if (fin.good())
-    {
-        std::string temp;
-        while (fin >> temp)
-        {
-            m_source->load(temp, fin);
-            m_processor->load(temp, fin);
-        }
-        fin.close();
-    }
+    setSource(m_save.source);
+    setProcessor(m_save.processor);
 }
 
 void Scene_Main::setSource(int source)
 {
+    if (m_source) { m_source->save(m_save); }
     m_sourceID = source;
     switch (source)
     {
@@ -282,10 +255,12 @@ void Scene_Main::setSource(int source)
     }
 
     m_source->init();
+    m_source->load(m_save);
 }
 
 void Scene_Main::setProcessor(int processor)
 {
+    if (m_processor) { m_processor->save(m_save); }
     m_processorID = processor;
     switch (processor)
     {
@@ -294,11 +269,13 @@ void Scene_Main::setProcessor(int processor)
     }
 
     m_processor->init();
+    m_processor->load(m_save);
 }
 
 void Scene_Main::saveDataDump()
 {
-    cv::FileStorage fout("dataDumps/snapshot.bin", cv::FileStorage::WRITE);
+    auto now = std::chrono::system_clock::now();
+    cv::FileStorage fout(std::format("dataDumps/{0:%F_%H-%M-%S}_snapshot.bin", now), cv::FileStorage::WRITE);
     fout << "matrix" << m_topography;
 
 }
