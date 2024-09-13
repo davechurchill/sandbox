@@ -1,0 +1,25 @@
+Calibration:
+
+Ideally: Find the matrix that transforms the real world
+         scene into the ideal scene that we want
+
+- [Probably Unnecessary] Cropping image
+
+- Same Height Identifier
+  - Click button, then click points that should be same height
+  - The calibrated image will scale values so that they are
+    the same height at that level
+  - Requires a flat surface
+
+- [DONE] Perspective Correction
+  - Click 4 corners of sandbox in image
+  - OpenCV trasnform it into rectangle within image frame
+
+- [DONE] Scale Image for Projector
+
+- Tilt / Rotate Image for projector
+  - Rotating the image may be necessary
+  - May need to be able to tilt the image backwards and forwards
+
+- [DONE / In Progress] Save Calibration Settings
+  - Must be updated as new settings added

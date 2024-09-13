@@ -9,6 +9,7 @@
 
 #include "imgui.h"
 #include "imgui-SFML.h"
+#include "MinecraftInterface.h"
 
 typedef std::map<std::string, std::shared_ptr<Scene>> SceneMap;
 
@@ -17,6 +18,7 @@ class GameEngine
 
 protected:
     
+    sf::RenderWindow    m_displayWindow;
     sf::RenderWindow    m_window;
     sf::Clock           m_deltaClock;
     std::string         m_currentScene;
@@ -24,6 +26,8 @@ protected:
     size_t              m_simulationSpeed = 1;
     bool                m_running = true;
     ImGuiStyle          m_originalStyle;
+    mc::MinecraftInterface  m_mcInterface;
+    float               m_framerate;
 
     void update();
 
@@ -59,7 +63,10 @@ public:
     void run();
     unsigned int width() const;
     unsigned int height() const;
+    float        framerate() const;
 
     sf::RenderWindow & window();
+    sf::RenderWindow & displayWindow();
+    mc::MinecraftInterface & minecraft();
     bool isRunning();
 };

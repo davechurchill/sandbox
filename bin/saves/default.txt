@@ -1,0 +1,26 @@
+source 0
+processor 0
+align 0
+gaussianBlur 1
+maxDistance 1.13
+minDistance 0.9
+drawDepth 1
+drawColor 0
+octaves 5
+seed 0
+seedSize 9
+persistance 0.5
+drawGrid 0
+temporalAlpha 0.047
+temporalDelta 72
+temporalPersistance 3
+holeFill 1
+warpPoints 100 100 200 100 100 200 421 204 
+applyHeightAdjustment 0
+planarPoints 150 0 75 150 0 75 
+projectionPoints 400 400 597 268 400 500 500 500 
+drawLines 1
+selectedShaderIndex 0
+drawContours 1
+numberOfContourLines 15
+drawProjection 1

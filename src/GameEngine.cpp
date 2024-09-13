@@ -1,5 +1,6 @@
 #include "GameEngine.h"
 #include "Assets.h"
+#include "Profiler.hpp"
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -13,7 +14,7 @@ GameEngine::GameEngine()
 
 void GameEngine::init()
 {
-    m_window.create(sf::VideoMode(1600, 900), "Grid View");
+    m_window.create(sf::VideoMode(1600, 900), "Sandbox");
     //m_window.setFramerateLimit(60);
 
     ImGui::SFML::Init(m_window);
@@ -32,6 +33,16 @@ sf::RenderWindow & GameEngine::window()
     return m_window;
 }
 
+sf::RenderWindow & GameEngine::displayWindow()
+{
+    return m_displayWindow;
+}
+
+mc::MinecraftInterface & GameEngine::minecraft()
+{
+    return m_mcInterface;
+}
+
 std::shared_ptr<Scene> GameEngine::currentScene()
 {
     return m_sceneMap.at(m_currentScene);
@@ -43,13 +54,27 @@ void GameEngine::update()
 
     if (m_sceneMap.empty()) { return; }
 
-    ImGui::SFML::Update(m_window, m_deltaClock.restart());
+    sf::Time dt = m_deltaClock.restart();
+    m_framerate = m_framerate * 0.75f + 0.25f / dt.asSeconds();
+
+    {
+        PROFILE_SCOPE("ImGui::Update");
+        ImGui::SFML::Update(m_window, dt);
+    }
 
     currentScene()->onFrame();
 
     ImGui::SFML::Render(m_window);
 
-    m_window.display();
+    {
+        PROFILE_SCOPE("window.display()");
+        m_window.display();
+
+        if (m_displayWindow.isOpen())
+        {
+            m_displayWindow.display();
+        }
+    }
 }
 
 void GameEngine::run()
@@ -73,4 +98,9 @@ unsigned int GameEngine::width() const
 unsigned int GameEngine::height() const
 {
     return m_window.getSize().x;
+}
+
+float GameEngine::framerate() const
+{
+    return m_framerate;
 }

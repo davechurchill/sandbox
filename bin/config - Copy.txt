@@ -1,0 +1,31 @@
+MaxDistance 1.117
+MinDistance 0.865
+temporalAlpha 0.068
+temporalDelta 72
+temporalPersistance 8
+Magnitude 2
+Alpha 0.5
+Delta 20
+SHole 0
+HoleFill 3
+m_drawSanboxAreaLines 1
+m_points[0] 235 129
+m_points[1] 1016 121
+m_points[2] 244 531
+m_points[3] 1010 538
+m_pointCircles[0] 235 129
+m_pointCircles[1] 1016 121
+m_pointCircles[2] 244 531
+m_pointCircles[3] 1010 538
+m_boxPoints[0] 62 109
+m_boxPoints[1] 1828 127
+m_boxPoints[2] 131 1057
+m_boxPoints[3] 1805 1054
+m_pointBoxCircles[0] 62 109
+m_pointBoxCircles[1] 1828 127
+m_pointBoxCircles[2] 131 1057
+m_pointBoxCircles[3] 1805 1054
+m_width 696
+m_height 357
+m_boxWidth 1766
+m_boxHeight 948

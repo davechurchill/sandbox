@@ -29,14 +29,44 @@
     <ClCompile Include="..\src\imgui\imgui-SFML.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Scene_Perlin2D.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Scene_Sandbox.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Scene_Menu.cpp">
       <Filter>scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\MinecraftInterface.cpp">
+      <Filter>minecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\BlockGeneration.cpp">
+      <Filter>minecraft</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Scene_Main.cpp">
+      <Filter>scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SandboxProjector.cpp">
+      <Filter>sandbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Processor_Colorizer.cpp">
+      <Filter>topography processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Source_Camera.cpp">
+      <Filter>topography sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\DataWarper.cpp">
+      <Filter>sandbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Tools.cpp">
+      <Filter>sandbox</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Source_Perlin.cpp">
+      <Filter>topography sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Source_Snapshot.cpp">
+      <Filter>topography sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Processor_Minecraft.cpp">
+      <Filter>topography processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Processor_Socket.cpp">
+      <Filter>topography processors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -61,13 +91,7 @@
     <ClInclude Include="..\src\Action.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Scene_Perlin2D.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Perlin.hpp">
-      <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Scene_Sandbox.h">
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ViewController.hpp">
@@ -76,8 +100,59 @@
     <ClInclude Include="..\src\Scene_Menu.h">
       <Filter>scenes</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ContourLines.hpp">
+    <ClInclude Include="..\src\Cube.hpp">
       <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\MinecraftInterface.h">
+      <Filter>minecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\BlockGeneration.h">
+      <Filter>minecraft</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Profiler.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\CameraFilters.hpp">
+      <Filter>sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\RealSenseTools.hpp">
+      <Filter>sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Scene_Main.h">
+      <Filter>scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TopographySource.h">
+      <Filter>topography sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TopographyProcessor.h">
+      <Filter>topography processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SandboxProjector.h">
+      <Filter>sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Processor_Colorizer.h">
+      <Filter>topography processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Camera.h">
+      <Filter>topography sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\DataWarper.h">
+      <Filter>sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Tools.h">
+      <Filter>sandbox</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Perlin.h">
+      <Filter>topography sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Snapshot.h">
+      <Filter>topography sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Processor_Minecraft.h">
+      <Filter>topography processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Processor_Socket.h">
+      <Filter>topography processors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -90,5 +165,22 @@
     <Filter Include="imgui">
       <UniqueIdentifier>{fd00c5e6-54c2-4cbd-91ee-c7d51d1d1d6d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="minecraft">
+      <UniqueIdentifier>{1129600a-c15c-4492-9aa1-6c0056e70bf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sandbox">
+      <UniqueIdentifier>{2da31b36-3cf6-482f-a351-25836cb25a3d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="topography sources">
+      <UniqueIdentifier>{ad0c4095-a702-48c6-a6cc-ce356a96b904}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="topography processors">
+      <UniqueIdentifier>{9367886d-e567-4128-803e-2168c7e93d01}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\shaders\shader_contour_color.frag">
+      <Filter>sandbox</Filter>
+    </None>
   </ItemGroup>
 </Project>

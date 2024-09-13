@@ -20,6 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Assets.cpp" />
+    <ClCompile Include="..\src\BlockGeneration.cpp" />
+    <ClCompile Include="..\src\Processor_Minecraft.cpp" />
+    <ClCompile Include="..\src\Processor_Socket.cpp" />
+    <ClCompile Include="..\src\Source_Camera.cpp" />
+    <ClCompile Include="..\src\Processor_Colorizer.cpp" />
+    <ClCompile Include="..\src\DataWarper.cpp" />
     <ClCompile Include="..\src\GameEngine.cpp" />
     <ClCompile Include="..\src\imgui\imgui-SFML.cpp" />
     <ClCompile Include="..\src\imgui\imgui.cpp" />
@@ -27,26 +33,49 @@
     <ClCompile Include="..\src\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\src\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\src\imgui\imgui_widgets.cpp" />
+    <ClCompile Include="..\src\MinecraftInterface.cpp" />
+    <ClCompile Include="..\src\SandboxProjector.cpp" />
     <ClCompile Include="..\src\Scene.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\Scene_Main.cpp" />
     <ClCompile Include="..\src\Scene_Menu.cpp" />
-    <ClCompile Include="..\src\Scene_Perlin2D.cpp" />
-    <ClCompile Include="..\src\Scene_Sandbox.cpp" />
+    <ClCompile Include="..\src\Source_Perlin.cpp" />
+    <ClCompile Include="..\src\Source_Snapshot.cpp" />
+    <ClCompile Include="..\src\Tools.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Action.hpp" />
     <ClInclude Include="..\src\Assets.h" />
-    <ClInclude Include="..\src\ContourLines.hpp" />
+    <ClInclude Include="..\src\BlockGeneration.h" />
+    <ClInclude Include="..\src\Processor_Minecraft.h" />
+    <ClInclude Include="..\src\Processor_Socket.h" />
+    <ClInclude Include="..\src\Save.hpp" />
+    <ClInclude Include="..\src\Source_Camera.h" />
+    <ClInclude Include="..\src\CameraFilters.hpp" />
+    <ClInclude Include="..\src\Processor_Colorizer.h" />
+    <ClInclude Include="..\src\Cube.hpp" />
+    <ClInclude Include="..\src\DataWarper.h" />
     <ClInclude Include="..\src\GameEngine.h" />
+    <ClInclude Include="..\src\MinecraftInterface.h" />
     <ClInclude Include="..\src\Perlin.hpp" />
+    <ClInclude Include="..\src\Profiler.hpp" />
+    <ClInclude Include="..\src\RealSenseTools.hpp" />
+    <ClInclude Include="..\src\SandboxProjector.h" />
     <ClInclude Include="..\src\Scene.h" />
     <ClInclude Include="..\src\Grid.hpp" />
+    <ClInclude Include="..\src\Scene_Main.h" />
     <ClInclude Include="..\src\Scene_Menu.h" />
-    <ClInclude Include="..\src\Scene_Perlin2D.h" />
-    <ClInclude Include="..\src\Scene_Sandbox.h" />
+    <ClInclude Include="..\src\Source_Perlin.h" />
+    <ClInclude Include="..\src\Source_Snapshot.h" />
     <ClInclude Include="..\src\Timer.hpp" />
+    <ClInclude Include="..\src\Tools.h" />
+    <ClInclude Include="..\src\TopographyProcessor.h" />
+    <ClInclude Include="..\src\TopographySource.h" />
     <ClInclude Include="..\src\Vec2.hpp" />
     <ClInclude Include="..\src\ViewController.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\bin\shaders\shader_contour_color.frag" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{08A10BC2-2DCF-4F95-A0B2-BA931971AEEA}</ProjectGuid>
