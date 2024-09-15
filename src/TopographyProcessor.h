@@ -20,7 +20,8 @@ public:
     enum
     {
         Colorizer,
-        Minecraft
+        Minecraft,
+        Socket
     };
 
 
