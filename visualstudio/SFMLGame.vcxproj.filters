@@ -154,6 +154,9 @@
     <ClInclude Include="..\src\Processor_Socket.h">
       <Filter>topography processors</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Save.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="engine">

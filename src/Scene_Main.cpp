@@ -177,36 +177,44 @@ void Scene_Main::renderUI()
     ImGui::Text("Framerate: %d", (int)m_game->framerate());
     ImGui::EndMainMenuBar();
 
+    ImGui::Begin("Controls");
+    ImGui::BeginTabBar("ControlTabs");
+
     // Source
 
-    ImGui::Begin("Source", &m_drawUI);
-
-    const char * sources[] = {"Camera", "Perlin", "Snapshot"};
-    if (ImGui::Combo("Selected Source", &m_sourceID, sources, IM_ARRAYSIZE(sources)))
+    if (ImGui::BeginTabItem("Source", &m_drawUI))
     {
-        setSource(m_sourceID);
+        const char* sources[] = { "Camera", "Perlin", "Snapshot" };
+        if (ImGui::Combo("Selected Source", &m_sourceID, sources, IM_ARRAYSIZE(sources)))
+        {
+            setSource(m_sourceID);
+        }
+
+        ImGui::Separator();
+
+        m_source->imgui();
+
+        ImGui::EndTabItem();
     }
-
-    ImGui::Separator();
-
-    m_source->imgui();
-    
-    ImGui::End();
 
     // Processor
 
-    ImGui::Begin("Processor", &m_drawUI);
-
-    const char * processors[] = {"Colorizer", "Minecraft"};
-    if (ImGui::Combo("Selected Processor", &m_processorID, processors, IM_ARRAYSIZE(processors)))
+    if (ImGui::BeginTabItem("Processor", &m_drawUI))
     {
-        setProcessor(m_processorID);
+        const char* processors[] = { "Colorizer", "Minecraft" };
+        if (ImGui::Combo("Selected Processor", &m_processorID, processors, IM_ARRAYSIZE(processors)))
+        {
+            setProcessor(m_processorID);
+        }
+
+        ImGui::Separator();
+
+        m_processor->imgui();
+
+        ImGui::EndTabItem();
     }
 
-    ImGui::Separator();
-
-    m_processor->imgui();
-
+    ImGui::EndTabBar();
     ImGui::End();
 }
 

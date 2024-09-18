@@ -167,6 +167,5 @@ struct Save
             if (temp == "numberOfContourLines") { fin >> numberOfContourLines; }
             if (temp == "drawProjection") { fin >> drawProjection; }
         }
-        std::cout << temp << std::endl;;
     }
 };
