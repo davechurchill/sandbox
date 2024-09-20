@@ -21,6 +21,8 @@
   <ItemGroup>
     <ClCompile Include="..\src\Assets.cpp" />
     <ClCompile Include="..\src\BlockGeneration.cpp" />
+    <ClCompile Include="..\src\HeatMap.cpp" />
+    <ClCompile Include="..\src\Processor_Heat.cpp" />
     <ClCompile Include="..\src\Processor_Minecraft.cpp" />
     <ClCompile Include="..\src\Processor_Socket.cpp" />
     <ClCompile Include="..\src\Source_Camera.cpp" />
@@ -47,6 +49,8 @@
     <ClInclude Include="..\src\Action.hpp" />
     <ClInclude Include="..\src\Assets.h" />
     <ClInclude Include="..\src\BlockGeneration.h" />
+    <ClInclude Include="..\src\HeatMap.h" />
+    <ClInclude Include="..\src\Processor_Heat.h" />
     <ClInclude Include="..\src\Processor_Minecraft.h" />
     <ClInclude Include="..\src\Processor_Socket.h" />
     <ClInclude Include="..\src\Save.hpp" />
@@ -76,6 +80,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\shader_contour_color.frag" />
+    <None Include="..\bin\shaders\shader_heat.frag" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{08A10BC2-2DCF-4F95-A0B2-BA931971AEEA}</ProjectGuid>

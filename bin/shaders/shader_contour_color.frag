@@ -11,8 +11,8 @@ void terrain(float c);
 void animate(float b);
 void animatedWater(float c);
 
-void main() {
-
+void main()
+{
 	vec2 coord = gl_TexCoord[0].xy;   
 	vec4 pixel_color = texture2D(currentTexture, coord);
 	float c = pixel_color[0];
@@ -32,7 +32,7 @@ void main() {
 		default: gl_FragColor = pixel_color; break;
 	}
 	
-	if(contour)
+	if (contour)
 	{
 		ivec2 textureSize = textureSize(currentTexture, 0);
 

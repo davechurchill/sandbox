@@ -68,6 +68,12 @@
     <ClCompile Include="..\src\Processor_Socket.cpp">
       <Filter>topography processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Processor_Heat.cpp">
+      <Filter>topography processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HeatMap.cpp">
+      <Filter>sandbox</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Assets.h">
@@ -157,6 +163,12 @@
     <ClInclude Include="..\src\Save.hpp">
       <Filter>engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Processor_Heat.h">
+      <Filter>topography processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\HeatMap.h">
+      <Filter>sandbox</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="engine">
@@ -183,6 +195,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\shader_contour_color.frag">
+      <Filter>sandbox</Filter>
+    </None>
+    <None Include="..\bin\shaders\shader_heat.frag">
       <Filter>sandbox</Filter>
     </None>
   </ItemGroup>
