@@ -1,114 +1,84 @@
 #include "HeatMap.h"
+#include <iostream>
 
-namespace
+namespace HeatMap
 {
-    enum class ComputeMethod {
-        Average,
-        HeatEquation
-    };
-
-    const ComputeMethod method = ComputeMethod::HeatEquation;
-
-    float computeAverage(const cv::Mat& temps, int i, int j)
-    {
-        const float currCell = temps.at<float>(i, j);
-        float sum = currCell;
-
-        if (i > 0)
-        {
-            sum += temps.at<float>(i - 1, j);
-        }
-        if (i < temps.cols - 1)
-        {
-            sum += temps.at<float>(i + 1, j);
-        }
-
-        if (j > 0)
-        {
-            sum += temps.at<float>(i, j - 1);
-        }
-        if (j < temps.rows - 1)
-        {
-            sum += temps.at<float>(i, j + 1) ;
-        }
-
-        return sum / 5;
-    }
-
-    float computeHeatEquation(const cv::Mat& temps, int i, int j)
-    {
-        const float currCell = temps.at<float>(i, j);
-        float sum = currCell;
-
-        if (i > 0)
-        {
-            sum += temps.at<float>(i - 1, j) - currCell;
-        }
-        if (i < temps.rows - 1)
-        {
-            sum += temps.at<float>(i + 1, j) - currCell;
-        }
-
-        if (j > 0)
-        {
-            sum += temps.at<float>(i, j - 1) - currCell;
-        }
-        if (j < temps.cols - 1)
-        {
-            sum += temps.at<float>(i, j + 1) - currCell;
-        }
-
-        return sum;
-    }
-}
-
-void HeatMap::update(const cv::Mat& kMat)
-{
-    // Restart simulation if size has changed
-    
-    const cv::Size kMatSize = kMat.size();
-
-	if (kMatSize != temps.size())
+	void Grid::update(const cv::Mat& kMat)
 	{
-        if (kMatSize.width <= 0 || kMatSize.height <= 0)
-        {
-            return;
-        }
+		// Restart simulation if requested or if size has changed
+		const cv::Size kMatSize = kMat.size();
+		if (restartRequested || kMatSize != temps.size())
+		{
+			restartRequested = false;
 
-        temps = cv::Mat{ kMat.size(), CV_32F, 0.f };
+			if (kMatSize.width <= 0 || kMatSize.height <= 0)
+			{
+				return;
+			}
+
+			// Boundaries are permanently at 0, all other cells are also initalized to 0
+			temps = cv::Mat{ kMat.size(), CV_32F, 0.f };
+
+			// Populate initial conditions
+			for (auto& source : sources)
+			{
+				temps.at<float>(source.position) = source.getTempRaw();
+			}
+		}
+
+		if (stepRequested)
+		{
+			stepRequested = false;
+
+			static cv::Mat workingTemps{};
+			temps.copyTo(workingTemps);
+
+			// Don't recompute at boundaries
+			for (int i = 1; i < temps.rows - 1; i++)
+			{
+				for (int j = 1; j < temps.cols - 1; j++)
+				{
+					const float k = kMat.at<float>(i, j);
+					workingTemps.at<float>(i, j) = getNewTemp(i, j, kMat);
+				}
+			}
+
+			workingTemps.copyTo(temps);
+		}
 	}
 
-	if (stepRequested)
+	float Grid::getNewTemp(int i, int j, const cv::Mat& kMat)
 	{
-		stepRequested = false;
+		switch (algorithm)
+		{
+		case Algorithms::Average:
+		{
+			const float sum =
+				temps.at<float>(i - 1, j) +
+				temps.at<float>(i + 1, j) +
+				temps.at<float>(i, j - 1) +
+				temps.at<float>(i, j + 1);
 
-        static cv::Mat workingTemps{};
+			return sum / 4;
+		}
+		case Algorithms::HeatEquation:
+		{
+			constexpr float dt = 0.25f;
+			constexpr float dx = 1.f;
+			constexpr float dy = 1.f;
 
-        temps.copyTo(workingTemps);
+			const float currCell = temps.at<float>(i, j);
+			const float k = kMat.at<float>(i, j);
 
-        for (int i = 0; i < temps.rows; i++)
-        {
-            for (int j = 0; j < temps.cols; j++)
-            {
-                static auto getNewTemp = [&](int i, int j)
-                {
-                    switch (method)
-                    {
-                    case ComputeMethod::Average: return computeAverage(temps, i, j);
-                    case ComputeMethod::HeatEquation: return computeHeatEquation(temps, i, j);
-                    default: return temps.at<float>(i, j);
-                    };
-                };
+			const float hSum =
+				temps.at<float>(i - 1, j) - 2 * currCell + temps.at<float>(i + 1, j);
+			const float vSum =
+				temps.at<float>(i, j - 1) - 2 * currCell + temps.at<float>(i, j + 1);
 
-                workingTemps.at<float>(i, j) = getNewTemp(i, j);
-            }
-        }
-
-        workingTemps.copyTo(temps);
-
-        for (auto& source : sources)
-        {
-            temps.at<float>(source.position) = source.getTempRaw();
-        }
+			return currCell + dt * k * (hSum / (dx * dx) + vSum / (dy * dy));
+		}
+		default:
+			return temps.at<float>(i, j);
+		};
 	}
 }

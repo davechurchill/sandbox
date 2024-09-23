@@ -34,17 +34,28 @@ void Processor_Heat::imgui()
 
     static bool autoStep = false;
 
-    if (ImGui::Button("Step Forward") && !autoStep)
+    if (ImGui::Button("Step") && !autoStep)
     {
-        heatMap.requestStep();
+        heatGrid.requestStep();
     }
-    
+
     ImGui::Checkbox("Auto Step", &autoStep);
 
     if (autoStep)
     {
-        heatMap.requestStep();
+        heatGrid.requestStep();
     }
+
+    if (ImGui::Button("Restart") && !autoStep)
+    {
+        heatGrid.restart();
+        autoStep = false;
+    }
+
+    ImGui::Combo("Algorithm",
+                 (int*)&heatGrid.algorithm,
+                 HeatMap::AlgorithmNames,
+                 IM_ARRAYSIZE(HeatMap::AlgorithmNames));
 
     ImGui::Spacing();
 
@@ -101,12 +112,12 @@ void Processor_Heat::load(const Save& save)
 
 void Processor_Heat::processTopography(const cv::Mat& data)
 {
-    heatMap.update(data);
+    heatGrid.update(data);
 
     PROFILE_FUNCTION();
     {
         PROFILE_SCOPE("Calibration TransformProjection");
-        m_projector.project(heatMap.data(), m_cvTransformedDepthImage32f);
+        m_projector.project(heatGrid.data(), m_cvTransformedDepthImage32f);
     }
 
     // Draw warped depth image

@@ -6,11 +6,27 @@
 #include "Tools.h"
 #include "TopographyProcessor.h"
 
+namespace
+{
+    constexpr std::vector<HeatMap::HeatSource> initialSources()
+    {
+        std::vector<HeatMap::HeatSource> sources{};
+
+        for (int i = 100; i < 200; i++)
+        {
+            for (int j = 100; j < 200; j++)
+            {
+                sources.push_back({ { i, j }, 100.f });
+            }
+        }
+
+        return sources;
+    }
+}
+
 class Processor_Heat : public TopographyProcessor
 {
-    HeatMap heatMap{{
-        { { 100, 100 }, 100.0 }
-    }};
+    HeatMap::Grid heatGrid{ initialSources() };
 
     SandBoxProjector m_projector;
     cv::Mat m_cvTransformedDepthImage32f;
