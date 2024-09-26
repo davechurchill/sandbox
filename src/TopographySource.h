@@ -16,11 +16,4 @@ public:
     virtual void load(const Save & save) = 0;
 
     virtual cv::Mat getTopography() = 0;
-
-    enum
-    {
-        Camera,
-        Perlin,
-        Snapshot
-    };
 };
