@@ -16,13 +16,4 @@ public:
     virtual void load(const Save & save) = 0;
 
     virtual void processTopography(const cv::Mat & data) = 0;
-
-    enum
-    {
-        Colorizer,
-        Minecraft,
-        Socket
-    };
-
-
 };

@@ -6,8 +6,8 @@
 struct Save
 {
     // main
-    int source = 0;
-    int processor = 0;
+    std::string source = "Camera";
+    std::string processor = "Colorizer";
 
     // camera
     int align = 0;
@@ -167,6 +167,5 @@ struct Save
             if (temp == "numberOfContourLines") { fin >> numberOfContourLines; }
             if (temp == "drawProjection") { fin >> drawProjection; }
         }
-        std::cout << temp << std::endl;;
     }
 };
