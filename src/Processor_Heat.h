@@ -29,13 +29,20 @@ class Processor_Heat : public TopographyProcessor
     HeatMap::Grid heatGrid{ initialSources() };
 
     SandBoxProjector m_projector;
-    cv::Mat m_cvTransformedDepthImage32f;
     bool m_drawProjection = true;
-    sf::Image m_sfTransformedDepthImage;
-    sf::Texture m_sfTransformedDepthTexture;
-    sf::Sprite m_sfTransformedDepthSprite;
-    sf::Shader          m_shader;
-    int                 m_selectedShaderIndex = 0;
+
+    cv::Mat m_cvTransformedDepthImage32fColor;
+    sf::Image m_sfTransformedDepthImageColor;
+    sf::Texture m_sfTransformedDepthTextureColor;
+    sf::Sprite m_sfTransformedDepthSpriteColor;
+    sf::Shader          m_shader_color;
+
+    cv::Mat m_cvTransformedDepthImage32fHeat;
+    sf::Image m_sfTransformedDepthImageHeat;
+    sf::Texture m_sfTransformedDepthTextureHeat;
+    sf::Sprite m_sfTransformedDepthSpriteHeat;
+    sf::Shader          m_shader_heat;
+
     bool                m_drawContours = false;
     int                 m_numberOfContourLines = 19;
 

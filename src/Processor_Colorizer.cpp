@@ -20,7 +20,7 @@ void Processor_Colorizer::imgui()
         m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
     }
 
-    const char * shaders[] = { "Popsicle", "Red", "Terrain", "Animating Water", "None" };
+    const char * shaders[] = { "Popsicle", "Blue", "Red", "Terrain", "Animating Water", "None" };
     ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 5);
 
     ImGui::Checkbox("Draw Contour Lines", &m_drawContours);

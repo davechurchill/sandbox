@@ -63,9 +63,9 @@ namespace HeatMap
 		}
 		case Algorithms::HeatEquation:
 		{
-			constexpr float dt = 0.25f;
 			constexpr float dx = 1.f;
 			constexpr float dy = 1.f;
+			constexpr float dt = 0.25f;
 
 			const float currCell = temps.at<float>(i, j);
 			const float k = kMat.at<float>(i, j);
