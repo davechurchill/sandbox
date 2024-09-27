@@ -40,6 +40,7 @@ void Scene_Main::init()
 
     registerProcessor<Processor_Colorizer>("Colorizer");
     registerProcessor<Processor_Minecraft>("Minecraft");
+    registerProcessor<Processor_Socket>("Socket");
 
     load();
     m_source->init();
