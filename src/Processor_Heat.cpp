@@ -36,7 +36,7 @@ void Processor_Heat::imgui()
     }
 
     static int SPF = 0;
-    ImGui::SliderInt("Steps Per Frame", &SPF, 0, 4);
+    ImGui::SliderInt("Steps Per Frame", &SPF, 0, 100);
     heatGrid.requestStep(SPF);
 
     if (ImGui::Button("Restart"))

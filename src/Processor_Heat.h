@@ -8,17 +8,27 @@
 
 namespace
 {
-    constexpr std::vector<HeatMap::HeatSource> initialSources()
+    constexpr void drawSquare(std::vector<HeatMap::HeatSource>& sources, int x, int y, int w, int h)
     {
-        std::vector<HeatMap::HeatSource> sources{};
-
-        for (int i = 100; i < 200; i++)
+        for (int i = x; i < x + w; i++)
         {
-            for (int j = 100; j < 200; j++)
+            for (int j = y; j < y + h; j++)
             {
                 sources.push_back({ { i, j }, 100.f });
             }
         }
+    }
+
+    constexpr std::vector<HeatMap::HeatSource> initialSources()
+    {
+        std::vector<HeatMap::HeatSource> sources{};
+
+        drawSquare(sources, 100, 100, 20, 20);
+        drawSquare(sources, 200, 100, 25, 25);
+        drawSquare(sources, 150, 150, 20, 20);
+        drawSquare(sources, 250, 150, 30, 30);
+        drawSquare(sources, 150, 300, 20, 20);
+        drawSquare(sources, 500, 300, 50, 50);
 
         return sources;
     }
