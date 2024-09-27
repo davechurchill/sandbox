@@ -28,6 +28,8 @@ class Source_Camera : public TopographySource
     rs2::align          m_alignment_color = rs2::align(RS2_STREAM_COLOR);
     bool                m_gaussianBlur = false;
 
+    int                 m_fpsSetting = 0;
+
     cv::Mat             m_cvColorImage;
     sf::Image           m_sfColorImage;
     sf::Texture         m_sfColorTexture;
