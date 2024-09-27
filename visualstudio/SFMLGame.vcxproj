@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\Assets.cpp" />
     <ClCompile Include="..\src\BlockGeneration.cpp" />
+    <ClCompile Include="..\src\GoodAssert.cpp" />
     <ClCompile Include="..\src\Processor_Minecraft.cpp" />
     <ClCompile Include="..\src\Processor_Socket.cpp" />
     <ClCompile Include="..\src\Source_Camera.cpp" />
@@ -38,7 +39,6 @@
     <ClCompile Include="..\src\Scene.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\Scene_Main.cpp" />
-    <ClCompile Include="..\src\Scene_Menu.cpp" />
     <ClCompile Include="..\src\Source_Perlin.cpp" />
     <ClCompile Include="..\src\Source_Snapshot.cpp" />
     <ClCompile Include="..\src\Tools.cpp" />
@@ -47,6 +47,8 @@
     <ClInclude Include="..\src\Action.hpp" />
     <ClInclude Include="..\src\Assets.h" />
     <ClInclude Include="..\src\BlockGeneration.h" />
+    <ClInclude Include="..\src\GoodAssert.h" />
+    <ClInclude Include="..\src\Logger.hpp" />
     <ClInclude Include="..\src\Processor_Minecraft.h" />
     <ClInclude Include="..\src\Processor_Socket.h" />
     <ClInclude Include="..\src\Save.hpp" />
@@ -64,7 +66,6 @@
     <ClInclude Include="..\src\Scene.h" />
     <ClInclude Include="..\src\Grid.hpp" />
     <ClInclude Include="..\src\Scene_Main.h" />
-    <ClInclude Include="..\src\Scene_Menu.h" />
     <ClInclude Include="..\src\Source_Perlin.h" />
     <ClInclude Include="..\src\Source_Snapshot.h" />
     <ClInclude Include="..\src\Timer.hpp" />

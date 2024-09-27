@@ -1,5 +1,4 @@
 #include "Scene_Main.h"
-#include "Scene_Menu.h"
 #include "GameEngine.h"
 #include "Assets.h"
 #include "Profiler.hpp"
@@ -319,7 +318,7 @@ void Scene_Main::saveDataDump()
 
 void Scene_Main::endScene()
 {
-    m_game->changeScene<Scene_Menu>("Menu");
     m_game->displayWindow().close();
     save();
+    m_game->quit();
 }
