@@ -63,7 +63,7 @@ namespace HeatMap
 		cv::Mat temps{};
 		std::vector<HeatSource> sources{};
 		bool restartRequested = false;
-		bool stepRequested = false;
+		int stepsRequested = 0;
 
 	public:
 		Algorithms algorithm = Algorithms::HeatEquation;
@@ -75,13 +75,17 @@ namespace HeatMap
 			return temps;
 		}
 
-		void requestStep()
+		void requestStep(int count = 1)
 		{
-			stepRequested = true;
+			if (count > 0)
+			{
+				stepsRequested = count;
+			}
 		}
 
 		void restart()
 		{
+			stepsRequested = 0;
 			restartRequested = true;
 		}
 

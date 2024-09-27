@@ -5,6 +5,14 @@ namespace HeatMap
 {
 	void Grid::update(const cv::Mat& kMat)
 	{
+		const auto setSources = [&]()
+		{
+			for (auto& source : sources)
+			{
+				temps.at<float>(source.position) = source.getTempRaw();
+			}
+		};
+
 		// Restart simulation if requested or if size has changed
 		const cv::Size kMatSize = kMat.size();
 		if (restartRequested || kMatSize != temps.size())
@@ -20,16 +28,11 @@ namespace HeatMap
 			temps = cv::Mat{ kMat.size(), CV_32F, 0.f };
 
 			// Populate initial conditions
-			for (auto& source : sources)
-			{
-				temps.at<float>(source.position) = source.getTempRaw();
-			}
+			setSources();
 		}
 
-		if (stepRequested)
+		for (; stepsRequested > 0; stepsRequested--)
 		{
-			stepRequested = false;
-
 			static cv::Mat workingTemps{};
 			temps.copyTo(workingTemps);
 
@@ -44,6 +47,8 @@ namespace HeatMap
 			}
 
 			workingTemps.copyTo(temps);
+
+			setSources();
 		}
 	}
 

@@ -30,24 +30,19 @@ void Processor_Heat::imgui()
     ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
     ImGui::InputInt("Contour Lines", &m_numberOfContourLines, 1, 10);
 
-    static bool autoStep = false;
-
-    if (ImGui::Button("Step") && !autoStep)
+    if (ImGui::Button("Step"))
     {
         heatGrid.requestStep();
     }
 
-    ImGui::Checkbox("Auto Step", &autoStep);
+    static int SPF = 0;
+    ImGui::SliderInt("Steps Per Frame", &SPF, 0, 4);
+    heatGrid.requestStep(SPF);
 
-    if (autoStep)
+    if (ImGui::Button("Restart"))
     {
-        heatGrid.requestStep();
-    }
-
-    if (ImGui::Button("Restart") && !autoStep)
-    {
+        SPF = 0;
         heatGrid.restart();
-        autoStep = false;
     }
 
     ImGui::Combo("Algorithm",
