@@ -2,16 +2,16 @@
 
 #include "TopographyProcessor.h"
 
-#include <asio.hpp>
-
+#include <zmq.hpp>
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
 
 class Processor_Socket : public TopographyProcessor
 {
-    asio::io_context m_context;
-    asio::ip::tcp::socket m_socket;
     int m_port = 4960;
+    bool m_bound = false;
+    zmq::context_t m_context;
+    zmq::socket_t m_socket;
 
 public:
     Processor_Socket();
