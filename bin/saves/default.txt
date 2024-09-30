@@ -1,4 +1,4 @@
-source 0
+source Snapshot
 processor Socket
 align 0
 gaussianBlur 1

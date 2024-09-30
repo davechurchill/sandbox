@@ -13,6 +13,10 @@ class Processor_Socket : public TopographyProcessor
     zmq::context_t m_context;
     zmq::socket_t m_socket;
 
+    bool m_limitFrames = false;
+    int m_frameRate = 60;
+    char m_toggleFrames = 0; // 0 is do nothing, 1 is activate framelimit, 2 is disable it
+
 public:
     Processor_Socket();
     void init();
