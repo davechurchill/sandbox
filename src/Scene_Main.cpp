@@ -39,6 +39,7 @@ void Scene_Main::init()
 
     registerProcessor<Processor_Colorizer>("Colorizer");
     registerProcessor<Processor_Minecraft>("Minecraft");
+    registerProcessor<Processor_Heat>("Heat");
 
     load();
     m_source->init();
@@ -184,12 +185,12 @@ void Scene_Main::renderUI()
     ImGui::Text("Framerate: %d", (int)m_game->framerate());
     ImGui::EndMainMenuBar();
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", &m_drawUI);
     ImGui::BeginTabBar("ControlTabs");
 
     // Source
 
-    if (ImGui::BeginTabItem("Source", &m_drawUI))
+    if (ImGui::BeginTabItem("Source"))
     {
         
         if (ImGui::BeginCombo("Selected Source", m_sourceID.c_str()))
@@ -214,7 +215,7 @@ void Scene_Main::renderUI()
 
     // Processor
 
-    if (ImGui::BeginTabItem("Processor", &m_drawUI))
+    if (ImGui::BeginTabItem("Processor"))
     {
         if (ImGui::BeginCombo("Selected Processor", m_processorID.c_str()))
         {

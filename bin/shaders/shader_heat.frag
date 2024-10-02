@@ -11,7 +11,7 @@ void main()
 	vec4 pixel_color = texture2D(currentTexture, coord);
 	float c = pixel_color[0];
 
-	gl_FragColor = vec4(c, 0.0, 1.0 - c, 1.0);
+	gl_FragColor = vec4(c, 0.0, 0.0, 1.0);
 	
 	if (contour)
 	{
