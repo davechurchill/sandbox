@@ -1,7 +1,9 @@
 #pragma once
 
-#include "TopographyProcessor.h"
+#include "Profiler.hpp"
 #include "SandboxProjector.h"
+#include "Tools.h"
+#include "TopographyProcessor.h"
 
 class Processor_Colorizer : public TopographyProcessor 
 {
@@ -14,7 +16,7 @@ class Processor_Colorizer : public TopographyProcessor
     sf::Shader          m_shader;
     int                 m_selectedShaderIndex = 0;
     bool                m_drawContours = true;
-    int                 m_numberOfContourLines = 15;
+    int                 m_numberOfContourLines = 19;
 
 public:
     void init();

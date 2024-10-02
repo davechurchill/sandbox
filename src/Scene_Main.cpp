@@ -5,6 +5,7 @@
 
 #include "Processor_Colorizer.h"
 #include "Processor_Minecraft.h"
+#include "Processor_Heat.h"
 #include "Source_Camera.h"
 #include "Source_Perlin.h"
 #include "Source_Snapshot.h"

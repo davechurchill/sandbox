@@ -18,10 +18,10 @@ temporalPersistance 3
 holeFill 1
 warpPoints 156 75 708 73 163 370 707 365 
 applyHeightAdjustment 0
-planarPoints 150 0 75 150 0 75 
-projectionPoints 18 60 1866 92 32 1079 1875 1071 
-drawLines 0
-selectedShaderIndex 3
-drawContours 1
-numberOfContourLines 10
+planarPoints 150 0 75 150 0 75
+projectionPoints 7 61 1866 92 0 1078 1870 1078 
+drawLines 1
+selectedShaderIndex 0
+drawContours 0
+numberOfContourLines 19
 drawProjection 1

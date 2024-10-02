@@ -29,10 +29,16 @@ public:
     void save(Save & save) const;
     void load(const Save & save);
     void project(const cv::Mat & input, cv::Mat & output);
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
+    bool processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void render(sf::RenderWindow & window);
 
     inline float getTransformedScale() const { return 1.f / m_boxScale.x; }
 
     inline sf::Vector2f getTransformedPosition() const { return m_minXY; }
+
+    inline cv::Mat getProjectionMatrix()
+    {
+        generateProjection();
+        return m_projectionMatrix;
+    }
 };
