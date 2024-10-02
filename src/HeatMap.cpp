@@ -1,16 +1,14 @@
 #include "HeatMap.h"
 #include <iostream>
 #include <opencv2/core.hpp> // Ensure core functionalities are included
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace HeatMap
 {
     void setRectValue(cv::Mat& mat, const cv::Rect& rect, float value)
     {
         // Check if the input matrix is valid
-        if (mat.empty())
-        {
-            throw std::invalid_argument("Input matrix is empty.");
-        }
+        if (mat.empty()) { return; }
 
         // Calculate the valid rectangle
         int x1 = std::max(0, rect.x);
@@ -22,10 +20,7 @@ namespace HeatMap
         cv::Rect boundedRect(x1, y1, x2 - x1, y2 - y1);
 
         // Check if the bounded rectangle is valid
-        if (boundedRect.width <= 0 || boundedRect.height <= 0)
-        {
-            return; // No area to set
-        }
+        if (boundedRect.width <= 0 || boundedRect.height <= 0) { return; }
 
         // Set all values within the bounded rectangle to the specified value
         mat(boundedRect).setTo(value);
@@ -34,6 +29,9 @@ namespace HeatMap
 
     void Grid::update(const cv::Mat& kMat)
     {
+        //updateKernel(kMat);
+        //return;
+
         // Restart simulation if requested or if size has changed
         const cv::Size kMatSize = kMat.size();
         if (restartRequested || kMatSize != temps.size())
@@ -74,6 +72,44 @@ namespace HeatMap
         }
     }
 
+    void Grid::updateKernel(const cv::Mat& kMat)
+    {
+        // Restart simulation if requested or if size has changed
+        const cv::Size kMatSize = kMat.size();
+        if (restartRequested || kMatSize != temps.size())
+        {
+            restartRequested = false;
+
+            if (kMatSize.width <= 0 || kMatSize.height <= 0)
+            {
+                return;
+            }
+
+            // Boundaries are permanently at 0, all other cells are also initialized to 0
+            temps = cv::Mat{ kMat.size(), CV_32F, 0.f };
+
+            // Populate initial conditions
+            updateSources();
+        }
+
+        for (; stepsRequested > 0; stepsRequested--)
+        {
+            static cv::Mat workingTemps{};
+
+            temps.copyTo(workingTemps);
+
+            constexpr float dt = 0.25f;
+            cv::Mat kernel = (cv::Mat_<float>(3, 3) << 
+                0.00, 0.25, 0.00,
+                0.25, 0.00, 0.25,
+                0.00, 0.25, 0.00);
+
+            cv::filter2D(temps, workingTemps, CV_32F, kernel);
+            workingTemps.copyTo(temps);
+            updateSources();
+        }
+    }
+
     void Grid::updateSources()
     {
         for (auto& source : sources)
@@ -107,12 +143,13 @@ namespace HeatMap
             float k = kMat.at<float>(i, j);
             k = k * k * k;
 
-            const float hSum =
-                temps.at<float>(i - 1, j) - 2 * currCell + temps.at<float>(i + 1, j);
-            const float vSum =
-                temps.at<float>(i, j - 1) - 2 * currCell + temps.at<float>(i, j + 1);
+            const float neighBourSum =
+                temps.at<float>(i - 1, j) +
+                temps.at<float>(i + 1, j) +
+                temps.at<float>(i, j - 1) +
+                temps.at<float>(i, j + 1);
 
-            return currCell + dt * k * (hSum + vSum);
+            return currCell + dt * k * (neighBourSum - 4*currCell);
         }
         default:
             return temps.at<float>(i, j);

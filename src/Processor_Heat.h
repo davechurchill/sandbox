@@ -17,10 +17,10 @@ namespace
     {
         std::vector<HeatMap::HeatSource> sources{};
 
-        drawSquare(sources, 100, 100, 20, 20);
-        drawSquare(sources, 300, 100, 25, 20);
-        drawSquare(sources, 300, 200, 25, 20);
-        drawSquare(sources, 100, 200, 20, 20);
+        drawSquare(sources, 100, 100, 10, 10);
+        drawSquare(sources, 300, 100, 10, 10);
+        drawSquare(sources, 300, 200, 10, 10);
+        drawSquare(sources, 100, 200, 10, 10);
 
         return sources;
     }
@@ -33,22 +33,22 @@ class Processor_Heat : public TopographyProcessor
     SandBoxProjector m_projector;
     bool m_drawProjection = true;
 
-    cv::Mat m_cvTransformedDepthImage32fColor;
-    sf::Image m_sfTransformedDepthImageColor;
+    cv::Mat     m_cvTransformedDepthImage32fColor;
+    sf::Image   m_sfTransformedDepthImageColor;
     sf::Texture m_sfTransformedDepthTextureColor;
-    sf::Sprite m_sfTransformedDepthSpriteColor;
-    sf::Shader          m_shader_color;
+    sf::Sprite  m_sfTransformedDepthSpriteColor;
+    sf::Shader  m_shader_color;
 
-    cv::Mat m_cvTransformedDepthImage32fHeat;
-    sf::Image m_sfTransformedDepthImageHeat;
+    cv::Mat     m_cvTransformedDepthImage32fHeat;
+    sf::Image   m_sfTransformedDepthImageHeat;
     sf::Texture m_sfTransformedDepthTextureHeat;
-    sf::Sprite m_sfTransformedDepthSpriteHeat;
-    sf::Shader          m_shader_heat;
+    sf::Sprite  m_sfTransformedDepthSpriteHeat;
+    sf::Shader  m_shader_heat;
 
-    bool                m_drawContours = false;
-    int                 m_numberOfContourLines = 19;
+    bool        m_drawContours = false;
+    int         m_numberOfContourLines = 19;
 
-    bool drawingSource = false;
+    bool        m_drawingSource = false;
     cv::Point rectStart{};
 
 public:

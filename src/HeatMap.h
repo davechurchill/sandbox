@@ -23,9 +23,10 @@ namespace HeatMap
 	{
 		// All temperatures are Celcius, in the range [0.0, 100.0]
 		// However, they are stored as [0.0, 1.0]
-		float temp;
-
+		
 	public:
+
+        float temp;
 		cv::Rect area;
 
 		HeatSource(const cv::Rect& area, const float temp) : area(area)
@@ -106,6 +107,7 @@ namespace HeatMap
 			sources.clear();
 		}
 
+        void updateKernel(const cv::Mat& kMat);
 		void update(const cv::Mat& kMat);
 		void updateSources();
 		float getNewTemp(int i, int j, const cv::Mat& kMat = {});

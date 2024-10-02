@@ -55,7 +55,7 @@ void Processor_Heat::imgui()
 
         static int SPF = 0;
 
-        ImGui::SliderInt("Steps Per Frame", &SPF, 0, 100);
+        ImGui::SliderInt("Steps Per Frame", &SPF, 0, 200);
         heatGrid.requestStep(SPF);
 
         if (ImGui::Button("Reset"))
@@ -106,7 +106,7 @@ void Processor_Heat::imgui()
 
         if (ImGui::Button("Draw Source"))
         {
-            drawingSource = true;
+            m_drawingSource = true;
         }
 
         if (ImGui::Button("Clear Sources"))
@@ -162,7 +162,7 @@ void Processor_Heat::processEvent(const sf::Event& event, const sf::Vector2f& mo
     const bool draggingProjection = m_projector.processEvent(event, mouse);
 
     // TODO: Make this less horrifically wrong (I am not good at linear algebra)
-    if (drawingSource && !draggingProjection)
+    if (m_drawingSource && !draggingProjection)
     {
         sf::Vector2f ms = mouse;
         ms /= m_projector.getTransformedScale();
@@ -180,12 +180,12 @@ void Processor_Heat::processEvent(const sf::Event& event, const sf::Vector2f& mo
         if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
         {
             heatGrid.addSource({ rectStart, mousePoint - rectStart, 100.f});
-            drawingSource = false;
+            m_drawingSource = false;
         }
 
         if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right)
         {
-            drawingSource = false;
+            m_drawingSource = false;
         }
     }
 }
