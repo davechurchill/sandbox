@@ -1,6 +1,7 @@
 #pragma once
 
 #include "opencv2/core.hpp"
+#include <iostream>
 
 namespace HeatMap
 {
@@ -20,14 +21,19 @@ namespace HeatMap
 
 	class HeatSource
 	{
-		// All temperatures are celcius, in the range [0.0, 100.0]
-		// However, they are stored as [0.0, 1.0] for precision
+		// All temperatures are Celcius, in the range [0.0, 100.0]
+		// However, they are stored as [0.0, 1.0]
 		float temp;
 
 	public:
-		cv::Point position;
+		cv::Rect area;
 
-		HeatSource(const cv::Point& position, const float temp) : position(position)
+		HeatSource(const cv::Rect& area, const float temp) : area(area)
+		{
+			setTempCelcius(temp);
+		}
+
+		HeatSource(const cv::Point& position, const cv::Size& size, const float temp) : area(cv::Rect2i{ position, size })
 		{
 			setTempCelcius(temp);
 		}
@@ -83,13 +89,25 @@ namespace HeatMap
 			}
 		}
 
-		void restart()
+		void reset()
 		{
 			stepsRequested = 0;
 			restartRequested = true;
 		}
 
+		void addSource(const HeatSource& source)
+		{
+			sources.push_back(source);
+			updateSources();
+		}
+
+		void clearSources()
+		{
+			sources.clear();
+		}
+
 		void update(const cv::Mat& kMat);
+		void updateSources();
 		float getNewTemp(int i, int j, const cv::Mat& kMat = {});
 	};
 }

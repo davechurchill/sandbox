@@ -1,5 +1,5 @@
-source 0
-processor 0
+source 2
+processor 2
 align 0
 gaussianBlur 1
 maxDistance 1.13

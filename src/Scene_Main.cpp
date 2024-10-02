@@ -202,7 +202,7 @@ void Scene_Main::renderUI()
 
     if (ImGui::BeginTabItem("Processor", &m_drawUI))
     {
-        const char* processors[] = { "Colorizer", "Minecraft", "Heat Equation" };
+        const char* processors[] = { "Colorizer", "Minecraft", "Heat Grid" };
         if (ImGui::Combo("Selected Processor", &m_processorID, processors, IM_ARRAYSIZE(processors)))
         {
             setProcessor(m_processorID);

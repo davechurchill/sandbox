@@ -10,13 +10,7 @@ namespace
 {
     constexpr void drawSquare(std::vector<HeatMap::HeatSource>& sources, int x, int y, int w, int h)
     {
-        for (int i = x; i < x + w; i++)
-        {
-            for (int j = y; j < y + h; j++)
-            {
-                sources.push_back({ { i, j }, 100.f });
-            }
-        }
+        sources.push_back({ { x, y }, { w, h }, 100.f });
     }
 
     constexpr std::vector<HeatMap::HeatSource> initialSources()
@@ -55,6 +49,9 @@ class Processor_Heat : public TopographyProcessor
 
     bool                m_drawContours = false;
     int                 m_numberOfContourLines = 19;
+
+    bool drawingSource = false;
+    cv::Point rectStart{};
 
 public:
     void init();

@@ -5,14 +5,6 @@ namespace HeatMap
 {
 	void Grid::update(const cv::Mat& kMat)
 	{
-		const auto setSources = [&]()
-		{
-			for (auto& source : sources)
-			{
-				temps.at<float>(source.position) = source.getTempRaw();
-			}
-		};
-
 		// Restart simulation if requested or if size has changed
 		const cv::Size kMatSize = kMat.size();
 		if (restartRequested || kMatSize != temps.size())
@@ -28,7 +20,7 @@ namespace HeatMap
 			temps = cv::Mat{ kMat.size(), CV_32F, 0.f };
 
 			// Populate initial conditions
-			setSources();
+			updateSources();
 		}
 
 		for (; stepsRequested > 0; stepsRequested--)
@@ -41,14 +33,30 @@ namespace HeatMap
 			{
 				for (int j = 1; j < temps.cols - 1; j++)
 				{
-					const float k = kMat.at<float>(i, j);
 					workingTemps.at<float>(i, j) = getNewTemp(i, j, kMat);
 				}
 			}
 
 			workingTemps.copyTo(temps);
 
-			setSources();
+			updateSources();
+		}
+	}
+
+	void Grid::updateSources()
+	{
+		for (auto& source : sources)
+		{
+			const int width = std::min(source.area.br().x, temps.rows);
+			const int height = std::min(source.area.br().y, temps.cols);
+
+			for (int x = source.area.x; x < width; x++)
+			{
+				for (int y = source.area.y; y < height; y++)
+				{
+					temps.at<float>(x, y) = source.getTempRaw();
+				}
+			}
 		}
 	}
 
@@ -71,9 +79,10 @@ namespace HeatMap
 			constexpr float dx = 1.f;
 			constexpr float dy = 1.f;
 			constexpr float dt = 0.25f;
+			constexpr float kMultiplier = 1.0f;
 
 			const float currCell = temps.at<float>(i, j);
-			const float k = kMat.at<float>(i, j);
+			const float k = kMat.at<float>(i, j) * kMultiplier;
 
 			const float hSum =
 				temps.at<float>(i - 1, j) - 2 * currCell + temps.at<float>(i + 1, j);
