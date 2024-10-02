@@ -29,9 +29,6 @@
     <ClCompile Include="..\src\imgui\imgui-SFML.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Scene_Menu.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\MinecraftInterface.cpp">
       <Filter>minecraft</Filter>
     </ClCompile>
@@ -73,6 +70,8 @@
     </ClCompile>
     <ClCompile Include="..\src\HeatMap.cpp">
       <Filter>sandbox</Filter>
+    <ClCompile Include="..\src\GoodAssert.cpp">
+      <Filter>engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -102,9 +101,6 @@
     </ClInclude>
     <ClInclude Include="..\src\ViewController.hpp">
       <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Scene_Menu.h">
-      <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Cube.hpp">
       <Filter>engine</Filter>
@@ -168,6 +164,11 @@
     </ClInclude>
     <ClInclude Include="..\src\HeatMap.h">
       <Filter>sandbox</Filter>
+    <ClInclude Include="..\src\GoodAssert.h">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Logger.hpp">
+      <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

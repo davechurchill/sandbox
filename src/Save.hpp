@@ -6,8 +6,8 @@
 struct Save
 {
     // main
-    int source = 0;
-    int processor = 0;
+    std::string source = "Camera";
+    std::string processor = "Colorizer";
 
     // camera
     int align = 0;
@@ -16,6 +16,7 @@ struct Save
     float minDistance = 0.90f;
     bool drawDepth = true;
     bool drawColor = false;
+    int fpsSetting = 0;
 
     // perlin
     int octaves = 5;
@@ -64,6 +65,7 @@ struct Save
         fout << "minDistance " << minDistance << '\n';
         fout << "drawDepth " << drawDepth << '\n';
         fout << "drawColor " << drawColor << '\n';
+        fout << "fpsSetting " << fpsSetting << '\n';
         fout << "octaves " << octaves << '\n';
         fout << "seed " << seed << '\n';
         fout << "seedSize " << seedSize << '\n';
@@ -125,6 +127,7 @@ struct Save
             if (temp == "minDistance") { fin >> minDistance; }
             if (temp == "drawDepth") { fin >> drawDepth; }
             if (temp == "drawColor") { fin >> drawColor; }
+            if (temp == "fpsSetting") { fin >> fpsSetting; }
             if (temp == "octaves") { fin >> octaves; }
             if (temp == "seed") { fin >> seed; }
             if (temp == "seedSize") { fin >> seedSize; }

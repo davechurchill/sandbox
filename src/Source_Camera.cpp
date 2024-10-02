@@ -16,8 +16,12 @@ void Source_Camera::connectToCamera()
     {
         m_cameraConnected = true;
 
-        int depthWidth = 1280, depthHeight = 720, depthFPS = 30; // depth camera hi res
-        //int depthWidth = 848,  depthHeight = 480, depthFPS = 90; // depth camera hi fps
+        int depthWidth = 1280, depthHeight = 720, depthFPS = 30;
+        switch (m_fpsSetting) {
+        case 0: depthWidth = 1280, depthHeight = 720, depthFPS = 30; break;
+        case 1: depthWidth = 848, depthHeight = 480, depthFPS = 90; break;
+        }
+
         int colorWidth = 1280, colorHeight = 720, colorFPS = 30; // color camera
 
         rs2::config cfg;
@@ -159,7 +163,13 @@ void Source_Camera::imgui()
         {
 
             const char * items[] = { "Depth", "Color", "Nothing" };
-            ImGui::Combo("Alignment", (int *)&m_alignment, items, 3);
+            ImGui::Combo("Alignment", (int *)&m_alignment, items, IM_ARRAYSIZE(items));
+
+            const char* settings[] = {"1280w 720h 30fps", "848w 480h 90fps"};
+            if (ImGui::Combo("FPS / Resolution", &m_fpsSetting, settings, IM_ARRAYSIZE(settings))) {
+                m_pipe.stop();
+                connectToCamera();
+            }
 
             if (ImGui::CollapsingHeader("Thresholds"))
             {
@@ -239,6 +249,7 @@ void Source_Camera::save(Save & save) const
     save.minDistance = m_minDistance;
     save.drawColor = m_drawColor;
     save.drawDepth = m_drawDepth;
+    save.fpsSetting = m_fpsSetting;
     m_filters.save(save);
     m_warper.save(save);
 }
@@ -250,6 +261,7 @@ void Source_Camera::load(const Save & save)
     m_minDistance = save.minDistance;
     m_drawColor = save.drawColor;
     m_drawDepth = save.drawDepth;
+    m_fpsSetting = save.fpsSetting;
     m_filters.load(save);
     m_warper.load(save);
 }

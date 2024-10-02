@@ -1,5 +1,4 @@
 #include "Scene_Main.h"
-#include "Scene_Menu.h"
 #include "GameEngine.h"
 #include "Assets.h"
 #include "Profiler.hpp"
@@ -33,6 +32,13 @@ void Scene_Main::init()
 {
     ImGui::GetStyle().ScaleAllSizes(2.0f);
     ImGui::GetIO().FontGlobalScale = 2.0f;
+
+    registerSource<Source_Camera>("Camera");
+    registerSource<Source_Perlin>("Perlin");
+    registerSource<Source_Snapshot>("Snapshot");
+
+    registerProcessor<Processor_Colorizer>("Colorizer");
+    registerProcessor<Processor_Minecraft>("Minecraft");
 
     load();
     m_source->init();
@@ -185,10 +191,18 @@ void Scene_Main::renderUI()
 
     if (ImGui::BeginTabItem("Source", &m_drawUI))
     {
-        const char* sources[] = { "Camera", "Perlin", "Snapshot" };
-        if (ImGui::Combo("Selected Source", &m_sourceID, sources, IM_ARRAYSIZE(sources)))
+        
+        if (ImGui::BeginCombo("Selected Source", m_sourceID.c_str()))
         {
-            setSource(m_sourceID);
+            for (auto & [name, _] : m_sourceMap)
+            {
+                bool selected = name == m_sourceID;
+                if (ImGui::Selectable(name.c_str(), &selected))
+                {
+                    setSource(name);
+                }
+            }
+            ImGui::EndCombo();
         }
 
         ImGui::Separator();
@@ -202,12 +216,18 @@ void Scene_Main::renderUI()
 
     if (ImGui::BeginTabItem("Processor", &m_drawUI))
     {
-        const char* processors[] = { "Colorizer", "Minecraft", "Heat Grid" };
-        if (ImGui::Combo("Selected Processor", &m_processorID, processors, IM_ARRAYSIZE(processors)))
+        if (ImGui::BeginCombo("Selected Processor", m_processorID.c_str()))
         {
-            setProcessor(m_processorID);
+            for (auto & [name, _] : m_processorMap)
+            {
+                bool selected = name == m_processorID;
+                if (ImGui::Selectable(name.c_str(), &selected))
+                {
+                    setProcessor(name);
+                }
+            }
+            ImGui::EndCombo();
         }
-
         ImGui::Separator();
 
         m_processor->imgui();
@@ -228,6 +248,9 @@ void Scene_Main::save()
 
     m_source->save(m_save);
     m_processor->save(m_save);
+
+    m_save.source = m_sourceID;
+    m_save.processor = m_processorID;
 
     m_save.saveToFile("saves/" + m_saveFile);
 }
@@ -252,30 +275,34 @@ void Scene_Main::load()
     setProcessor(m_save.processor);
 }
 
-void Scene_Main::setSource(int source)
+void Scene_Main::setSource(const std::string & source)
 {
     if (m_source) { m_source->save(m_save); }
     m_sourceID = source;
-    switch (source)
+    if (m_sourceMap.contains(source))
     {
-    case TopographySource::Camera: { m_source = std::make_shared<Source_Camera>(); } break;
-    case TopographySource::Perlin: { m_source = std::make_shared<Source_Perlin>(); } break;
-    case TopographySource::Snapshot: { m_source = std::make_shared<Source_Snapshot>(); } break;
+        m_source = m_sourceMap.at(source)();
+    }
+    else
+    {
+        m_source = m_sourceMap.at("Camera")();
     }
 
     m_source->init();
     m_source->load(m_save);
 }
 
-void Scene_Main::setProcessor(int processor)
+void Scene_Main::setProcessor(const std::string & processor)
 {
     if (m_processor) { m_processor->save(m_save); }
     m_processorID = processor;
-    switch (processor)
+    if (m_processorMap.contains(processor))
     {
-    case TopographyProcessor::Colorizer: { m_processor = std::make_shared<Processor_Colorizer>(); } break;
-    case TopographyProcessor::Minecraft: { m_processor = std::make_shared<Processor_Minecraft>(); } break;
-    case TopographyProcessor::Heat: { m_processor = std::make_shared<Processor_Heat>(); } break;
+        m_processor = m_processorMap.at(processor)();
+    }
+    else
+    {
+        m_processor = m_processorMap.at("Colorizer")();
     }
 
     m_processor->init();
@@ -292,7 +319,7 @@ void Scene_Main::saveDataDump()
 
 void Scene_Main::endScene()
 {
-    m_game->changeScene<Scene_Menu>("Menu");
     m_game->displayWindow().close();
     save();
+    m_game->quit();
 }
