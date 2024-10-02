@@ -42,7 +42,7 @@ void Processor_Heat::imgui()
 
     // Set algorithm used for computations
     ImGui::Combo("Algorithm",
-        (int*)&heatGrid.algorithm,
+        (int*)&heatGrid.m_algorithm,
         HeatMap::AlgorithmNames,
         IM_ARRAYSIZE(HeatMap::AlgorithmNames));
 

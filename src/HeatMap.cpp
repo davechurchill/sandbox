@@ -26,12 +26,8 @@ namespace HeatMap
         mat(boundedRect).setTo(value);
     }
 
-
     void Grid::update(const cv::Mat& kMat)
     {
-        //updateKernel(kMat);
-        //return;
-
         // Restart simulation if requested or if size has changed
         const cv::Size kMatSize = kMat.size();
         if (restartRequested || kMatSize != temps.size())
@@ -52,61 +48,14 @@ namespace HeatMap
 
         for (; stepsRequested > 0; stepsRequested--)
         {
-            static cv::Mat workingTemps{};
-            temps.copyTo(workingTemps);
-
-            // Use OpenCV's parallel_for_ for parallel processing
-            cv::Range range(1, temps.rows - 1);
-            cv::parallel_for_(range, [&](const cv::Range& r) {
-                for (int i = r.start; i < r.end; i++)
-                {
-                    for (int j = 1; j < temps.cols - 1; j++)
-                    {
-                        workingTemps.at<float>(i, j) = getNewTemp(i, j, kMat);
-                    }
-                }
-                });
-
-            workingTemps.copyTo(temps);
-            updateSources();
-        }
-    }
-
-    void Grid::updateKernel(const cv::Mat& kMat)
-    {
-        // Restart simulation if requested or if size has changed
-        const cv::Size kMatSize = kMat.size();
-        if (restartRequested || kMatSize != temps.size())
-        {
-            restartRequested = false;
-
-            if (kMatSize.width <= 0 || kMatSize.height <= 0)
+            if (m_algorithm == Algorithms::Average)
             {
-                return;
+                formulaAvg(kMat);
             }
-
-            // Boundaries are permanently at 0, all other cells are also initialized to 0
-            temps = cv::Mat{ kMat.size(), CV_32F, 0.f };
-
-            // Populate initial conditions
-            updateSources();
-        }
-
-        for (; stepsRequested > 0; stepsRequested--)
-        {
-            static cv::Mat workingTemps{};
-
-            temps.copyTo(workingTemps);
-
-            constexpr float dt = 0.25f;
-            cv::Mat kernel = (cv::Mat_<float>(3, 3) << 
-                0.00, 0.25, 0.00,
-                0.25, 0.00, 0.25,
-                0.00, 0.25, 0.00);
-
-            cv::filter2D(temps, workingTemps, CV_32F, kernel);
-            workingTemps.copyTo(temps);
-            updateSources();
+            else if (m_algorithm == Algorithms::HeatEquation)
+            {
+                formulaHeat(kMat);
+            }
         }
     }
 
@@ -118,41 +67,51 @@ namespace HeatMap
         }
     }
 
-    float Grid::getNewTemp(int i, int j, const cv::Mat& kMat)
+    void Grid::formulaAvg(const cv::Mat& kMat)
     {
-        switch (algorithm)
-        {
-        case Algorithms::Average:
-        {
-            const float sum =
-                temps.at<float>(i - 1, j) +
-                temps.at<float>(i + 1, j) +
-                temps.at<float>(i, j - 1) +
-                temps.at<float>(i, j + 1);
+        static cv::Mat workingTemps{};
 
-            return sum / 4;
-        }
-        case Algorithms::HeatEquation:
-        {
-            //constexpr float dx = 1.f;
-            //constexpr float dy = 1.f;
-            constexpr float dt = 0.25f;
-            //constexpr float kMultiplier = 1.0f;
+        temps.copyTo(workingTemps);
 
-            const float currCell = temps.at<float>(i, j);
-            float k = kMat.at<float>(i, j);
-            k = k * k * k;
+        constexpr float dt = 0.25f;
+        cv::Mat kernel = (cv::Mat_<float>(3, 3) <<
+            0.00, 0.25, 0.00,
+            0.25, 0.00, 0.25,
+            0.00, 0.25, 0.00);
 
-            const float neighBourSum =
-                temps.at<float>(i - 1, j) +
-                temps.at<float>(i + 1, j) +
-                temps.at<float>(i, j - 1) +
-                temps.at<float>(i, j + 1);
+        cv::filter2D(temps, workingTemps, CV_32F, kernel);
+        workingTemps.copyTo(temps);
+        updateSources();
+    }
 
-            return currCell + dt * k * (neighBourSum - 4*currCell);
-        }
-        default:
-            return temps.at<float>(i, j);
-        }
+    void Grid::formulaHeat(const cv::Mat& kMat)
+    {
+        static cv::Mat workingTemps{};
+        temps.copyTo(workingTemps);
+
+        // Use OpenCV's parallel_for_ for parallel processing
+        cv::Range range(1, temps.rows - 1);
+        cv::parallel_for_(range, [&](const cv::Range& r) {
+            for (int i = r.start; i < r.end; i++)
+            {
+                for (int j = 1; j < temps.cols - 1; j++)
+                {
+                    constexpr float dt = 0.25f;
+                    float& cell = temps.at<float>(i, j);
+                    float k = kMat.at<float>(i, j);
+                    k = k * k * k;
+
+                    const float neighBourSum =
+                        temps.at<float>(i - 1, j) +
+                        temps.at<float>(i + 1, j) +
+                        temps.at<float>(i, j - 1) +
+                        temps.at<float>(i, j + 1);
+
+                    cell = cell + dt * k * (neighBourSum - 4 * cell);
+                }
+            }
+            });
+
+        updateSources();
     }
 }

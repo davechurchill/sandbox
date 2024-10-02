@@ -73,7 +73,7 @@ namespace HeatMap
 		int stepsRequested = 0;
 
 	public:
-		Algorithms algorithm = Algorithms::HeatEquation;
+		Algorithms m_algorithm = Algorithms::HeatEquation;
 
 		Grid(std::vector<HeatSource> sources = {}) : sources(sources) {}
 
@@ -107,9 +107,12 @@ namespace HeatMap
 			sources.clear();
 		}
 
+
+        void formulaAvg(const cv::Mat& kMat);
+        void formulaHeat(const cv::Mat& kMat);
+
         void updateKernel(const cv::Mat& kMat);
 		void update(const cv::Mat& kMat);
 		void updateSources();
-		float getNewTemp(int i, int j, const cv::Mat& kMat = {});
 	};
 }
