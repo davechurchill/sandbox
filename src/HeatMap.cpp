@@ -4,6 +4,34 @@
 
 namespace HeatMap
 {
+    void setRectValue(cv::Mat& mat, const cv::Rect& rect, float value)
+    {
+        // Check if the input matrix is valid
+        if (mat.empty())
+        {
+            throw std::invalid_argument("Input matrix is empty.");
+        }
+
+        // Calculate the valid rectangle
+        int x1 = std::max(0, rect.x);
+        int y1 = std::max(0, rect.y);
+        int x2 = std::min(mat.cols, rect.x + rect.width);
+        int y2 = std::min(mat.rows, rect.y + rect.height);
+
+        // Create a bounded rectangle
+        cv::Rect boundedRect(x1, y1, x2 - x1, y2 - y1);
+
+        // Check if the bounded rectangle is valid
+        if (boundedRect.width <= 0 || boundedRect.height <= 0)
+        {
+            return; // No area to set
+        }
+
+        // Set all values within the bounded rectangle to the specified value
+        mat(boundedRect).setTo(value);
+    }
+
+
     void Grid::update(const cv::Mat& kMat)
     {
         // Restart simulation if requested or if size has changed
@@ -50,16 +78,7 @@ namespace HeatMap
     {
         for (auto& source : sources)
         {
-            const int width = std::min(source.area.br().x, temps.rows);
-            const int height = std::min(source.area.br().y, temps.cols);
-
-            for (int x = source.area.x; x < width; x++)
-            {
-                for (int y = source.area.y; y < height; y++)
-                {
-                    temps.at<float>(x, y) = source.getTempRaw();
-                }
-            }
+            setRectValue(temps, source.area, source.getTempRaw());
         }
     }
 
@@ -79,13 +98,13 @@ namespace HeatMap
         }
         case Algorithms::HeatEquation:
         {
-            constexpr float dx = 1.f;
-            constexpr float dy = 1.f;
+            //constexpr float dx = 1.f;
+            //constexpr float dy = 1.f;
             constexpr float dt = 0.25f;
-            constexpr float kMultiplier = 1.0f;
+            //constexpr float kMultiplier = 1.0f;
 
             const float currCell = temps.at<float>(i, j);
-            float k = kMat.at<float>(i, j) * kMultiplier;
+            float k = kMat.at<float>(i, j);
             k = k * k * k;
 
             const float hSum =

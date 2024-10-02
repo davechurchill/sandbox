@@ -1,5 +1,5 @@
 source Camera
-processor Colorizer
+processor Heat
 align 0
 gaussianBlur 1
 maxDistance 1.13
@@ -16,12 +16,12 @@ temporalAlpha 0.099
 temporalDelta 72
 temporalPersistance 3
 holeFill 1
-warpPoints 156 75 708 73 163 370 707 365 
+warpPoints 171 84 705 77 184 360 704 361 
 applyHeightAdjustment 0
 planarPoints 150 0 75 150 0 75 
 projectionPoints 7 61 1866 92 0 1078 1870 1078 
 drawLines 1
 selectedShaderIndex 4
-drawContours 0
+drawContours 1
 numberOfContourLines 19
 drawProjection 1

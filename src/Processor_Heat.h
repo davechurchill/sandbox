@@ -18,9 +18,9 @@ namespace
         std::vector<HeatMap::HeatSource> sources{};
 
         drawSquare(sources, 100, 100, 20, 20);
-        drawSquare(sources, 200, 100, 25, 20);
-        drawSquare(sources, 200, 300, 25, 20);
-        drawSquare(sources, 100, 300, 20, 20);
+        drawSquare(sources, 300, 100, 25, 20);
+        drawSquare(sources, 300, 200, 25, 20);
+        drawSquare(sources, 100, 200, 20, 20);
 
         return sources;
     }
