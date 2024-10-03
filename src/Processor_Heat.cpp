@@ -23,7 +23,7 @@ void Processor_Heat::setInitialHeatSources()
     m_heatGrid.addSource(HeatSource(cv::Rect(100, 100, 10, 10), 100.0f));
     m_heatGrid.addSource(HeatSource(cv::Rect(300, 100, 10, 10), -100.0f));
     m_heatGrid.addSource(HeatSource(cv::Rect(300, 200, 10, 10), 100.0f));
-    m_heatGrid.addSource(HeatSource(cv::Rect(100, 200, 10, 10), -100.0f));
+    m_heatGrid.addSource(HeatSource(cv::Rect(100, 200, 10, 10), 100.0f));
 }
 
 void Processor_Heat::imgui()

@@ -101,7 +101,6 @@ public:
     void formulaHeatParallel(const cv::Mat& kMat);
     void formulaHeatOMP(const cv::Mat& kMat);
     void formulaHeatSIMD(const cv::Mat& kMat);
-    void formulaHeatSIMD128(const cv::Mat& kMat);
     void formulaHeatKernel(const cv::Mat& kMat);
 	void updateSources();
 };

@@ -246,113 +246,57 @@ void HeatGrid::formulaHeatOMP(const cv::Mat& kMat)
 
 void HeatGrid::formulaHeatSIMD(const cv::Mat& kMat)
 {
-    cv::Range range(1, m_temps.rows - 1);
-    cv::parallel_for_(range, [&](const cv::Range& r) {
-        for (int i = r.start; i < r.end; i++)
-        {
-            int j = 1;
-
-            // Process 8 floats at a time with AVX (256-bit registers)
-            for (; j <= m_temps.cols - 9; j += 8)
-            {
-                constexpr float dt = 0.25f;
-
-                // Load the current cell values into an AVX register
-                __m256 cell = _mm256_loadu_ps(&m_temps.at<float>(i, j));
-
-                // Load the neighboring cell values into AVX registers
-                __m256 north = _mm256_loadu_ps(&m_temps.at<float>(i - 1, j));
-                __m256 south = _mm256_loadu_ps(&m_temps.at<float>(i + 1, j));
-                __m256 west  = _mm256_loadu_ps(&m_temps.at<float>(i, j - 1));
-                __m256 east  = _mm256_loadu_ps(&m_temps.at<float>(i, j + 1));
-
-                // Compute the neighbor sum: north + south + west + east
-                __m256 neighborSum = _mm256_add_ps(north, south);
-                neighborSum = _mm256_add_ps(neighborSum, west);
-                neighborSum = _mm256_add_ps(neighborSum, east);
-
-                // Load the k values and cube them
-                __m256 k = _mm256_loadu_ps(&kMat.at<float>(i, j));
-                k        = _mm256_mul_ps(k, _mm256_mul_ps(k, k)); // k = k^3
-
-                // Compute the heat equation: newCell = cell + dt * k * (neighborSum - 4 * cell)
-                __m256 fourCell = _mm256_mul_ps(cell, _mm256_set1_ps(4.0f));
-                __m256 diff     = _mm256_sub_ps(neighborSum, fourCell);
-                __m256 dtK      = _mm256_mul_ps(_mm256_set1_ps(dt), k);
-                __m256 newCell  = _mm256_add_ps(cell, _mm256_mul_ps(dtK, diff));
-
-                // Store the result back into the workingTemps matrix
-                _mm256_storeu_ps(&m_workingTemps.at<float>(i, j), newCell);
-            }
-
-            // Handle the remaining columns that are not divisible by 8
-            for (; j < m_temps.cols - 1; j++)
-            {
-                constexpr float dt = 0.25f;
-                float& cell = m_temps.at<float>(i, j);
-                float& newCell = m_workingTemps.at<float>(i, j);
-                float k = kMat.at<float>(i, j);
-                k = k * k * k;
-
-                const float neighborSum =
-                    m_temps.at<float>(i - 1, j) +
-                    m_temps.at<float>(i + 1, j) +
-                    m_temps.at<float>(i, j - 1) +
-                    m_temps.at<float>(i, j + 1);
-
-                newCell = cell + dt * k * (neighborSum - 4 * cell);
-            }
-        }
-        });
-
-    m_workingTemps.copyTo(m_temps);
-    updateSources();
-}
-
-void HeatGrid::formulaHeatSIMD128(const cv::Mat& kMat)
-{
     constexpr float dt = 0.25f;
-    const int simdWidth = 4; // SSE processes 4 floats at a time (128-bit)
+    const int rows = m_temps.rows;
+    const int cols = m_temps.cols;
 
-    cv::Range range(1, m_temps.rows - 1);
+    // Precompute dt constant in AVX register
+    __m256 dtVec = _mm256_set1_ps(dt);
+    __m256 fourVec = _mm256_set1_ps(4.0f);
+
+    cv::Range range(1, rows - 1);
     cv::parallel_for_(range, [&](const cv::Range& r) {
         for (int i = r.start; i < r.end; ++i)
         {
             int j = 1;
 
-            // Process columns in chunks of 4 (SSE width)
-            for (; j <= m_temps.cols - simdWidth - 1; j += simdWidth)
+            // Process columns in chunks of 8 (AVX width)
+            for (; j <= cols - 9; j += 8)
             {
                 // Load current cell values
-                __m128 cell = _mm_loadu_ps(&m_temps.at<float>(i, j));
+                __m256 cell = _mm256_loadu_ps(&m_temps.at<float>(i, j));
 
                 // Load neighboring values
-                __m128 north = _mm_loadu_ps(&m_temps.at<float>(i - 1, j));
-                __m128 south = _mm_loadu_ps(&m_temps.at<float>(i + 1, j));
-                __m128 west = _mm_loadu_ps(&m_temps.at<float>(i, j - 1));
-                __m128 east = _mm_loadu_ps(&m_temps.at<float>(i, j + 1));
+                __m256 north = _mm256_loadu_ps(&m_temps.at<float>(i - 1, j));
+                __m256 south = _mm256_loadu_ps(&m_temps.at<float>(i + 1, j));
+                __m256 west = _mm256_loadu_ps(&m_temps.at<float>(i, j - 1));
+                __m256 east = _mm256_loadu_ps(&m_temps.at<float>(i, j + 1));
 
-                // Sum neighboring values: north + south + west + east
-                __m128 neighborSum = _mm_add_ps(north, south);
-                neighborSum = _mm_add_ps(neighborSum, west);
-                neighborSum = _mm_add_ps(neighborSum, east);
+                // Sum neighboring values
+                __m256 neighborSum = _mm256_add_ps(north, south);
+                neighborSum = _mm256_add_ps(neighborSum, west);
+                neighborSum = _mm256_add_ps(neighborSum, east);
 
-                // Load k values and cube them: k = k^3
-                __m128 k = _mm_loadu_ps(&kMat.at<float>(i, j));
-                k = _mm_mul_ps(k, _mm_mul_ps(k, k)); // k = k^3
+                // Load k values and cube them
+                __m256 k = _mm256_loadu_ps(&kMat.at<float>(i, j));
+                k = _mm256_mul_ps(k, _mm256_mul_ps(k, k)); // k = k^3
 
-                // Compute: newCell = cell + dt * k * (neighborSum - 4 * cell)
-                __m128 fourCell = _mm_mul_ps(cell, _mm_set1_ps(4.0f));
-                __m128 diff = _mm_sub_ps(neighborSum, fourCell);
-                __m128 dtK = _mm_mul_ps(_mm_set1_ps(dt), k);
-                __m128 newCell = _mm_add_ps(cell, _mm_mul_ps(dtK, diff));
+                // Compute diff = neighborSum - 4 * cell
+                __m256 fourCell = _mm256_mul_ps(cell, fourVec);
+                __m256 diff = _mm256_sub_ps(neighborSum, fourCell);
 
-                // Store result back into m_workingTemps
-                _mm_storeu_ps(&m_workingTemps.at<float>(i, j), newCell);
+                // Compute dtK = dt * k
+                __m256 dtK = _mm256_mul_ps(dtVec, k);
+
+                // Compute newCell = cell + dtK * diff
+                __m256 newCell = _mm256_fmadd_ps(dtK, diff, cell);
+
+                // Store result
+                _mm256_storeu_ps(&m_workingTemps.at<float>(i, j), newCell);
             }
 
-            // Handle remaining elements that are not divisible by 4
-            for (; j < m_temps.cols - 1; ++j)
+            // Handle remaining elements
+            for (; j < cols - 1; ++j)
             {
                 float& cell = m_temps.at<float>(i, j);
                 float& newCell = m_workingTemps.at<float>(i, j);
@@ -370,11 +314,10 @@ void HeatGrid::formulaHeatSIMD128(const cv::Mat& kMat)
         }
         });
 
-    // Copy results from m_workingTemps back to m_temps
-    m_workingTemps.copyTo(m_temps);
+    // Swap matrices instead of copying
+    std::swap(m_temps, m_workingTemps);
     updateSources();
 }
-
 
 void ParallelAdd(const cv::Mat& mat1, const cv::Mat& mat2, cv::Mat& result)
 {
@@ -407,16 +350,15 @@ void ParallelMultiply(const cv::Mat& mat1, const cv::Mat& mat2, cv::Mat& result)
 void HeatGrid::formulaHeatKernel(const cv::Mat& kMat)
 {
     constexpr float dt = 0.25f;
-    cv::Mat kernel = (cv::Mat_<float>(3, 3) <<
-        0.00, dt, 0.00,
-        dt, dt*-4.00, dt,
-        0.00, dt, 0.00);
+    // Use cv::Laplacian for efficiency
+    cv::Laplacian(m_temps, m_workingTemps, CV_32F);
 
-    cv::filter2D(m_temps, m_workingTemps, CV_32F, kernel);
+    // Multiply and scale in one step
+    cv::multiply(m_workingTemps, kMat, m_workingTemps, dt);
 
-    cv::multiply(m_workingTemps, kMat, m_result);
-    cv::add(m_temps, m_result, m_workingTemps);
+    // Update m_temps directly
+    cv::add(m_temps, m_workingTemps, m_temps);
 
-    m_workingTemps.copyTo(m_temps);
     updateSources();
 }
+
