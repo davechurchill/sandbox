@@ -59,7 +59,7 @@ void Processor_Heat::imgui()
     // Move time forwards, or reset it
     {
 
-        ImGui::SliderInt("Iterations Per Frame", &m_iterations, 0, 200);
+        ImGui::SliderInt("Iterations Per Frame", &m_iterations, 0, 500);
         
 
         if (ImGui::Button("Step"))

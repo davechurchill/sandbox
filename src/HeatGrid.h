@@ -38,6 +38,7 @@ struct HeatSource
 class HeatGrid
 {
 	cv::Mat m_temps;
+    cv::Mat m_result;
     cv::Mat m_workingTemps;
     cv::Mat m_normalized;
 	bool    m_restartRequested = false;
@@ -92,6 +93,8 @@ public:
 
     void formulaAvg(const cv::Mat& kMat);
     void formulaHeat(const cv::Mat& kMat);
+    void formulaHeatSIMD(const cv::Mat& kMat);
+    void formulaHeatKernel(const cv::Mat& kMat);
 	void updateSources();
 };
 
