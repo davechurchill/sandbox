@@ -23,7 +23,7 @@ void Processor_Heat::setInitialHeatSources()
     m_heatGrid.addSource(HeatSource(cv::Rect(100, 100, 10, 10), 100.0f));
     m_heatGrid.addSource(HeatSource(cv::Rect(300, 100, 10, 10), -100.0f));
     m_heatGrid.addSource(HeatSource(cv::Rect(300, 200, 10, 10), 100.0f));
-    m_heatGrid.addSource(HeatSource(cv::Rect(100, 200, 10, 10), 100.0f));
+    m_heatGrid.addSource(HeatSource(cv::Rect(100, 200, 10, 10), -100.0f));
 }
 
 void Processor_Heat::imgui()
@@ -59,7 +59,7 @@ void Processor_Heat::imgui()
     // Move time forwards, or reset it
     {
 
-        ImGui::SliderInt("Iterations Per Frame", &m_iterations, 0, 500);
+        ImGui::SliderInt("Iterations Per Frame", &m_iterations, 0, 200);
         
 
         if (ImGui::Button("Step"))
@@ -94,7 +94,7 @@ void Processor_Heat::imgui()
         }
 
         // Now use sourceCStrings for the ImGui::Combo function
-        ImGui::Combo("Source", &m_selectedSource, sourceCStrings.data(), sourceCStrings.size());
+        ImGui::Combo("Source", &m_selectedSource, sourceCStrings.data(), (int)sourceCStrings.size());
 
     }
 
@@ -207,8 +207,8 @@ void Processor_Heat::processEvent(const sf::Event& event, const sf::Vector2f& mo
 
         if (diff.x != 0 || diff.y != 0)
         {
-            m_heatGrid.getSources()[m_selectedSource].m_area.x += diff.x;
-            m_heatGrid.getSources()[m_selectedSource].m_area.y += diff.y;
+            m_heatGrid.getSources()[m_selectedSource].m_area.x += (int)diff.x;
+            m_heatGrid.getSources()[m_selectedSource].m_area.y += (int)diff.y;
             m_heatGrid.updateSources();
         }
     }
