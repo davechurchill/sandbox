@@ -6,7 +6,6 @@
 
 #include "Processor_Colorizer.h"
 #include "Processor_Minecraft.h"
-#include "Processor_Socket.h"
 #include "Source_Camera.h"
 #include "Source_Perlin.h"
 #include "Source_Snapshot.h"
@@ -24,7 +23,7 @@
 
 
 Scene_Main::Scene_Main(GameEngine * game)
-    : Scene(game)
+    : Scene(game), m_socketHandler(&m_topography)
 {
     init();
 }
@@ -40,7 +39,6 @@ void Scene_Main::init()
 
     registerProcessor<Processor_Colorizer>("Colorizer");
     registerProcessor<Processor_Minecraft>("Minecraft");
-    registerProcessor<Processor_Socket>("Socket");
 
     load();
     m_source->init();
@@ -233,6 +231,15 @@ void Scene_Main::renderUI()
         ImGui::Separator();
 
         m_processor->imgui();
+
+        ImGui::EndTabItem();
+    }
+
+    // Socket
+
+    if (ImGui::BeginTabItem("Socket")) 
+    {
+        m_socketHandler.imgui();
 
         ImGui::EndTabItem();
     }

@@ -5,6 +5,7 @@
 #include "TopographyProcessor.h"
 #include "ViewController.hpp"
 #include "Save.hpp"
+#include "SocketHandler.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -14,6 +15,8 @@
 class Scene_Main : public Scene
 {
     cv::Mat             m_topography;
+
+    SocketHandler       m_socketHandler;
 
     Save                m_save;
 
