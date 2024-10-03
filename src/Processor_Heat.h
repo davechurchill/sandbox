@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HeatMap.h"
+#include "HeatGrid.h"
 #include "Profiler.hpp"
 #include "SandboxProjector.h"
 #include "Tools.h"
@@ -8,30 +8,15 @@
 
 namespace
 {
-    constexpr void drawSquare(std::vector<HeatMap::HeatSource>& sources, int x, int y, int w, int h)
-    {
-        sources.push_back({ { x, y }, { w, h }, 100.f });
-    }
 
-    constexpr std::vector<HeatMap::HeatSource> initialSources()
-    {
-        std::vector<HeatMap::HeatSource> sources{};
-
-        drawSquare(sources, 100, 100, 10, 10);
-        drawSquare(sources, 300, 100, 10, 10);
-        drawSquare(sources, 300, 200, 10, 10);
-        drawSquare(sources, 100, 200, 10, 10);
-
-        return sources;
-    }
 }
 
 class Processor_Heat : public TopographyProcessor
 {
-    HeatMap::Grid heatGrid{ initialSources() };
+    HeatGrid    m_heatGrid;
 
     SandBoxProjector m_projector;
-    bool m_drawProjection = true;
+    bool        m_drawProjection = true;
 
     cv::Mat     m_cvTransformedDepthImage32fColor;
     sf::Image   m_sfTransformedDepthImageColor;
@@ -47,9 +32,17 @@ class Processor_Heat : public TopographyProcessor
 
     bool        m_drawContours = false;
     int         m_numberOfContourLines = 19;
+    int         m_iterations = 0;
+    bool        m_doStep = false;
 
     bool        m_drawingSource = false;
-    cv::Point rectStart{};
+    cv::Point   m_sources;
+
+    int         m_selectedSource = 0;
+
+    sf::Vector2f m_previousMouse;
+
+    void setInitialHeatSources();
 
 public:
     void init();

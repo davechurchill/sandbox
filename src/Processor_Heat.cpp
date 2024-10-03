@@ -12,8 +12,18 @@ namespace {
 
 void Processor_Heat::init()
 {
+    setInitialHeatSources();
     m_shader_color.loadFromFile(shaderPathColor, sf::Shader::Fragment);
     m_shader_heat.loadFromFile(shaderPathHeat, sf::Shader::Fragment);
+}
+
+void Processor_Heat::setInitialHeatSources()
+{
+    m_heatGrid.clearSources();
+    m_heatGrid.addSource(HeatSource(cv::Rect(100, 100, 10, 10), 100.0f));
+    m_heatGrid.addSource(HeatSource(cv::Rect(300, 100, 10, 10), -100.0f));
+    m_heatGrid.addSource(HeatSource(cv::Rect(300, 200, 10, 10), 100.0f));
+    m_heatGrid.addSource(HeatSource(cv::Rect(100, 200, 10, 10), 100.0f));
 }
 
 void Processor_Heat::imgui()
@@ -22,6 +32,7 @@ void Processor_Heat::imgui()
 
     // Common options
     {
+        m_projector.imgui();
         ImGui::Checkbox("Draw Projection", &m_drawProjection);
 
         if (ImGui::Button("Reload Shader"))
@@ -30,42 +41,62 @@ void Processor_Heat::imgui()
             m_shader_heat.loadFromFile(shaderPathHeat, sf::Shader::Fragment);
         }
 
-        ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
-        ImGui::InputInt("Contour Lines", &m_numberOfContourLines, 1, 10);
+        //ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
+        ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
 
         //ImGui::Spacing();
 
-        m_projector.imgui();
     }
 
     ImGui::Separator();
 
     // Set algorithm used for computations
     ImGui::Combo("Algorithm",
-        (int*)&heatGrid.m_algorithm,
-        HeatMap::AlgorithmNames,
-        IM_ARRAYSIZE(HeatMap::AlgorithmNames));
+        (int*)&m_heatGrid.m_algorithm,
+        AlgorithmNames,
+        IM_ARRAYSIZE(AlgorithmNames));
 
     // Move time forwards, or reset it
     {
+
+        ImGui::SliderInt("Iterations Per Frame", &m_iterations, 0, 200);
+        
+
         if (ImGui::Button("Step"))
         {
-            heatGrid.requestStep();
-        }
-
-        static int SPF = 0;
-
-        ImGui::SliderInt("Steps Per Frame", &SPF, 0, 200);
-        heatGrid.requestStep(SPF);
+            m_doStep = true;
+        }   ImGui::SameLine();
 
         if (ImGui::Button("Reset"))
         {
-            SPF = 0;
-            heatGrid.reset();
+            m_iterations = 0;
+            m_heatGrid.reset();
         }
     }
 
     ImGui::Separator();
+
+    {
+        std::vector<std::string> sourceStrings; 
+        sourceStrings.reserve(m_heatGrid.getSources().size());
+        std::vector<const char*> sourceCStrings; 
+        sourceCStrings.reserve(m_heatGrid.getSources().size());
+        
+        for (size_t s = 0; s < m_heatGrid.getSources().size(); s++)
+        {
+            auto& source = m_heatGrid.getSources()[s];
+            std::stringstream ss;
+            ss << source.m_temp << " : (" << source.m_area.x << ", " << source.m_area.y << ")";
+            sourceStrings.push_back(ss.str());
+            sourceCStrings.push_back(sourceStrings.back().c_str());
+            //std::string label = "S" + std::to_string(s);
+            //ImGui::SliderInt2(label.c_str(), &source.m_area.x, 0, 1000);
+        }
+
+        // Now use sourceCStrings for the ImGui::Combo function
+        ImGui::Combo("Source", &m_selectedSource, sourceCStrings.data(), sourceCStrings.size());
+
+    }
 
     // Add & delete sources
     {
@@ -90,7 +121,7 @@ void Processor_Heat::imgui()
 
             if (ImGui::Button("Add"))
             {
-                heatGrid.addSource({ { pos[0], pos[1] }, { size[0], size[1] }, temp });
+                //m_heatGrid.addSource({ { pos[0], pos[1] }, { size[0], size[1] }, temp });
                 ImGui::CloseCurrentPopup();
             }
 
@@ -111,7 +142,7 @@ void Processor_Heat::imgui()
 
         if (ImGui::Button("Clear Sources"))
         {
-            heatGrid.clearSources();
+            m_heatGrid.clearSources();
         }
     }
 }
@@ -161,33 +192,28 @@ void Processor_Heat::processEvent(const sf::Event& event, const sf::Vector2f& mo
     
     const bool draggingProjection = m_projector.processEvent(event, mouse);
 
-    // TODO: Make this less horrifically wrong (I am not good at linear algebra)
-    if (m_drawingSource && !draggingProjection)
+    sf::Vector2f ms = mouse;
+    ms /= m_projector.getTransformedScale();
+    ms -= m_projector.getTransformedPosition();
+    cv::Mat projectedMat = (cv::Mat_<double>(1, 3) << ms.x, ms.y, 1.f) * m_projector.getProjectionMatrix().inv();
+    sf::Vector2f mousePos = sf::Vector2f{ (float)projectedMat.at<double>(0, 0), (float)projectedMat.at<double>(0, 1) };
+    cv::Point mousePoint{ (int)mousePos.y, (int)mousePos.x };
+    //cv::Point mousePoint((int)ms.y, (int)ms.x);
+
+
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
     {
-        sf::Vector2f ms = mouse;
-        ms /= m_projector.getTransformedScale();
-        ms -= m_projector.getTransformedPosition();
-        cv::Mat projectedMat = (cv::Mat_<double>(1, 3) << ms.x, ms.y, 1.f) * m_projector.getProjectionMatrix().inv();
-        sf::Vector2f mousePos = sf::Vector2f{ (float)projectedMat.at<double>(0, 0), (float)projectedMat.at<double>(0, 1) };
-        cv::Point mousePoint{ (int)mousePos.y, (int)mousePos.x };
-        //cv::Point mousePoint((int)ms.y, (int)ms.x);
+        sf::Vector2f diff = mouse - m_previousMouse;
 
-        if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+        if (diff.x != 0 || diff.y != 0)
         {
-            rectStart = mousePoint;
-        }
-
-        if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
-        {
-            heatGrid.addSource({ rectStart, mousePoint - rectStart, 100.f});
-            m_drawingSource = false;
-        }
-
-        if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Right)
-        {
-            m_drawingSource = false;
+            m_heatGrid.getSources()[m_selectedSource].m_area.x += diff.x;
+            m_heatGrid.getSources()[m_selectedSource].m_area.y += diff.y;
+            m_heatGrid.updateSources();
         }
     }
+
+    m_previousMouse = mouse;
 }
 
 void Processor_Heat::save(Save& save) const
@@ -239,12 +265,17 @@ void Processor_Heat::processTopography(const cv::Mat& data)
 
     {
         PROFILE_SCOPE("Heat");
+        m_heatGrid.update(data, m_iterations);
 
-        heatGrid.update(data);
+        if (m_doStep)
+        {
+            m_heatGrid.update(data, 1);
+            m_doStep = false;
+        }
 
         {
             PROFILE_SCOPE("Calibration TransformProjection");
-            m_projector.project(heatGrid.data(), m_cvTransformedDepthImage32fHeat);
+            m_projector.project(m_heatGrid.normalizedData(), m_cvTransformedDepthImage32fHeat);
         }
 
         // Draw warped depth image

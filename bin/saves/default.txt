@@ -1,4 +1,4 @@
-source Camera
+source Snapshot
 processor Heat
 align 0
 gaussianBlur 1
