@@ -9,12 +9,16 @@ constexpr float KelvinDiff = 273.15f;
 enum class Algorithms
 {
 	Average,
-	HeatEquation
+	HeatEquation,
+    HeatEquationKernel,
+    HeatEquationSIMD,
 };
 
 static const char* AlgorithmNames[] = {
 	"Average",
-	"Heat Equation"
+	"Heat Equation",
+    "Heat Equation Kernel",
+    "Heat Equation SIMD",
 };
 
 struct HeatSource
@@ -47,7 +51,7 @@ class HeatGrid
 
 public:
 
-	Algorithms m_algorithm = Algorithms::HeatEquation;
+	Algorithms m_algorithm = Algorithms::HeatEquationSIMD;
 
     HeatGrid() = default;
 
@@ -92,8 +96,12 @@ public:
 
 
     void formulaAvg(const cv::Mat& kMat);
+    void formulaAvgSIMD(const cv::Mat& kMat);
     void formulaHeat(const cv::Mat& kMat);
+    void formulaHeatParallel(const cv::Mat& kMat);
+    void formulaHeatOMP(const cv::Mat& kMat);
     void formulaHeatSIMD(const cv::Mat& kMat);
+    void formulaHeatSIMD128(const cv::Mat& kMat);
     void formulaHeatKernel(const cv::Mat& kMat);
 	void updateSources();
 };

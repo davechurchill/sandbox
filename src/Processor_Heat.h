@@ -6,11 +6,6 @@
 #include "Tools.h"
 #include "TopographyProcessor.h"
 
-namespace
-{
-
-}
-
 class Processor_Heat : public TopographyProcessor
 {
     HeatGrid    m_heatGrid;
