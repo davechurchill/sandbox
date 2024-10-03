@@ -23,5 +23,5 @@ projectionPoints 7 61 1866 92 0 1078 1870 1078
 drawLines 1
 selectedShaderIndex 4
 drawContours 1
-numberOfContourLines 19
+numberOfContourLines 0
 drawProjection 1

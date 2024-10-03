@@ -187,32 +187,54 @@ void HeatGrid::formulaHeat(const cv::Mat& kMat)
 
 void HeatGrid::formulaHeatParallel(const cv::Mat& kMat)
 {
-    cv::Range range(1, m_temps.rows - 1);
+    const int rows = m_temps.rows;
+    const int cols = m_temps.cols;
+
+    cv::Range range(1, rows - 1);
+
     cv::parallel_for_(range, [&](const cv::Range& r) {
-        for (int i = r.start; i < r.end; i++)
+        constexpr float dt = 0.25f;
+
+        // Get the step sizes (number of elements per row)
+        size_t tempsStep = m_temps.step1();
+        size_t workingTempsStep = m_workingTemps.step1();
+        size_t kMatStep = kMat.step1();
+
+        // Get pointers to the data
+        float* tempsData = m_temps.ptr<float>();
+        float* workingTempsData = m_workingTemps.ptr<float>();
+        float* kMatData = ((cv::Mat&)kMat).ptr<float>();
+
+        for (int i = r.start; i < r.end; ++i)
         {
-            for (int j = 1; j < m_temps.cols - 1; j++)
+            // Pointers to the current and neighboring rows
+            float* currRow = tempsData + i * tempsStep;
+            float* prevRow = tempsData + (i - 1) * tempsStep;
+            float* nextRow = tempsData + (i + 1) * tempsStep;
+
+            float* kRow = kMatData + i * kMatStep;
+            float* workingRow = workingTempsData + i * workingTempsStep;
+
+            for (int j = 1; j < cols - 1; ++j)
             {
-                constexpr float dt = 0.25f;
-                float& cell = m_temps.at<float>(i, j);
-                float& newCell = m_workingTemps.at<float>(i, j);
-                float k = kMat.at<float>(i, j);
-                k = k * k * k;
+                float cell = currRow[j];
+                float k = kRow[j];
+                k = k * k * k; // Compute k^3
 
-                const float neighBourSum =
-                    m_temps.at<float>(i - 1, j) +
-                    m_temps.at<float>(i + 1, j) +
-                    m_temps.at<float>(i, j - 1) +
-                    m_temps.at<float>(i, j + 1);
+                // Sum of neighboring cells
+                float neighbourSum = prevRow[j] + nextRow[j] + currRow[j - 1] + currRow[j + 1];
 
-                newCell = cell + dt * k * (neighBourSum - 4 * cell);
+                // Update the working temperature
+                workingRow[j] = cell + dt * k * (neighbourSum - 4 * cell);
             }
         }
         });
 
-    m_workingTemps.copyTo(m_temps);
+    // Swap the matrices instead of copying to avoid unnecessary memory operations
+    std::swap(m_temps, m_workingTemps);
     updateSources();
 }
+
 
 void HeatGrid::formulaHeatOMP(const cv::Mat& kMat)
 {
@@ -250,74 +272,56 @@ void HeatGrid::formulaHeatSIMD(const cv::Mat& kMat)
     const int rows = m_temps.rows;
     const int cols = m_temps.cols;
 
-    // Precompute dt constant in AVX register
     __m256 dtVec = _mm256_set1_ps(dt);
     __m256 fourVec = _mm256_set1_ps(4.0f);
 
-    cv::Range range(1, rows - 1);
-    cv::parallel_for_(range, [&](const cv::Range& r) {
-        for (int i = r.start; i < r.end; ++i)
+    cv::parallel_for_(cv::Range(1, rows - 1), [&](const cv::Range& range)
+    {
+        for (int i = range.start; i < range.end; ++i)
         {
-            int j = 1;
+            float* currRow   = m_temps.ptr<float>(i);
+            float* prevRow   = m_temps.ptr<float>(i - 1);
+            float* nextRow   = m_temps.ptr<float>(i + 1);
+            float* resultRow = m_workingTemps.ptr<float>(i);
+            float* kRow      = ((cv::Mat&)kMat).ptr<float>(i);
 
-            // Process columns in chunks of 8 (AVX width)
+            int j = 1;
             for (; j <= cols - 9; j += 8)
             {
-                // Load current cell values
-                __m256 cell = _mm256_loadu_ps(&m_temps.at<float>(i, j));
+                __m256 cell  = _mm256_loadu_ps(currRow + j);
+                __m256 north = _mm256_loadu_ps(prevRow + j);
+                __m256 south = _mm256_loadu_ps(nextRow + j);
+                __m256 west  = _mm256_loadu_ps(currRow + j - 1);
+                __m256 east  = _mm256_loadu_ps(currRow + j + 1);
 
-                // Load neighboring values
-                __m256 north = _mm256_loadu_ps(&m_temps.at<float>(i - 1, j));
-                __m256 south = _mm256_loadu_ps(&m_temps.at<float>(i + 1, j));
-                __m256 west = _mm256_loadu_ps(&m_temps.at<float>(i, j - 1));
-                __m256 east = _mm256_loadu_ps(&m_temps.at<float>(i, j + 1));
+                __m256 neighborSum = _mm256_add_ps(_mm256_add_ps(north, south), _mm256_add_ps(west, east));
+                __m256 laplacian   = _mm256_sub_ps(neighborSum, _mm256_mul_ps(fourVec, cell));
 
-                // Sum neighboring values
-                __m256 neighborSum = _mm256_add_ps(north, south);
-                neighborSum = _mm256_add_ps(neighborSum, west);
-                neighborSum = _mm256_add_ps(neighborSum, east);
+                __m256 k = _mm256_loadu_ps(&kRow[j]);
+                        k = _mm256_mul_ps(k, _mm256_mul_ps(k, k)); // k^3
 
-                // Load k values and cube them
-                __m256 k = _mm256_loadu_ps(&kMat.at<float>(i, j));
-                k = _mm256_mul_ps(k, _mm256_mul_ps(k, k)); // k = k^3
+                __m256 newCell = _mm256_fmadd_ps(_mm256_mul_ps(dtVec, k), laplacian, cell);
 
-                // Compute diff = neighborSum - 4 * cell
-                __m256 fourCell = _mm256_mul_ps(cell, fourVec);
-                __m256 diff = _mm256_sub_ps(neighborSum, fourCell);
-
-                // Compute dtK = dt * k
-                __m256 dtK = _mm256_mul_ps(dtVec, k);
-
-                // Compute newCell = cell + dtK * diff
-                __m256 newCell = _mm256_fmadd_ps(dtK, diff, cell);
-
-                // Store result
-                _mm256_storeu_ps(&m_workingTemps.at<float>(i, j), newCell);
+                _mm256_storeu_ps(&resultRow[j], newCell);
             }
 
-            // Handle remaining elements
+            // Handle remaining columns
             for (; j < cols - 1; ++j)
             {
-                float& cell = m_temps.at<float>(i, j);
-                float& newCell = m_workingTemps.at<float>(i, j);
-                float k = kMat.at<float>(i, j);
+                float laplacian = prevRow[j] + nextRow[j] + currRow[j - 1] + currRow[j + 1] - 4 * currRow[j];
+                float k = kRow[j];
                 k = k * k * k;
 
-                const float neighborSum =
-                    m_temps.at<float>(i - 1, j) +
-                    m_temps.at<float>(i + 1, j) +
-                    m_temps.at<float>(i, j - 1) +
-                    m_temps.at<float>(i, j + 1);
-
-                newCell = cell + dt * k * (neighborSum - 4 * cell);
+                resultRow[j] = currRow[j] + dt * k * laplacian;
             }
         }
-        });
+    });
 
-    // Swap matrices instead of copying
+    // Swap matrices to avoid copying
     std::swap(m_temps, m_workingTemps);
     updateSources();
 }
+
 
 void ParallelAdd(const cv::Mat& mat1, const cv::Mat& mat2, cv::Mat& result)
 {
