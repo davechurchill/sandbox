@@ -191,28 +191,28 @@ void HeatGrid::formulaHeatParallel(const cv::Mat& kMat)
     const int cols = m_temps.cols;
 
     cv::Range range(1, rows - 1);
-
-    cv::parallel_for_(range, [&](const cv::Range& r) {
+    cv::parallel_for_(range, [&](const cv::Range& r) 
+    {
         constexpr float dt = 0.25f;
 
         // Get the step sizes (number of elements per row)
-        size_t tempsStep = m_temps.step1();
+        size_t tempsStep        = m_temps.step1();
         size_t workingTempsStep = m_workingTemps.step1();
-        size_t kMatStep = kMat.step1();
+        size_t kMatStep         = kMat.step1();
 
         // Get pointers to the data
-        float* tempsData = m_temps.ptr<float>();
+        float* tempsData        = m_temps.ptr<float>();
         float* workingTempsData = m_workingTemps.ptr<float>();
-        float* kMatData = ((cv::Mat&)kMat).ptr<float>();
+        float* kMatData         = ((cv::Mat&)kMat).ptr<float>();
 
         for (int i = r.start; i < r.end; ++i)
         {
             // Pointers to the current and neighboring rows
-            float* currRow = tempsData + i * tempsStep;
+            float* currRow = tempsData +  i      * tempsStep;
             float* prevRow = tempsData + (i - 1) * tempsStep;
             float* nextRow = tempsData + (i + 1) * tempsStep;
 
-            float* kRow = kMatData + i * kMatStep;
+            float* kRow       = kMatData + i * kMatStep;
             float* workingRow = workingTempsData + i * workingTempsStep;
 
             for (int j = 1; j < cols - 1; ++j)
@@ -228,7 +228,7 @@ void HeatGrid::formulaHeatParallel(const cv::Mat& kMat)
                 workingRow[j] = cell + dt * k * (neighbourSum - 4 * cell);
             }
         }
-        });
+    });
 
     // Swap the matrices instead of copying to avoid unnecessary memory operations
     std::swap(m_temps, m_workingTemps);
