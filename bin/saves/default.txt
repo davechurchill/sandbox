@@ -1,5 +1,5 @@
-source Snapshot
-processor Socket
+source Perlin
+processor Colorizer
 align 0
 gaussianBlur 1
 maxDistance 1.13
@@ -7,9 +7,9 @@ minDistance 0.9
 drawDepth 1
 drawColor 0
 octaves 5
-seed 0
-seedSize 9
-persistance 0.5
+seed 2
+seedSize 4
+persistance 0.473
 drawGrid 0
 temporalAlpha 0.099
 temporalDelta 72

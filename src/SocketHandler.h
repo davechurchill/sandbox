@@ -18,4 +18,6 @@ public:
     SocketHandler(cv::Mat * data);
     void imgui();
     void connect();
+    void stop();
+    ~SocketHandler();
 };
