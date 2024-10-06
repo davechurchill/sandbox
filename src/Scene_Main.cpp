@@ -192,7 +192,6 @@ void Scene_Main::renderUI()
 
     if (ImGui::BeginTabItem("Source"))
     {
-        
         if (ImGui::BeginCombo("Selected Source", m_sourceID.c_str()))
         {
             for (auto & [name, _] : m_sourceMap)
@@ -207,9 +206,7 @@ void Scene_Main::renderUI()
         }
 
         ImGui::Separator();
-
         m_source->imgui();
-
         ImGui::EndTabItem();
     }
 
@@ -230,9 +227,7 @@ void Scene_Main::renderUI()
             ImGui::EndCombo();
         }
         ImGui::Separator();
-
         m_processor->imgui();
-
         ImGui::EndTabItem();
     }
 

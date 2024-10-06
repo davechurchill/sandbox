@@ -76,7 +76,6 @@
     <ClInclude Include="..\src\Tools.h" />
     <ClInclude Include="..\src\TopographyProcessor.h" />
     <ClInclude Include="..\src\TopographySource.h" />
-    <ClInclude Include="..\src\Vec2.hpp" />
     <ClInclude Include="..\src\ViewController.hpp" />
   </ItemGroup>
   <ItemGroup>

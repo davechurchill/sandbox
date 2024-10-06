@@ -42,6 +42,7 @@ void SandBoxProjector::imgui()
 {
     PROFILE_FUNCTION();
 
+    ImGui::Checkbox("Show Projection", &m_drawProjection);
     ImGui::Checkbox("Show Projection Lines", &m_drawLines);
 }
 
@@ -77,6 +78,7 @@ bool SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f 
 
 void SandBoxProjector::render(sf::RenderWindow & window)
 {
+    if (!m_drawProjection) { return; }
     PROFILE_FUNCTION();
     if (m_drawLines)
     {
@@ -147,10 +149,12 @@ void SandBoxProjector::save(Save& save) const
 {
     std::copy(std::cbegin(m_projectionPoints), std::cend(m_projectionPoints), std::begin(save.projectionPoints));
     save.drawLines = m_drawLines;
+    save.drawProjection = m_drawProjection;
 }
 
 void SandBoxProjector::load(const Save& save)
 {
     std::copy(std::cbegin(save.projectionPoints), std::cend(save.projectionPoints), std::begin(m_projectionPoints));
     m_drawLines = save.drawLines;
+    m_drawProjection = save.drawProjection;
 }

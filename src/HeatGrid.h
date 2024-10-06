@@ -14,7 +14,7 @@ enum class Algorithms
     HeatEquationSIMD,
 };
 
-static const char* AlgorithmNames[] = {
+static std::vector<const char*> AlgorithmNames = {
 	"Average",
 	"Heat Equation",
     "Heat Equation Kernel",

@@ -1,5 +1,5 @@
 source Snapshot
-processor Heat
+processor Colorizer
 align 0
 gaussianBlur 1
 maxDistance 1.13
@@ -23,5 +23,5 @@ projectionPoints 7 61 1866 92 0 1078 1870 1078
 drawLines 1
 selectedShaderIndex 4
 drawContours 1
-numberOfContourLines 0
+numberOfContourLines 19
 drawProjection 1

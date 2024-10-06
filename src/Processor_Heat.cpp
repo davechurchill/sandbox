@@ -30,121 +30,56 @@ void Processor_Heat::imgui()
 {
     PROFILE_FUNCTION();
 
-    // Common options
-    {
-        m_projector.imgui();
-        ImGui::Checkbox("Draw Projection", &m_drawProjection);
-
-        if (ImGui::Button("Reload Shader"))
-        {
-            m_shader_color.loadFromFile(shaderPathColor, sf::Shader::Fragment);
-            m_shader_heat.loadFromFile(shaderPathHeat, sf::Shader::Fragment);
-        }
-
-        //ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
-        ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
-
-        //ImGui::Spacing();
-
-    }
-
-    ImGui::Separator();
-
     // Set algorithm used for computations
-    ImGui::Combo("Algorithm",
-        (int*)&m_heatGrid.m_algorithm,
-        AlgorithmNames,
-        IM_ARRAYSIZE(AlgorithmNames));
-
-    // Move time forwards, or reset it
-    {
-
-        ImGui::SliderInt("Iterations Per Frame", &m_iterations, 0, 200);
+    ImGui::Combo("Algorithm", (int*)&m_heatGrid.m_algorithm, AlgorithmNames.data(), (int)AlgorithmNames.size());
+    ImGui::SliderInt("Iterations Per Frame", &m_iterations, 0, 200);
         
 
-        if (ImGui::Button("Step"))
-        {
-            m_doStep = true;
-        }   ImGui::SameLine();
+    if (ImGui::Button("Step")) 
+    {
+        m_doStep = true;
+    }   ImGui::SameLine();
 
-        if (ImGui::Button("Reset"))
-        {
-            m_iterations = 0;
-            m_heatGrid.reset();
-        }
+    if (ImGui::Button("Reset"))
+    {
+        m_iterations = 0;
+        m_heatGrid.reset();
+    }
+    
+    std::vector<std::string> sourceStrings; 
+    sourceStrings.reserve(m_heatGrid.getSources().size());
+    std::vector<const char*> sourceCStrings; 
+    sourceCStrings.reserve(m_heatGrid.getSources().size());
+        
+    for (size_t s = 0; s < m_heatGrid.getSources().size(); s++)
+    {
+        auto& source = m_heatGrid.getSources()[s];
+        std::stringstream ss;
+        ss << source.m_temp << " : (" << source.m_area.x << ", " << source.m_area.y << ")";
+        sourceStrings.push_back(ss.str());
+        sourceCStrings.push_back(sourceStrings.back().c_str());
+    }
+
+    // Now use sourceCStrings for the ImGui::Combo function
+    ImGui::Combo("Source", &m_selectedSource, sourceCStrings.data(), (int)sourceCStrings.size());
+
+    if (ImGui::Button("Clear Sources"))
+    {
+        m_heatGrid.clearSources();
     }
 
     ImGui::Separator();
+    m_projector.imgui();
 
+    if (ImGui::Button("Reload Shader"))
     {
-        std::vector<std::string> sourceStrings; 
-        sourceStrings.reserve(m_heatGrid.getSources().size());
-        std::vector<const char*> sourceCStrings; 
-        sourceCStrings.reserve(m_heatGrid.getSources().size());
-        
-        for (size_t s = 0; s < m_heatGrid.getSources().size(); s++)
-        {
-            auto& source = m_heatGrid.getSources()[s];
-            std::stringstream ss;
-            ss << source.m_temp << " : (" << source.m_area.x << ", " << source.m_area.y << ")";
-            sourceStrings.push_back(ss.str());
-            sourceCStrings.push_back(sourceStrings.back().c_str());
-            //std::string label = "S" + std::to_string(s);
-            //ImGui::SliderInt2(label.c_str(), &source.m_area.x, 0, 1000);
-        }
-
-        // Now use sourceCStrings for the ImGui::Combo function
-        ImGui::Combo("Source", &m_selectedSource, sourceCStrings.data(), (int)sourceCStrings.size());
-
+        m_shader_color.loadFromFile(shaderPathColor, sf::Shader::Fragment);
+        m_shader_heat.loadFromFile(shaderPathHeat, sf::Shader::Fragment);
     }
 
-    // Add & delete sources
-    {
-        static int pos[2]{};
-        static int size[2]{};
-        static float temp;
+    ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
 
-        if (ImGui::Button("Add Source##AddSourceButton"))
-        {
-            pos[0] = 10;
-            pos[1] = 10;
-            size[0] = 20;
-            size[1] = 20;
-            temp = 50.f;
-            ImGui::OpenPopup("Add Source##AddSourceModal");
-        }
 
-        if (ImGui::BeginPopupModal("Add Source##AddSourceModal")) {
-            ImGui::InputInt2("Position", pos);
-            ImGui::InputInt2("Size", size);
-            ImGui::SliderFloat("Temp", &temp, 0.f, 100.f);
-
-            if (ImGui::Button("Add"))
-            {
-                //m_heatGrid.addSource({ { pos[0], pos[1] }, { size[0], size[1] }, temp });
-                ImGui::CloseCurrentPopup();
-            }
-
-            ImGui::SameLine();
-
-            if (ImGui::Button("Cancel"))
-            {
-                ImGui::CloseCurrentPopup();
-            }
-
-            ImGui::EndPopup();
-        }
-
-        if (ImGui::Button("Draw Source"))
-        {
-            m_drawingSource = true;
-        }
-
-        if (ImGui::Button("Clear Sources"))
-        {
-            m_heatGrid.clearSources();
-        }
-    }
 }
 
 void Processor_Heat::render(sf::RenderWindow& window)
@@ -166,8 +101,6 @@ void Processor_Heat::render(sf::RenderWindow& window)
             m_shader_color.setUniform("contour", m_drawContours);
             m_shader_color.setUniform("numberOfContourLines", m_numberOfContourLines);
             m_shader_color.setUniform("u_time", time.getElapsedTime().asSeconds());
-
-            //window.draw(m_sfTransformedDepthSpriteColor, &m_shader_color);
         }
         
         {

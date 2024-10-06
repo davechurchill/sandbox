@@ -24,6 +24,7 @@ class DataWarper
     float                           m_baseHeight;
     bool                            m_updatePlane = false;
     bool                            m_applyHeightAdjustment = false;
+    bool                            m_drawCameraRegion = true;
 
     void generateWarpMatrix();
 

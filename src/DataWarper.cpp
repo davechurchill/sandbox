@@ -29,6 +29,8 @@ void DataWarper::imgui()
 {
     PROFILE_FUNCTION();
  
+    ImGui::Checkbox("Draw Camera Region", &m_drawCameraRegion);
+
     ImGui::Checkbox("Apply Height Adjust", &m_applyHeightAdjustment);
     if (ImGui::Button("Update Height Adjustment"))
     {
@@ -126,20 +128,23 @@ void DataWarper::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
 
-    // draw the circles and lines used to calibrate the interior of the sandbox for the depth camera
-    for (size_t i = 0; i < m_warpCircles.size(); ++i)
+    if (m_drawCameraRegion)
     {
-        m_warpCircles[i].setPosition({ m_warpPoints[i].x, m_warpPoints[i].y });
-        window.draw(m_warpCircles[i]);
-    }
+        // draw the circles and lines used to calibrate the interior of the sandbox for the depth camera
+        for (size_t i = 0; i < m_warpCircles.size(); ++i)
+        {
+            m_warpCircles[i].setPosition({ m_warpPoints[i].x, m_warpPoints[i].y });
+            window.draw(m_warpCircles[i]);
+        }
 
-    sf::VertexArray boxInteriorVertices(sf::LinesStrip);
-    boxInteriorVertices.append(sf::Vertex(m_warpCircles[0].getPosition()));
-    boxInteriorVertices.append(sf::Vertex(m_warpCircles[1].getPosition()));
-    boxInteriorVertices.append(sf::Vertex(m_warpCircles[3].getPosition()));
-    boxInteriorVertices.append(sf::Vertex(m_warpCircles[2].getPosition()));
-    boxInteriorVertices.append(sf::Vertex(m_warpCircles[0].getPosition()));
-    window.draw(boxInteriorVertices);
+        sf::VertexArray boxInteriorVertices(sf::LinesStrip);
+        boxInteriorVertices.append(sf::Vertex(m_warpCircles[0].getPosition()));
+        boxInteriorVertices.append(sf::Vertex(m_warpCircles[1].getPosition()));
+        boxInteriorVertices.append(sf::Vertex(m_warpCircles[3].getPosition()));
+        boxInteriorVertices.append(sf::Vertex(m_warpCircles[2].getPosition()));
+        boxInteriorVertices.append(sf::Vertex(m_warpCircles[0].getPosition()));
+        window.draw(boxInteriorVertices);
+    }
 
     if (m_applyHeightAdjustment)
     {
