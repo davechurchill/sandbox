@@ -14,6 +14,7 @@ class Processor_Colorizer : public TopographyProcessor
     sf::Sprite          m_sfTransformedDepthSprite;
     sf::Shader          m_shader;
     int                 m_selectedShaderIndex = 0;
+    bool                m_drawContours = true;
     int                 m_numberOfContourLines = 19;
 
 public:

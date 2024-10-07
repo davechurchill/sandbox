@@ -13,18 +13,20 @@ void Processor_Colorizer::init()
 void Processor_Colorizer::imgui()
 {
     PROFILE_FUNCTION();
-    if (ImGui::Button("Reload Shader"))
-    {
-        m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
-    }
 
     const char * shaders[] = { "Popsicle", "Blue", "Red", "Terrain", "Animating Water", "None" };
     ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 5);
 
+    ImGui::Checkbox("##Contours", &m_drawContours);
+    ImGui::SameLine();
     ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
 
-    ImGui::Spacing();
+    ImGui::Separator();
 
+    if (ImGui::Button("Reload Shader"))
+    {
+        m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
+    }
     m_projector.imgui();
 }
 
@@ -44,7 +46,7 @@ void Processor_Colorizer::render(sf::RenderWindow & window)
 
         //Change color scheme
         m_shader.setUniform("shaderIndex", m_selectedShaderIndex);
-        m_shader.setUniform("contour", true);
+        m_shader.setUniform("contour", m_drawContours);
         m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
         m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
 
@@ -63,12 +65,14 @@ void Processor_Colorizer::processEvent(const sf::Event & event, const sf::Vector
 void Processor_Colorizer::save(Save & save) const
 {
     save.selectedShaderIndex = m_selectedShaderIndex;
+    save.drawContours = m_drawContours;
     save.numberOfContourLines = m_numberOfContourLines;
     m_projector.save(save);
 }
 void Processor_Colorizer::load(const Save & save)
 {
     m_selectedShaderIndex = save.selectedShaderIndex;
+    m_drawContours = save.drawContours;
     m_numberOfContourLines = save.numberOfContourLines;
     m_projector.load(save);
 }

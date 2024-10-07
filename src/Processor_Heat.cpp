@@ -77,6 +77,8 @@ void Processor_Heat::imgui()
         m_shader_heat.loadFromFile(shaderPathHeat, sf::Shader::Fragment);
     }
 
+    ImGui::Checkbox("##Contours", &m_drawContours);
+    ImGui::SameLine();
     ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
 
 
