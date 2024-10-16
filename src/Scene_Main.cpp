@@ -40,16 +40,15 @@ void Scene_Main::init()
     registerProcessor<Processor_Colorizer>("Colorizer");
     registerProcessor<Processor_Minecraft>("Minecraft");
     registerProcessor<Processor_Heat>("Heat");
+    m_processorMap.emplace("None", []() {return nullptr; });
 
     load();
-    m_source->init();
-    m_processor->init();
 }
 
 void Scene_Main::onFrame()
 {
     m_topography = m_source->getTopography();
-    if (m_topography.rows > 0 && m_topography.cols > 0)
+    if (m_processor && m_topography.rows > 0 && m_topography.cols > 0)
     {
         m_processor->processTopography(m_topography);
     }
@@ -127,8 +126,8 @@ void Scene_Main::sUserInput()
             m_mouseWorld = m_game->window().mapPixelToCoords(m_mouseScreen);
         }
 
-        m_source->processEvent(event, m_mouseWorld);
-        if (!displayOpen)
+        if (m_source) { m_source->processEvent(event, m_mouseWorld); }
+        if (m_processor && !displayOpen)
         {
             m_processor->processEvent(event, m_mouseWorld);
         }
@@ -141,7 +140,7 @@ void Scene_Main::sUserInput()
         {
             sProcessEvent(displayEvent);
 
-            m_processor->processEvent(displayEvent, m_mouseDisplay);
+            if (m_processor) { m_processor->processEvent(displayEvent, m_mouseDisplay); }
 
             // happens whenever the mouse is being moved
             if (displayEvent.type == sf::Event::MouseMoved)
@@ -160,7 +159,8 @@ void Scene_Main::sRender()
     m_game->window().clear();
     m_game->displayWindow().clear();
 
-    m_source->render(m_game->window());
+    if (m_source) { m_source->render(m_game->window()); }
+    if (!m_processor) { return; }
     if (m_game->displayWindow().isOpen())
     {
         m_processor->render(m_game->displayWindow());
@@ -206,7 +206,9 @@ void Scene_Main::renderUI()
         }
 
         ImGui::Separator();
-        m_source->imgui();
+      
+        if (m_source) { m_source->imgui(); }
+      
         ImGui::EndTabItem();
     }
 
@@ -227,7 +229,9 @@ void Scene_Main::renderUI()
             ImGui::EndCombo();
         }
         ImGui::Separator();
-        m_processor->imgui();
+
+        if (m_processor) { m_processor->imgui(); }
+
         ImGui::EndTabItem();
     }
 
@@ -242,8 +246,8 @@ void Scene_Main::save()
     current << m_saveFile << '\n';
     current.close();
 
-    m_source->save(m_save);
-    m_processor->save(m_save);
+    if (m_source) { m_source->save(m_save); }
+    if (m_processor) { m_processor->save(m_save); }
 
     m_save.source = m_sourceID;
     m_save.processor = m_processorID;
@@ -283,9 +287,11 @@ void Scene_Main::setSource(const std::string & source)
     {
         m_source = m_sourceMap.at("Camera")();
     }
-
-    m_source->init();
-    m_source->load(m_save);
+    if (m_source) 
+    {
+        m_source->init();
+        m_source->load(m_save);
+    }
 }
 
 void Scene_Main::setProcessor(const std::string & processor)
@@ -300,9 +306,11 @@ void Scene_Main::setProcessor(const std::string & processor)
     {
         m_processor = m_processorMap.at("Colorizer")();
     }
-
-    m_processor->init();
-    m_processor->load(m_save);
+    if (m_processor) 
+    {
+        m_processor->init();
+        m_processor->load(m_save);
+    }
 }
 
 void Scene_Main::saveDataDump()
