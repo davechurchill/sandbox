@@ -6,13 +6,14 @@ uniform int numberOfContourLines;
 uniform float u_time;
 
 void popsicle(float c);
+void blue(float c);
 void red(float c);
 void terrain(float c);
 void animate(float b);
 void animatedWater(float c);
 
-void main() {
-
+void main()
+{
 	vec2 coord = gl_TexCoord[0].xy;   
 	vec4 pixel_color = texture2D(currentTexture, coord);
 	float c = pixel_color[0];
@@ -26,13 +27,14 @@ void main() {
 	switch (shaderIndex)
 	{
 		case 0: popsicle(c); break;
-		case 1: red(c); break;
-		case 2: terrain(c); break;
-		case 3: animatedWater(c); break;
+		case 1: blue(c); break;
+		case 2: red(c); break;
+		case 3: terrain(c); break;
+		case 4: animatedWater(c); break;
 		default: gl_FragColor = pixel_color; break;
 	}
 	
-	if(contour)
+	if (contour)
 	{
 		ivec2 textureSize = textureSize(currentTexture, 0);
 
@@ -90,9 +92,14 @@ void popsicle(float c) {
 	gl_FragColor = vec4( float(pR) / 255.0, float(pG) / 255.0, float(pB) / 255.0, 1.0);
 }
 
+void blue(float c)
+{
+	gl_FragColor = vec4(c, c, 1.0, 1.0);
+}
+
 void red(float c)
 {
-	gl_FragColor = vec4(1.0, c, c, 1.0 );
+	gl_FragColor = vec4(1.0, c, c, 1.0);
 }
 
 void terrain(float c)

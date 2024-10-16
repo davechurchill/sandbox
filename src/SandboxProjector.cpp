@@ -42,10 +42,11 @@ void SandBoxProjector::imgui()
 {
     PROFILE_FUNCTION();
 
+    ImGui::Checkbox("Show Projection", &m_drawProjection);
     ImGui::Checkbox("Show Projection Lines", &m_drawLines);
 }
 
-void SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
+bool SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
     PROFILE_FUNCTION();
 
@@ -71,10 +72,13 @@ void SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f 
             generateProjection();
         }
     }
+
+    return m_dragPoint != -1;
 }
 
 void SandBoxProjector::render(sf::RenderWindow & window)
 {
+    if (!m_drawProjection) { return; }
     PROFILE_FUNCTION();
     if (m_drawLines)
     {
@@ -139,16 +143,18 @@ void SandBoxProjector::generateProjection()
     }
 
     m_projectionMatrix = cv::getPerspectiveTransform(dataCorners, boxPoints);
-  
 }
 
-void SandBoxProjector::save(Save & save) const
+void SandBoxProjector::save(Save& save) const
 {
     std::copy(std::cbegin(m_projectionPoints), std::cend(m_projectionPoints), std::begin(save.projectionPoints));
     save.drawLines = m_drawLines;
+    save.drawProjection = m_drawProjection;
 }
-void SandBoxProjector::load(const Save & save)
+
+void SandBoxProjector::load(const Save& save)
 {
     std::copy(std::cbegin(save.projectionPoints), std::cend(save.projectionPoints), std::begin(m_projectionPoints));
     m_drawLines = save.drawLines;
+    m_drawProjection = save.drawProjection;
 }

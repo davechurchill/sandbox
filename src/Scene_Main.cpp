@@ -1,11 +1,11 @@
 #include "Scene_Main.h"
-#include "Scene_Menu.h"
 #include "GameEngine.h"
 #include "Assets.h"
 #include "Profiler.hpp"
 
 #include "Processor_Colorizer.h"
 #include "Processor_Minecraft.h"
+#include "Processor_Heat.h"
 #include "Source_Camera.h"
 #include "Source_Perlin.h"
 #include "Source_Snapshot.h"
@@ -39,6 +39,7 @@ void Scene_Main::init()
 
     registerProcessor<Processor_Colorizer>("Colorizer");
     registerProcessor<Processor_Minecraft>("Minecraft");
+    registerProcessor<Processor_Heat>("Heat");
     m_processorMap.emplace("None", []() {return nullptr; });
 
     load();
@@ -184,14 +185,13 @@ void Scene_Main::renderUI()
     ImGui::Text("Framerate: %d", (int)m_game->framerate());
     ImGui::EndMainMenuBar();
 
-    ImGui::Begin("Controls");
+    ImGui::Begin("Controls", &m_drawUI);
     ImGui::BeginTabBar("ControlTabs");
 
     // Source
 
-    if (ImGui::BeginTabItem("Source", &m_drawUI))
+    if (ImGui::BeginTabItem("Source"))
     {
-        
         if (ImGui::BeginCombo("Selected Source", m_sourceID.c_str()))
         {
             for (auto & [name, _] : m_sourceMap)
@@ -206,15 +206,15 @@ void Scene_Main::renderUI()
         }
 
         ImGui::Separator();
-
+      
         if (m_source) { m_source->imgui(); }
-
+      
         ImGui::EndTabItem();
     }
 
     // Processor
 
-    if (ImGui::BeginTabItem("Processor", &m_drawUI))
+    if (ImGui::BeginTabItem("Processor"))
     {
         if (ImGui::BeginCombo("Selected Processor", m_processorID.c_str()))
         {
@@ -332,7 +332,7 @@ void Scene_Main::saveDataDump()
 
 void Scene_Main::endScene()
 {
-    m_game->changeScene<Scene_Menu>("Menu");
     m_game->displayWindow().close();
     save();
+    m_game->quit();
 }

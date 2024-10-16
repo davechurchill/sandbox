@@ -13,28 +13,27 @@ void Processor_Colorizer::init()
 void Processor_Colorizer::imgui()
 {
     PROFILE_FUNCTION();
-    ImGui::Checkbox("Draw Projection", &m_drawProjection);
+
+    const char * shaders[] = { "Popsicle", "Blue", "Red", "Terrain", "Animating Water", "None" };
+    ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 5);
+
+    ImGui::Checkbox("##Contours", &m_drawContours);
+    ImGui::SameLine();
+    ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
+
+    ImGui::Separator();
 
     if (ImGui::Button("Reload Shader"))
     {
         m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
     }
-
-    const char * shaders[] = { "Popsicle", "Red", "Terrain", "Animating Water", "None" };
-    ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 5);
-
-    ImGui::Checkbox("Draw Contour Lines", &m_drawContours);
-    ImGui::InputInt("Contour Lines", &m_numberOfContourLines, 1, 10);
-
-    ImGui::Spacing();
-
     m_projector.imgui();
 }
 
 void Processor_Colorizer::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
-    if (m_drawProjection)
+
     {
         PROFILE_SCOPE("Draw Transformed Image");
 
@@ -44,7 +43,6 @@ void Processor_Colorizer::render(sf::RenderWindow & window)
 
         //Use static so that it does not get initilialized every time this function is called
         static sf::Clock time;
-
 
         //Change color scheme
         m_shader.setUniform("shaderIndex", m_selectedShaderIndex);
@@ -69,7 +67,6 @@ void Processor_Colorizer::save(Save & save) const
     save.selectedShaderIndex = m_selectedShaderIndex;
     save.drawContours = m_drawContours;
     save.numberOfContourLines = m_numberOfContourLines;
-    save.drawProjection = m_drawProjection;
     m_projector.save(save);
 }
 void Processor_Colorizer::load(const Save & save)
@@ -77,7 +74,6 @@ void Processor_Colorizer::load(const Save & save)
     m_selectedShaderIndex = save.selectedShaderIndex;
     m_drawContours = save.drawContours;
     m_numberOfContourLines = save.numberOfContourLines;
-    m_drawProjection = save.drawProjection;
     m_projector.load(save);
 }
 
@@ -94,8 +90,7 @@ void Processor_Colorizer::processTopography(const cv::Mat & data)
     int dh = m_cvTransformedDepthImage32f.rows;
 
     // if something went wrong above, quit the function
-    if (m_drawProjection && dw == 0 || dh == 0) { return; }
-
+    if (dw == 0 || dh == 0) { return; }
     {
         {
             PROFILE_SCOPE("Transformed Image SFML Image");

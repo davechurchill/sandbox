@@ -1,20 +1,21 @@
 #pragma once
 
-#include "TopographyProcessor.h"
+#include "Profiler.hpp"
 #include "SandboxProjector.h"
+#include "Tools.h"
+#include "TopographyProcessor.h"
 
 class Processor_Colorizer : public TopographyProcessor 
 {
-    SandBoxProjector m_projector;
-    cv::Mat m_cvTransformedDepthImage32f;
-    bool m_drawProjection = true;
-    sf::Image m_sfTransformedDepthImage;
-    sf::Texture m_sfTransformedDepthTexture;
-    sf::Sprite m_sfTransformedDepthSprite;
+    SandBoxProjector    m_projector;
+    cv::Mat             m_cvTransformedDepthImage32f;
+    sf::Image           m_sfTransformedDepthImage;
+    sf::Texture         m_sfTransformedDepthTexture;
+    sf::Sprite          m_sfTransformedDepthSprite;
     sf::Shader          m_shader;
     int                 m_selectedShaderIndex = 0;
     bool                m_drawContours = true;
-    int                 m_numberOfContourLines = 15;
+    int                 m_numberOfContourLines = 19;
 
 public:
     void init();
