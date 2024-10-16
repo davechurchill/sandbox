@@ -1,5 +1,5 @@
-source Perlin
-processor Colorizer
+source Camera
+processor None
 align 0
 gaussianBlur 1
 maxDistance 1.13

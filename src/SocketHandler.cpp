@@ -44,12 +44,15 @@ void SocketHandler::connect()
                     {
                         // Construct Message
                         std::array<zmq::const_buffer, 5> messages = {
-                            zmq::buffer(request[0].data(), request[0].size()),
-                            zmq::const_buffer(),
+                            // Message Wrapper
+                            zmq::buffer(request[0].data(), request[0].size()), // Address of requester
+                            zmq::const_buffer(), // empty frame
+                            // Actual Message
                             zmq::buffer(&m_data->cols, sizeof(int)), // width
                             zmq::buffer(&m_data->rows, sizeof(int)), // height
                             zmq::buffer(m_data->ptr(), m_data->total() * m_data->elemSize()) // data
                         };
+
                         // Send Message
                         if (!zmq::send_multipart(m_socket, messages))
                         {
