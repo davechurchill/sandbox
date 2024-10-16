@@ -43,3 +43,4 @@ bin/maps/weighted-map
 bin/depthImage_normalized.png
 bin/depthImage_raw.png
 /visualstudio/SFMLGame/x64
+/visualstudio/Sandbox

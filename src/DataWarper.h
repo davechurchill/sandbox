@@ -18,6 +18,8 @@ class DataWarper
     std::vector<sf::CircleShape>    m_warpCircles;
     std::vector<sf::CircleShape>    m_planarCircles;
     float                           m_dataSize = 1.0f;
+    bool                            m_drawCameraRegion = true;
+
 
     // Height Adjustment
     float                           m_plane[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
