@@ -8,9 +8,9 @@ drawDepth 1
 drawColor 1
 fpsSetting 1
 octaves 5
-seed 2
-seedSize 4
-persistance 0.473
+seed 0
+seedSize 9
+persistance 0.5
 drawGrid 0
 temporalAlpha 0.099
 temporalDelta 72

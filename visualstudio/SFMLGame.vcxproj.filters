@@ -65,8 +65,8 @@
     <ClCompile Include="..\src\Processor_Minecraft.cpp">
       <Filter>processors\minecraft</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\SocketHandler.cpp">
-      <Filter>sandbox</Filter>
+    <ClCompile Include="..\src\Processor_Socket.cpp">
+      <Filter>processors\socket</Filter>
     </ClCompile>
     <ClCompile Include="..\src\SandboxProjector.cpp">
       <Filter>calibration</Filter>
@@ -142,6 +142,9 @@
     <ClInclude Include="..\src\Processor_Minecraft.h">
       <Filter>processors\minecraft</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Processor_Socket.h">
+      <Filter>processors\socket</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\Profiler.hpp">
       <Filter>engine</Filter>
     </ClInclude>
@@ -154,9 +157,6 @@
     <ClInclude Include="..\src\RealSenseTools.hpp">
       <Filter>camera</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Save.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\CameraFilters.hpp">
       <Filter>camera</Filter>
     </ClInclude>
@@ -168,9 +168,6 @@
     </ClInclude>
     <ClInclude Include="..\src\Perlin.hpp">
       <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\SocketHandler.h">
-      <Filter>sandbox</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

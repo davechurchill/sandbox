@@ -25,7 +25,7 @@
     <ClCompile Include="..\src\Processor_Heat.cpp" />
     <ClCompile Include="..\src\GoodAssert.cpp" />
     <ClCompile Include="..\src\Processor_Minecraft.cpp" />
-    <ClCompile Include="..\src\SocketHandler.cpp" />
+    <ClCompile Include="..\src\Processor_Socket.cpp" />
     <ClCompile Include="..\src\Source_Camera.cpp" />
     <ClCompile Include="..\src\Processor_Colorizer.cpp" />
     <ClCompile Include="..\src\DataWarper.cpp" />
@@ -54,7 +54,7 @@
     <ClInclude Include="..\src\GoodAssert.h" />
     <ClInclude Include="..\src\Logger.hpp" />
     <ClInclude Include="..\src\Processor_Minecraft.h" />
-    <ClInclude Include="..\src\SocketHandler.h" />
+    <ClInclude Include="..\src\Processor_Socket.h" />
     <ClInclude Include="..\src\Save.hpp" />
     <ClInclude Include="..\src\Source_Camera.h" />
     <ClInclude Include="..\src\CameraFilters.hpp" />
