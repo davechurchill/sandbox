@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\Assets.cpp" />
     <ClCompile Include="..\src\BlockGeneration.cpp" />
+    <ClCompile Include="..\src\HandDetection.cpp" />
     <ClCompile Include="..\src\HeatGrid.cpp" />
     <ClCompile Include="..\src\Processor_Heat.cpp" />
     <ClCompile Include="..\src\GoodAssert.cpp" />
@@ -48,6 +49,7 @@
     <ClInclude Include="..\src\Action.hpp" />
     <ClInclude Include="..\src\Assets.h" />
     <ClInclude Include="..\src\BlockGeneration.h" />
+    <ClInclude Include="..\src\HandDetection.h" />
     <ClInclude Include="..\src\HeatGrid.h" />
     <ClInclude Include="..\src\Processor_Heat.h" />
     <ClInclude Include="..\src\GoodAssert.h" />

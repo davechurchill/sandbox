@@ -65,14 +65,14 @@
     <ClCompile Include="..\src\Processor_Minecraft.cpp">
       <Filter>processors\minecraft</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_Socket.cpp">
-      <Filter>processors\socket</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\SandboxProjector.cpp">
       <Filter>calibration</Filter>
     </ClCompile>
     <ClCompile Include="..\src\DataWarper.cpp">
       <Filter>calibration</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HandDetection.cpp">
+      <Filter>camera</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -142,9 +142,6 @@
     <ClInclude Include="..\src\Processor_Minecraft.h">
       <Filter>processors\minecraft</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_Socket.h">
-      <Filter>processors\socket</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Profiler.hpp">
       <Filter>engine</Filter>
     </ClInclude>
@@ -168,6 +165,9 @@
     </ClInclude>
     <ClInclude Include="..\src\Perlin.hpp">
       <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\HandDetection.h">
+      <Filter>camera</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
