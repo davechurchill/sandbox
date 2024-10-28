@@ -119,7 +119,11 @@ void Source_Camera::captureImages()
         int kernelSize = 17; // Example kernel size
         double sigmaX = 9.5; // Example standard deviation in X direction
         double sigmaY = 9.5; // Example standard deviation in Y direction
-        cv::GaussianBlur(m_cvDepthImage32f, m_cvDepthImage32f, cv::Size(kernelSize, kernelSize), sigmaX, sigmaY);
+        cv::GaussianBlur(m_cvDepthImage32f, m_cvBlurred32f, cv::Size(kernelSize, kernelSize), sigmaX, sigmaY);
+    }
+    else 
+    {
+        m_cvBlurred32f = m_cvDepthImage32f;
     }
 
     // set everything to 0 that's below min distance or above max distance
@@ -127,7 +131,7 @@ void Source_Camera::captureImages()
     // store these values in a new 'normalized' cv::mat
     {
         PROFILE_SCOPE("Threshold and Normalize");
-        cv::threshold(m_cvDepthImage32f, m_cvNormalizedDepthImage32f, m_minDistance, 255, cv::THRESH_TOZERO);
+        cv::threshold(m_cvBlurred32f, m_cvNormalizedDepthImage32f, m_minDistance, 255, cv::THRESH_TOZERO);
         cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, m_maxDistance, 255, cv::THRESH_TOZERO_INV);
         m_cvNormalizedDepthImage32f = 1.f - (m_cvNormalizedDepthImage32f - m_minDistance) / (m_maxDistance - m_minDistance);
         cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, 0.99, 255, cv::THRESH_TOZERO_INV);
@@ -213,6 +217,12 @@ void Source_Camera::imgui()
         if (ImGui::BeginTabItem("Calibration"))
         {
             m_warper.imgui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Hand Recognition"))
+        {
+            m_handDetection.imgui(m_cvDepthImage32f);
             ImGui::EndTabItem();
         }
 

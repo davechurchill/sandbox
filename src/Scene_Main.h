@@ -5,7 +5,6 @@
 #include "TopographyProcessor.h"
 #include "ViewController.hpp"
 #include "Save.hpp"
-#include "HandDetection.h"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -20,7 +19,6 @@ class Scene_Main : public Scene
 
     bool                m_drawUI = true;
     ViewController      m_viewController;
-    HandDetection       m_handDetection;
     sf::Vector2i        m_mouseScreen;
     sf::Vector2f        m_mouseWorld;
     sf::Vector2f        m_mouseDisplay;

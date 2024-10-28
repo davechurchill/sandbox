@@ -10,6 +10,7 @@ class HandDetection
     int m_thresh = 100;
     sf::Image image;
     sf::Texture tex;
+    int label = 0;
 public:
     void imgui(const cv::Mat & input);
 };

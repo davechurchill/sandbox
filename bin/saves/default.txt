@@ -1,4 +1,4 @@
-source Snapshot
+source Camera
 processor None
 align 0
 gaussianBlur 1

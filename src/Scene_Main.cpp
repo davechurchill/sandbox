@@ -235,12 +235,6 @@ void Scene_Main::renderUI()
         ImGui::EndTabItem();
     }
 
-    if (ImGui::BeginTabItem("Hand Recognition"))
-    {
-        m_handDetection.imgui(m_topography);
-        ImGui::EndTabItem();
-    }
-
     ImGui::EndTabBar();
     ImGui::End();
 }
