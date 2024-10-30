@@ -1,48 +1,40 @@
 #include "HandDetection.h"
+#include "Tools.h"
 
-void HandDetection::imgui(const cv::Mat & input)
+void HandDetection::imgui()
 {
-    try
+    
+    m_image = Tools::matToSfImage(m_segmented);
+    m_texture.loadFromImage(m_image);
+    ImGui::Image(m_texture);
+    
+    ImGui::SliderInt("Threshold", &m_thresh, 0, 255);
+    ImGui::Checkbox("Use Input", &m_useInput);
+    ImGui::Checkbox("Use Previous", &m_usePrevious);
+}
+
+// Function that detects the area taken up by hands / arms and ignores it
+void HandDetection::removeHands(const cv::Mat & input, cv::Mat & output, float maxDistance, float minDistance)
+{
+    if (m_previous.total() <= 0) // For the first frame
     {
-        cv::Mat adjusted;
-        input.convertTo(adjusted, CV_8U, 255.0);
-        //adjusted = 255 - adjusted;
-
-        cv::Canny(adjusted, adjusted, m_thresh, m_thresh * 2);
-
-        std::vector<std::vector<cv::Point>> contours;
-        cv::findContours(adjusted, contours, cv::RETR_TREE, cv::ContourApproximationModes::CHAIN_APPROX_TC89_KCOS);
-
-        std::vector<std::vector<cv::Point>> hull(contours.size());
-        //ImGui::Text("Contours: %d", contours.size());
-        for (size_t i = 0; i < contours.size(); i++)
-        {
-            cv::convexHull(contours[i], hull[i],true);
-            //ImGui::Text("   C%d: %d", i, contours[i].size());
-        }
-        cv::Mat drawing = cv::Mat::zeros(adjusted.size(), CV_8UC4) + cv::Scalar(0,0,0,255);
-        for (size_t i = 0; i < contours.size(); i++)
-        {
-            cv::drawContours(drawing, hull, (int)i, cv::Scalar(0, 255, 0, 255), -1);
-            cv::drawContours(drawing, contours, (int)i, cv::Scalar(255, 0, 0, 255), -1);
-        }
-        /*cv::Mat components = cv::Mat::zeros(adjusted.size(), CV_16U);
-        int labels = cv::connectedComponents(adjusted, components);
-        ImGui::SliderInt("Label", &label, 0, labels);
-        if (label >= labels) 
-        {
-            label = 0;
-        }
-        cv::Mat drawing = cv::Mat::zeros(adjusted.size(), CV_8UC4) + cv::Scalar(0,0,0,255);
-        drawing.setTo(cv::Scalar(255, 255, 255, 255), components == label);*/
-
-        image.create(drawing.cols, drawing.rows, drawing.ptr());
-        tex.loadFromImage(image);
-        ImGui::Image(tex, sf::Color::White);
+        m_previous = input;
+        output = input;
+        return;
     }
-    catch (cv::Exception e)
-    {
-        ImGui::Text("Error: %s", e.msg);
-    }
-    ImGui::SliderInt("Threshold", &m_thresh, 10, 255);
+
+    // Normalize
+    cv::Mat normalized;
+    normalized = 1.f - (input - minDistance) / (maxDistance - minDistance);
+    cv::threshold(normalized, normalized, 0.0, 255, cv::THRESH_TOZERO);
+    cv::threshold(normalized, normalized, 1.0, 255, cv::THRESH_TRUNC);
+
+    // Binarize
+    cv::Mat binarized;
+    normalized.convertTo(binarized, CV_8U, 255.0);
+    cv::threshold(binarized, binarized, m_thresh, 255, cv::THRESH_BINARY);
+    m_segmented = binarized;
+    cv::Mat mask = m_segmented == 255;
+    cv::bitwise_and(input, m_previous, output, mask);
+    m_previous = output;
 }

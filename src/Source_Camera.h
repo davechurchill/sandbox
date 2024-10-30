@@ -23,6 +23,7 @@ class Source_Camera : public TopographySource
 
     DataWarper          m_warper;
     HandDetection       m_handDetection;
+    bool                m_detectHands = true;
 
     CameraFilters       m_filters;
     alignment           m_alignment = alignment::depth;

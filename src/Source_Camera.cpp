@@ -109,6 +109,12 @@ void Source_Camera::captureImages()
         m_warper.heightAdjustment(m_cvDepthImage32f);
     }
 
+    if (m_detectHands)
+    {
+        PROFILE_SCOPE("Hand Detection");
+        m_handDetection.removeHands(m_cvDepthImage32f, m_cvDepthImage32f, m_maxDistance, m_minDistance);
+    }
+
     // Perform Gaussian Blur of data if turned on
     // Note: Guassian Blur must be applied before thresholding or else the zeros created by the threshold will blur with the real values.
     //       It must also be applied before the transformation, or else the values in the matrix that represent black space will blur with the image.
@@ -126,15 +132,14 @@ void Source_Camera::captureImages()
         m_cvBlurred32f = m_cvDepthImage32f;
     }
 
-    // set everything to 0 that's below min distance or above max distance
-    // then scale the remaining values between min and max distance 0 to 1 (normalize)
+    // scale the values between min and max distance 0 to 1 (normalize)
+    // set everything below 0 to 0 and above 1 to 1
     // store these values in a new 'normalized' cv::mat
     {
         PROFILE_SCOPE("Threshold and Normalize");
-        cv::threshold(m_cvBlurred32f, m_cvNormalizedDepthImage32f, m_minDistance, 255, cv::THRESH_TOZERO);
-        cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, m_maxDistance, 255, cv::THRESH_TOZERO_INV);
-        m_cvNormalizedDepthImage32f = 1.f - (m_cvNormalizedDepthImage32f - m_minDistance) / (m_maxDistance - m_minDistance);
-        cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, 0.99, 255, cv::THRESH_TOZERO_INV);
+        m_cvNormalizedDepthImage32f = 1.f - (m_cvBlurred32f - m_minDistance) / (m_maxDistance - m_minDistance);
+        cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, 0.0, 255, cv::THRESH_TOZERO);
+        cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, 1.0, 255, cv::THRESH_TRUNC);
     }
 
     if (m_drawDepth)
@@ -222,7 +227,8 @@ void Source_Camera::imgui()
 
         if (ImGui::BeginTabItem("Hand Recognition"))
         {
-            m_handDetection.imgui(m_cvDepthImage32f);
+            ImGui::Checkbox("Filter Hands", &m_detectHands);
+            m_handDetection.imgui();
             ImGui::EndTabItem();
         }
 

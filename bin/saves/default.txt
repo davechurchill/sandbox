@@ -1,11 +1,11 @@
 source Camera
-processor None
+processor Colorizer
 align 0
-gaussianBlur 1
+gaussianBlur 0
 maxDistance 1.13
 minDistance 0.9
 drawDepth 1
-drawColor 1
+drawColor 0
 fpsSetting 1
 octaves 5
 seed 0
