@@ -8,8 +8,6 @@
 class HandDetection
 {
     int m_thresh = 218;
-    bool m_useInput = true;
-    bool m_usePrevious = true;
     sf::Image m_image;
     sf::Texture m_texture;
 

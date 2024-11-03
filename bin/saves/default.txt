@@ -12,16 +12,16 @@ seed 0
 seedSize 9
 persistance 0.5
 drawGrid 0
-temporalAlpha 0.099
+temporalAlpha 1
 temporalDelta 72
 temporalPersistance 3
-holeFill 1
+holeFill 3
 warpPoints 171 84 705 77 184 360 704 361 
 applyHeightAdjustment 0
 planarPoints 150 0 75 150 0 75 
 projectionPoints 7 61 1866 92 0 1078 1870 1078 
 drawLines 1
 selectedShaderIndex 4
-drawContours 1
+drawContours 0
 numberOfContourLines 19
 drawProjection 1
