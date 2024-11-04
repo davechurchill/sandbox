@@ -25,6 +25,7 @@
     <ClCompile Include="..\src\Processor_Heat.cpp" />
     <ClCompile Include="..\src\GoodAssert.cpp" />
     <ClCompile Include="..\src\Processor_Minecraft.cpp" />
+    <ClCompile Include="..\src\Processor_Vectors.cpp" />
     <ClCompile Include="..\src\Source_Camera.cpp" />
     <ClCompile Include="..\src\Processor_Colorizer.cpp" />
     <ClCompile Include="..\src\DataWarper.cpp" />
@@ -43,6 +44,7 @@
     <ClCompile Include="..\src\Source_Perlin.cpp" />
     <ClCompile Include="..\src\Source_Snapshot.cpp" />
     <ClCompile Include="..\src\Tools.cpp" />
+    <ClCompile Include="..\src\VectorField.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Action.hpp" />
@@ -53,6 +55,7 @@
     <ClInclude Include="..\src\GoodAssert.h" />
     <ClInclude Include="..\src\Logger.hpp" />
     <ClInclude Include="..\src\Processor_Minecraft.h" />
+    <ClInclude Include="..\src\Processor_Vectors.h" />
     <ClInclude Include="..\src\Save.hpp" />
     <ClInclude Include="..\src\Source_Camera.h" />
     <ClInclude Include="..\src\CameraFilters.hpp" />
@@ -74,6 +77,7 @@
     <ClInclude Include="..\src\Tools.h" />
     <ClInclude Include="..\src\TopographyProcessor.h" />
     <ClInclude Include="..\src\TopographySource.h" />
+    <ClInclude Include="..\src\VectorField.h" />
     <ClInclude Include="..\src\ViewController.hpp" />
   </ItemGroup>
   <ItemGroup>

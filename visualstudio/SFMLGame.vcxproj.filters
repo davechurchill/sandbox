@@ -47,12 +47,6 @@
     <ClCompile Include="..\src\Tools.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_Heat.cpp">
-      <Filter>processors\heat</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\HeatGrid.cpp">
-      <Filter>processors\heat</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\BlockGeneration.cpp">
       <Filter>processors\minecraft</Filter>
     </ClCompile>
@@ -65,14 +59,23 @@
     <ClCompile Include="..\src\Processor_Minecraft.cpp">
       <Filter>processors\minecraft</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_Socket.cpp">
-      <Filter>processors\socket</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\SandboxProjector.cpp">
       <Filter>calibration</Filter>
     </ClCompile>
     <ClCompile Include="..\src\DataWarper.cpp">
       <Filter>calibration</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HeatGrid.cpp">
+      <Filter>processors\heat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Processor_Heat.cpp">
+      <Filter>processors\heat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Processor_Vectors.cpp">
+      <Filter>processors\vectors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\VectorField.cpp">
+      <Filter>processors\vectors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -124,12 +127,6 @@
     <ClInclude Include="..\src\TopographySource.h">
       <Filter>processors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_Heat.h">
-      <Filter>processors\heat</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\HeatGrid.h">
-      <Filter>processors\heat</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\BlockGeneration.h">
       <Filter>processors\minecraft</Filter>
     </ClInclude>
@@ -141,9 +138,6 @@
     </ClInclude>
     <ClInclude Include="..\src\Processor_Minecraft.h">
       <Filter>processors\minecraft</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Processor_Socket.h">
-      <Filter>processors\socket</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Profiler.hpp">
       <Filter>engine</Filter>
@@ -168,6 +162,18 @@
     </ClInclude>
     <ClInclude Include="..\src\Perlin.hpp">
       <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\HeatGrid.h">
+      <Filter>processors\heat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Processor_Heat.h">
+      <Filter>processors\heat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Processor_Vectors.h">
+      <Filter>processors\vectors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\VectorField.h">
+      <Filter>processors\vectors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -211,6 +217,9 @@
     </Filter>
     <Filter Include="calibration">
       <UniqueIdentifier>{8274e842-7bd1-4020-b79c-6007d282d44f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="processors\vectors">
+      <UniqueIdentifier>{22e83f83-56dc-408f-9d8d-788309b022db}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -17,10 +17,11 @@ void main()
 	vec2 coord = gl_TexCoord[0].xy;   
 	vec4 pixel_color = texture2D(currentTexture, coord);
 	float c = pixel_color[0];
+	float p = pixel_color[1];
 
 	if (c < 0.02 || c > 0.99) 
 	{
-		gl_FragColor = vec4( 0.0, 0.0, 0.0, 0.0);
+		gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
 		return;
 	}
 
@@ -71,7 +72,12 @@ void main()
 				}
 			}
 		}
-	} 
+	}
+
+	if (p > 0)
+	{
+		gl_FragColor = vec4(p, p, 1.0, 1.0);
+	}
 }
 
 void popsicle(float c) {
