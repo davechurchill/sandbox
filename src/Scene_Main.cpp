@@ -48,6 +48,7 @@ void Scene_Main::init()
 void Scene_Main::onFrame()
 {
     m_topography = m_source->getTopography();
+    m_source->getGestures();
     if (m_processor && m_topography.rows > 0 && m_topography.cols > 0)
     {
         m_processor->processTopography(m_topography);

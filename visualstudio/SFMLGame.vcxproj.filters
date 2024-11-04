@@ -26,15 +26,6 @@
     <ClCompile Include="..\src\Scene_Main.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Source_Camera.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Source_Perlin.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Source_Snapshot.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\GoodAssert.cpp">
       <Filter>engine</Filter>
     </ClCompile>
@@ -74,21 +65,21 @@
     <ClCompile Include="..\src\HandDetection.cpp">
       <Filter>camera</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Source_Camera.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Source_Perlin.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Source_Snapshot.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Scene.h">
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Scene_Main.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Source_Camera.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Source_Perlin.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Source_Snapshot.h">
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Logger.hpp">
@@ -119,9 +110,6 @@
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\TopographyProcessor.h">
-      <Filter>processors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\TopographySource.h">
       <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Processor_Heat.h">
@@ -169,6 +157,18 @@
     <ClInclude Include="..\src\HandDetection.h">
       <Filter>camera</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\TopographySource.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Camera.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Perlin.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Snapshot.h">
+      <Filter>sources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\shader_contour_color.frag">
@@ -211,6 +211,9 @@
     </Filter>
     <Filter Include="calibration">
       <UniqueIdentifier>{8274e842-7bd1-4020-b79c-6007d282d44f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources">
+      <UniqueIdentifier>{023f8d89-974c-4af5-a780-8732fc50a3a3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

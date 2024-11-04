@@ -293,3 +293,21 @@ cv::Mat Source_Camera::getTopography()
     captureImages();
     return m_data;
 }
+
+std::vector<Gesture> Source_Camera::getGestures()
+{
+    // Get points and convert to integers
+    auto pointsF = m_warper.getPoints();
+    cv::Point points[4] = {
+        pointsF[0],
+        pointsF[1],
+        pointsF[3],
+        pointsF[2]
+    };
+
+    // Identify gestures
+    m_handDetection.identifyGestures(points);
+
+    // Return reference to gesture array
+    return m_handDetection.m_gestures;
+}

@@ -66,4 +66,6 @@ public:
 
     cv::Mat getTopography();
 
+    std::vector<Gesture> getGestures();
+
 };
