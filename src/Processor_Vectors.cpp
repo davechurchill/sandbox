@@ -86,9 +86,9 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
 
     if (particles.empty())
     {
-        for (int i = 0; i < 1000; ++i)
+        for (int i = 0; i < 10000; ++i)
         {
-            particles.push_back(Particle{ rand() % (int)(m_field.width() * spacing), rand() % (int)(m_field.height() * spacing) });
+            particles.push_back(Particle{ (double)(rand() % (int)(m_field.width() * spacing)), (double)(rand() % (int)(m_field.height() * spacing)) });
         }
     }
 
@@ -101,9 +101,9 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
             particle.y += dir.y;
         }
 
-        if (particle.x / spacing == m_field.width() - 1)
+        if (particle.x / spacing >= m_field.width() - 1)
         {
-            particle.x = 0;
+            particle.x = spacing;
             particle.y = rand() % (int)(m_field.height() * spacing);
         }
 
@@ -113,8 +113,8 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
             particle.trail.erase(particle.trail.begin());
         }
 
-        particle.x = std::max(0, std::min(data.cols, particle.x));
-        particle.y = std::max(0, std::min(data.rows, particle.y));
+        particle.x = std::max(0.0, std::min((double)data.cols, particle.x));
+        particle.y = std::max(0.0, std::min((double)data.rows, particle.y));
 
         for (int i = 0; i < particle.trail.size(); ++i)
         {

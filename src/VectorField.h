@@ -7,8 +7,8 @@
 
 struct Direction
 {
-    int x = 0;
-    int y = 0;
+    double x = 0;
+    double y = 0;
 };
 
 struct Cell { size_t x = 0; size_t y = 0; };
@@ -20,7 +20,7 @@ class VectorField
     size_t m_height     = 0;    // number of rows in the grid
 
     Grid<double> m_grid;           // blocked/unblocked grid
-    Grid<int> m_distance;       // distance map grid
+    Grid<double> m_distance;       // distance map grid
     Grid<std::vector<Direction>> m_directions; // vector field direction grid
 
 public:

@@ -18,7 +18,7 @@ Grid<std::vector<Direction>> VectorField::compute(const cv::Mat& grid, size_t sp
     m_height = grid.size().height / m_spacing;
 
     m_grid = Grid<double>(m_width, m_height, 0);
-    m_distance = Grid<int>(m_width, m_height, -1);
+    m_distance = Grid<double>(m_width, m_height, -1);
     m_directions = Grid<std::vector<Direction>>(m_width, m_height, {});
 
     for (int x = 0; x < m_width; ++x)
@@ -68,7 +68,7 @@ Grid<std::vector<Direction>> VectorField::compute(const cv::Mat& grid, size_t sp
         {
             update(cell.x - 1, cell.y);
         }
-        if (cell.x < m_distance.width() - 1)
+        if (cell.x < m_width - 1)
         {
             update(cell.x + 1, cell.y);
         }
@@ -76,75 +76,37 @@ Grid<std::vector<Direction>> VectorField::compute(const cv::Mat& grid, size_t sp
         {
             update(cell.x, cell.y - 1);
         }
-        if (cell.y < m_distance.height() - 1)
+        if (cell.y < m_height - 1)
         {
             update(cell.x, cell.y + 1);
         }
     }
 
-    for (int x = 0; x < m_distance.width(); ++x)
+    double weight = 0.25;
+    for (int x = 0; x < m_width; ++x)
     {
-        for (int y = 0; y < m_distance.height(); ++y)
+        for (int y = 0; y < m_height; ++y)
         {
-            if (x == m_width - 1)
-            {
-                continue;
-            }
+            m_distance.get(x, y) *= 1 + m_grid.get(x, y) * weight;
+        }
+    }
 
-            double min = std::numeric_limits<double>::max();
+    for (int x = 0; x < m_width; ++x)
+    {
+        for (int y = 0; y < m_height; ++y)
+        {
+            constexpr double max = std::numeric_limits<double>::max();
 
-            auto get_v = [&](int sx, int sy)
-            {
-                auto weight = .2;
-                return m_distance.get(sx, sy) * (1 - weight + (1 - m_grid.get(x, y) + m_grid.get(sx, sy)) * weight);
-            };
+            double left = x > 0 ? m_distance.get(x - 1, y) : max;
+            double right = x < m_width - 1 ? m_distance.get(x + 1, y) : max;
+            double up = y > 0 ? m_distance.get(x, y - 1) : max;
+            double down = y < m_width - 1 ? m_distance.get(x, y + 1) : max;
 
-            auto update_min = [&](int sx, int sy)
-            {
-                min = std::min((double) min, get_v(sx, sy));
-            };
+            Direction dir{ left - right, up - down };
 
-            if (x > 0)
-            {
-                update_min(x - 1, y);
-            }
-            if (x < m_distance.width() - 1)
-            {
-                update_min(x + 1, y);
-            }
-            if (y > 0)
-            {
-                update_min(x, y - 1);
-            }
-            if (y < m_distance.height() - 1)
-            {
-                update_min(x, y + 1);
-            }
+            double magnitude = std::sqrt(dir.x * dir.x + dir.y * dir.y);
 
-            auto add_direction = [&](int dx, int dy)
-            {
-                if (get_v(x + dx, y + dy) == min)
-                {
-                    m_directions.get(x, y).push_back({ dx, dy });
-                }
-            };
-
-            if (x > 0)
-            {
-                add_direction(-1, 0);
-            }
-            if (x < m_distance.width() - 1)
-            {
-                add_direction(1, 0);
-            }
-            if (y > 0)
-            {
-                add_direction(0, -1);
-            }
-            if (y < m_distance.height() - 1)
-            {
-                add_direction(0, 1);
-            }
+            m_directions.get(x, y).push_back({ dir.x / magnitude, dir.y / magnitude });
         }
     }
 
