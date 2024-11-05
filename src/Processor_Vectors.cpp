@@ -82,10 +82,7 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
     const int spacing = 8;
     const int trailSize = 4;
 
-    int gx = 200 / spacing;
-    int gy = 200 / spacing;
-
-    auto directions = m_field.compute(data, spacing, gx, gy);
+    auto directions = m_field.compute(data, spacing);
 
     if (particles.empty())
     {
@@ -104,9 +101,9 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
             particle.y += dir.y;
         }
 
-        if (particle.x / spacing == gx && particle.y / spacing == gy)
+        if (particle.x / spacing == m_field.width() - 1)
         {
-            particle.x = rand() % (int)(m_field.width() * spacing);
+            particle.x = 0;
             particle.y = rand() % (int)(m_field.height() * spacing);
         }
 

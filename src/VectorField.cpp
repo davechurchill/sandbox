@@ -11,13 +11,11 @@ VectorField::VectorField()
 {
 }
 
-Grid<std::vector<Direction>> VectorField::compute(const cv::Mat& grid, size_t spacing, size_t gx, size_t gy)
+Grid<std::vector<Direction>> VectorField::compute(const cv::Mat& grid, size_t spacing)
 {
     m_spacing = spacing;
     m_width = grid.size().width / m_spacing;
     m_height = grid.size().height / m_spacing;
-    m_gx = gx;
-    m_gy = gy;
 
     m_grid = Grid<double>(m_width, m_height, 0);
     m_distance = Grid<int>(m_width, m_height, -1);
@@ -42,8 +40,12 @@ Grid<std::vector<Direction>> VectorField::compute(const cv::Mat& grid, size_t sp
     }
 
     std::queue<Cell> openList{};
-    openList.push({ m_gx, m_gy });
-    m_distance.set(m_gx, m_gy, 0);
+
+    for (size_t y = 0; y < m_height; ++y)
+    {
+        openList.push({ m_width - 1, y });
+        m_distance.set(m_width - 1, y, 0);
+    }
 
     while (!openList.empty())
     {
@@ -84,7 +86,7 @@ Grid<std::vector<Direction>> VectorField::compute(const cv::Mat& grid, size_t sp
     {
         for (int y = 0; y < m_distance.height(); ++y)
         {
-            if (x == gx && y == gy)
+            if (x == m_width - 1)
             {
                 continue;
             }
@@ -93,7 +95,8 @@ Grid<std::vector<Direction>> VectorField::compute(const cv::Mat& grid, size_t sp
 
             auto get_v = [&](int sx, int sy)
             {
-                return m_distance.get(sx, sy) * (1 - m_grid.get(x, y) + m_grid.get(sx, sy));
+                auto weight = .2;
+                return m_distance.get(sx, sy) * (1 - weight + (1 - m_grid.get(x, y) + m_grid.get(sx, sy)) * weight);
             };
 
             auto update_min = [&](int sx, int sy)
@@ -146,11 +149,6 @@ Grid<std::vector<Direction>> VectorField::compute(const cv::Mat& grid, size_t sp
     }
 
     return m_directions;
-}
-
-bool VectorField::isGoalCell(size_t x, size_t y) const
-{
-    return x == m_gx && y == m_gy;
 }
 
 bool VectorField::isValidCell(size_t x, size_t y) const

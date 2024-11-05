@@ -18,8 +18,6 @@ class VectorField
     size_t m_spacing    = 16;   // spacing of the grid (pixels)
     size_t m_width      = 0;    // number of columns in the grid
     size_t m_height     = 0;    // number of rows in the grid
-    size_t m_gx         = 0;    // the goal x cell
-    size_t m_gy         = 0;    // the goal y cell
 
     Grid<double> m_grid;           // blocked/unblocked grid
     Grid<int> m_distance;       // distance map grid
@@ -30,7 +28,7 @@ public:
     VectorField();
 
     // called by the GUI to compute the grid, distance map, and vector field
-    Grid<std::vector<Direction>> compute(const cv::Mat& data, size_t spacing, size_t gx, size_t gy);
+    Grid<std::vector<Direction>> compute(const cv::Mat& data, size_t spacing);
 
     // returns the value of the blocked grid (0 = unblocked, 1 = blocked)
     int getGrid(size_t x, size_t y) const;
@@ -43,7 +41,6 @@ public:
     Direction getDirection(size_t x, size_t y, size_t index) const;
 
     // various helper functions
-    bool isGoalCell(size_t x, size_t y) const;
     bool isValidCell(size_t x, size_t y) const;
     inline size_t width() const { return m_width; }
     inline size_t height() const { return m_height; }
