@@ -89,9 +89,9 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
 
     if (particles.empty())
     {
-        for (int i = 0; i < 10000; ++i)
+        for (int i = 0; i < 1000; ++i)
         {
-            particles.push_back(Particle{ rand() % (int)(m_field.width() * spacing), rand() % (int)(m_field.height() * spacing)});
+            particles.push_back(Particle{ rand() % (int)(m_field.width() * spacing), rand() % (int)(m_field.height() * spacing) });
         }
     }
 
@@ -118,18 +118,21 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
 
         particle.x = std::max(0, std::min(data.cols, particle.x));
         particle.y = std::max(0, std::min(data.rows, particle.y));
-        
+
         for (int i = 0; i < particle.trail.size(); ++i)
         {
             auto& t = particle.trail[i];
-            particleGrid.at<uint8_t>(t.y, t.x) = 255 - (trailSize - i - 1) * 128 / trailSize;
+            particleGrid.at<uint8_t>(t.y, t.x) = 255 - (trailSize - i - 1) * 255 / trailSize;
         }
     }
+
+    cv::Mat m_cvTransformedParticleGrid32f;
 
     PROFILE_FUNCTION();
     {
         PROFILE_SCOPE("Calibration TransformProjection");
         m_projector.project(data, m_cvTransformedDepthImage32f);
+        m_projector.project(particleGrid, m_cvTransformedParticleGrid32f);
     }
 
     // Draw warped depth image
@@ -145,7 +148,7 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
             {
                 // Ensure the input image is in the correct format (CV_32F)
                 cv::Mat normalized;
-                data.convertTo(normalized, CV_8U, 255.0); // Scale float [0, 1] to [0, 255]
+                m_cvTransformedDepthImage32f.convertTo(normalized, CV_8U, 255.0); // Scale float [0, 1] to [0, 255]
 
                 // Convert to RGB (SFML requires RGB format)
                 cv::Mat rgb;
@@ -155,7 +158,7 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
                 {
                     for (int j = 0; j < rgb.cols; ++j)
                     {
-                        rgb.at<cv::Vec4b>(i, j)[1] = particleGrid.at<uint8_t>(i, j);
+                        rgb.at<cv::Vec4b>(i, j)[1] = m_cvTransformedParticleGrid32f.at<uint8_t>(i, j);
                     }
                 }
 

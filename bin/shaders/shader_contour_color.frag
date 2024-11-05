@@ -76,7 +76,7 @@ void main()
 
 	if (p > 0)
 	{
-		gl_FragColor = vec4(p, p, 1.0, 1.0);
+		gl_FragColor = vec4(0.8 + p / 5, 0.8 + p / 5, 1.0, 1.0);
 	}
 }
 
