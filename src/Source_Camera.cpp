@@ -166,6 +166,10 @@ void Source_Camera::captureImages()
 void Source_Camera::imgui()
 {
     PROFILE_FUNCTION();
+    if (ImGui::Button(m_pause ? "Unpause" : "Pause"))
+    {
+        m_pause = !m_pause;
+    }
     if (ImGui::BeginTabBar("CameraTabBar"))
     {
         if (ImGui::BeginTabItem("View"))
@@ -284,6 +288,10 @@ void Source_Camera::load(const Save & save)
 
 cv::Mat Source_Camera::getTopography()
 {
+    if (m_pause)
+    {
+        return m_data;
+    }
     if (!m_cameraConnected)
     {
         connectToCamera();
@@ -298,7 +306,7 @@ std::vector<Gesture> Source_Camera::getGestures()
 {
     // Get points and convert to integers
     auto pointsF = m_warper.getPoints();
-    cv::Point points[4] = {
+    std::vector<cv::Point> points = {
         pointsF[0],
         pointsF[1],
         pointsF[3],

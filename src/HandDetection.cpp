@@ -11,20 +11,45 @@ void HandDetection::imgui()
     cv::Mat rgb;
     cv::cvtColor(normalized, rgb, cv::COLOR_GRAY2RGBA);
 
-    cv::RNG rng(68);
     for (size_t i = 0; i < m_hulls.size(); i++)
     {
-        cv::Scalar color = cv::Scalar(rng.uniform(0, 256), rng.uniform(0, 256), rng.uniform(0, 256), 255);
-        cv::drawContours(rgb, m_hulls, (int)i, color, 3);
+        cv::Scalar color = cv::Scalar(240, 0, 0, 255);
+        if (m_selectedHull == i)
+        {
+            color = cv::Scalar(0, 250, 0, 255);
+        }
+        cv::drawContours(rgb, m_hulls, (int)i, color, 2);
     }
 
     // Create SFML image
     m_image.create(rgb.cols, rgb.rows, rgb.ptr());
 
+    for (size_t i = 0; i < m_hulls.size(); i++)
+    {
+        auto m = cv::moments(m_hulls[i]);
+        int cx = (int)(m.m10 / m.m00);
+        int cy = (int)(m.m01 / m.m00);
+        m_image.setPixel(cx, cy, sf::Color(0, 0, 255, 255));
+    }
+
     m_texture.loadFromImage(m_image);
     ImGui::Image(m_texture);
     
     ImGui::SliderInt("Threshold", &m_thresh, 0, 255);
+
+    if (ImGui::CollapsingHeader("Convex Hulls"))
+    {
+        for (size_t i = 0; i < m_hulls.size(); i++)
+        {
+
+            ImGui::Text("Hull %d: ", i);
+            ImGui::SameLine();
+            if (ImGui::Button(std::format("Select##{}", i).c_str()))
+            {
+                m_selectedHull = i;
+            }
+        }
+    }
 }
 
 // Function that detects the area taken up by hands / arms and ignores it
@@ -53,25 +78,71 @@ void HandDetection::removeHands(const cv::Mat & input, cv::Mat & output, float m
     m_previous = output.clone();
 }
 
-void HandDetection::identifyGestures(const cv::Point* area)
+void HandDetection::identifyGestures(std::vector<cv::Point> & box)
 {
     m_gestures.clear();
+    if (m_segmented.total() <= 0)
+    {
+        return;
+    }
+
+    double boxArea = cv::contourArea(box, true);
 
     // Make mask
     cv::Mat mask = cv::Mat::ones(m_segmented.size(), CV_8U);
-    cv::fillConvexPoly(mask, area, 4, cv::Scalar(0));
+    cv::fillConvexPoly(mask, box, cv::Scalar(0));
 
     m_segmented.setTo(0.0, mask);
 
+    m_contours = std::vector<std::vector<cv::Point>>();
     // Find Contours
-    std::vector<std::vector<cv::Point>> contours;
-    cv::findContours(m_segmented, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+    cv::findContours(m_segmented, m_contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
 
     // Find Convex Hulls
-    m_hulls = std::vector<std::vector<cv::Point>>(contours.size());
-    for (size_t i = 0; i < contours.size(); i++)
+    m_hulls = std::vector<std::vector<cv::Point>>(m_contours.size());
+    for (size_t i = 0; i < m_contours.size(); i++)
     {
-        cv::convexHull(contours[i], m_hulls[i]);
+        cv::convexHull(m_contours[i], m_hulls[i]);
+        auto m = cv::moments(m_hulls[i]);
+        int cx = (int)(m.m10 / m.m00);
+        int cy = (int)(m.m01 / m.m00);
+
+        double hullArea = cv::contourArea(m_hulls[i], true);
+        double hullPerimeter = cv::arcLength(m_hulls[i], true);
+        double contourArea = cv::contourArea(m_contours[i], true);
+        double contourPerimeter = cv::arcLength(m_contours[i], true);
+
+        double max = 0.0;
+        double min = 0.0;
+        for (size_t j = 0; j < m_contours[i].size(); j++)
+        {
+            cv::Point p = m_contours[i][j];
+            double distance = sqrt(pow(cx - (double)p.x, 2) + pow(cy - (double)p.y, 2));
+            if (j == 0)
+            {
+                max = distance;
+                min = distance;
+                continue;
+            }
+
+            if (distance > max)
+            {
+                max = distance;
+            }
+
+            if (distance < min)
+            {
+                min = distance;
+            }
+        }
+
+        std::vector<double> x = {
+            contourArea / boxArea,
+            contourArea / hullArea,
+            contourPerimeter / hullPerimeter,
+            max,
+            min
+        };
     }
 }
 

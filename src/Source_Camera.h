@@ -53,6 +53,8 @@ class Source_Camera : public TopographySource
     bool                m_drawDepth = true;
     bool                m_drawColor = false;
 
+    bool                m_pause = false;
+
     void connectToCamera();
     void captureImages();
 
