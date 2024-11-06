@@ -86,7 +86,7 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
 
     if (particles.empty())
     {
-        for (int i = 0; i < 10000; ++i)
+        for (int i = 0; i < 30000; ++i)
         {
             particles.push_back(Particle{ (double)(rand() % (int)(m_field.width() * spacing)), (double)(rand() % (int)(m_field.height() * spacing)) });
         }
@@ -95,10 +95,12 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
     cv::Mat particleGrid = cv::Mat(data.rows, data.cols, CV_8U, 0.0);
     for (auto& particle : particles)
     {
+        constexpr int speed = 5;
+
         for (auto& dir : directions.get(particle.x / spacing, particle.y / spacing))
         {
-            particle.x += dir.x;
-            particle.y += dir.y;
+            particle.x += dir.x * (rand() % speed + 1);
+            particle.y += dir.y * (rand() % speed + 1);
         }
 
         if (particle.x / spacing >= m_field.width() - 1)

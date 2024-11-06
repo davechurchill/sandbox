@@ -82,7 +82,7 @@ Grid<std::vector<Direction>> VectorField::compute(const cv::Mat& grid, size_t sp
         }
     }
 
-    double weight = 0.25;
+    double weight = 0.2;
     for (int x = 0; x < m_width; ++x)
     {
         for (int y = 0; y < m_height; ++y)
