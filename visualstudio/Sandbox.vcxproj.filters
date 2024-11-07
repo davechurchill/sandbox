@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\imgui\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
@@ -64,9 +63,6 @@
     </ClCompile>
     <ClCompile Include="..\src\Processor_Minecraft.cpp">
       <Filter>processors\minecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Processor_Socket.cpp">
-      <Filter>processors\socket</Filter>
     </ClCompile>
     <ClCompile Include="..\src\SandboxProjector.cpp">
       <Filter>calibration</Filter>
@@ -141,9 +137,6 @@
     </ClInclude>
     <ClInclude Include="..\src\Processor_Minecraft.h">
       <Filter>processors\minecraft</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Processor_Socket.h">
-      <Filter>processors\socket</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Profiler.hpp">
       <Filter>engine</Filter>
