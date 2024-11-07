@@ -1,4 +1,4 @@
-source Perlin
+source Camera
 processor Vectors
 align 0
 gaussianBlur 1

@@ -79,55 +79,34 @@ void Processor_Vectors::load(const Save& save)
 
 void Processor_Vectors::processTopography(const cv::Mat& data)
 {
-    const int spacing = 8;
-    const int trailSize = 4;
-
-    auto directions = m_field.compute(data, spacing);
-
-    if (particles.empty())
-    {
-        for (int i = 0; i < 30000; ++i)
-        {
-            particles.push_back(Particle{ (double)(rand() % (int)(m_field.width() * spacing)), (double)(rand() % (int)(m_field.height() * spacing)) });
-        }
-    }
+    PROFILE_FUNCTION();
 
     cv::Mat particleGrid = cv::Mat(data.rows, data.cols, CV_8U, 0.0);
-    for (auto& particle : particles)
-    {
-        constexpr int speed = 5;
-
-        for (auto& dir : directions.get(particle.x / spacing, particle.y / spacing))
-        {
-            particle.x += dir.x * (rand() % speed + 1);
-            particle.y += dir.y * (rand() % speed + 1);
-        }
-
-        if (particle.x / spacing >= m_field.width() - 1)
-        {
-            particle.x = spacing;
-            particle.y = rand() % (int)(m_field.height() * spacing);
-        }
-
-        particle.trail.push_back({ particle.x, particle.y });
-        if (particle.trail.size() > trailSize)
-        {
-            particle.trail.erase(particle.trail.begin());
-        }
-
-        particle.x = std::max(0.0, std::min((double)data.cols, particle.x));
-        particle.y = std::max(0.0, std::min((double)data.rows, particle.y));
-
-        for (int i = 0; i < particle.trail.size(); ++i)
-        {
-            auto& t = particle.trail[i];
-            particleGrid.at<uint8_t>(t.y, t.x) = 255 - (trailSize - i - 1) * 255 / trailSize;
-        }
-    }
-
     cv::Mat m_cvTransformedParticleGrid32f;
 
-    PROFILE_FUNCTION();
+    {
+        PROFILE_SCOPE("Update Particles");
+
+        static bool particlesCreated = false;
+        if (!particlesCreated)  {
+            m_particleManager.createParticles(data);
+            particlesCreated = true;
+        }
+
+        int trailLength = m_particleManager.trailLength();
+
+        m_particleManager.update(data);
+
+        for (auto& particle : m_particleManager.getParticles())
+        {
+            for (int i = 0; i < particle.trail.size(); ++i)
+            {
+                auto& [x, y] = particle.trail[i];
+                particleGrid.at<uint8_t>(y, x) = 255 - (trailLength - i - 1) * 255 / trailLength;
+            }
+        }
+    }
+    
     {
         PROFILE_SCOPE("Calibration TransformProjection");
         m_projector.project(data, m_cvTransformedDepthImage32f);

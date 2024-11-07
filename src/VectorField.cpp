@@ -100,7 +100,7 @@ Grid<std::vector<Direction>> VectorField::compute(const cv::Mat& grid, size_t sp
             double left = x > 0 ? m_distance.get(x - 1, y) : max;
             double right = x < m_width - 1 ? m_distance.get(x + 1, y) : max;
             double up = y > 0 ? m_distance.get(x, y - 1) : max;
-            double down = y < m_width - 1 ? m_distance.get(x, y + 1) : max;
+            double down = y < m_height - 1 ? m_distance.get(x, y + 1) : max;
 
             Direction dir{ left - right, up - down };
 
