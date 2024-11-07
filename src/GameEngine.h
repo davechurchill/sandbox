@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Scene.h"
-#include "Assets.h"
 
 #include <vector>
 #include <memory>
@@ -9,7 +8,6 @@
 
 #include "imgui.h"
 #include "imgui-SFML.h"
-#include "MinecraftInterface.h"
 
 typedef std::map<std::string, std::shared_ptr<Scene>> SceneMap;
 
@@ -26,7 +24,6 @@ protected:
     size_t              m_simulationSpeed = 1;
     bool                m_running = true;
     ImGuiStyle          m_originalStyle;
-    mc::MinecraftInterface  m_mcInterface;
     float               m_framerate;
 
     void update();
@@ -67,6 +64,5 @@ public:
 
     sf::RenderWindow & window();
     sf::RenderWindow & displayWindow();
-    mc::MinecraftInterface & minecraft();
     bool isRunning();
 };

@@ -40,9 +40,6 @@
     <ClCompile Include="..\src\GameEngine.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Assets.cpp">
-      <Filter>engine</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Tools.cpp">
       <Filter>engine</Filter>
     </ClCompile>
@@ -52,17 +49,8 @@
     <ClCompile Include="..\src\HeatGrid.cpp">
       <Filter>processors\heat</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\BlockGeneration.cpp">
-      <Filter>processors\minecraft</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\MinecraftInterface.cpp">
-      <Filter>processors\minecraft</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Processor_Colorizer.cpp">
       <Filter>processors\colorizer</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Processor_Minecraft.cpp">
-      <Filter>processors\minecraft</Filter>
     </ClCompile>
     <ClCompile Include="..\src\SandboxProjector.cpp">
       <Filter>calibration</Filter>
@@ -90,19 +78,10 @@
     <ClInclude Include="..\src\Logger.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Grid.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\GoodAssert.h">
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\GameEngine.h">
-      <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Assets.h">
-      <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Action.hpp">
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Timer.hpp">
@@ -126,23 +105,11 @@
     <ClInclude Include="..\src\HeatGrid.h">
       <Filter>processors\heat</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\BlockGeneration.h">
-      <Filter>processors\minecraft</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\MinecraftInterface.h">
-      <Filter>processors\minecraft</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Processor_Colorizer.h">
       <Filter>processors\colorizer</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_Minecraft.h">
-      <Filter>processors\minecraft</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Profiler.hpp">
       <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Cube.hpp">
-      <Filter>processors\minecraft</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ViewController.hpp">
       <Filter>engine</Filter>
@@ -162,6 +129,10 @@
     <ClInclude Include="..\src\Perlin.hpp">
       <Filter>engine</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Grid.hpp">
+      <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Sandbox.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\shader_contour_color.frag">
@@ -190,14 +161,8 @@
     <Filter Include="processors\heat">
       <UniqueIdentifier>{ec1db916-4f12-4bf6-b9da-a8e929c59028}</UniqueIdentifier>
     </Filter>
-    <Filter Include="processors\minecraft">
-      <UniqueIdentifier>{6999ad05-ca1f-43f7-a5cf-771d2b001e7b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="processors\colorizer">
       <UniqueIdentifier>{4914076f-3beb-4024-8e48-d76ad32a6dfa}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="processors\socket">
-      <UniqueIdentifier>{899555c7-0f63-41b2-be2f-fdabddbc2b30}</UniqueIdentifier>
     </Filter>
     <Filter Include="camera">
       <UniqueIdentifier>{4a1e8f66-f9d6-4160-b8f9-fcb860f59987}</UniqueIdentifier>

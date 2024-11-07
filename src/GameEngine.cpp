@@ -1,5 +1,4 @@
 #include "GameEngine.h"
-#include "Assets.h"
 #include "Profiler.hpp"
 
 #include "imgui.h"
@@ -19,8 +18,6 @@ void GameEngine::init()
 
     ImGui::SFML::Init(m_window);
     m_originalStyle = ImGui::GetStyle();
-
-    Assets::Instance().addFont("Tech", "fonts/tech.ttf");
 }
 
 bool GameEngine::isRunning()
@@ -36,11 +33,6 @@ sf::RenderWindow & GameEngine::window()
 sf::RenderWindow & GameEngine::displayWindow()
 {
     return m_displayWindow;
-}
-
-mc::MinecraftInterface & GameEngine::minecraft()
-{
-    return m_mcInterface;
 }
 
 std::shared_ptr<Scene> GameEngine::currentScene()
