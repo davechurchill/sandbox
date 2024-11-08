@@ -1,5 +1,5 @@
 source Camera
-processor Minecraft
+processor Colorizer
 align 0
 gaussianBlur 1
 maxDistance 1.13

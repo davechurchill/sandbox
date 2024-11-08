@@ -47,6 +47,13 @@ class Scene_Main : public Scene
     void setProcessor(const std::string & processor);
 
     void saveDataDump();
+    
+public:
+
+    Scene_Main(GameEngine * game);
+
+    void onFrame();
+    void endScene();
 
     template <class T>
         requires (std::is_base_of<TopographySource, T>::value)
@@ -61,11 +68,4 @@ class Scene_Main : public Scene
     {
         m_processorMap.emplace(name, std::make_shared<T>);
     }
-    
-public:
-
-    Scene_Main(GameEngine * game);
-
-    void onFrame();
-    void endScene();
 };
