@@ -19,6 +19,8 @@ class HandDetection
     std::vector<std::vector<cv::Point>> m_hulls;
     std::vector<std::vector<cv::Point>> m_contours;
 
+    std::vector<std::vector<double>> m_features;
+
 public:
     std::vector<Gesture> m_gestures;
 

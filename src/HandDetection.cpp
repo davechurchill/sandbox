@@ -48,6 +48,11 @@ void HandDetection::imgui()
             {
                 m_selectedHull = i;
             }
+            for (auto x : m_features[i])
+            {
+                ImGui::SameLine();
+                ImGui::Text("%.2f",x);
+            }
         }
     }
 }
@@ -100,6 +105,8 @@ void HandDetection::identifyGestures(std::vector<cv::Point> & box)
 
     // Find Convex Hulls
     m_hulls = std::vector<std::vector<cv::Point>>(m_contours.size());
+
+    m_features = std::vector<std::vector<double>>();
     for (size_t i = 0; i < m_contours.size(); i++)
     {
         cv::convexHull(m_contours[i], m_hulls[i]);
@@ -114,10 +121,19 @@ void HandDetection::identifyGestures(std::vector<cv::Point> & box)
 
         double max = 0.0;
         double min = 0.0;
+        double average = 0.0;
+        cv::Vec2d normalizedSum;
+        std::vector<double> angles (m_contours[i].size());
         for (size_t j = 0; j < m_contours[i].size(); j++)
         {
             cv::Point p = m_contours[i][j];
+
+            cv::Vec2d dif(p.x - cx, p.y - cy);
+            angles[j] = atan2(dif[1], dif[0]);
+            normalizedSum += cv::normalize(dif);
+
             double distance = sqrt(pow(cx - (double)p.x, 2) + pow(cy - (double)p.y, 2));
+            average += distance;
             if (j == 0)
             {
                 max = distance;
@@ -135,14 +151,43 @@ void HandDetection::identifyGestures(std::vector<cv::Point> & box)
                 min = distance;
             }
         }
+        average /= (double)m_contours[i].size();
+        double averageAngle = atan2(normalizedSum[0], normalizedSum[1]);
 
-        std::vector<double> x = {
-            contourArea / boxArea,
+        // Find slice densities
+        const int slices = 10;
+        std::vector<int> sliceCounts(slices,0);
+        double offset = CV_2PI - averageAngle;
+        const double sliceSize = CV_2PI / (double)slices;
+        std::cout << "Hull " << i;
+        for (double a : angles)
+        {
+            int s = (int)(fmod((a + offset), CV_2PI) / sliceSize);
+            std::cout << " " << a << "->" << s;
+            sliceCounts[s]++;
+        }
+        std::cout << "\n";
+
+        m_features.push_back({
+            /*contourArea / boxArea,
             contourArea / hullArea,
             contourPerimeter / hullPerimeter,
             max,
-            min
-        };
+            min,
+            average,
+            (double)m_hulls[i].size() / (double)m_contours[i].size(),
+            averageAngle*/
+            (double)sliceCounts[0],
+            (double)sliceCounts[1],
+            (double)sliceCounts[2],
+            (double)sliceCounts[3],
+            (double)sliceCounts[4],
+            (double)sliceCounts[5],
+            (double)sliceCounts[6],
+            (double)sliceCounts[7],
+            (double)sliceCounts[8],
+            (double)sliceCounts[9],
+        });
     }
 }
 
