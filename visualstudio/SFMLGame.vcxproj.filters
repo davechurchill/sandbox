@@ -74,7 +74,7 @@
     <ClCompile Include="..\src\Processor_Vectors.cpp">
       <Filter>processors\vectors</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\VectorField.cpp">
+    <ClCompile Include="..\src\ParticleManager.cpp">
       <Filter>processors\vectors</Filter>
     </ClCompile>
   </ItemGroup>
@@ -172,7 +172,10 @@
     <ClInclude Include="..\src\Processor_Vectors.h">
       <Filter>processors\vectors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\VectorField.h">
+    <ClInclude Include="..\src\VectorField.hpp">
+      <Filter>processors\vectors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ParticleManager.h">
       <Filter>processors\vectors</Filter>
     </ClInclude>
   </ItemGroup>

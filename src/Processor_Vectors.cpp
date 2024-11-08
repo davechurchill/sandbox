@@ -1,9 +1,8 @@
+#include "imgui.h"
+#include "imgui-SFML.h"
 #include "Processor_Vectors.h"
 #include "Profiler.hpp"
 #include "Tools.h"
-
-#include "imgui.h"
-#include "imgui-SFML.h"
 
 void Processor_Vectors::init()
 {
@@ -20,6 +19,15 @@ void Processor_Vectors::imgui()
     ImGui::Checkbox("##Contours", &m_drawContours);
     ImGui::SameLine();
     ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
+
+    ImGui::InputInt("Particles", &m_particleManager.particleCount);
+    ImGui::SliderInt("Cell Size", &m_particleManager.cellSize, 1, 128);
+    ImGui::SliderInt("Trail Length", &m_particleManager.trailLength, 1, 32);
+    ImGui::SliderFloat("Terrain Weight", &m_particleManager.terrainWeight, 0.0f, 1.0f, "%.3f");
+    if (ImGui::Button("Reset Particles"))
+    {
+        m_particleManager.resetRequested = true;
+    }
 
     ImGui::Separator();
 
@@ -69,6 +77,7 @@ void Processor_Vectors::save(Save& save) const
     save.numberOfContourLines = m_numberOfContourLines;
     m_projector.save(save);
 }
+
 void Processor_Vectors::load(const Save& save)
 {
     m_selectedShaderIndex = save.selectedShaderIndex;
@@ -87,14 +96,6 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
     {
         PROFILE_SCOPE("Update Particles");
 
-        static bool particlesCreated = false;
-        if (!particlesCreated)  {
-            m_particleManager.createParticles(data);
-            particlesCreated = true;
-        }
-
-        int trailLength = m_particleManager.trailLength();
-
         m_particleManager.update(data);
 
         for (auto& particle : m_particleManager.getParticles())
@@ -102,8 +103,10 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
             for (int i = 0; i < particle.trail.size(); ++i)
             {
                 auto& [x, y] = particle.trail[i];
-                particleGrid.at<uint8_t>(y, x) = 255 - (trailLength - i - 1) * 255 / trailLength;
+                particleGrid.at<uint8_t>((int)round(y), (int)round(x)) = 255 - (m_particleManager.trailLength - i - 1) * 255 / m_particleManager.trailLength;
             }
+
+            particleGrid.at<uint8_t>((int)round(particle.pos.y), (int)round(particle.pos.x)) = 255;
         }
     }
     
