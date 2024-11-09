@@ -1,8 +1,87 @@
 #include "HandDetection.h"
 #include "Tools.h"
 
+#include <fstream>
+
+HandDetection::HandDetection()
+{
+    loadDatabase();
+}
+HandDetection::~HandDetection()
+{
+    saveDatabase();
+}
+void HandDetection::loadDatabase()
+{
+    std::ifstream file(m_filename);
+    if (!file.good())
+    {
+        return;
+    }
+
+    std::string line;
+    std::getline(file, line); // Remove labels
+    while (std::getline(file, line)) // Read in data
+    {
+        GestureData g;
+        std::stringstream s(line);
+        s.imbue(std::locale(","));
+        s >> g.areaCB >> g.areaCH >> g.perimeterCH >> g.maxD >> g.minD >> g.averageD >> g.pointsCH >> g.averageA;
+        for (int& slice : g.sliceCounts)
+        {
+            s >> slice;
+        }
+        s >> g.classLabel;
+    }
+}
+
+void HandDetection::saveDatabase()
+{
+    std::ofstream file(m_filename);
+    if (!file.good())
+    {
+        std::cout << "Couldn't write to file " << m_filename << std::endl;
+        return;
+    }
+
+    // First line: labels
+    const std::vector<std::string> names = { "AreaCB", "AreaCH", "PerimeterCH", "MaxD", "MinD", "AverageD", "PointsCH", "AverageA" };
+    for (int i = 0; i < names.size(); ++i)
+    {
+        file << names[i] << ",";
+    }
+    for (int i = 0; i < 10; ++i)
+    {
+        file << "slice" << i << ",";
+    }
+    file << "class\n";
+
+    // Data
+    for (auto& g : m_dataset)
+    {
+        file << g.areaCB << "," << g.areaCH << "," << g.perimeterCH << "," << g.maxD << "," << g.minD << "," << g.averageD << "," << g.pointsCH << "," << g.averageA << "," ;
+        for (int& slice : g.sliceCounts)
+        {
+            file << slice << ",";
+        }
+        file << g.classLabel << "\n";
+    }
+}
+
+void HandDetection::transferCurrentData()
+{
+    for (auto& g : m_currentData)
+    {
+        m_dataset.push_back(g);
+    }
+}
+
 void HandDetection::imgui()
 {
+    if (ImGui::Button("Save Dataset"))
+    {
+        saveDatabase();
+    }
     // Ensure the input image is in the correct format (CV_32F)
     cv::Mat normalized;
     m_segmented.convertTo(normalized, CV_8U, 255.0); // Scale float [0, 1] to [0, 255]
@@ -10,7 +89,7 @@ void HandDetection::imgui()
     // Convert to RGB (SFML requires RGB format)
     cv::Mat rgb;
     cv::cvtColor(normalized, rgb, cv::COLOR_GRAY2RGBA);
-
+    std::vector<std::vector<cv::Point>> lines;
     for (size_t i = 0; i < m_hulls.size(); i++)
     {
         cv::Scalar color = cv::Scalar(240, 0, 0, 255);
@@ -19,18 +98,16 @@ void HandDetection::imgui()
             color = cv::Scalar(0, 250, 0, 255);
         }
         cv::drawContours(rgb, m_hulls, (int)i, color, 2);
+
+        auto m = cv::moments(m_hulls[i]);
+        cv::Point p = { (int)(m.m10 / m.m00),(int)(m.m01 / m.m00) };
+        double angle = m_currentData[i].averageA;
+        lines.push_back({ p, cv::Point(10.0 * sin(angle), 10.0 * cos(angle)) + p });
+        cv::drawContours(rgb, lines, i, cv::Scalar(240, 0, 0, 255), 2);
     }
 
     // Create SFML image
     m_image.create(rgb.cols, rgb.rows, rgb.ptr());
-
-    for (size_t i = 0; i < m_hulls.size(); i++)
-    {
-        auto m = cv::moments(m_hulls[i]);
-        int cx = (int)(m.m10 / m.m00);
-        int cy = (int)(m.m01 / m.m00);
-        m_image.setPixel(cx, cy, sf::Color(0, 0, 255, 255));
-    }
 
     m_texture.loadFromImage(m_image);
     ImGui::Image(m_texture);
@@ -48,12 +125,15 @@ void HandDetection::imgui()
             {
                 m_selectedHull = i;
             }
-            for (auto x : m_features[i])
-            {
-                ImGui::SameLine();
-                ImGui::Text("%.2f",x);
-            }
+            ImGui::SameLine();
+            const static char* classLabels[] = {"None", "High Five", "OK", "Peace", "Rock", "Judgement"};
+            ImGui::Combo(std::format("##clslabel{}", i).c_str(), &m_currentData[i].classLabel, classLabels, IM_ARRAYSIZE(classLabels));
         }
+    }
+
+    if (ImGui::Button("Add data to dataset"))
+    {
+        transferCurrentData();
     }
 }
 
@@ -101,12 +181,12 @@ void HandDetection::identifyGestures(std::vector<cv::Point> & box)
 
     m_contours = std::vector<std::vector<cv::Point>>();
     // Find Contours
-    cv::findContours(m_segmented, m_contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+    cv::findContours(m_segmented, m_contours, cv::RETR_TREE, cv::CHAIN_APPROX_NONE);
 
     // Find Convex Hulls
     m_hulls = std::vector<std::vector<cv::Point>>(m_contours.size());
 
-    m_features = std::vector<std::vector<double>>();
+    m_currentData = std::vector<GestureData>(m_contours.size());
     for (size_t i = 0; i < m_contours.size(); i++)
     {
         cv::convexHull(m_contours[i], m_hulls[i]);
@@ -119,11 +199,9 @@ void HandDetection::identifyGestures(std::vector<cv::Point> & box)
         double contourArea = cv::contourArea(m_contours[i], true);
         double contourPerimeter = cv::arcLength(m_contours[i], true);
 
-        double max = 0.0;
-        double min = 0.0;
-        double average = 0.0;
         cv::Vec2d normalizedSum;
         std::vector<double> angles (m_contours[i].size());
+        auto& g = m_currentData[i];
         for (size_t j = 0; j < m_contours[i].size(); j++)
         {
             cv::Point p = m_contours[i][j];
@@ -133,61 +211,41 @@ void HandDetection::identifyGestures(std::vector<cv::Point> & box)
             normalizedSum += cv::normalize(dif);
 
             double distance = sqrt(pow(cx - (double)p.x, 2) + pow(cy - (double)p.y, 2));
-            average += distance;
+            g.averageD += distance;
             if (j == 0)
             {
-                max = distance;
-                min = distance;
+                g.maxD = distance;
+                g.minD = distance;
                 continue;
             }
 
-            if (distance > max)
+            if (distance > g.maxD)
             {
-                max = distance;
+                g.maxD = distance;
             }
 
-            if (distance < min)
+            if (distance < g.minD)
             {
-                min = distance;
+                g.minD = distance;
             }
         }
-        average /= (double)m_contours[i].size();
-        double averageAngle = atan2(normalizedSum[0], normalizedSum[1]);
+        g.averageD /= (double)m_contours[i].size();
+        g.averageA = atan2(normalizedSum[0], normalizedSum[1]);
 
         // Find slice densities
         const int slices = 10;
-        std::vector<int> sliceCounts(slices,0);
-        double offset = CV_2PI - averageAngle;
+        double offset = CV_2PI - g.averageA;
         const double sliceSize = CV_2PI / (double)slices;
-        std::cout << "Hull " << i;
         for (double a : angles)
         {
             int s = (int)(fmod((a + offset), CV_2PI) / sliceSize);
-            std::cout << " " << a << "->" << s;
-            sliceCounts[s]++;
+            g.sliceCounts[s]++;
         }
-        std::cout << "\n";
 
-        m_features.push_back({
-            /*contourArea / boxArea,
-            contourArea / hullArea,
-            contourPerimeter / hullPerimeter,
-            max,
-            min,
-            average,
-            (double)m_hulls[i].size() / (double)m_contours[i].size(),
-            averageAngle*/
-            (double)sliceCounts[0],
-            (double)sliceCounts[1],
-            (double)sliceCounts[2],
-            (double)sliceCounts[3],
-            (double)sliceCounts[4],
-            (double)sliceCounts[5],
-            (double)sliceCounts[6],
-            (double)sliceCounts[7],
-            (double)sliceCounts[8],
-            (double)sliceCounts[9],
-        });
+        g.areaCB = contourArea / boxArea;
+        g.areaCH = contourArea / hullArea;
+        g.perimeterCH = contourPerimeter / hullPerimeter;
+        g.pointsCH = (double)m_hulls[i].size() / (double)m_contours[i].size();
     }
 }
 

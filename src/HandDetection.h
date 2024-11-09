@@ -6,6 +6,20 @@
 #include "imgui-SFML.h"
 #include "TopographySource.h"
 
+struct GestureData
+{
+    double areaCB;
+    double areaCH;
+    double perimeterCH;
+    double maxD = 0.0;
+    double minD = 0.0;
+    double averageD = 0.0;
+    double pointsCH;
+    double averageA;
+    std::array<int, 10> sliceCounts = {0,0,0,0,0, 0,0,0,0,0};
+    int classLabel = 0;
+};
+
 class HandDetection
 {
     int m_thresh = 218;
@@ -19,9 +33,21 @@ class HandDetection
     std::vector<std::vector<cv::Point>> m_hulls;
     std::vector<std::vector<cv::Point>> m_contours;
 
-    std::vector<std::vector<double>> m_features;
+    std::vector<GestureData> m_currentData;
+    std::vector<GestureData> m_dataset;
+
+    std::string m_filename = "gestureData.csv";
+
+    void loadDatabase();
+    void saveDatabase();
+
+    void transferCurrentData();
+
 
 public:
+    HandDetection();
+    ~HandDetection();
+
     std::vector<Gesture> m_gestures;
 
     void imgui();

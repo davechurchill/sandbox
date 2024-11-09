@@ -304,6 +304,7 @@ cv::Mat Source_Camera::getTopography()
 
 std::vector<Gesture> Source_Camera::getGestures()
 {
+    if (m_pause) { return m_handDetection.m_gestures; }
     // Get points and convert to integers
     auto pointsF = m_warper.getPoints();
     std::vector<cv::Point> points = {
