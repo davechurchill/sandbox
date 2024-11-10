@@ -269,6 +269,10 @@ void Source_Camera::render(sf::RenderWindow & window)
 void Source_Camera::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
     m_warper.processEvent(event, mouse);
+    if (event.type == sf::Event::JoystickButtonPressed && event.joystickButton.button == 9)
+    {
+        m_pause = !m_pause;
+    }
 }
 
 void Source_Camera::save(Save & save) const

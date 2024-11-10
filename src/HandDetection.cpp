@@ -253,4 +253,29 @@ sf::Texture & HandDetection::getTexture()
     return m_texture;
 }
 
+void HandDetection::eventHandling(sf::Event & event)
+{
+    if (event.type == sf::Event::JoystickButtonPressed)
+    {
+        switch (event.joystickButton.button)
+        {
+        case 0: transferCurrentData(); break; // Add to database
+        case 1:
+        {
+            int & c = m_currentData[m_selectedHull].classLabel;
+            c = (c + 1) % 6;
+        }
+            break; // Cycle class labels
+        case 3: saveDatabase(); break; // Save
+        }
+    }
+    else if (event.type == sf::Event::JoystickMoved)
+    {
+        if (event.joystickMove.axis == 6)
+        {
+            m_selectedHull = (m_selectedHull + ((int)event.joystickMove.position / 100) + m_hulls.size()) % m_hulls.size();
+        }
+    }
+}
+
 
