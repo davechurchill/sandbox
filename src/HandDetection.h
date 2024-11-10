@@ -54,5 +54,5 @@ public:
     void removeHands(const cv::Mat & input, cv::Mat & output, float maxDistance, float minDistance);
     void identifyGestures(std::vector<cv::Point> & nbox);
     sf::Texture & getTexture();
-    void eventHandling(sf::Event & event);
+    void eventHandling(const sf::Event & event);
 };

@@ -260,6 +260,8 @@ void Source_Camera::render(sf::RenderWindow & window)
         {
             auto & texture = m_handDetection.getTexture();
             m_gestureGraphic.setTexture(texture, true);
+            m_gestureGraphic.setScale({ 2.0,2.0 });
+            window.draw(m_gestureGraphic);
         }
     }
 
@@ -273,6 +275,7 @@ void Source_Camera::processEvent(const sf::Event & event, const sf::Vector2f & m
     {
         m_pause = !m_pause;
     }
+    m_handDetection.eventHandling(event);
 }
 
 void Source_Camera::save(Save & save) const

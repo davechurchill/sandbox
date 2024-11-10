@@ -13,9 +13,11 @@ HandDetection::~HandDetection()
 }
 void HandDetection::loadDatabase()
 {
+    std::cout << "Loading Dataset" << std::endl;
     std::ifstream file(m_filename);
     if (!file.good())
     {
+        std::cout << "Failed to Load Dataset" << std::endl;
         return;
     }
 
@@ -31,11 +33,13 @@ void HandDetection::loadDatabase()
             s >> slice;
         }
         s >> g.classLabel;
+        m_dataset.push_back(g);
     }
 }
 
 void HandDetection::saveDatabase()
 {
+    std::cout << "Saving Dataset" << std::endl;
     std::ofstream file(m_filename);
     if (!file.good())
     {
@@ -77,6 +81,7 @@ void HandDetection::transferCurrentData()
 
 void HandDetection::imgui()
 {
+    ImGui::Text("Dataset Size:%d", m_dataset.size());
     if (ImGui::Button("Save Dataset"))
     {
         saveDatabase();
@@ -232,18 +237,26 @@ sf::Texture & HandDetection::getTexture()
     std::vector<std::vector<cv::Point>> lines;
     for (size_t i = 0; i < m_hulls.size(); i++)
     {
-        cv::Scalar color = cv::Scalar(240, 0, 0, 255);
+        cv::Scalar color = cv::Scalar(100, 100, 100, 255);
+        switch (m_currentData[i].classLabel)
+        {
+        case 1: color = cv::Scalar(255, 0, 0, 255); break;
+        case 2: color = cv::Scalar(0, 0, 255, 255); break;
+        case 3: color = cv::Scalar(0, 255, 0, 255); break;
+        case 4: color = cv::Scalar(255, 160, 0, 255); break;
+        case 5: color = cv::Scalar(255, 0, 255, 255); break;
+        }
         if (m_selectedHull == i)
         {
-            color = cv::Scalar(0, 250, 0, 255);
+            cv::drawContours(rgb, m_hulls, (int)i, cv::Scalar(150,150,150,255), 2);
         }
-        cv::drawContours(rgb, m_hulls, (int)i, color, 2);
+        cv::drawContours(rgb, m_hulls, (int)i, color, 1);
 
-        auto m = cv::moments(m_hulls[i]);
+        /*auto m = cv::moments(m_hulls[i]);
         cv::Point p = { (int)(m.m10 / m.m00),(int)(m.m01 / m.m00) };
         double angle = m_currentData[i].averageA;
         lines.push_back({ p, cv::Point(10.0 * sin(angle), 10.0 * cos(angle)) + p });
-        cv::drawContours(rgb, lines, i, cv::Scalar(240, 0, 0, 255), 2);
+        cv::drawContours(rgb, lines, i, cv::Scalar(240, 0, 0, 255), 2);*/
     }
 
     // Create SFML image
@@ -253,7 +266,7 @@ sf::Texture & HandDetection::getTexture()
     return m_texture;
 }
 
-void HandDetection::eventHandling(sf::Event & event)
+void HandDetection::eventHandling(const sf::Event & event)
 {
     if (event.type == sf::Event::JoystickButtonPressed)
     {
