@@ -36,7 +36,7 @@ class HandDetection
     std::vector<GestureData> m_currentData;
     std::vector<GestureData> m_dataset;
 
-    std::string m_filename = "gestureData.csv";
+    std::string m_filename = "gestureData.txt";
 
     void loadDatabase();
     void saveDatabase();
@@ -53,4 +53,5 @@ public:
     void imgui();
     void removeHands(const cv::Mat & input, cv::Mat & output, float maxDistance, float minDistance);
     void identifyGestures(std::vector<cv::Point> & nbox);
+    sf::Texture & getTexture();
 };

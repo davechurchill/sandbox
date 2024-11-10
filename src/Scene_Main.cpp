@@ -93,6 +93,7 @@ void Scene_Main::sProcessEvent(const sf::Event& event)
 
         case sf::Keyboard::F:
         {
+            auto & display = displayWindow();
             if (!m_game->displayWindow().isOpen())
             {
                 m_game->displayWindow().create(sf::VideoMode(1920, 1080), "Display", sf::Style::None);
@@ -101,6 +102,7 @@ void Scene_Main::sProcessEvent(const sf::Event& event)
             else
             {
                 m_game->displayWindow().close();
+                m_switchWindows = false;
             }
         }
         }
@@ -113,18 +115,19 @@ void Scene_Main::sUserInput()
 
     bool displayOpen = m_game->displayWindow().isOpen();
 
+    auto & main = mainWindow();
     sf::Event event;
-    while (m_game->window().pollEvent(event))
+    while (main.pollEvent(event))
     {
-        ImGui::SFML::ProcessEvent(m_game->window(), event);
-        m_viewController.processEvent(m_game->window(), event);
+        ImGui::SFML::ProcessEvent(main, event);
+        m_viewController.processEvent(main, event);
         sProcessEvent(event);
 
         // happens whenever the mouse is being moved
         if (event.type == sf::Event::MouseMoved)
         {
             m_mouseScreen = { event.mouseMove.x, event.mouseMove.y };
-            m_mouseWorld = m_game->window().mapPixelToCoords(m_mouseScreen);
+            m_mouseWorld = main.mapPixelToCoords(m_mouseScreen);
         }
 
         if (m_source) { m_source->processEvent(event, m_mouseWorld); }
@@ -136,8 +139,9 @@ void Scene_Main::sUserInput()
 
     if (displayOpen)
     {
+        auto & display = displayWindow();
         sf::Event displayEvent;
-        while (m_game->displayWindow().pollEvent(displayEvent))
+        while (display.pollEvent(displayEvent))
         {
             sProcessEvent(displayEvent);
 
@@ -160,15 +164,15 @@ void Scene_Main::sRender()
     m_game->window().clear();
     m_game->displayWindow().clear();
 
-    if (m_source) { m_source->render(m_game->window()); }
+    if (m_source) { m_source->render(mainWindow()); }
     if (!m_processor) { return; }
     if (m_game->displayWindow().isOpen())
     {
-        m_processor->render(m_game->displayWindow());
+        m_processor->render(displayWindow());
     }
     else
     {
-        m_processor->render(m_game->window());
+        m_processor->render(mainWindow());
     }
 }
 
@@ -184,6 +188,12 @@ void Scene_Main::renderUI()
     }
 
     ImGui::Text("Framerate: %d", (int)m_game->framerate());
+
+    if (m_game->displayWindow().isOpen() && ImGui::Button("Switch windows"))
+    {
+        m_switchWindows = !m_switchWindows;
+    }
+
     ImGui::EndMainMenuBar();
 
     ImGui::Begin("Controls", &m_drawUI);
@@ -320,6 +330,16 @@ void Scene_Main::saveDataDump()
     cv::FileStorage fout(std::format("dataDumps/{0:%F_%H-%M-%S}_snapshot.bin", now), cv::FileStorage::WRITE);
     fout << "matrix" << m_topography;
 
+}
+
+sf::RenderWindow & Scene_Main::mainWindow()
+{
+    return m_switchWindows ? m_game->displayWindow() : m_game->window();
+}
+
+sf::RenderWindow & Scene_Main::displayWindow()
+{
+    return m_switchWindows ? m_game->window() : m_game->displayWindow();
 }
 
 void Scene_Main::endScene()

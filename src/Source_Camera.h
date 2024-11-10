@@ -54,6 +54,8 @@ class Source_Camera : public TopographySource
     bool                m_drawColor = false;
 
     bool                m_pause = false;
+    bool                m_showGestureRecognition = false;
+    sf::Sprite          m_gestureGraphic;
 
     void connectToCamera();
     void captureImages();

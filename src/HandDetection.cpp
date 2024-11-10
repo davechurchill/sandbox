@@ -25,7 +25,6 @@ void HandDetection::loadDatabase()
     {
         GestureData g;
         std::stringstream s(line);
-        s.imbue(std::locale(","));
         s >> g.areaCB >> g.areaCH >> g.perimeterCH >> g.maxD >> g.minD >> g.averageD >> g.pointsCH >> g.averageA;
         for (int& slice : g.sliceCounts)
         {
@@ -48,21 +47,21 @@ void HandDetection::saveDatabase()
     const std::vector<std::string> names = { "AreaCB", "AreaCH", "PerimeterCH", "MaxD", "MinD", "AverageD", "PointsCH", "AverageA" };
     for (int i = 0; i < names.size(); ++i)
     {
-        file << names[i] << ",";
+        file << names[i] << " ";
     }
     for (int i = 0; i < 10; ++i)
     {
-        file << "slice" << i << ",";
+        file << "slice" << i << " ";
     }
     file << "class\n";
 
     // Data
     for (auto& g : m_dataset)
     {
-        file << g.areaCB << "," << g.areaCH << "," << g.perimeterCH << "," << g.maxD << "," << g.minD << "," << g.averageD << "," << g.pointsCH << "," << g.averageA << "," ;
+        file << g.areaCB << " " << g.areaCH << " " << g.perimeterCH << " " << g.maxD << " " << g.minD << " " << g.averageD << " " << g.pointsCH << " " << g.averageA << " " ;
         for (int& slice : g.sliceCounts)
         {
-            file << slice << ",";
+            file << slice << " ";
         }
         file << g.classLabel << "\n";
     }
@@ -82,35 +81,6 @@ void HandDetection::imgui()
     {
         saveDatabase();
     }
-    // Ensure the input image is in the correct format (CV_32F)
-    cv::Mat normalized;
-    m_segmented.convertTo(normalized, CV_8U, 255.0); // Scale float [0, 1] to [0, 255]
-
-    // Convert to RGB (SFML requires RGB format)
-    cv::Mat rgb;
-    cv::cvtColor(normalized, rgb, cv::COLOR_GRAY2RGBA);
-    std::vector<std::vector<cv::Point>> lines;
-    for (size_t i = 0; i < m_hulls.size(); i++)
-    {
-        cv::Scalar color = cv::Scalar(240, 0, 0, 255);
-        if (m_selectedHull == i)
-        {
-            color = cv::Scalar(0, 250, 0, 255);
-        }
-        cv::drawContours(rgb, m_hulls, (int)i, color, 2);
-
-        auto m = cv::moments(m_hulls[i]);
-        cv::Point p = { (int)(m.m10 / m.m00),(int)(m.m01 / m.m00) };
-        double angle = m_currentData[i].averageA;
-        lines.push_back({ p, cv::Point(10.0 * sin(angle), 10.0 * cos(angle)) + p });
-        cv::drawContours(rgb, lines, i, cv::Scalar(240, 0, 0, 255), 2);
-    }
-
-    // Create SFML image
-    m_image.create(rgb.cols, rgb.rows, rgb.ptr());
-
-    m_texture.loadFromImage(m_image);
-    ImGui::Image(m_texture);
     
     ImGui::SliderInt("Threshold", &m_thresh, 0, 255);
 
@@ -247,6 +217,40 @@ void HandDetection::identifyGestures(std::vector<cv::Point> & box)
         g.perimeterCH = contourPerimeter / hullPerimeter;
         g.pointsCH = (double)m_hulls[i].size() / (double)m_contours[i].size();
     }
+}
+
+sf::Texture & HandDetection::getTexture()
+{
+    if (m_segmented.total() <= 0) { return m_texture; }
+    // Ensure the input image is in the correct format (CV_32F)
+    cv::Mat normalized;
+    m_segmented.convertTo(normalized, CV_8U, 255.0); // Scale float [0, 1] to [0, 255]
+
+    // Convert to RGB (SFML requires RGB format)
+    cv::Mat rgb;
+    cv::cvtColor(normalized, rgb, cv::COLOR_GRAY2RGBA);
+    std::vector<std::vector<cv::Point>> lines;
+    for (size_t i = 0; i < m_hulls.size(); i++)
+    {
+        cv::Scalar color = cv::Scalar(240, 0, 0, 255);
+        if (m_selectedHull == i)
+        {
+            color = cv::Scalar(0, 250, 0, 255);
+        }
+        cv::drawContours(rgb, m_hulls, (int)i, color, 2);
+
+        auto m = cv::moments(m_hulls[i]);
+        cv::Point p = { (int)(m.m10 / m.m00),(int)(m.m01 / m.m00) };
+        double angle = m_currentData[i].averageA;
+        lines.push_back({ p, cv::Point(10.0 * sin(angle), 10.0 * cos(angle)) + p });
+        cv::drawContours(rgb, lines, i, cv::Scalar(240, 0, 0, 255), 2);
+    }
+
+    // Create SFML image
+    m_image.create(rgb.cols, rgb.rows, rgb.ptr());
+
+    m_texture.loadFromImage(m_image);
+    return m_texture;
 }
 
 

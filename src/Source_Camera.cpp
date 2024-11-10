@@ -232,6 +232,7 @@ void Source_Camera::imgui()
         if (ImGui::BeginTabItem("Hand Recognition"))
         {
             ImGui::Checkbox("Filter Hands", &m_detectHands);
+            ImGui::Checkbox("Show Gesture Recognition", &m_showGestureRecognition);
             m_handDetection.imgui();
             ImGui::EndTabItem();
         }
@@ -251,6 +252,15 @@ void Source_Camera::render(sf::RenderWindow & window)
     {
         PROFILE_SCOPE("Draw Color Image");
         if (m_drawColor) { window.draw(m_colorSprite); }
+    }
+
+    {
+        PROFILE_SCOPE("Draw Gesture Image");
+        if (m_showGestureRecognition)
+        {
+            auto & texture = m_handDetection.getTexture();
+            m_gestureGraphic.setTexture(texture, true);
+        }
     }
 
     m_warper.render(window);
