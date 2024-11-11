@@ -169,6 +169,9 @@
     <ClInclude Include="..\src\Source_Snapshot.h">
       <Filter>sources</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\GestureClassifier.hpp">
+      <Filter>camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\shader_contour_color.frag">

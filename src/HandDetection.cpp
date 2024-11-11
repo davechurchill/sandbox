@@ -98,7 +98,7 @@ void HandDetection::imgui()
             ImGui::SameLine();
             if (ImGui::Button(std::format("Select##{}", i).c_str()))
             {
-                m_selectedHull = i;
+                m_selectedHull = (int)i;
             }
             ImGui::SameLine();
             const static char* classLabels[] = {"None", "High Five", "OK", "Peace", "Rock", "Judgement"};
@@ -221,6 +221,8 @@ void HandDetection::identifyGestures(std::vector<cv::Point> & box)
         g.areaCH = contourArea / hullArea;
         g.perimeterCH = contourPerimeter / hullPerimeter;
         g.pointsCH = (double)m_hulls[i].size() / (double)m_contours[i].size();
+
+        m_classifier.classify(g);
     }
 }
 
@@ -286,7 +288,7 @@ void HandDetection::eventHandling(const sf::Event & event)
     {
         if (event.joystickMove.axis == 6)
         {
-            m_selectedHull = (m_selectedHull + ((int)event.joystickMove.position / 100) + m_hulls.size()) % m_hulls.size();
+            m_selectedHull = (m_selectedHull + ((int)event.joystickMove.position / 100) + (int)m_hulls.size()) % (int)m_hulls.size();
         }
     }
 }

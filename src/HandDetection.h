@@ -5,20 +5,7 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 #include "TopographySource.h"
-
-struct GestureData
-{
-    double areaCB;
-    double areaCH;
-    double perimeterCH;
-    double maxD = 0.0;
-    double minD = 0.0;
-    double averageD = 0.0;
-    double pointsCH;
-    double averageA;
-    std::array<int, 10> sliceCounts = {0,0,0,0,0, 0,0,0,0,0};
-    int classLabel = 0;
-};
+#include "GestureClassifier.hpp"
 
 class HandDetection
 {
@@ -37,6 +24,8 @@ class HandDetection
     std::vector<GestureData> m_dataset;
 
     std::string m_filename = "gestureData.txt";
+
+    GestureClassifier m_classifier;
 
     void loadDatabase();
     void saveDatabase();
