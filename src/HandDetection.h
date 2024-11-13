@@ -27,6 +27,9 @@ class HandDetection
 
     GestureClassifier m_classifier;
 
+    bool m_drawHulls = false;
+    bool m_drawContours = true;
+
     void loadDatabase();
     void saveDatabase();
 

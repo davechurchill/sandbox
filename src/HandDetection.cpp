@@ -81,6 +81,7 @@ void HandDetection::transferCurrentData()
 
 void HandDetection::imgui()
 {
+    ImGui::Checkbox("Draw Hulls", &m_drawHulls);
     ImGui::Text("Dataset Size:%d", m_dataset.size());
     if (ImGui::Button("Save Dataset"))
     {
@@ -236,7 +237,8 @@ sf::Texture & HandDetection::getTexture()
     // Convert to RGB (SFML requires RGB format)
     cv::Mat rgb;
     cv::cvtColor(normalized, rgb, cv::COLOR_GRAY2RGBA);
-    std::vector<std::vector<cv::Point>> lines;
+
+    // Draw Hulls and Contours
     for (size_t i = 0; i < m_hulls.size(); i++)
     {
         cv::Scalar color = cv::Scalar(100, 100, 100, 255);
@@ -250,15 +252,11 @@ sf::Texture & HandDetection::getTexture()
         }
         if (m_selectedHull == i)
         {
-            cv::drawContours(rgb, m_hulls, (int)i, cv::Scalar(150,150,150,255), 2);
+            if (m_drawHulls) { cv::drawContours(rgb, m_hulls, (int)i, cv::Scalar(150, 150, 150, 255), 2); }
+            if (m_drawContours) { cv::drawContours(rgb, m_contours, (int)i, cv::Scalar(150, 150, 150, 255), 2); }
         }
-        cv::drawContours(rgb, m_hulls, (int)i, color, 1);
-
-        /*auto m = cv::moments(m_hulls[i]);
-        cv::Point p = { (int)(m.m10 / m.m00),(int)(m.m01 / m.m00) };
-        double angle = m_currentData[i].averageA;
-        lines.push_back({ p, cv::Point(10.0 * sin(angle), 10.0 * cos(angle)) + p });
-        cv::drawContours(rgb, lines, i, cv::Scalar(240, 0, 0, 255), 2);*/
+        if (m_drawHulls) { cv::drawContours(rgb, m_hulls, (int)i, color, 1); }
+        if(m_drawContours){ cv::drawContours(rgb, m_contours, (int)i, color, 1); }
     }
 
     // Create SFML image
