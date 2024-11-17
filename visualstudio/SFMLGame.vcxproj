@@ -84,6 +84,7 @@
   <ItemGroup>
     <None Include="..\bin\shaders\shader_contour_color.frag" />
     <None Include="..\bin\shaders\shader_heat.frag" />
+    <None Include="..\bin\shaders\shader_vector_fields.frag" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{08A10BC2-2DCF-4F95-A0B2-BA931971AEEA}</ProjectGuid>

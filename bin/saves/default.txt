@@ -1,4 +1,4 @@
-source Camera
+source Perlin
 processor Vectors
 align 0
 gaussianBlur 1
@@ -8,7 +8,7 @@ drawDepth 1
 drawColor 1
 fpsSetting 1
 octaves 8
-seed 2
+seed 1
 seedSize 9
 persistance 0.5
 drawGrid 0

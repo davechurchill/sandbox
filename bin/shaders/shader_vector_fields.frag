@@ -11,12 +11,14 @@ void red(float c);
 void terrain(float c);
 void animate(float b);
 void animatedWater(float c);
+void drawTrails(float p);
 
 void main()
 {
 	vec2 coord = gl_TexCoord[0].xy;
 	vec4 pixel_color = texture2D(currentTexture, coord);
 	float c = pixel_color[0];
+	float p = pixel_color[1];
 
 	if (c < 0.02 || c > 0.99)
 	{
@@ -72,6 +74,8 @@ void main()
 			}
 		}
 	}
+
+	drawTrails(p);
 }
 
 void popsicle(float c) {
@@ -236,5 +240,13 @@ void animatedWater(float c)
         vec4 peakElevationColor =vec4(0.925, 0.953, 1.0, 1.0);
 
         gl_FragColor = mix(higherElevationColor, peakElevationColor, t);
+	}
+}
+
+void drawTrails(float p)
+{
+	if (p > 0)
+	{
+		gl_FragColor = vec4(0.8 + p / 5, 0.8 + p / 5, 1.0, 1.0);
 	}
 }

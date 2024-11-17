@@ -186,6 +186,9 @@
     <None Include="..\bin\shaders\shader_heat.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\bin\shaders\shader_vector_fields.frag">
+      <Filter>shaders</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="imgui">
