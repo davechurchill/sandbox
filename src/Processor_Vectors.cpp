@@ -26,7 +26,7 @@ void Processor_Vectors::imgui()
     ImGui::SliderFloat("Terrain Weight", &m_particleManager.terrainWeight, 0.0f, 1.0f, "%.3f");
     if (ImGui::Button("Reset Particles"))
     {
-        m_particleManager.resetRequested = true;
+        m_particleManager.reset();
     }
 
     ImGui::Separator();
@@ -90,6 +90,15 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
 {
     PROFILE_FUNCTION();
 
+    // Reset particles if data dimensions change
+    static int dataSize[2] = { data.rows, data.cols };
+    if (dataSize[0] != data.rows || dataSize[1] != data.cols)
+    {
+        m_particleManager.reset();
+        dataSize[0] = data.rows;
+        dataSize[1] = data.cols;
+    }
+
     cv::Mat particleGrid = cv::Mat(data.rows, data.cols, CV_8U, 0.0);
     cv::Mat m_cvTransformedParticleGrid32f;
 
@@ -122,38 +131,37 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
 
     // if something went wrong above, quit the function
     if (dw == 0 || dh == 0) { return; }
+
     {
+        PROFILE_SCOPE("Transformed Image SFML Image");
+
         {
-            PROFILE_SCOPE("Transformed Image SFML Image");
+            // Ensure the input image is in the correct format (CV_32F)
+            cv::Mat normalized;
+            m_cvTransformedDepthImage32f.convertTo(normalized, CV_8U, 255.0); // Scale float [0, 1] to [0, 255]
 
+            // Convert to RGB (SFML requires RGB format)
+            cv::Mat rgb;
+            cv::cvtColor(normalized, rgb, cv::COLOR_GRAY2RGBA);
+
+            for (int i = 0; i < rgb.rows; ++i)
             {
-                // Ensure the input image is in the correct format (CV_32F)
-                cv::Mat normalized;
-                m_cvTransformedDepthImage32f.convertTo(normalized, CV_8U, 255.0); // Scale float [0, 1] to [0, 255]
-
-                // Convert to RGB (SFML requires RGB format)
-                cv::Mat rgb;
-                cv::cvtColor(normalized, rgb, cv::COLOR_GRAY2RGBA);
-
-                for (int i = 0; i < rgb.rows; ++i)
+                for (int j = 0; j < rgb.cols; ++j)
                 {
-                    for (int j = 0; j < rgb.cols; ++j)
-                    {
-                        rgb.at<cv::Vec4b>(i, j)[1] = m_cvTransformedParticleGrid32f.at<uint8_t>(i, j);
-                    }
+                    rgb.at<cv::Vec4b>(i, j)[1] = m_cvTransformedParticleGrid32f.at<uint8_t>(i, j);
                 }
-
-                // Create SFML image
-                sf::Image image;
-                image.create(rgb.cols, rgb.rows, rgb.ptr());
-                m_sfTransformedDepthImage = image;
             }
 
-            {
-                PROFILE_SCOPE("SFML Texture From Image");
-                m_sfTransformedDepthTexture.loadFromImage(m_sfTransformedDepthImage);
-                m_sfTransformedDepthSprite.setTexture(m_sfTransformedDepthTexture, true);
-            }
+            // Create SFML image
+            sf::Image image;
+            image.create(rgb.cols, rgb.rows, rgb.ptr());
+            m_sfTransformedDepthImage = image;
+        }
+
+        {
+            PROFILE_SCOPE("SFML Texture From Image");
+            m_sfTransformedDepthTexture.loadFromImage(m_sfTransformedDepthImage);
+            m_sfTransformedDepthSprite.setTexture(m_sfTransformedDepthTexture, true);
         }
     }
 }

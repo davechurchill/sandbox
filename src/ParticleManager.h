@@ -17,17 +17,23 @@ struct Particle
 
 class ParticleManager {
     std::vector<Particle> m_particles{};
+    bool m_resetRequested = false;
 
 public:
     int cellSize = 8;
     int trailLength = 4;
     int particleCount = 30000;
     float terrainWeight = 0.2f;
-    bool resetRequested = false;
+    
 
     ParticleManager() = default;
 
     void update(const cv::Mat& data);
+
+    void reset()
+    {
+        m_resetRequested = true;
+    }
 
     const std::vector<Particle>& getParticles() const
     {

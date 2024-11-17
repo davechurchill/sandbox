@@ -17,7 +17,7 @@ void ParticleManager::update(const cv::Mat& data)
         }
     }
 
-    if (resetRequested)
+    if (m_resetRequested)
     {
         for (auto& particle : m_particles)
         {
@@ -25,13 +25,13 @@ void ParticleManager::update(const cv::Mat& data)
             particle.pos.y = rand() % pixelHeight;
         }
 
-        resetRequested = false;
+        m_resetRequested = false;
     }
 
     auto clampPos = [&](sf::Vector2<double>& pos)
     {
         // TODO: Figure out why particles get stuck on the edges
-        pos.x = std::clamp(pos.x, (double)cellSize, (double)pixelWidth);
+        pos.x = std::clamp(pos.x, (double)cellSize, (double)(pixelWidth - 1));
         pos.y = std::clamp(pos.y, (double)cellSize, (double)(pixelHeight - cellSize - 1));
     };
 
@@ -56,7 +56,11 @@ void ParticleManager::update(const cv::Mat& data)
             particle.trail.erase(particle.trail.begin());
         }
 
-        // In case the particle went out of bounds
+        // In case the particle or its trails went out of bounds
         clampPos(particle.pos);
+        for (auto& segment : particle.trail)
+        {
+            clampPos(segment);
+        }
     }
 }
