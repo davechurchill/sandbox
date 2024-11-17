@@ -31,8 +31,8 @@ void ParticleManager::update(const cv::Mat& data)
     auto clampPos = [&](sf::Vector2<double>& pos)
     {
         // TODO: Figure out why particles get stuck on the edges
-        pos.x = std::clamp(pos.x, (double)cellSize, (double)(pixelWidth - 1));
-        pos.y = std::clamp(pos.y, (double)cellSize, (double)(pixelHeight - cellSize - 1));
+        pos.x = std::clamp(pos.x, 0.0, (double)(pixelWidth - 1));
+        pos.y = std::clamp(pos.y, 0.0, (double)(pixelHeight - 1));
     };
 
     for (auto& particle : m_particles)
@@ -41,12 +41,13 @@ void ParticleManager::update(const cv::Mat& data)
         clampPos(particle.pos);
 
         auto& dir = directions.get((size_t)(particle.pos.x / cellSize), (size_t)(particle.pos.y / cellSize));
+
         particle.pos.x += dir.x;
         particle.pos.y += dir.y;
 
-        if (particle.pos.x >= pixelWidth - cellSize)
+        if (particle.pos.x >= pixelWidth - 1)
         {
-            particle.pos.x = cellSize;
+            particle.pos.x = 0.0;
             particle.pos.y = rand() % pixelHeight;
         }
 

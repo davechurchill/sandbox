@@ -57,20 +57,20 @@ namespace VectorField
 
         while (!openList.empty())
         {
-            auto cell = openList.front();
+            sf::Vector2i cell = openList.front();
             openList.pop();
 
             auto value = m_distance.get(cell.x, cell.y);
 
             auto update = [&](int x, int y)
+            {
+                auto& dist = m_distance.get(x, y);
+                if (dist == -1)
                 {
-                    auto& dist = m_distance.get(x, y);
-                    if (dist == -1)
-                    {
-                        openList.push({ x, y });
-                        dist = value + 1;
-                    }
-                };
+                    openList.push({ x, y });
+                    dist = value + 1;
+                }
+            };
 
             if (cell.x > 0)
             {
@@ -102,12 +102,12 @@ namespace VectorField
         {
             for (int y = 0; y < gridHeight; ++y)
             {
-                constexpr double max = std::numeric_limits<double>::max();
+                auto thisDist = m_distance.get(x, y);
 
-                double left = x > 0 ? m_distance.get(x - 1, y) : max;
-                double right = x < gridWidth - 1 ? m_distance.get(x + 1, y) : max;
-                double up = y > 0 ? m_distance.get(x, y - 1) : max;
-                double down = y < gridHeight - 1 ? m_distance.get(x, y + 1) : max;
+                double left = x > 0 ? m_distance.get(x - 1, y) : thisDist;
+                double right = x < gridWidth - 1 ? m_distance.get(x + 1, y) : thisDist;
+                double up = y > 0 ? m_distance.get(x, y - 1) : thisDist;
+                double down = y < gridHeight - 1 ? m_distance.get(x, y + 1) : thisDist;
 
                 sf::Vector2<double> dir{ left - right, up - down };
 
