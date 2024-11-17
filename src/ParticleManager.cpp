@@ -49,6 +49,7 @@ void ParticleManager::update(const cv::Mat& data)
         {
             particle.pos.x = 0.0;
             particle.pos.y = rand() % pixelHeight;
+            particle.trail.clear();
         }
 
         particle.trail.push_back({ particle.pos.x, particle.pos.y });
