@@ -22,6 +22,6 @@ protected:
 
 public:
 
-    virtual void onFrame() = 0;
+    virtual void onFrame(float deltaTime) = 0;
 
 };

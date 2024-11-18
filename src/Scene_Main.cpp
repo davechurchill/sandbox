@@ -4,6 +4,7 @@
 
 #include "Processor_Colorizer.h"
 #include "Processor_Heat.h"
+#include "Processor_Vectors.h"
 #include "Source_Camera.h"
 #include "Source_Perlin.h"
 #include "Source_Snapshot.h"
@@ -37,17 +38,18 @@ void Scene_Main::init()
 
     registerProcessor<Processor_Colorizer>("Colorizer");
     registerProcessor<Processor_Heat>("Heat");
+    registerProcessor<Processor_Vectors>("Vectors");
     m_processorMap.emplace("None", []() {return nullptr; });
 
     load();
 }
 
-void Scene_Main::onFrame()
+void Scene_Main::onFrame(float deltaTime)
 {
     m_topography = m_source->getTopography();
     if (m_processor && m_topography.rows > 0 && m_topography.cols > 0)
     {
-        m_processor->processTopography(m_topography);
+        m_processor->processTopography(m_topography, deltaTime);
     }
 
     sUserInput();

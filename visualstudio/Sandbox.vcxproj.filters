@@ -58,6 +58,18 @@
     <ClCompile Include="..\src\DataWarper.cpp">
       <Filter>calibration</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\HeatGrid.cpp">
+      <Filter>processors\heat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Processor_Heat.cpp">
+      <Filter>processors\heat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ParticleManager.cpp">
+      <Filter>processors\vectors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Processor_Vectors.cpp">
+      <Filter>processors\vectors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Scene.h">
@@ -133,12 +145,24 @@
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Sandbox.h" />
+    <ClInclude Include="..\src\ParticleManager.h">
+      <Filter>processors\vectors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Processor_Vectors.h">
+      <Filter>processors\vectors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\VectorField.hpp">
+      <Filter>processors\vectors</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\shader_contour_color.frag">
       <Filter>shaders</Filter>
     </None>
     <None Include="..\bin\shaders\shader_heat.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\shader_vector_fields.frag">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>
@@ -169,6 +193,9 @@
     </Filter>
     <Filter Include="calibration">
       <UniqueIdentifier>{8274e842-7bd1-4020-b79c-6007d282d44f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="processors\vectors">
+      <UniqueIdentifier>{22e83f83-56dc-408f-9d8d-788309b022db}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

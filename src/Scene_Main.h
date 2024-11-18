@@ -49,10 +49,9 @@ class Scene_Main : public Scene
     void saveDataDump();
     
 public:
-
     Scene_Main(GameEngine * game);
 
-    void onFrame();
+    void onFrame(float deltaTime);
     void endScene();
 
     template <class T>

@@ -1,5 +1,5 @@
-source Camera
-processor Colorizer
+source Perlin
+processor Vectors
 align 0
 gaussianBlur 1
 maxDistance 1.13
@@ -7,8 +7,8 @@ minDistance 0.9
 drawDepth 1
 drawColor 1
 fpsSetting 1
-octaves 5
-seed 0
+octaves 8
+seed 13
 seedSize 9
 persistance 0.5
 drawGrid 0
@@ -21,7 +21,7 @@ applyHeightAdjustment 0
 planarPoints 150 0 75 150 0 75 
 projectionPoints 7 61 1866 92 0 1078 1870 1078 
 drawLines 1
-selectedShaderIndex 4
+selectedShaderIndex 3
 drawContours 1
 numberOfContourLines 19
 drawProjection 1

@@ -1,11 +1,11 @@
 #pragma once
 
+#include "ParticleManager.h"
 #include "Profiler.hpp"
 #include "SandboxProjector.h"
-#include "Tools.h"
 #include "TopographyProcessor.h"
 
-class Processor_Colorizer : public TopographyProcessor 
+class Processor_Vectors : public TopographyProcessor
 {
     SandBoxProjector    m_projector;
     cv::Mat             m_cvTransformedDepthImage32f;
@@ -16,14 +16,15 @@ class Processor_Colorizer : public TopographyProcessor
     int                 m_selectedShaderIndex = 0;
     bool                m_drawContours = true;
     int                 m_numberOfContourLines = 19;
+    ParticleManager     m_particleManager{};
 
 public:
     void init();
     void imgui();
-    void render(sf::RenderWindow & window);
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
-    void save(Save & save) const;
-    void load(const Save & save);
+    void render(sf::RenderWindow& window);
+    void processEvent(const sf::Event& event, const sf::Vector2f& mouse);
+    void save(Save& save) const;
+    void load(const Save& save);
 
-    void processTopography(const cv::Mat & data, float deltaTime);
+    void processTopography(const cv::Mat& data, float deltaTime);
 };
