@@ -16,7 +16,7 @@ temporalAlpha 0.099
 temporalDelta 72
 temporalPersistance 3
 holeFill 1
-warpPoints 171 84 705 77 184 360 704 361 
+warpPoints 149 66 705 74 152 367 692 362 
 applyHeightAdjustment 0
 planarPoints 150 0 75 150 0 75 
 projectionPoints 7 61 1866 92 0 1078 1870 1078 

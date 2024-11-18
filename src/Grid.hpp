@@ -3,8 +3,6 @@
 #include <vector>
 #include <algorithm>
 
-#include "Action.hpp"
-
 
 template <class T>
 class Grid
@@ -82,16 +80,6 @@ public:
         m_grid[index] = val;
     }
 
-    inline T& get(State c) 
-    {
-        return get(c.x, c.y);
-    }
-
-    inline const T& get(State c) const
-    {
-        return get(c.x, c.y);
-    }
-
     inline T& get(size_t x, size_t y)
     {
         return m_grid[y * m_width + x];
@@ -105,11 +93,6 @@ public:
     inline void add(size_t x, size_t y, T val)
     {
         m_grid[y * m_width + x] += val;
-    }
-
-    inline void set(State c, T val)
-    {
-        m_grid[c.y * m_width + c.x] = val;
     }
 
     inline void set(size_t x, size_t y, T val)

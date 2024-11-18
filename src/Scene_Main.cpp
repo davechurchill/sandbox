@@ -1,10 +1,8 @@
 #include "Scene_Main.h"
 #include "GameEngine.h"
-#include "Assets.h"
 #include "Profiler.hpp"
 
 #include "Processor_Colorizer.h"
-#include "Processor_Minecraft.h"
 #include "Processor_Heat.h"
 #include "Processor_Vectors.h"
 #include "Source_Camera.h"
@@ -39,7 +37,6 @@ void Scene_Main::init()
     registerSource<Source_Snapshot>("Snapshot");
 
     registerProcessor<Processor_Colorizer>("Colorizer");
-    registerProcessor<Processor_Minecraft>("Minecraft");
     registerProcessor<Processor_Heat>("Heat");
     registerProcessor<Processor_Vectors>("Vectors");
     m_processorMap.emplace("None", []() {return nullptr; });
