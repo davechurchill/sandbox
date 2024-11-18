@@ -44,3 +44,7 @@ bin/depthImage_normalized.png
 bin/depthImage_raw.png
 /visualstudio/SFMLGame/x64
 /visualstudio/Sandbox
+lib/Sandbox.lib
+lib/Sandbox_d.idb
+lib/Sandbox_d.lib
+/visualstudio/SandboxMain
