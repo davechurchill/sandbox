@@ -47,12 +47,12 @@ void Scene_Main::init()
     load();
 }
 
-void Scene_Main::onFrame()
+void Scene_Main::onFrame(float deltaTime)
 {
     m_topography = m_source->getTopography();
     if (m_processor && m_topography.rows > 0 && m_topography.cols > 0)
     {
-        m_processor->processTopography(m_topography);
+        m_processor->processTopography(m_topography, deltaTime);
     }
 
     sUserInput();

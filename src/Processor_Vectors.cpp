@@ -24,6 +24,7 @@ void Processor_Vectors::imgui()
     ImGui::SliderInt("Cell Size", &m_particleManager.cellSize, 1, 128);
     ImGui::SliderInt("Trail Length", &m_particleManager.trailLength, 1, 32);
     ImGui::SliderFloat("Terrain Weight", &m_particleManager.terrainWeight, 0.0f, 1.0f, "%.3f");
+    ImGui::SliderFloat("Particle Speed", &m_particleManager.particleSpeed, 0.0f, 1000.0f, "%.1f");
     if (ImGui::Button("Reset Particles"))
     {
         m_particleManager.reset();
@@ -86,7 +87,7 @@ void Processor_Vectors::load(const Save& save)
     m_projector.load(save);
 }
 
-void Processor_Vectors::processTopography(const cv::Mat& data)
+void Processor_Vectors::processTopography(const cv::Mat& data, float deltaTime)
 {
     PROFILE_FUNCTION();
 
@@ -105,7 +106,7 @@ void Processor_Vectors::processTopography(const cv::Mat& data)
     {
         PROFILE_SCOPE("Update Particles");
 
-        m_particleManager.update(data);
+        m_particleManager.update(data, deltaTime);
 
         for (auto& particle : m_particleManager.getParticles())
         {

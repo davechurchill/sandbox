@@ -1,7 +1,10 @@
+#include <iostream>
+#include <SFML/System/Time.hpp>
+
 #include "ParticleManager.h"
 #include "VectorField.hpp"
 
-void ParticleManager::update(const cv::Mat& data)
+void ParticleManager::update(const cv::Mat& data, float deltaTime)
 {
     const int pixelWidth = data.cols;
     const int pixelHeight = data.rows;
@@ -11,6 +14,7 @@ void ParticleManager::update(const cv::Mat& data)
     {
         m_particles.clear();
         m_particles.reserve(particleCount);
+
         for (int i = 0; i < particleCount; ++i)
         {
             m_particles.emplace_back(Particle{ (double)(rand() % pixelWidth), (double)(rand() % pixelHeight) });
@@ -42,8 +46,8 @@ void ParticleManager::update(const cv::Mat& data)
 
         auto& dir = directions.get((size_t)(particle.pos.x / cellSize), (size_t)(particle.pos.y / cellSize));
 
-        particle.pos.x += dir.x;
-        particle.pos.y += dir.y;
+        particle.pos.x += dir.x * particleSpeed * deltaTime;
+        particle.pos.y += dir.y * particleSpeed * deltaTime;
 
         if (particle.pos.x >= pixelWidth - 1)
         {

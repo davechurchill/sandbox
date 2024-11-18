@@ -25,5 +25,5 @@ public:
     void save(Save & save) const;
     void load(const Save & save);
 
-    void processTopography(const cv::Mat & data);
+    void processTopography(const cv::Mat & data, float deltaTime);
 };

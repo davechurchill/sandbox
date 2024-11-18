@@ -77,7 +77,7 @@ void Processor_Colorizer::load(const Save & save)
     m_projector.load(save);
 }
 
-void Processor_Colorizer::processTopography(const cv::Mat & data)
+void Processor_Colorizer::processTopography(const cv::Mat & data, float deltaTime)
 {
     PROFILE_FUNCTION();
     {

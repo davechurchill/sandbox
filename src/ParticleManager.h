@@ -24,11 +24,11 @@ public:
     int trailLength = 4;
     int particleCount = 30000;
     float terrainWeight = 0.2f;
-    
+    float particleSpeed = 120.0;
 
     ParticleManager() = default;
 
-    void update(const cv::Mat& data);
+    void update(const cv::Mat& data, float deltaTime);
 
     void reset()
     {

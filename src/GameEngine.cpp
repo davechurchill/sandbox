@@ -62,7 +62,8 @@ void GameEngine::update()
         ImGui::SFML::Update(m_window, dt);
     }
 
-    currentScene()->onFrame();
+    float deltaTime = dt.asMicroseconds() / 1000000.f;
+    currentScene()->onFrame(deltaTime);
 
     ImGui::SFML::Render(m_window);
 

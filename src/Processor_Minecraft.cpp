@@ -26,7 +26,7 @@ void Processor_Minecraft::load(const Save & save)
 
 }
 
-void Processor_Minecraft::processTopography(const cv::Mat & data)
+void Processor_Minecraft::processTopography(const cv::Mat & data, float deltaTime)
 {
     m_minecraft.setGrid(data);
 }

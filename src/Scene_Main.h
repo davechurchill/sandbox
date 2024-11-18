@@ -66,6 +66,6 @@ public:
 
     Scene_Main(GameEngine * game);
 
-    void onFrame();
+    void onFrame(float deltaTime);
     void endScene();
 };
