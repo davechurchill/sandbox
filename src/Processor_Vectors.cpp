@@ -145,6 +145,7 @@ void Processor_Vectors::processTopography(const cv::Mat& data, float deltaTime)
             cv::Mat rgb;
             cv::cvtColor(normalized, rgb, cv::COLOR_GRAY2RGBA);
 
+            // Pass particle layer as image data
             for (int i = 0; i < rgb.rows; ++i)
             {
                 for (int j = 0; j < rgb.cols; ++j)

@@ -41,7 +41,7 @@ void Processor_Colorizer::render(sf::RenderWindow & window)
         float scale = m_projector.getTransformedScale();
         m_sfTransformedDepthSprite.setScale(scale, scale);
 
-        //Use static so that it does not get initilialized every time this function is called
+        //Use static so that it does not get initialized every time this function is called
         static sf::Clock time;
 
         //Change color scheme
