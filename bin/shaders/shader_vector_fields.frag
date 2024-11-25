@@ -4,6 +4,7 @@ uniform int shaderIndex;
 uniform bool contour;
 uniform int numberOfContourLines;
 uniform float u_time;
+uniform float particleAlpha;
 
 void popsicle(float c);
 void blue(float c);
@@ -11,7 +12,7 @@ void red(float c);
 void terrain(float c);
 void animate(float b);
 void animatedWater(float c);
-void drawTrails(float p);
+void drawTrails(float p, vec2 coord);
 
 void main()
 {
@@ -75,7 +76,7 @@ void main()
 		}
 	}
 
-	drawTrails(p);
+	drawTrails(p, coord);
 }
 
 void popsicle(float c) {
@@ -243,10 +244,14 @@ void animatedWater(float c)
 	}
 }
 
-void drawTrails(float p)
+void drawTrails(float p, vec2 coord)
 {
+	vec4 pixel_color = vec4(gl_FragColor[0], gl_FragColor[1], gl_FragColor[2], 1.0) * (1 - particleAlpha);
+	vec4 wind_color = vec4(1.0, 1.0, 1.0, 1.0) * particleAlpha;
+	vec4 result = pixel_color + wind_color;
+
 	if (p > 0)
 	{
-		gl_FragColor = vec4(0.8 + p / 5, 0.8 + p / 5, 1.0, 1.0);
+		gl_FragColor = vec4(result[0], result[1], result[2], 1.0);
 	}
 }

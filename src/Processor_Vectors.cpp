@@ -25,6 +25,7 @@ void Processor_Vectors::imgui()
     ImGui::SliderInt("Trail Length", &m_particleManager.trailLength, 1, 32);
     ImGui::SliderFloat("Terrain Weight", &m_particleManager.terrainWeight, 0.0f, 1.0f, "%.3f");
     ImGui::SliderFloat("Particle Speed", &m_particleManager.particleSpeed, 0.0f, 1000.0f, "%.1f");
+    ImGui::SliderFloat("Particle Alpha", &m_particleManager.particleAlpha, 0.f, 1.f);
     if (ImGui::Button("Reset Particles"))
     {
         m_particleManager.reset();
@@ -58,6 +59,7 @@ void Processor_Vectors::render(sf::RenderWindow& window)
         m_shader.setUniform("contour", m_drawContours);
         m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
         m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
+        m_shader.setUniform("particleAlpha", m_particleManager.particleAlpha);
 
         window.draw(m_sfTransformedDepthSprite, &m_shader);
     }
@@ -113,7 +115,7 @@ void Processor_Vectors::processTopography(const cv::Mat& data, float deltaTime)
             for (int i = 0; i < particle.trail.size(); ++i)
             {
                 auto& [x, y] = particle.trail[i];
-                particleGrid.at<uint8_t>((int)round(y), (int)round(x)) = 255 - (m_particleManager.trailLength - i - 1) * 255 / m_particleManager.trailLength;
+                particleGrid.at<uint8_t>((int)round(y), (int)round(x)) = 255;
             }
 
             particleGrid.at<uint8_t>((int)round(particle.pos.y), (int)round(particle.pos.x)) = 255;
