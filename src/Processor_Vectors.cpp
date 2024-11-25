@@ -115,7 +115,8 @@ void Processor_Vectors::processTopography(const cv::Mat& data, float deltaTime)
             for (int i = 0; i < particle.trail.size(); ++i)
             {
                 auto& [x, y] = particle.trail[i];
-                particleGrid.at<uint8_t>((int)round(y), (int)round(x)) = 255;
+                particleGrid.at<uint8_t>((int)round(y), (int)round(x)) =
+                    255 - (m_particleManager.trailLength - i - 1) * 255 / (m_particleManager.trailLength + 1);
             }
 
             particleGrid.at<uint8_t>((int)round(particle.pos.y), (int)round(particle.pos.x)) = 255;

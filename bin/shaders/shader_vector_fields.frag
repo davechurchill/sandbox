@@ -246,12 +246,12 @@ void animatedWater(float c)
 
 void drawTrails(float p, vec2 coord)
 {
-	vec4 pixel_color = vec4(gl_FragColor[0], gl_FragColor[1], gl_FragColor[2], 1.0) * (1 - particleAlpha);
-	vec4 wind_color = vec4(1.0, 1.0, 1.0, 1.0) * particleAlpha;
-	vec4 result = pixel_color + wind_color;
-
 	if (p > 0)
 	{
+		vec4 pixel_color = vec4(gl_FragColor[0], gl_FragColor[1], gl_FragColor[2], 1.0) * (1 - particleAlpha);
+		vec4 wind_color = vec4(0.8 + p / 5, 0.8 + p / 5, 1.0, 1.0) * particleAlpha;
+		vec4 result = pixel_color + wind_color;
+
 		gl_FragColor = vec4(result[0], result[1], result[2], 1.0);
 	}
 }

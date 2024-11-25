@@ -25,7 +25,7 @@ public:
     int particleCount = 30000;
     float terrainWeight = 0.2f;
     float particleSpeed = 120.f;
-    float particleAlpha = 1.f;
+    float particleAlpha = 0.85f;
 
     ParticleManager() = default;
 
