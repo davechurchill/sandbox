@@ -260,6 +260,7 @@ void Source_Camera::render(sf::RenderWindow & window)
         {
             auto & texture = m_handDetection.getTexture();
             m_gestureGraphic.setTexture(texture, true);
+            m_gestureGraphic.setScale({ 2.0,2.0 });
             window.draw(m_gestureGraphic);
         }
     }
