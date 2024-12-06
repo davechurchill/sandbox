@@ -180,21 +180,34 @@ void Scene_Main::renderUI()
 {
     PROFILE_FUNCTION();
 
-    ImGui::BeginMainMenuBar();
-
-    if (ImGui::Button("Snapshot"))
+    if (ImGui::BeginMainMenuBar())
     {
-        saveDataDump();
+        if (ImGui::BeginMenu("Options"))
+        {
+            if (ImGui::MenuItem("Save Settings"))
+            {
+                save();
+            }
+            if (ImGui::MenuItem("Load Settings"))
+            {
+                load();
+            }
+            if (ImGui::MenuItem("Snapshot"))
+            {
+                saveDataDump();
+            }
+            if (m_game->displayWindow().isOpen() && ImGui::MenuItem("Switch windows"))
+            {
+                m_switchWindows = !m_switchWindows;
+            }
+
+            ImGui::EndMenu();
+        }
+
+        ImGui::Text("Framerate: %d", (int)m_game->framerate());
+
+        ImGui::EndMainMenuBar();
     }
-
-    ImGui::Text("Framerate: %d", (int)m_game->framerate());
-
-    if (m_game->displayWindow().isOpen() && ImGui::Button("Switch windows"))
-    {
-        m_switchWindows = !m_switchWindows;
-    }
-
-    ImGui::EndMainMenuBar();
 
     ImGui::Begin("Controls", &m_drawUI);
     ImGui::BeginTabBar("ControlTabs");

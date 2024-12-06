@@ -47,7 +47,7 @@ class GestureClassifier
 
     double yesGesture() const
     {
-        -0.24 * x_11 + 0.18 * x_14 - 0.25 * x_4 + 0.62 * x_6 - 0.22 * x_9 + 9.59 * sqrt(0.05 * x_18 + 1) + 23.87 * sin(2.58 * x_2 - 9.59) + 2.21 * tanh(3.54 * x_3 - 3.32) - 55.87;
+        return -0.24 * x_11 + 0.18 * x_14 - 0.25 * x_4 + 0.62 * x_6 - 0.22 * x_9 + 9.59 * sqrt(0.05 * x_18 + 1) + 23.87 * sin(2.58 * x_2 - 9.59) + 2.21 * tanh(3.54 * x_3 - 3.32) - 55.87;
     }
 
     double class1() const
