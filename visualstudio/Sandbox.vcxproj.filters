@@ -25,15 +25,6 @@
     <ClCompile Include="..\src\Scene_Main.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Source_Camera.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Source_Perlin.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Source_Snapshot.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\GoodAssert.cpp">
       <Filter>engine</Filter>
     </ClCompile>
@@ -70,21 +61,24 @@
     <ClCompile Include="..\src\Processor_Vectors.cpp">
       <Filter>processors\vectors</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\HandDetection.cpp">
+      <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Source_Camera.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Source_Perlin.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Source_Snapshot.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Scene.h">
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Scene_Main.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Source_Camera.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Source_Perlin.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Source_Snapshot.h">
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Logger.hpp">
@@ -106,9 +100,6 @@
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\TopographyProcessor.h">
-      <Filter>processors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\TopographySource.h">
       <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Processor_Heat.h">
@@ -154,6 +145,24 @@
     <ClInclude Include="..\src\VectorField.hpp">
       <Filter>processors\vectors</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\HandDetection.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TopographySource.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Camera.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Perlin.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Snapshot.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\GestureClassifier.hpp">
+      <Filter>camera</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\shader_contour_color.frag">
@@ -196,6 +205,9 @@
     </Filter>
     <Filter Include="processors\vectors">
       <UniqueIdentifier>{22e83f83-56dc-408f-9d8d-788309b022db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources">
+      <UniqueIdentifier>{023f8d89-974c-4af5-a780-8732fc50a3a3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

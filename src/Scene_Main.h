@@ -34,6 +34,8 @@ class Scene_Main : public Scene
     std::map<std::string, std::function<std::shared_ptr<TopographySource>()>> m_sourceMap;
     std::map<std::string, std::function<std::shared_ptr<TopographyProcessor>()>> m_processorMap;
 
+    bool                m_switchWindows = false;
+
     void init();  
     void renderUI();
     void sUserInput();  
@@ -53,6 +55,9 @@ public:
 
     void onFrame(float deltaTime);
     void endScene();
+
+    inline sf::RenderWindow & mainWindow();
+    inline sf::RenderWindow & displayWindow();
 
     template <class T>
         requires (std::is_base_of<TopographySource, T>::value)

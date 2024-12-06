@@ -47,6 +47,7 @@ void Scene_Main::init()
 void Scene_Main::onFrame(float deltaTime)
 {
     m_topography = m_source->getTopography();
+    m_source->getGestures();
     if (m_processor && m_topography.rows > 0 && m_topography.cols > 0)
     {
         m_processor->processTopography(m_topography, deltaTime);
@@ -91,6 +92,7 @@ void Scene_Main::sProcessEvent(const sf::Event& event)
 
         case sf::Keyboard::F:
         {
+            auto & display = displayWindow();
             if (!m_game->displayWindow().isOpen())
             {
                 m_game->displayWindow().create(sf::VideoMode(1920, 1080), "Display", sf::Style::None);
@@ -99,6 +101,7 @@ void Scene_Main::sProcessEvent(const sf::Event& event)
             else
             {
                 m_game->displayWindow().close();
+                m_switchWindows = false;
             }
         }
         }
@@ -111,18 +114,19 @@ void Scene_Main::sUserInput()
 
     bool displayOpen = m_game->displayWindow().isOpen();
 
+    auto & main = mainWindow();
     sf::Event event;
-    while (m_game->window().pollEvent(event))
+    while (main.pollEvent(event))
     {
-        ImGui::SFML::ProcessEvent(m_game->window(), event);
-        m_viewController.processEvent(m_game->window(), event);
+        ImGui::SFML::ProcessEvent(main, event);
+        m_viewController.processEvent(main, event);
         sProcessEvent(event);
 
         // happens whenever the mouse is being moved
         if (event.type == sf::Event::MouseMoved)
         {
             m_mouseScreen = { event.mouseMove.x, event.mouseMove.y };
-            m_mouseWorld = m_game->window().mapPixelToCoords(m_mouseScreen);
+            m_mouseWorld = main.mapPixelToCoords(m_mouseScreen);
         }
 
         if (m_source) { m_source->processEvent(event, m_mouseWorld); }
@@ -134,8 +138,9 @@ void Scene_Main::sUserInput()
 
     if (displayOpen)
     {
+        auto & display = displayWindow();
         sf::Event displayEvent;
-        while (m_game->displayWindow().pollEvent(displayEvent))
+        while (display.pollEvent(displayEvent))
         {
             sProcessEvent(displayEvent);
 
@@ -158,15 +163,15 @@ void Scene_Main::sRender()
     m_game->window().clear();
     m_game->displayWindow().clear();
 
-    if (m_source) { m_source->render(m_game->window()); }
+    if (m_source) { m_source->render(mainWindow()); }
     if (!m_processor) { return; }
     if (m_game->displayWindow().isOpen())
     {
-        m_processor->render(m_game->displayWindow());
+        m_processor->render(displayWindow());
     }
     else
     {
-        m_processor->render(m_game->window());
+        m_processor->render(mainWindow());
     }
 }
 
@@ -174,15 +179,34 @@ void Scene_Main::renderUI()
 {
     PROFILE_FUNCTION();
 
-    ImGui::BeginMainMenuBar();
-
-    if (ImGui::Button("Snapshot"))
+    if (ImGui::BeginMainMenuBar())
     {
-        saveDataDump();
-    }
+        if (ImGui::BeginMenu("Options"))
+        {
+            if (ImGui::MenuItem("Save Settings"))
+            {
+                save();
+            }
+            if (ImGui::MenuItem("Load Settings"))
+            {
+                load();
+            }
+            if (ImGui::MenuItem("Snapshot"))
+            {
+                saveDataDump();
+            }
+            if (m_game->displayWindow().isOpen() && ImGui::MenuItem("Switch windows"))
+            {
+                m_switchWindows = !m_switchWindows;
+            }
 
-    ImGui::Text("Framerate: %d", (int)m_game->framerate());
-    ImGui::EndMainMenuBar();
+            ImGui::EndMenu();
+        }
+
+        ImGui::Text("Framerate: %d", (int)m_game->framerate());
+
+        ImGui::EndMainMenuBar();
+    }
 
     ImGui::Begin("Controls", &m_drawUI);
     ImGui::BeginTabBar("ControlTabs");
@@ -318,6 +342,16 @@ void Scene_Main::saveDataDump()
     cv::FileStorage fout(std::format("dataDumps/{0:%F_%H-%M-%S}_snapshot.bin", now), cv::FileStorage::WRITE);
     fout << "matrix" << m_topography;
 
+}
+
+sf::RenderWindow & Scene_Main::mainWindow()
+{
+    return m_switchWindows ? m_game->displayWindow() : m_game->window();
+}
+
+sf::RenderWindow & Scene_Main::displayWindow()
+{
+    return m_switchWindows ? m_game->window() : m_game->displayWindow();
 }
 
 void Scene_Main::endScene()

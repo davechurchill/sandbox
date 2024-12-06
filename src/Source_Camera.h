@@ -3,6 +3,7 @@
 #include "TopographySource.h"
 #include "CameraFilters.hpp"
 #include "DataWarper.h"
+#include "HandDetection.h"
 
 #include <opencv2/opencv.hpp>
 #include <librealsense2/rs.hpp>
@@ -21,6 +22,8 @@ class Source_Camera : public TopographySource
     bool                m_cameraConnected = false;
 
     DataWarper          m_warper;
+    HandDetection       m_handDetection;
+    bool                m_detectHands = true;
 
     CameraFilters       m_filters;
     alignment           m_alignment = alignment::depth;
@@ -38,6 +41,7 @@ class Source_Camera : public TopographySource
     cv::Mat             m_cvDepthImage16u;
     cv::Mat             m_cvDepthImage32f;
     cv::Mat             m_cvNormalizedDepthImage32f;
+    cv::Mat             m_cvBlurred32f;
     cv::Mat             m_data;
     sf::Image           m_sfDepthImage;
     sf::Texture         m_sfDepthTexture;
@@ -48,6 +52,10 @@ class Source_Camera : public TopographySource
 
     bool                m_drawDepth = true;
     bool                m_drawColor = false;
+
+    bool                m_pause = false;
+    bool                m_showGestureRecognition = false;
+    sf::Sprite          m_gestureGraphic;
 
     void connectToCamera();
     void captureImages();
@@ -61,5 +69,7 @@ public:
     void load(const Save & save);
 
     cv::Mat getTopography();
+
+    std::vector<Gesture> getGestures();
 
 };
