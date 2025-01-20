@@ -357,6 +357,5 @@ sf::RenderWindow & Scene_Main::displayWindow()
 void Scene_Main::endScene()
 {
     m_game->displayWindow().close();
-    save();
     m_game->quit();
 }

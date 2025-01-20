@@ -88,7 +88,7 @@ void HandDetection::imgui()
         saveDatabase();
     }
     
-    ImGui::SliderInt("Threshold", &m_thresh, 0, 255);
+    ImGui::SliderFloat("Threshold", &m_thresh, 0.0, 1.0);
 
     if (ImGui::CollapsingHeader("Convex Hulls"))
     {
@@ -126,17 +126,8 @@ void HandDetection::removeHands(const cv::Mat & input, cv::Mat & output, float m
     cv::Mat normalized;
     normalized = 1.f - (input - minDistance) / (maxDistance - minDistance);
 
-    // Binarize
-    cv::Mat binarized;
-    normalized.convertTo(binarized, CV_8U, 255.0);
-    cv::threshold(binarized, m_segmented, m_thresh, 255, cv::THRESH_BINARY);
-    cv::Mat mask = m_segmented == 255;
-    cv::Mat in = input.clone();
-    cv::Mat prev = m_previous.clone();
-    in.setTo(0.0, mask);
-    prev.setTo(0.0, 1 - mask);
-    output = in + prev;
-    m_previous = output.clone();
+    input.copyTo(m_previous, (normalized < m_thresh) & (normalized > 0.0));
+    output = m_previous.clone();
 }
 
 void HandDetection::identifyGestures(std::vector<cv::Point> & box)

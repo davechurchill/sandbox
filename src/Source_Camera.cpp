@@ -138,8 +138,8 @@ void Source_Camera::captureImages()
     {
         PROFILE_SCOPE("Threshold and Normalize");
         m_cvNormalizedDepthImage32f = 1.f - (m_cvBlurred32f - m_minDistance) / (m_maxDistance - m_minDistance);
-        cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, 0.0, 255, cv::THRESH_TOZERO);
-        cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, 1.0, 255, cv::THRESH_TRUNC);
+        cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, 0.0, 0, cv::THRESH_TOZERO);
+        cv::threshold(m_cvNormalizedDepthImage32f, m_cvNormalizedDepthImage32f, 1.0, 0, cv::THRESH_TRUNC);
     }
 
     if (m_drawDepth)

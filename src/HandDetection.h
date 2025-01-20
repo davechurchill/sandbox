@@ -9,7 +9,7 @@
 
 class HandDetection
 {
-    int m_thresh = 218;
+    float m_thresh = 0.855;
     int m_selectedHull = -1;
     sf::Image m_image;
     sf::Texture m_texture;
