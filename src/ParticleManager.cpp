@@ -4,6 +4,25 @@
 #include "ParticleManager.h"
 #include "VectorField.hpp"
 
+namespace {
+    bool checkSimilar(const cv::Mat& mat1, const cv::Mat& mat2, double tolerance = 0.1) {
+        if (mat1.size() != mat2.size())
+        {
+            return false;
+        }
+
+        double error = cv::norm(mat1, mat2, cv::NORM_L2);
+        double normFactor = cv::norm(mat1, cv::NORM_L2);
+
+        if (normFactor > 0)
+        {
+            error /= normFactor;
+        }
+
+        return error < tolerance;
+    }
+}
+
 void ParticleManager::update(const cv::Mat& data, float deltaTime)
 {
     const int pixelWidth = data.cols;
@@ -17,12 +36,14 @@ void ParticleManager::update(const cv::Mat& data, float deltaTime)
     computeTimer -= deltaTime;
 
     bool compute = false;
-    bool dataChanged = oldData.size() != data.size() || cv::countNonZero(oldData != data) != 0;
     
-    if (computeTimer <= 0.0 && dataChanged) {
-        oldData = data;
-        compute = true;
+    if (computeTimer <= 0.0) {
         computeTimer = 5.00;
+
+        if (!checkSimilar(oldData, data)) {
+            oldData = data.clone();
+            compute = true;
+        }
     }
 
     const auto directions = VectorField::computePhysics(data, compute);
