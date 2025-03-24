@@ -8,7 +8,24 @@ void ParticleManager::update(const cv::Mat& data, float deltaTime)
 {
     const int pixelWidth = data.cols;
     const int pixelHeight = data.rows;
-    const auto directions = VectorField::compute(data, cellSize, terrainWeight);
+    // const auto directions = VectorField::computeBFS(data, cellSize, terrainWeight);
+    cellSize = 1;
+
+    static cv::Mat oldData = cv::Mat();
+    static double computeTimer = 0.0;
+
+    computeTimer -= deltaTime;
+
+    bool compute = false;
+    bool dataChanged = oldData.size() != data.size() || cv::countNonZero(oldData != data) != 0;
+    
+    if (computeTimer <= 0.0 && dataChanged) {
+        oldData = data;
+        compute = true;
+        computeTimer = 5.00;
+    }
+
+    const auto directions = VectorField::computePhysics(data, compute);
 
     if (m_particles.size() != particleCount)
     {
@@ -51,7 +68,7 @@ void ParticleManager::update(const cv::Mat& data, float deltaTime)
 
         if (particle.pos.x >= pixelWidth - 1)
         {
-            particle.pos.x = 0.0;
+            particle.pos.x = std::fmod(particle.pos.x, (double)(pixelWidth - 1));
             particle.pos.y = rand() % pixelHeight;
             particle.trail.clear();
         }
