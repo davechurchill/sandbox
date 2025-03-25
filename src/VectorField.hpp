@@ -1,6 +1,6 @@
 #pragma once
 
-constexpr double M_PI = 3.1415926535897932384626433832;
+constexpr double PI = 3.1415926535897932384626433832;
 
 #include <complex>
 #include <fstream>
@@ -12,27 +12,9 @@ constexpr double M_PI = 3.1415926535897932384626433832;
 
 namespace VectorField
 {
-    const int SUMMATION_POINTS = 80;
-
-    const double PHI = M_PI / 4;
-    const double S = 2.5;
-    const double S2 = S * S;
-    const double U = 0.29;
-
-    const double BETA = 4 * M_PI * std::pow(std::cos(PHI), 2);
-    const double LAMBDA2 = 2.5 * std::pow(std::sin(2 * PHI), 2);
-    const double M2 = BETA / U - S2;
-
-    const double G = 9.8;
-    const double OMEGA = 7.27 * std::pow(10, -5);
-    const double F = 2 * OMEGA * sin(PHI);
-    const double G_OVER_F = G / F;
-
-    using Matrix = std::vector<std::vector<double>>;
-
-    Matrix zeroMatrix(int X_POINTS, int Y_POINTS) {
-        return Matrix(Y_POINTS, std::vector<double>(X_POINTS, 0.0));
-    }
+    ////////////////////////
+    // BFS
+    ////////////////////////
 
     Grid<sf::Vector2<double>> computeBFS(const cv::Mat& grid, int spacing, float terrainWeight)
     {
@@ -146,164 +128,219 @@ namespace VectorField
         return m_directions;
     }
 
-    double greens_term(int n, double n2, double friction, double x)
+    ////////////////////////
+    // Charney
+    ////////////////////////
+
+    const int SUMMATION_POINTS = 80;
+
+    const double PHI = PI / 4;
+    const double S = 2.5;
+    const double U = 0.29;
+    const double G = 9.8;
+    const double OMEGA = 7.27 * std::pow(10, -5);
+
+    const double S_SQUARED = S * S;
+    const double BETA = 4 * PI * std::pow(std::cos(PHI), 2);
+    const double LAMBDA_SQUARED = 2.5 * std::pow(std::sin(2 * PHI), 2);
+    const double M_SQUARED = BETA / U - S_SQUARED;
+    const double F = 2 * OMEGA * sin(PHI);
+    const double G_OVER_F = G / F;
+
+    using Matrix = std::vector<std::vector<double>>;
+
+    Matrix zeroMatrix(int width, int height) {
+        return Matrix(height, std::vector<double>(width, 0.0));
+    }
+
+    struct ComputeContext {
+        double friction;
+        double windVelocity;
+        double reductionFactor;
+
+        int width;
+        int height;
+        double dx;
+        double dy;
+
+        std::vector<double> x;
+        std::vector<double> ySin;
+        std::vector<double> h;
+
+        Matrix u;
+        Matrix v;
+
+        ComputeContext(const cv::Mat& grid, double friction, double windVelocity, double reductionFactor = 0.4) :
+            friction(friction),
+            windVelocity(windVelocity),
+            reductionFactor(reductionFactor)
+        {
+            width = grid.cols;
+            height = grid.rows;
+
+            dx = 2 * PI / width;
+            dy = PI / height;
+
+            x = std::vector<double>(width);
+            ySin = std::vector<double>(height);
+            h = std::vector<double>(width);
+
+            u = zeroMatrix(width, height);
+            v = zeroMatrix(width, height);
+
+            for (int x = 0; x < width; ++x)
+            {
+                this->x[x] = x * dx;
+
+                double sum = 0.0;
+
+                for (int y = 0; y < height; ++y)
+                {
+                    sum += grid.at<float>(y, (int)x);
+                }
+
+                h[x] = sum / height;
+            }
+
+            for (int y = 0; y < height; ++y)
+            {
+                ySin[y] = sin(y * dy);
+            }
+        }
+    };
+
+    double greensTerm(ComputeContext& context, int n, int nSquared, double x)
     {
         std::complex<double> numerator = std::exp(std::complex<double>(0, n * x));
-        std::complex<double> denominator = n2 - S2 - std::complex<double>(0, friction * (n + M2) / n);
+        std::complex<double> denominator = nSquared - S_SQUARED - std::complex<double>(0, context.friction * (n + M_SQUARED) / n);
         return (numerator / denominator).real();
     }
 
-    double greens(double friction, double x)
+    double greens(ComputeContext& context, double x)
     {
         double sum = 0;
 
         for (int n = 1; n <= SUMMATION_POINTS / 2; ++n)
         {
-            double n2 = n * n;
-            sum += greens_term(n, n2, friction, x) + greens_term(-n, n2, friction, x);
+            int nSquared = n * n;
+            sum += greensTerm(context, n, nSquared, x) + greensTerm(context, -n, nSquared, x);
         }
 
-        return sum / (2.0 * M_PI);
+        return sum / (2.0 * PI);
     }
 
-    double integrate(int X_POINTS, const std::vector<double>& y)
+    double integrate(ComputeContext& context, const std::vector<double>& integrand)
     {
         double integral = 0.0;
 
-        for (size_t i = 1; i < X_POINTS; ++i)
+        for (int x = 1; x < context.width; ++x)
         {
-            integral += 2 * M_PI / X_POINTS * (y[i] + y[i - 1]);
+            // This should be multiplied by 2, but...
+            integral += PI / context.width * (integrand[x] + integrand[x - 1]);
         }
 
-        return integral / 2.0;
+        // We would need to divide it by 2 here, so they cancel out!
+        return integral;
     }
 
-    std::vector<double> z(int X_POINTS, std::vector<double>& X, double friction, std::vector<double>& h, double reduction_factor = 0.4)
+    std::vector<double> z(ComputeContext& context)
     {
-        std::vector<double> result(X_POINTS);
+        std::vector<double> result(context.width);
 
-        for (size_t i = 0; i < X_POINTS; i++)
+        for (int x = 0; x < context.width; ++x)
         {
-            std::vector<double> integrand(X_POINTS);
+            std::vector<double> integrand(context.width);
 
-            for (size_t j = 0; j < X_POINTS; j++)
+            for (int x2 = 0; x2 < context.width; ++x2)
             {
-                integrand[j] = h[j] * greens(friction, X[i] - X[j]);
+                integrand[x2] = context.h[x2] * greens(context, context.x[x] - context.x[x2]);
             }
 
-            result[i] = reduction_factor * LAMBDA2 * integrate(X_POINTS, integrand);
+            result[x] = context.reductionFactor * LAMBDA_SQUARED * integrate(context, integrand);
         }
 
         return result;
     }
 
-    void computeWindTrajectories(int X_POINTS, int Y_POINTS, std::vector<double>& X, std::vector<double>& SIN_Y, double DX, double DY, Matrix& u, Matrix& v, double friction, std::vector<double>& h, double wind_velocity)
+    void computeWindTrajectories(ComputeContext& context, double reduction_factor = 0.4)
     {
         // Compute z Matrix
 
-        auto z_values = z(X_POINTS, X, friction, h);
-        Matrix z_mat = zeroMatrix(X_POINTS, Y_POINTS);
+        auto zValues = z(context);
 
-        for (int i = 0; i < Y_POINTS; ++i)
+        Matrix zMat = zeroMatrix(context.width, context.height);
+
+        for (int x = 0; x < context.width; ++x)
         {
-            for (int j = 0; j < X_POINTS; ++j)
+            for (int y = 0; y < context.height; ++y)
             {
-                z_mat[i][j] = z_values[j] * SIN_Y[i];
+                zMat[y][x] = zValues[x] * context.ySin[y];
             }
         }
 
         // Compute raw trajectories
 
-#define compute_v(a, b) (z_mat[i][a] - z_mat[i][b]) / DX * G_OVER_F
+#define compute_v(a, b) (zMat[y][a] - zMat[y][b]) / context.dx * G_OVER_F
 
-        for (int i = 1; i < Y_POINTS - 1; ++i)
+        for (int y = 1; y < context.height - 1; ++y)
         {
-            for (int j = 0; j < X_POINTS; ++j)
+            for (int x = 0; x < context.width; ++x)
             {
-                u[i][j] = (z_mat[i + 1][j] - z_mat[i - 1][j]) / DY * -G_OVER_F;
+                context.u[y][x] = (zMat[y + 1][x] - zMat[y - 1][x]) / context.dy * -G_OVER_F;
             }
 
-            for (int j = 1; j < X_POINTS - 1; ++j)
+            for (int x = 1; x < context.width - 1; ++x)
             {
-                v[i][j] = compute_v(j + 1, j - 1);
+                context.v[y][x] = compute_v(x + 1, x - 1);
             }
 
             // Handle edge cases
-            v[i][0] = compute_v(0, X_POINTS - 1);
-            v[i][X_POINTS - 1] = compute_v(X_POINTS - 1, 0);
+            context.v[y][0] = compute_v(0, context.width - 1);
+            context.v[y][context.width - 1] = compute_v(context.width - 1, 0);
         }
 
         // Normalize u and v and apply constant velocity
 
-        double normal_factor = 0.0;
+        double normalFactor = 0.0;
 
-        for (int i = 0; i < Y_POINTS; ++i)
+        for (int x = 0; x < context.width; ++x)
         {
-            for (int j = 0; j < X_POINTS; ++j)
+            for (int y = 0; y < context.height; ++y)
             {
-                normal_factor = std::max(normal_factor, std::max(std::abs(u[i][j]), std::abs(v[i][j])));
+                const double absU = std::abs(context.u[y][x]);
+                const double absV = std::abs(context.v[y][x]);
+                normalFactor = std::max(normalFactor, std::max(absU, absV));
             }
         }
 
-        for (int i = 0; i < Y_POINTS; ++i)
+        for (int x = 0; x < context.width; ++x)
         {
-            for (int j = 0; j < X_POINTS; ++j)
+            for (int y = 0; y < context.height; ++y)
             {
-                u[i][j] = u[i][j] / normal_factor + wind_velocity;
-                v[i][j] = v[i][j] / normal_factor;
+                context.u[y][x] = context.u[y][x] / normalFactor + context.windVelocity;
+                context.v[y][x] = context.v[y][x] / normalFactor;
             }
         }
     }
 
     Grid<sf::Vector2<double>> computePhysics(const cv::Mat& grid, bool compute)
     {
-        const int X_POINTS = grid.cols;
-        const int Y_POINTS = grid.rows;
+        static Grid<sf::Vector2<double>> directions;
+        static bool directionsInitialized = false;
 
-        static Grid<sf::Vector2<double>> directions = Grid<sf::Vector2<double>>(X_POINTS, Y_POINTS, { 0, 0 });
+        if (compute || !directionsInitialized) {
+            ComputeContext context{ grid, 0.5, 0.4 };
 
-        if (compute) {
-            directions = Grid<sf::Vector2<double>>(X_POINTS, Y_POINTS, { 0, 0 });
+            computeWindTrajectories(context);
 
-            const double DX = 2 * M_PI / X_POINTS;
-            const double DY = M_PI / Y_POINTS;
+            directions = Grid<sf::Vector2<double>>(context.width, context.height, { 0, 0 });
+            directionsInitialized = true;
 
-            std::vector<double> X(X_POINTS);
-            std::vector<double> SIN_Y(Y_POINTS);
-            std::vector<double> H(X_POINTS);
-
-            // Set up vectors
-
-            for (int j = 0; j < X_POINTS; ++j)
+            for (size_t x = 0; x < context.width; ++x)
             {
-                const double x = j * DX;
-                X[j] = x;
-
-                double sum = 0.0;
-
-                for (int i = 0; i < Y_POINTS; ++i)
+                for (size_t y = 0; y < context.height; ++y)
                 {
-                    sum += grid.at<float>(i, j);
-                }
-
-                H[j] = sum / Y_POINTS;
-            }
-
-            for (int i = 0; i < Y_POINTS; ++i)
-            {
-                const double y = i * DY;
-                SIN_Y[i] = sin(i * DY);
-            }
-
-            Matrix u = zeroMatrix(X_POINTS, Y_POINTS);
-            Matrix v = zeroMatrix(X_POINTS, Y_POINTS);
-            computeWindTrajectories(X_POINTS, Y_POINTS, X, SIN_Y, DX, DY, u, v, 0.5, H, 0.4);
-
-            for (size_t x = 0; x < X_POINTS; ++x)
-            {
-                for (size_t y = 0; y < Y_POINTS; ++y)
-                {
-                    directions.set(x, y, { u[y][x], v[y][x] });
+                    directions.set(x, y, { context.u[y][x], context.v[y][x] });
                 }
             }
         }
