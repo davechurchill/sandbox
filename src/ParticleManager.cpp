@@ -23,30 +23,52 @@ namespace {
     }
 }
 
-void ParticleManager::update(const cv::Mat& data, float deltaTime)
+void ParticleManager::update(ParticleAlgorithm algorithm, const cv::Mat& data, float deltaTime)
 {
     const int pixelWidth = data.cols;
     const int pixelHeight = data.rows;
-    // const auto directions = VectorField::computeBFS(data, cellSize, terrainWeight);
-    cellSize = 1;
 
-    static cv::Mat oldData = cv::Mat();
+    Grid<sf::Vector2<double>> directions;
+
+    static ParticleAlgorithm previousAlgorithm = algorithm;
+
     static double computeTimer = 0.0;
-
     computeTimer -= deltaTime;
 
-    bool compute = false;
-    
-    if (computeTimer <= 0.0) {
-        computeTimer = 5.00;
-
-        if (!checkSimilar(oldData, data)) {
-            oldData = data.clone();
-            compute = true;
-        }
+    if (algorithm != previousAlgorithm)
+    {
+        previousAlgorithm = algorithm;
+        computeTimer = 0.0;
+        reset();
     }
 
-    const auto directions = VectorField::computePhysics(data, compute);
+    switch (algorithm)
+    {
+    case ParticleAlgorithm::BFS: {
+        directions = VectorField::computeBFS(data, cellSize, terrainWeight);
+        break;
+    }
+    case ParticleAlgorithm::CharneyEliassen: {
+        static cv::Mat oldData = cv::Mat();
+
+        bool compute = false;
+
+        if (computeTimer <= 0.0 && !checkSimilar(oldData, data)) {
+            oldData = data.clone();
+            compute = true;
+            reset(2);
+        }
+
+        directions = VectorField::computePhysics(data, compute);
+
+        break;
+    }
+    default: return; // Unknown algorithm, return
+    }
+
+    if (computeTimer <= 0.0) {
+        computeTimer = m_computeFrequency;
+    }
 
     if (m_particles.size() != particleCount)
     {
@@ -59,15 +81,18 @@ void ParticleManager::update(const cv::Mat& data, float deltaTime)
         }
     }
 
-    if (m_resetRequested)
+    if (m_framesUntilReset > 0)
     {
-        for (auto& particle : m_particles)
-        {
-            particle.pos.x = rand() % pixelWidth;
-            particle.pos.y = rand() % pixelHeight;
-        }
+        m_framesUntilReset--;
 
-        m_resetRequested = false;
+        if (m_framesUntilReset == 0)
+        {
+            for (auto& particle : m_particles)
+            {
+                particle.pos.x = rand() % pixelWidth;
+                particle.pos.y = rand() % pixelHeight;
+            }
+        }
     }
 
     auto clampPos = [&](sf::Vector2<double>& pos)
@@ -82,7 +107,15 @@ void ParticleManager::update(const cv::Mat& data, float deltaTime)
         // In case the grid size changed
         clampPos(particle.pos);
 
-        auto& dir = directions.get((size_t)(particle.pos.x / cellSize), (size_t)(particle.pos.y / cellSize));
+        sf::Vector2<double> particlePos = { particle.pos.x, particle.pos.y };
+
+        // Only BFS uses cellSize
+        if (algorithm == ParticleAlgorithm::BFS) {
+            particlePos.x /= cellSize;
+            particlePos.y /= cellSize;
+        }
+
+        auto& dir = directions.get((size_t)particlePos.x, (size_t)particlePos.y);
 
         particle.pos.x += dir.x * particleSpeed * deltaTime;
         particle.pos.y += dir.y * particleSpeed * deltaTime;

@@ -5,6 +5,11 @@
 
 #include "SFML/System/Vector2.hpp"
 
+enum class ParticleAlgorithm {
+    CharneyEliassen = 0,
+    BFS = 1,
+};
+
 struct Particle
 {
     sf::Vector2<double> pos{ 0.0, 0.0 };
@@ -16,8 +21,11 @@ struct Particle
 };
 
 class ParticleManager {
+    // How often to compute expensive things (like CharneyEliassen), in seconds
+    const double m_computeFrequency = 5.0;
+
     std::vector<Particle> m_particles{};
-    bool m_resetRequested = false;
+    int m_framesUntilReset = 0;
 
 public:
     int cellSize = 8;
@@ -29,11 +37,11 @@ public:
 
     ParticleManager() = default;
 
-    void update(const cv::Mat& data, float deltaTime);
+    void update(ParticleAlgorithm algorithm, const cv::Mat& data, float deltaTime);
 
-    void reset()
+    void reset(int frames = 1)
     {
-        m_resetRequested = true;
+        m_framesUntilReset = std::max(frames, 1);
     }
 
     const std::vector<Particle>& getParticles() const

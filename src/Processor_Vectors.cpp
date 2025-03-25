@@ -4,6 +4,9 @@
 #include "Profiler.hpp"
 #include "Tools.h"
 
+const char* Processor_Vectors::m_algorithms[] = { "Charney & Eliassen", "BFS" };
+const char* Processor_Vectors::m_shaders[] = { "Popsicle", "Blue", "Red", "Terrain", "Animating Water", "None" };
+
 void Processor_Vectors::init()
 {
     m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Fragment);
@@ -13,19 +16,24 @@ void Processor_Vectors::imgui()
 {
     PROFILE_FUNCTION();
 
-    const char* shaders[] = { "Popsicle", "Blue", "Red", "Terrain", "Animating Water", "None" };
-    ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 5);
+    ImGui::Combo("Algorithm", &m_selectedAlgorithmIndex, m_algorithms, IM_ARRAYSIZE(m_algorithms));
+    ImGui::Combo("Color Scheme", &m_selectedShaderIndex, m_shaders, IM_ARRAYSIZE(m_shaders));
 
     ImGui::Checkbox("##Contours", &m_drawContours);
     ImGui::SameLine();
     ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
 
     ImGui::InputInt("Particles", &m_particleManager.particleCount);
-    ImGui::SliderInt("Cell Size", &m_particleManager.cellSize, 1, 128);
     ImGui::SliderInt("Trail Length", &m_particleManager.trailLength, 1, 32);
-    ImGui::SliderFloat("Terrain Weight", &m_particleManager.terrainWeight, 0.0f, 1.0f, "%.3f");
     ImGui::SliderFloat("Particle Speed", &m_particleManager.particleSpeed, 0.0f, 1000.0f, "%.1f");
     ImGui::SliderFloat("Particle Alpha", &m_particleManager.particleAlpha, 0.f, 1.f);
+
+    if ((ParticleAlgorithm)m_selectedAlgorithmIndex == ParticleAlgorithm::BFS)
+    {
+        ImGui::SliderInt("Cell Size", &m_particleManager.cellSize, 1, 128);
+        ImGui::SliderFloat("Terrain Weight", &m_particleManager.terrainWeight, 0.0f, 1.0f, "%.3f");
+    }
+    
     if (ImGui::Button("Reset Particles"))
     {
         m_particleManager.reset();
@@ -108,7 +116,7 @@ void Processor_Vectors::processTopography(const cv::Mat& data, float deltaTime)
     {
         PROFILE_SCOPE("Update Particles");
 
-        m_particleManager.update(data, deltaTime);
+        m_particleManager.update((ParticleAlgorithm)m_selectedAlgorithmIndex, data, deltaTime);
 
         for (auto& particle : m_particleManager.getParticles())
         {

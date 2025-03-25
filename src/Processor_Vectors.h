@@ -13,10 +13,14 @@ class Processor_Vectors : public TopographyProcessor
     sf::Texture         m_sfTransformedDepthTexture;
     sf::Sprite          m_sfTransformedDepthSprite;
     sf::Shader          m_shader;
+    int                 m_selectedAlgorithmIndex = 0;
     int                 m_selectedShaderIndex = 0;
     bool                m_drawContours = true;
     int                 m_numberOfContourLines = 19;
     ParticleManager     m_particleManager{};
+
+    static const char* m_algorithms[];
+    static const char* m_shaders[];
 
 public:
     void init();
