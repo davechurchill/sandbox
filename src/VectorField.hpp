@@ -263,6 +263,8 @@ namespace VectorField
         static Grid<sf::Vector2<double>> directions = Grid<sf::Vector2<double>>(X_POINTS, Y_POINTS, { 0, 0 });
 
         if (compute) {
+            directions = Grid<sf::Vector2<double>>(X_POINTS, Y_POINTS, { 0, 0 });
+
             const double DX = 2 * M_PI / X_POINTS;
             const double DY = M_PI / Y_POINTS;
 
@@ -281,7 +283,7 @@ namespace VectorField
 
                 for (int i = 0; i < Y_POINTS; ++i)
                 {
-                    sum += grid.at<double>(i, j);
+                    sum += grid.at<float>(i, j);
                 }
 
                 H[j] = sum / Y_POINTS;

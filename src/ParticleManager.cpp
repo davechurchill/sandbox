@@ -53,10 +53,13 @@ void ParticleManager::update(ParticleAlgorithm algorithm, const cv::Mat& data, f
 
         bool compute = false;
 
-        if (computeTimer <= 0.0 && !checkSimilar(oldData, data)) {
+        const bool sameSize = oldData.size() == data.size();
+        const bool dataHasChanged = !checkSimilar(oldData, data);
+
+        if (!sameSize || (computeTimer <= 0.0 && dataHasChanged)) {
             oldData = data.clone();
             compute = true;
-            reset(2);
+            reset(3);
         }
 
         directions = VectorField::computePhysics(data, compute);
