@@ -1,5 +1,5 @@
-source Camera
-processor Colorizer
+source Snapshot
+processor Vectors
 align 0
 gaussianBlur 1
 maxDistance 1.13

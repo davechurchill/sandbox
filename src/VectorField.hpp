@@ -147,10 +147,8 @@ namespace VectorField
     const double F = 2 * OMEGA * sin(PHI);
     const double G_OVER_F = G / F;
 
-    using Matrix = std::vector<std::vector<double>>;
-
-    Matrix zeroMatrix(int width, int height) {
-        return Matrix(height, std::vector<double>(width, 0.0));
+    cv::Mat zeroMatrix(int width, int height) {
+        return cv::Mat::zeros(height, width, CV_64F);
     }
 
     struct ComputeContext {
@@ -167,8 +165,8 @@ namespace VectorField
         std::vector<double> ySin;
         std::vector<double> h;
 
-        Matrix u;
-        Matrix v;
+        cv::Mat zMat;
+        cv::Mat uv;
 
         ComputeContext(const cv::Mat& grid, double friction, double windVelocity, double reductionFactor = 0.4) :
             friction(friction),
@@ -185,26 +183,26 @@ namespace VectorField
             ySin = std::vector<double>(height);
             h = std::vector<double>(width);
 
-            u = zeroMatrix(width, height);
-            v = zeroMatrix(width, height);
+            zMat = cv::Mat::zeros(height, width, CV_64F);
+            uv = cv::Mat::zeros(height, width, CV_64FC2);
 
-            for (int x = 0; x < width; ++x)
+            for (int xIndex = 0; xIndex < width; ++xIndex)
             {
-                this->x[x] = x * dx;
+                this->x[xIndex] = xIndex * dx;
 
                 double sum = 0.0;
 
-                for (int y = 0; y < height; ++y)
+                for (int yIndex = 0; yIndex < height; ++yIndex)
                 {
-                    sum += grid.at<float>(y, (int)x);
+                    sum += grid.at<float>(yIndex, (int)xIndex);
                 }
 
-                h[x] = sum / height;
+                h[xIndex] = sum / height;
             }
 
-            for (int y = 0; y < height; ++y)
+            for (int yIndex = 0; yIndex < height; ++yIndex)
             {
-                ySin[y] = sin(y * dy);
+                ySin[yIndex] = sin(yIndex * dy);
             }
         }
     };
@@ -243,60 +241,47 @@ namespace VectorField
         return integral;
     }
 
-    std::vector<double> z(ComputeContext& context)
+    double z(ComputeContext& context, int xIndex)
     {
-        std::vector<double> result(context.width);
+        std::vector<double> integrand(context.width);
 
-        for (int x = 0; x < context.width; ++x)
+        for (int alpha = 0; alpha < context.width; ++alpha)
         {
-            std::vector<double> integrand(context.width);
-
-            for (int x2 = 0; x2 < context.width; ++x2)
-            {
-                integrand[x2] = context.h[x2] * greens(context, context.x[x] - context.x[x2]);
-            }
-
-            result[x] = context.reductionFactor * LAMBDA_SQUARED * integrate(context, integrand);
+            integrand[alpha] = context.h[alpha] * greens(context, context.x[xIndex] - context.x[alpha]);
         }
 
-        return result;
+        return context.reductionFactor * LAMBDA_SQUARED * integrate(context, integrand);
     }
 
     void computeWindTrajectories(ComputeContext& context, double reduction_factor = 0.4)
     {
-        // Compute z Matrix
-
-        auto zValues = z(context);
-
-        Matrix zMat = zeroMatrix(context.width, context.height);
+        // Compute z matrix
 
         for (int x = 0; x < context.width; ++x)
         {
+            const auto zValue = z(context, x);
+
             for (int y = 0; y < context.height; ++y)
             {
-                zMat[y][x] = zValues[x] * context.ySin[y];
+                context.zMat.at<double>(y, x) = zValue * context.ySin[y];
             }
         }
 
         // Compute raw trajectories
 
-#define compute_v(a, b) (zMat[y][a] - zMat[y][b]) / context.dx * G_OVER_F
-
         for (int y = 1; y < context.height - 1; ++y)
         {
             for (int x = 0; x < context.width; ++x)
             {
-                context.u[y][x] = (zMat[y + 1][x] - zMat[y - 1][x]) / context.dy * -G_OVER_F;
+                context.uv.at<cv::Vec2f>(y, x)[0] = (context.zMat.at<double>(y + 1, x) - context.zMat.at<double>(y - 1, x)) / context.dy * -G_OVER_F;
             }
 
+            context.uv.at<cv::Vec2f>(y, 0)[1] = (context.zMat.at<double>(y, 0) - context.zMat.at<double>(y, context.width - 1)) / context.dx * G_OVER_F;
             for (int x = 1; x < context.width - 1; ++x)
             {
-                context.v[y][x] = compute_v(x + 1, x - 1);
+                context.uv.at<cv::Vec2f>(y, x)[1] = (context.zMat.at<double>(y, x + 1) - context.zMat.at<double>(y, x - 1)) / context.dx * G_OVER_F;
             }
-
-            // Handle edge cases
-            context.v[y][0] = compute_v(0, context.width - 1);
-            context.v[y][context.width - 1] = compute_v(context.width - 1, 0);
+            context.uv.at<cv::Vec2f>(y, context.width - 1)[1] = (context.zMat.at<double>(y, context.width - 1) - context.zMat.at<double>(y, 0)) / context.dx * G_OVER_F;
         }
 
         // Normalize u and v and apply constant velocity
@@ -307,8 +292,8 @@ namespace VectorField
         {
             for (int y = 0; y < context.height; ++y)
             {
-                const double absU = std::abs(context.u[y][x]);
-                const double absV = std::abs(context.v[y][x]);
+                const double absU = std::abs(context.uv.at<cv::Vec2f>(y, x)[0]);
+                const double absV = std::abs(context.uv.at<cv::Vec2f>(y, x)[1]);
                 normalFactor = std::max(normalFactor, std::max(absU, absV));
             }
         }
@@ -317,8 +302,11 @@ namespace VectorField
         {
             for (int y = 0; y < context.height; ++y)
             {
-                context.u[y][x] = context.u[y][x] / normalFactor + context.windVelocity;
-                context.v[y][x] = context.v[y][x] / normalFactor;
+                auto& u = context.uv.at<cv::Vec2f>(y, x)[0];
+                auto& v = context.uv.at<cv::Vec2f>(y, x)[1];
+
+                u = u / normalFactor + context.windVelocity;
+                v = v / normalFactor;
             }
         }
     }
@@ -340,7 +328,7 @@ namespace VectorField
             {
                 for (size_t y = 0; y < context.height; ++y)
                 {
-                    directions.set(x, y, { context.u[y][x], context.v[y][x] });
+                    directions.set(x, y, { context.uv.at<cv::Vec2f>(y, x)[0], context.uv.at<cv::Vec2f>(y, x)[1] });
                 }
             }
         }
