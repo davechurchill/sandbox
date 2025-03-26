@@ -156,46 +156,49 @@ namespace VectorField
         double windVelocity;
         double reductionFactor;
 
-        int width;
-        int height;
-        double dx;
-        double dy;
+        int width = -1;
+        int height = -1;
+        double dx = 1;
+        double dy = 1;
 
         std::vector<double> x;
         std::vector<double> ySin;
         std::vector<double> h;
-        std::vector<double> integrand;
 
         cv::Mat zMat;
         cv::Mat u;
         cv::Mat v;
 
-        ComputeContext(const cv::Mat& grid, double friction, double windVelocity, double reductionFactor = 0.4) :
+        double PI_OVER_WIDTH = 1;
+
+        ComputeContext(double friction, double windVelocity, double reductionFactor = 0.4) :
             friction(friction),
             windVelocity(windVelocity),
             reductionFactor(reductionFactor)
         {
-            update(grid);
         }
 
-        void update(const cv::Mat& grid) {
+        // This function does very little work unless dimensions have changed,
+        // so not a target for optimization
+        bool update(const cv::Mat& grid) {
             bool dimensionsChanged = false;
 
             if (grid.cols != width)
             {
                 dimensionsChanged = true;
 
-            width = grid.cols;
-            dx = 2 * PI / width;
+                width = grid.cols;
+                dx = 2 * PI / width;
 
-            x = std::vector<double>(width);
-            h = std::vector<double>(width);
-                integrand = std::vector<double>(width);
+                x = std::vector<double>(width);
+                h = std::vector<double>(width);
 
-            for (int xIndex = 0; xIndex < width; ++xIndex)
-            {
-                this->x[xIndex] = xIndex * dx;
+                for (int xIndex = 0; xIndex < width; ++xIndex)
+                {
+                    this->x[xIndex] = xIndex * dx;
                 }
+
+                PI_OVER_WIDTH = PI / width;
             }
 
             if (grid.rows != height)
@@ -231,66 +234,66 @@ namespace VectorField
                     h[j] = sum / height;
                 }
             }
+
+            return dimensionsChanged;
         }
     };
 
-    double greensTerm(ComputeContext& context, int n, int nSquared, double x)
+    double greensTerm(double friction, int n, double nSquared_Minus_sSquared, double x)
     {
         std::complex<double> numerator = std::exp(std::complex<double>(0, n * x));
-        std::complex<double> denominator = nSquared - S_SQUARED - std::complex<double>(0, context.friction * (n + M_SQUARED) / n);
+        std::complex<double> denominator = nSquared_Minus_sSquared - std::complex<double>(0, friction * (n + M_SQUARED) / n);
         return (numerator / denominator).real();
     }
 
-    double greens(ComputeContext& context, double x)
+    double greens(double friction, double x)
     {
         double sum = 0;
 
         for (int n = 1; n <= SUMMATION_POINTS / 2; ++n)
         {
-            int nSquared = n * n;
-            sum += greensTerm(context, n, nSquared, x) + greensTerm(context, -n, nSquared, x);
+            const double nSquared_Minus_sSquared = n * n - S_SQUARED;
+            const double positiveTerm = greensTerm(friction, n, nSquared_Minus_sSquared, x);
+            const double negativeTerm = greensTerm(friction, -n, nSquared_Minus_sSquared, x);
+            sum += positiveTerm + negativeTerm;
         }
 
         return sum / (2.0 * PI);
     }
 
-    double integrate(ComputeContext& context)
+    double integrate(ComputeContext& context, const cv::Mat& integrand)
     {
-        double result = 0.0;
-
-        for (int x = 1; x < context.width; ++x)
-        {
-            // This should be multiplied by 2, but...
-            result += PI / context.width * (context.integrand[x] + context.integrand[x - 1]);
-        }
-
-        // We would need to divide it by 2 here, so they cancel out!
-        return result;
+        const double integrandSum = cv::sum(integrand)[0];
+        const double adjustedSum = integrandSum - integrand.at<double>(0, 0) - integrand.at<double>(0, context.width - 1);
+        return context.PI_OVER_WIDTH * adjustedSum;
     }
 
     double z(ComputeContext& context, int xIndex)
     {
-        for (int alpha = 0; alpha < context.width; ++alpha)
-        {
-            context.integrand[alpha] = context.h[alpha] * greens(context, context.x[xIndex] - context.x[alpha]);
-        }
+        cv::Mat integrand(1, context.width, CV_64F);
 
-        return context.reductionFactor * LAMBDA_SQUARED * integrate(context);
+        integrand.forEach<double>([&](double& value, const int* position) {
+            const int alpha = position[1];
+            value = context.h[alpha] * greens(context.friction, context.x[xIndex] - context.x[alpha]);
+        });
+
+        return context.reductionFactor * LAMBDA_SQUARED * integrate(context, integrand);
     }
 
     void computeWindTrajectories(ComputeContext& context, double reduction_factor = 0.4)
     {
         // Compute z matrix
 
-        for (int x = 0; x < context.width; ++x)
-        {
-            const auto zValue = z(context, x);
+        cv::parallel_for_(cv::Range(0, context.width), [&](const cv::Range& range) {
+            for (int x = range.start; x < range.end; ++x) {
+                const auto zValue = z(context, x);
 
-            for (int y = 0; y < context.height; ++y)
-            {
-                context.zMat.at<double>(y, x) = zValue * context.ySin[y];
+                for (int y = 0; y < context.height; ++y)
+                {
+                    context.zMat.at<double>(y, x) = zValue * context.ySin[y];
+                }
             }
-        }
+        });
 
         // Compute raw trajectories
 
@@ -335,25 +338,31 @@ namespace VectorField
 
     Grid<sf::Vector2<double>> computePhysics(const cv::Mat& grid, bool compute)
     {
-        static Grid<sf::Vector2<double>> directions;
-        static bool directionsInitialized = false;
-        static ComputeContext context{ grid, 0.5, 0.4 };
+        static bool initialized = false;
 
-        if (compute || !directionsInitialized) {
-            context.update(grid);
+        static Grid<sf::Vector2<double>> directions;
+        static ComputeContext context{ 0.5, 0.4 };
+
+        if (compute || !initialized) {
+            initialized = true;
+
+            const bool dimensionsChanged = context.update(grid);
+
+            if (dimensionsChanged)
+            {
+                directions = Grid<sf::Vector2<double>>(context.width, context.height, { 0, 0 });
+            }
 
             computeWindTrajectories(context);
 
-            directions = Grid<sf::Vector2<double>>(context.width, context.height, { 0, 0 });
-            directionsInitialized = true;
+            cv::parallel_for_(cv::Range(0, context.width * context.height), [&](const cv::Range& range) {
+                for (int r = range.start; r < range.end; ++r) {
+                    int x = r % context.width;
+                    int y = r / context.width;
 
-            for (size_t x = 0; x < context.width; ++x)
-            {
-                for (size_t y = 0; y < context.height; ++y)
-                {
                     directions.set(x, y, { context.u.at<double>(y, x), context.v.at<double>(y, x) });
                 }
-            }
+            });
         }
 
         return directions;
