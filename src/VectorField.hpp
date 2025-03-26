@@ -185,16 +185,16 @@ namespace VectorField
             {
                 dimensionsChanged = true;
 
-                width = grid.cols;
-                dx = 2 * PI / width;
+            width = grid.cols;
+            dx = 2 * PI / width;
 
-                x = std::vector<double>(width);
-                h = std::vector<double>(width);
+            x = std::vector<double>(width);
+            h = std::vector<double>(width);
                 integrand = std::vector<double>(width);
 
-                for (int xIndex = 0; xIndex < width; ++xIndex)
-                {
-                    this->x[xIndex] = xIndex * dx;
+            for (int xIndex = 0; xIndex < width; ++xIndex)
+            {
+                this->x[xIndex] = xIndex * dx;
                 }
             }
 
@@ -294,26 +294,26 @@ namespace VectorField
 
         // Compute raw trajectories
 
-        for (int y = 1; y < context.height - 1; ++y)
-        {
-            for (int x = 0; x < context.width; ++x)
+        cv::parallel_for_(cv::Range(0, (context.height - 2) * context.width), [&](const cv::Range& range) {
+            for (int i = range.start; i < range.end; ++i)
             {
-                context.u.at<double>(y, x) = (context.zMat.at<double>(y + 1, x) - context.zMat.at<double>(y - 1, x)) / context.dy * -G_OVER_F;
-            }
+                int y = i / context.width + 1;  // +1 to account for the y = 1 starting point
+                int x = i % context.width;
 
-            context.v.at<double>(y, 0) = (context.zMat.at<double>(y, 0) - context.zMat.at<double>(y, context.width - 1)) / context.dx * G_OVER_F;
-            for (int x = 1; x < context.width - 1; ++x)
-            {
-                context.v.at<double>(y, x) = (context.zMat.at<double>(y, x + 1) - context.zMat.at<double>(y, x - 1)) / context.dx * G_OVER_F;
+                context.u.at<double>(y, x) = (context.zMat.at<double>(y + 1, x) - context.zMat.at<double>(y - 1, x)) / context.dy * -G_OVER_F;
+
+                int xPlus = (x + 1) % context.width;
+                int xMinus = (x - 1 + context.width) % context.width;
+
+                context.v.at<double>(y, x) = (context.zMat.at<double>(y, xPlus) - context.zMat.at<double>(y, xMinus)) / context.dx * G_OVER_F;
             }
-            context.v.at<double>(y, context.width - 1) = (context.zMat.at<double>(y, context.width - 1) - context.zMat.at<double>(y, 0)) / context.dx * G_OVER_F;
-        }
+        });
 
         // Normalize u and v and apply constant velocity
 
         double minU, maxU, minV, maxV;
         cv::minMaxLoc(context.u, &minU, &maxU);
-        cv::minMaxLoc(context.u, &minV, &maxV);
+        cv::minMaxLoc(context.v, &minV, &maxV);
 
         const double absMaxU = std::max(std::abs(minU), maxU);
         const double absMaxV = std::max(std::abs(minV), maxV);
