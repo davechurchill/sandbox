@@ -16,7 +16,7 @@ namespace VectorField
     // BFS
     ////////////////////////
 
-    Grid<sf::Vector2<double>> computeBFS(const cv::Mat& grid, int spacing, float terrainWeight)
+    cv::Mat computeBFS(const cv::Mat& grid, int spacing, float terrainWeight)
     {
         int pixelWidth = grid.cols;
         int pixelHeight = grid.rows;
@@ -33,7 +33,7 @@ namespace VectorField
 
         Grid<double> m_grid = Grid<double>(gridWidth, gridHeight, 0); // average terrain height
         Grid<double> m_distance = Grid<double>(gridWidth + 1, gridHeight, -1); // distance to nearest goal cell * (1 + terrain height * weight) 
-        Grid<sf::Vector2<double>> m_directions = Grid<sf::Vector2<double>>(gridWidth, gridHeight, { 0, 0 }); // director vector
+        cv::Mat m_directions = cv::Mat::zeros(gridHeight, gridWidth, CV_64FC2); // director vector
 
         for (int x = 0; x < gridWidth; ++x)
         {
@@ -68,11 +68,11 @@ namespace VectorField
             sf::Vector2i cell = openList.front();
             openList.pop();
 
-            auto value = m_distance.get(cell.x, cell.y);
+            double value = m_distance.get(cell.x, cell.y);
 
             auto update = [&](int x, int y)
             {
-                auto& dist = m_distance.get(x, y);
+                double& dist = m_distance.get(x, y);
                 if (dist == -1)
                 {
                     openList.push({ x, y });
@@ -110,7 +110,7 @@ namespace VectorField
         {
             for (int y = 0; y < gridHeight; ++y)
             {
-                auto thisDist = m_distance.get(x, y);
+                double thisDist = m_distance.get(x, y);
 
                 double left = x > 0 ? m_distance.get(x - 1, y) : thisDist;
                 double right = x < gridWidth - 1 ? m_distance.get(x + 1, y) : thisDist;
@@ -121,7 +121,7 @@ namespace VectorField
 
                 double magnitude = std::sqrt(dir.x * dir.x + dir.y * dir.y);
 
-                m_directions.get(x, y) = { dir.x / magnitude, dir.y / magnitude };
+                m_directions.at<cv::Vec2d>(y, x) = { dir.x / magnitude, dir.y / magnitude };
             }
         }
 
@@ -188,8 +188,7 @@ namespace VectorField
         std::vector<double> h;
 
         cv::Mat zMat;
-        cv::Mat u;
-        cv::Mat v;
+        cv::Mat uv;
 
         double piOverWidth = 1;
 
@@ -241,8 +240,7 @@ namespace VectorField
             if (dimensionsChanged)
             {
                 zMat = cv::Mat::zeros(height, width, CV_64F);
-                u = cv::Mat::zeros(height, width, CV_64F);
-                v = cv::Mat::zeros(height, width, CV_64F);
+                uv = cv::Mat::zeros(height, width, CV_64FC2);
 
                 for (int j = 0; j < width; ++j)
                 {
@@ -270,77 +268,68 @@ namespace VectorField
         inline double z(int xIndex) const
         {
             cv::Mat integrand(1, width, CV_64F);
+            const double indexedX = x[xIndex];
 
-            integrand.forEach<double>([&](double& value, const int* position) {
+            integrand.forEach<double>([&, indexedX](double& value, const int* position) {
                 const int alpha = position[1];
-                value = h[alpha] * greens(friction, x[xIndex] - x[alpha]);
-                });
+                value = h[alpha] * greens(friction, indexedX - x[alpha]);
+            });
 
             return reductionFactor * LAMBDA_SQUARED * integrate(integrand);
         }
 
-        // Compute wind trajectories
-        void compute()
+        void computeWindTrajectories()
         {
             // Compute z matrix
 
             cv::parallel_for_(cv::Range(0, width), [&](const cv::Range& range) {
                 for (int x = range.start; x < range.end; ++x) {
-                    const auto zValue = z(x);
+                    const double zValue = z(x);
 
+                    // Expand to 2D
                     for (int y = 0; y < height; ++y)
                     {
                         zMat.at<double>(y, x) = zValue * ySin[y];
                     }
                 }
-                });
+            });
 
             // Compute raw trajectories
 
-            cv::parallel_for_(cv::Range(0, (height - 2) * width), [&](const cv::Range& range) {
-                for (int i = range.start; i < range.end; ++i)
-                {
-                    int y = i / width + 1;  // +1 to account for the y = 1 starting point
-                    int x = i % width;
+            double normalFactor = 0.0;
 
-                    u.at<double>(y, x) = (zMat.at<double>(y + 1, x) - zMat.at<double>(y - 1, x)) / dy * -G_OVER_F;
+            // Iterating over [1, height - 1) and [0, width)
+            cv::parallel_for_(cv::Range(0, (height - 2) * width), [&](const cv::Range& range) {
+                for (int r = range.start; r < range.end; ++r)
+                {
+                    int x = r % width;
+                    int y = r / width + 1;  // +1 to account for the y = 1 starting point
 
                     int xPlus = (x + 1) % width;
                     int xMinus = (x - 1 + width) % width;
 
-                    v.at<double>(y, x) = (zMat.at<double>(y, xPlus) - zMat.at<double>(y, xMinus)) / dx * G_OVER_F;
+                    cv::Vec2d& vec = uv.at<cv::Vec2d>(y, x);
+
+                    vec[0] = (zMat.at<double>(y + 1, x) - zMat.at<double>(y - 1, x)) / dy * -G_OVER_F;
+                    vec[1] = (zMat.at<double>(y, xPlus) - zMat.at<double>(y, xMinus)) / dx * G_OVER_F;
+
+                    const double maxComponent = std::max(std::abs(vec[0]), std::abs(vec[1]));
+                    normalFactor = std::max(normalFactor, maxComponent);
                 }
-                });
+            });
 
             // Normalize u and v and apply constant velocity
 
-            double minU, maxU, minV, maxV;
-            cv::minMaxLoc(u, &minU, &maxU);
-            cv::minMaxLoc(v, &minV, &maxV);
-
-            const double absMaxU = std::max(std::abs(minU), maxU);
-            const double absMaxV = std::max(std::abs(minV), maxV);
-            const double normalFactor = std::max(absMaxU, absMaxV);
-
-            cv::parallel_for_(cv::Range(0, width * height), [&](const cv::Range& range) {
-                for (int r = range.start; r < range.end; ++r) {
-                    int x = r % width;
-                    int y = r / width;
-
-                    auto& uValue = u.at<double>(y, x);
-                    auto& vValue = v.at<double>(y, x);
-
-                    uValue = uValue / normalFactor + windVelocity;
-                    vValue = vValue / normalFactor;
-                }
+            uv.forEach<cv::Vec2d>([&, normalFactor](cv::Vec2d& vec, const int* position) {
+                vec /= normalFactor;
+                vec[0] += windVelocity;
             });
         }
     };
 
-    Grid<sf::Vector2<double>> computePhysics(const cv::Mat& grid, bool compute)
+    cv::Mat computePhysics(const cv::Mat& grid, bool compute)
     {
         static bool initialized = false;
-        static Grid<sf::Vector2<double>> directions;
         static ComputeContext context{ 0.5, 0.4 };
 
         if (!initialized)
@@ -350,26 +339,10 @@ namespace VectorField
         }
 
         if (compute) {
-            const bool dimensionsChanged = context.update(grid);
-            context.compute();
-
-            // Will always be true the first time the function is called,
-            // so 'directions' will always be initialized
-            if (dimensionsChanged)
-            {
-                directions = Grid<sf::Vector2<double>>(context.width, context.height, { 0, 0 });
-            }
-
-            cv::parallel_for_(cv::Range(0, context.width * context.height), [&](const cv::Range& range) {
-                for (int r = range.start; r < range.end; ++r) {
-                    int x = r % context.width;
-                    int y = r / context.width;
-
-                    directions.set(x, y, { context.u.at<double>(y, x), context.v.at<double>(y, x) });
-                }
-            });
+            context.update(grid);
+            context.computeWindTrajectories();
         }
 
-        return directions;
+        return context.uv;
     }
 }

@@ -28,19 +28,15 @@ void ParticleManager::update(ParticleAlgorithm algorithm, const cv::Mat& data, f
     const int pixelWidth = data.cols;
     const int pixelHeight = data.rows;
 
-    Grid<sf::Vector2<double>> directions;
-
     static ParticleAlgorithm previousAlgorithm = algorithm;
-
-    static double computeTimer = 0.0;
-    computeTimer -= deltaTime;
-
     if (algorithm != previousAlgorithm)
     {
         previousAlgorithm = algorithm;
-        computeTimer = 0.0;
         reset();
     }
+
+    // TODO: DYNAMIC! BAD! BAD! BAD!
+    cv::Mat directions;
 
     switch (algorithm)
     {
@@ -53,12 +49,25 @@ void ParticleManager::update(ParticleAlgorithm algorithm, const cv::Mat& data, f
 
         bool compute = false;
 
-        const bool sameSize = oldData.size() == data.size();
-        const bool sameData = true || checkSimilar(oldData, data);
+        static double timer = 0.0;
+        bool timerTriggered = false;
+        timer -= deltaTime;
+        if (timer <= 0)
+        {
+            timer = 2.0;
+            timerTriggered = true;
+        }
 
-        if (!sameSize || !sameData) {
+        const bool sameSize = oldData.size() == data.size();
+        const bool sameData = checkSimilar(oldData, data);
+
+        if (timerTriggered || !sameSize || !sameData) {
             oldData = data.clone();
             compute = true;
+        }
+
+        if (!sameSize)
+        {
             reset(3);
         }
 
@@ -66,11 +75,8 @@ void ParticleManager::update(ParticleAlgorithm algorithm, const cv::Mat& data, f
 
         break;
     }
-    default: return; // Unknown algorithm, return
-    }
-
-    if (computeTimer <= 0.0) {
-        computeTimer = m_computeFrequency;
+    default:
+        directions = cv::Mat::zeros(data.cols, data.rows, CV_64FC2);
     }
 
     if (m_particles.size() != particleCount)
@@ -118,10 +124,11 @@ void ParticleManager::update(ParticleAlgorithm algorithm, const cv::Mat& data, f
             particlePos.y /= cellSize;
         }
 
-        auto& dir = directions.get((size_t)particlePos.x, (size_t)particlePos.y);
+        // TODO: Is (int) this the best way to round here?
+        auto& dir = directions.at<cv::Vec2d>((int)particlePos.y, (int)particlePos.x);
 
-        particle.pos.x += dir.x * particleSpeed * deltaTime;
-        particle.pos.y += dir.y * particleSpeed * deltaTime;
+        particle.pos.x += dir[0] * particleSpeed * deltaTime;
+        particle.pos.y += dir[1] * particleSpeed * deltaTime;
 
         if (particle.pos.x >= pixelWidth - 1)
         {

@@ -21,9 +21,6 @@ struct Particle
 };
 
 class ParticleManager {
-    // How often to compute expensive things (like CharneyEliassen), in seconds
-    const double m_computeFrequency = 5.0;
-
     std::vector<Particle> m_particles{};
     int m_framesUntilReset = 0;
 
@@ -41,7 +38,7 @@ public:
 
     void reset(int frames = 1)
     {
-        m_framesUntilReset = std::max(frames, 1);
+        m_framesUntilReset = std::max(m_framesUntilReset, std::max(frames, 1));
     }
 
     const std::vector<Particle>& getParticles() const
