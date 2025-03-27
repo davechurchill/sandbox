@@ -61,7 +61,7 @@ void ParticleManager::update(ParticleAlgorithm algorithm, const cv::Mat& data, f
         const bool sameSize = oldData.size() == data.size();
         const bool sameData = checkSimilar(oldData, data);
 
-        if (timerTriggered || !sameSize || !sameData) {
+        if (!sameSize || (timerTriggered && !sameData)) {
             oldData = data.clone();
             compute = true;
         }
