@@ -147,8 +147,30 @@ namespace VectorField
     const double F = 2 * OMEGA * sin(PHI);
     const double G_OVER_F = G / F;
 
-    cv::Mat zeroMatrix(int width, int height) {
+    inline cv::Mat zeroMatrix(int width, int height) {
         return cv::Mat::zeros(height, width, CV_64F);
+    }
+
+    inline double greensTerm(double friction, int n, double nSquared_Minus_sSquared, double x)
+    {
+        std::complex<double> numerator = std::exp(std::complex<double>(0, n * x));
+        std::complex<double> denominator = nSquared_Minus_sSquared - std::complex<double>(0, friction * (n + M_SQUARED) / n);
+        return (numerator / denominator).real();
+    }
+
+    inline double greens(double friction, double x)
+    {
+        double sum = 0;
+
+        for (int n = 1; n <= SUMMATION_POINTS / 2; ++n)
+        {
+            const double nSquared_Minus_sSquared = n * n - S_SQUARED;
+            const double positiveTerm = greensTerm(friction, n, nSquared_Minus_sSquared, x);
+            const double negativeTerm = greensTerm(friction, -n, nSquared_Minus_sSquared, x);
+            sum += positiveTerm + negativeTerm;
+        }
+
+        return sum / (2.0 * PI);
     }
 
     struct ComputeContext {
@@ -169,7 +191,7 @@ namespace VectorField
         cv::Mat u;
         cv::Mat v;
 
-        double PI_OVER_WIDTH = 1;
+        double piOverWidth = 1;
 
         ComputeContext(double friction, double windVelocity, double reductionFactor = 0.4) :
             friction(friction),
@@ -198,7 +220,7 @@ namespace VectorField
                     this->x[xIndex] = xIndex * dx;
                 }
 
-                PI_OVER_WIDTH = PI / width;
+                piOverWidth = PI / width;
             }
 
             if (grid.rows != height)
@@ -237,123 +259,106 @@ namespace VectorField
 
             return dimensionsChanged;
         }
-    };
 
-    double greensTerm(double friction, int n, double nSquared_Minus_sSquared, double x)
-    {
-        std::complex<double> numerator = std::exp(std::complex<double>(0, n * x));
-        std::complex<double> denominator = nSquared_Minus_sSquared - std::complex<double>(0, friction * (n + M_SQUARED) / n);
-        return (numerator / denominator).real();
-    }
-
-    double greens(double friction, double x)
-    {
-        double sum = 0;
-
-        for (int n = 1; n <= SUMMATION_POINTS / 2; ++n)
+        inline double integrate(const cv::Mat& integrand) const
         {
-            const double nSquared_Minus_sSquared = n * n - S_SQUARED;
-            const double positiveTerm = greensTerm(friction, n, nSquared_Minus_sSquared, x);
-            const double negativeTerm = greensTerm(friction, -n, nSquared_Minus_sSquared, x);
-            sum += positiveTerm + negativeTerm;
+            const double integrandSum = cv::sum(integrand)[0];
+            const double adjustedSum = integrandSum - integrand.at<double>(0, 0) - integrand.at<double>(0, width - 1);
+            return piOverWidth * adjustedSum;
         }
 
-        return sum / (2.0 * PI);
-    }
+        inline double z(int xIndex) const
+        {
+            cv::Mat integrand(1, width, CV_64F);
 
-    double integrate(ComputeContext& context, const cv::Mat& integrand)
-    {
-        const double integrandSum = cv::sum(integrand)[0];
-        const double adjustedSum = integrandSum - integrand.at<double>(0, 0) - integrand.at<double>(0, context.width - 1);
-        return context.PI_OVER_WIDTH * adjustedSum;
-    }
+            integrand.forEach<double>([&](double& value, const int* position) {
+                const int alpha = position[1];
+                value = h[alpha] * greens(friction, x[xIndex] - x[alpha]);
+                });
 
-    double z(ComputeContext& context, int xIndex)
-    {
-        cv::Mat integrand(1, context.width, CV_64F);
+            return reductionFactor * LAMBDA_SQUARED * integrate(integrand);
+        }
 
-        integrand.forEach<double>([&](double& value, const int* position) {
-            const int alpha = position[1];
-            value = context.h[alpha] * greens(context.friction, context.x[xIndex] - context.x[alpha]);
-        });
+        // Compute wind trajectories
+        void compute()
+        {
+            // Compute z matrix
 
-        return context.reductionFactor * LAMBDA_SQUARED * integrate(context, integrand);
-    }
+            cv::parallel_for_(cv::Range(0, width), [&](const cv::Range& range) {
+                for (int x = range.start; x < range.end; ++x) {
+                    const auto zValue = z(x);
 
-    void computeWindTrajectories(ComputeContext& context, double reduction_factor = 0.4)
-    {
-        // Compute z matrix
-
-        cv::parallel_for_(cv::Range(0, context.width), [&](const cv::Range& range) {
-            for (int x = range.start; x < range.end; ++x) {
-                const auto zValue = z(context, x);
-
-                for (int y = 0; y < context.height; ++y)
-                {
-                    context.zMat.at<double>(y, x) = zValue * context.ySin[y];
+                    for (int y = 0; y < height; ++y)
+                    {
+                        zMat.at<double>(y, x) = zValue * ySin[y];
+                    }
                 }
-            }
-        });
+                });
 
-        // Compute raw trajectories
+            // Compute raw trajectories
 
-        cv::parallel_for_(cv::Range(0, (context.height - 2) * context.width), [&](const cv::Range& range) {
-            for (int i = range.start; i < range.end; ++i)
-            {
-                int y = i / context.width + 1;  // +1 to account for the y = 1 starting point
-                int x = i % context.width;
+            cv::parallel_for_(cv::Range(0, (height - 2) * width), [&](const cv::Range& range) {
+                for (int i = range.start; i < range.end; ++i)
+                {
+                    int y = i / width + 1;  // +1 to account for the y = 1 starting point
+                    int x = i % width;
 
-                context.u.at<double>(y, x) = (context.zMat.at<double>(y + 1, x) - context.zMat.at<double>(y - 1, x)) / context.dy * -G_OVER_F;
+                    u.at<double>(y, x) = (zMat.at<double>(y + 1, x) - zMat.at<double>(y - 1, x)) / dy * -G_OVER_F;
 
-                int xPlus = (x + 1) % context.width;
-                int xMinus = (x - 1 + context.width) % context.width;
+                    int xPlus = (x + 1) % width;
+                    int xMinus = (x - 1 + width) % width;
 
-                context.v.at<double>(y, x) = (context.zMat.at<double>(y, xPlus) - context.zMat.at<double>(y, xMinus)) / context.dx * G_OVER_F;
-            }
-        });
+                    v.at<double>(y, x) = (zMat.at<double>(y, xPlus) - zMat.at<double>(y, xMinus)) / dx * G_OVER_F;
+                }
+                });
 
-        // Normalize u and v and apply constant velocity
+            // Normalize u and v and apply constant velocity
 
-        double minU, maxU, minV, maxV;
-        cv::minMaxLoc(context.u, &minU, &maxU);
-        cv::minMaxLoc(context.v, &minV, &maxV);
+            double minU, maxU, minV, maxV;
+            cv::minMaxLoc(u, &minU, &maxU);
+            cv::minMaxLoc(v, &minV, &maxV);
 
-        const double absMaxU = std::max(std::abs(minU), maxU);
-        const double absMaxV = std::max(std::abs(minV), maxV);
-        const double normalFactor = std::max(absMaxU, absMaxV);
+            const double absMaxU = std::max(std::abs(minU), maxU);
+            const double absMaxV = std::max(std::abs(minV), maxV);
+            const double normalFactor = std::max(absMaxU, absMaxV);
 
-        cv::parallel_for_(cv::Range(0, context.width * context.height), [&](const cv::Range& range) {
-            for (int r = range.start; r < range.end; ++r) {
-                int x = r % context.width;
-                int y = r / context.width;
+            cv::parallel_for_(cv::Range(0, width * height), [&](const cv::Range& range) {
+                for (int r = range.start; r < range.end; ++r) {
+                    int x = r % width;
+                    int y = r / width;
 
-                auto& u = context.u.at<double>(y, x);
-                auto& v = context.v.at<double>(y, x);
+                    auto& uValue = u.at<double>(y, x);
+                    auto& vValue = v.at<double>(y, x);
 
-                u = u / normalFactor + context.windVelocity;
-                v = v / normalFactor;
-            }
-        });
-    }
+                    uValue = uValue / normalFactor + windVelocity;
+                    vValue = vValue / normalFactor;
+                }
+            });
+        }
+    };
 
     Grid<sf::Vector2<double>> computePhysics(const cv::Mat& grid, bool compute)
     {
         static bool initialized = false;
-
         static Grid<sf::Vector2<double>> directions;
         static ComputeContext context{ 0.5, 0.4 };
 
-        if (compute || !initialized) {
+        if (!initialized)
+        {
             initialized = true;
+            compute = true;
+        }
 
+        if (compute) {
             const bool dimensionsChanged = context.update(grid);
+            context.compute();
 
+            // Will always be true the first time the function is called,
+            // so 'directions' will always be initialized
             if (dimensionsChanged)
             {
                 directions = Grid<sf::Vector2<double>>(context.width, context.height, { 0, 0 });
             }
-
-            computeWindTrajectories(context);
 
             cv::parallel_for_(cv::Range(0, context.width * context.height), [&](const cv::Range& range) {
                 for (int r = range.start; r < range.end; ++r) {
