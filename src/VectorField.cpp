@@ -129,28 +129,6 @@ cv::Mat VectorField::computeBFS(const cv::Mat& grid, int spacing, float terrainW
 // Charney
 ////////////////////////
 
-inline double VectorField::greensTerm(double friction, int n, double nSquared_Minus_sSquared, double x)
-{
-    std::complex<double> numerator = std::exp(std::complex<double>(0, n * x));
-    std::complex<double> denominator = nSquared_Minus_sSquared - std::complex<double>(0, friction * (n + M_SQUARED) / n);
-    return (numerator / denominator).real();
-}
-
-inline double VectorField::greens(double friction, double x)
-{
-    double sum = 0;
-
-    for (int n = 1; n <= SUMMATION_POINTS / 2; ++n)
-    {
-        const double nSquared_Minus_sSquared = n * n - S_SQUARED;
-        const double positiveTerm = greensTerm(friction, n, nSquared_Minus_sSquared, x);
-        const double negativeTerm = greensTerm(friction, -n, nSquared_Minus_sSquared, x);
-        sum += positiveTerm + negativeTerm;
-    }
-
-    return sum / (2.0 * PI);
-}
-
 // This function does very little work unless dimensions have changed,
 // so not a target for optimization
 bool VectorField::ComputeContext::update(const cv::Mat& grid) {
@@ -168,7 +146,7 @@ bool VectorField::ComputeContext::update(const cv::Mat& grid) {
 
         for (int xIndex = 0; xIndex < width; ++xIndex)
         {
-            this->x[xIndex] = xIndex * dx;
+            x[xIndex] = xIndex * dx;
         }
 
         piOverWidth = PI / width;
@@ -208,6 +186,28 @@ bool VectorField::ComputeContext::update(const cv::Mat& grid) {
     }
 
     return dimensionsChanged;
+}
+
+inline double VectorField::greensTerm(double friction, int n, double nSquared_Minus_sSquared, double x)
+{
+    std::complex<double> numerator = std::exp(std::complex<double>(0, n * x));
+    std::complex<double> denominator = nSquared_Minus_sSquared - std::complex<double>(0, friction * (n + M_SQUARED) / n);
+    return (numerator / denominator).real();
+}
+
+inline double VectorField::greens(double friction, double x)
+{
+    double sum = 0;
+
+    for (int n = 1; n <= SUMMATION_POINTS / 2; ++n)
+    {
+        const double nSquared_Minus_sSquared = n * n - S_SQUARED;
+        const double positiveTerm = greensTerm(friction, n, nSquared_Minus_sSquared, x);
+        const double negativeTerm = greensTerm(friction, -n, nSquared_Minus_sSquared, x);
+        sum += positiveTerm + negativeTerm;
+    }
+
+    return sum / (2.0 * PI);
 }
 
 void VectorField::ComputeContext::computeWindTrajectories()
