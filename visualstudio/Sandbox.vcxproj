@@ -71,7 +71,8 @@
     <ClInclude Include="..\src\Tools.h" />
     <ClInclude Include="..\src\TopographyProcessor.h" />
     <ClInclude Include="..\src\TopographySource.h" />
-    <ClInclude Include="..\src\VectorField.hpp" />
+    <ClCompile Include="..\src\VectorField.cpp" />
+    <ClInclude Include="..\src\VectorField.h" />
     <ClInclude Include="..\src\ViewController.hpp" />
   </ItemGroup>
   <ItemGroup>

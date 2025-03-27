@@ -73,6 +73,9 @@
     <ClCompile Include="..\src\Source_Snapshot.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\VectorField.cpp">
+      <Filter>processors\vectors</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Scene.h">
@@ -142,9 +145,6 @@
     <ClInclude Include="..\src\Processor_Vectors.h">
       <Filter>processors\vectors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\VectorField.hpp">
-      <Filter>processors\vectors</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\HandDetection.h">
       <Filter>camera</Filter>
     </ClInclude>
@@ -162,6 +162,9 @@
     </ClInclude>
     <ClInclude Include="..\src\GestureClassifier.hpp">
       <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\VectorField.h">
+      <Filter>processors\vectors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

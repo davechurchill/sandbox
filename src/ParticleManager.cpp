@@ -2,7 +2,7 @@
 #include <SFML/System/Time.hpp>
 
 #include "ParticleManager.h"
-#include "VectorField.hpp"
+#include "VectorField.h"
 
 namespace {
     bool checkSimilar(const cv::Mat& mat1, const cv::Mat& mat2, double tolerance = 0.1) {
