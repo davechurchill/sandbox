@@ -66,10 +66,6 @@ namespace VectorField
         }
 
         bool update(const cv::Mat& grid);
-
-        inline double integrate(const cv::Mat& integrand) const;
-        inline double z(int xIndex) const;
-
         void computeWindTrajectories();
     };
 

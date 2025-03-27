@@ -210,38 +210,38 @@ bool VectorField::ComputeContext::update(const cv::Mat& grid) {
     return dimensionsChanged;
 }
 
-inline double VectorField::ComputeContext::integrate(const cv::Mat& integrand) const
-{
-    const double integrandSum = cv::sum(integrand)[0];
-    const double adjustedSum = integrandSum - integrand.at<double>(0, 0) - integrand.at<double>(0, width - 1);
-    return piOverWidth * adjustedSum;
-}
-
-inline double VectorField::ComputeContext::z(int xIndex) const
-{
-    cv::Mat integrand(1, width, CV_64F);
-    const double indexedX = x[xIndex];
-
-    integrand.forEach<double>([&, indexedX](double& value, const int* position) {
-        const int alpha = position[1];
-        value = h[alpha] * greens(friction, indexedX - x[alpha]);
-    });
-
-    return reductionFactor * LAMBDA_SQUARED * integrate(integrand);
-}
-
 void VectorField::ComputeContext::computeWindTrajectories()
 {
     // Compute z matrix
 
     cv::parallel_for_(cv::Range(0, width), [&](const cv::Range& range) {
-        for (int x = range.start; x < range.end; ++x) {
-            const double zValue = z(x);
+        for (int xIndex = range.start; xIndex < range.end; ++xIndex) {
+            const double xValue = x[xIndex];
+
+            // Integrate
+
+            const auto integrandTerm = [&, xValue](int alpha) {
+                return h[alpha] * greens(friction, xValue - x[alpha]);
+            };
+
+            double integralSum = integrandTerm(0) + integrandTerm(width - 1);
+
+            for (int alpha = 1; alpha < width - 1; ++alpha)
+            {
+                integralSum += 2 * integrandTerm(alpha);
+            }
+
+            const double integrationResult = piOverWidth * integralSum;
+
+            // Compute Z
+
+            const double zValue = reductionFactor * LAMBDA_SQUARED * integrationResult;
 
             // Expand to 2D
-            for (int y = 0; y < height; ++y)
+
+            for (int yIndex = 0; yIndex < height; ++yIndex)
             {
-                zMat.at<double>(y, x) = zValue * ySin[y];
+                zMat.at<double>(yIndex, xIndex) = zValue * ySin[yIndex];
             }
         }
     });
