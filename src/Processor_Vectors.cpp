@@ -87,26 +87,27 @@ void Processor_Vectors::load(const Save& save)
     m_projector.load(save);
 }
 
-void Processor_Vectors::processTopography(const cv::Mat& data, float deltaTime)
+void Processor_Vectors::processTopography(const IntermediateData& data)
 {
     PROFILE_FUNCTION();
+    const cv::Mat& top = data.topography;
 
     // Reset particles if data dimensions change
-    static int dataSize[2] = { data.rows, data.cols };
-    if (dataSize[0] != data.rows || dataSize[1] != data.cols)
+    static int dataSize[2] = { top.rows, top.cols };
+    if (dataSize[0] != top.rows || dataSize[1] != top.cols)
     {
         m_particleManager.reset();
-        dataSize[0] = data.rows;
-        dataSize[1] = data.cols;
+        dataSize[0] = top.rows;
+        dataSize[1] = top.cols;
     }
 
-    cv::Mat particleGrid = cv::Mat(data.rows, data.cols, CV_8U, 0.0);
+    cv::Mat particleGrid = cv::Mat(top.rows, top.cols, CV_8U, 0.0);
     cv::Mat m_cvTransformedParticleGrid32f;
 
     {
         PROFILE_SCOPE("Update Particles");
 
-        m_particleManager.update(data, deltaTime);
+        m_particleManager.update(top, data.deltaTime);
 
         for (auto& particle : m_particleManager.getParticles())
         {
@@ -122,7 +123,7 @@ void Processor_Vectors::processTopography(const cv::Mat& data, float deltaTime)
     
     {
         PROFILE_SCOPE("Calibration TransformProjection");
-        m_projector.project(data, m_cvTransformedDepthImage32f);
+        m_projector.project(top, m_cvTransformedDepthImage32f);
         m_projector.project(particleGrid, m_cvTransformedParticleGrid32f);
     }
 

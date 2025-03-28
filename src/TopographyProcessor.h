@@ -1,9 +1,17 @@
 #pragma once
 
 #include "Save.hpp"
+#include "MarkerData.h"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
+
+struct IntermediateData
+{
+    cv::Mat topography;
+    float deltaTime;
+    std::vector<MarkerData> markers;
+};
 
 class TopographyProcessor
 {
@@ -15,5 +23,5 @@ public:
     virtual void save(Save& save) const = 0;
     virtual void load(const Save& save) = 0;
 
-    virtual void processTopography(const cv::Mat& data, float deltaTime) = 0;
+    virtual void processTopography(const IntermediateData& data) = 0;
 };

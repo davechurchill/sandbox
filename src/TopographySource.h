@@ -1,15 +1,10 @@
 #pragma once
 
 #include "Save.hpp"
+#include "MarkerData.h"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
-
-struct Gesture
-{
-    char type = 0;
-    cv::Point position;
-};
 
 class TopographySource
 {
@@ -22,5 +17,5 @@ public:
     virtual void load(const Save & save) = 0;
 
     virtual cv::Mat getTopography() = 0;
-    virtual std::vector<Gesture> getGestures() { return {}; };
+    virtual std::vector<MarkerData> getMarkers() { return {}; }
 };

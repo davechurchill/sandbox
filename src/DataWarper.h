@@ -43,4 +43,6 @@ public:
     inline bool shouldAdjustHeight() const { return m_applyHeightAdjustment; }
     inline const cv::Point2f* getPoints() const { return m_warpPoints; }
 
+    void transformPoints(std::vector<cv::Point2f>& points) const;
+
 };

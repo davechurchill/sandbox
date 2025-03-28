@@ -166,7 +166,7 @@ void Processor_Heat::load(const Save& save)
     m_projector.load(save);
 }
 
-void Processor_Heat::processTopography(const cv::Mat& data, float deltaTime)
+void Processor_Heat::processTopography(const IntermediateData& data)
 {
     PROFILE_FUNCTION();
 
@@ -175,7 +175,7 @@ void Processor_Heat::processTopography(const cv::Mat& data, float deltaTime)
 
         {
             PROFILE_SCOPE("Calibration TransformProjection");
-            m_projector.project(data, m_cvTransformedDepthImage32fColor);
+            m_projector.project(data.topography, m_cvTransformedDepthImage32fColor);
         }
 
         // Draw warped depth image
@@ -200,11 +200,11 @@ void Processor_Heat::processTopography(const cv::Mat& data, float deltaTime)
 
     {
         PROFILE_SCOPE("Heat");
-        m_heatGrid.update(data, m_iterations);
+        m_heatGrid.update(data.topography, m_iterations);
 
         if (m_doStep)
         {
-            m_heatGrid.update(data, 1);
+            m_heatGrid.update(data.topography, 1);
             m_doStep = false;
         }
 

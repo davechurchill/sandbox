@@ -60,7 +60,6 @@ void Source_Camera::captureImages()
     }
 
     // capture the color image
-    if (m_drawColor)
     {
         rs2::frame colorFrame;
         {
@@ -72,10 +71,21 @@ void Source_Camera::captureImages()
         const int cw = colorFrame.as<rs2::video_frame>().get_width();
         const int ch = colorFrame.as<rs2::video_frame>().get_height();
         m_cvColorImage = cv::Mat(cv::Size(cw, ch), CV_8UC3, (void *)colorFrame.get_data(), cv::Mat::AUTO_STEP);
-        cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
-        m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
-        m_sfColorTexture.loadFromImage(m_sfColorImage);
-        m_colorSprite.setTexture(m_sfColorTexture, true);
+
+        // Detect ArUco Markers
+        m_markerDetector.identifyMarkers(m_cvColorImage);
+
+        if (m_drawColor)
+        {
+            // Draw ArUco Markers
+            m_markerDetector.drawMarkers(m_cvColorImage);
+
+            // Convert to SFML
+            cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
+            m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
+            m_sfColorTexture.loadFromImage(m_sfColorImage);
+            m_colorSprite.setTexture(m_sfColorTexture, true);
+        }
     }
 
     // Handle depth feed
@@ -112,7 +122,7 @@ void Source_Camera::captureImages()
     if (m_detectHands)
     {
         PROFILE_SCOPE("Hand Detection");
-        m_handDetection.removeHands(m_cvDepthImage32f, m_cvDepthImage32f, m_maxDistance, m_minDistance);
+        removeHands(m_cvDepthImage32f, m_cvDepthImage32f, m_maxDistance, m_minDistance);
     }
 
     // Perform Gaussian Blur of data if turned on
@@ -212,6 +222,13 @@ void Source_Camera::imgui()
                 cv::imwrite("depthImage_normalized.png", depthImage8u);
             }
 
+            if (ImGui::CollapsingHeader("ArUco Markers"))
+            {
+                ImGui::Indent();
+                m_markerDetector.imgui();
+                ImGui::Unindent();
+            }
+
             ImGui::EndTabItem();
         }
 
@@ -232,8 +249,7 @@ void Source_Camera::imgui()
         if (ImGui::BeginTabItem("Hand Recognition"))
         {
             ImGui::Checkbox("Filter Hands", &m_detectHands);
-            ImGui::Checkbox("Show Gesture Recognition", &m_showGestureRecognition);
-            m_handDetection.imgui();
+            ImGui::SliderFloat("Hand Threshold", &m_handThresh, 0.0, 1.0);
             ImGui::EndTabItem();
         }
 
@@ -254,17 +270,6 @@ void Source_Camera::render(sf::RenderWindow & window)
         if (m_drawColor) { window.draw(m_colorSprite); }
     }
 
-    {
-        PROFILE_SCOPE("Draw Gesture Image");
-        if (m_showGestureRecognition)
-        {
-            auto & texture = m_handDetection.getTexture();
-            m_gestureGraphic.setTexture(texture, true);
-            m_gestureGraphic.setScale({ 2.0,2.0 });
-            window.draw(m_gestureGraphic);
-        }
-    }
-
     m_warper.render(window);
 }
 
@@ -275,7 +280,6 @@ void Source_Camera::processEvent(const sf::Event & event, const sf::Vector2f & m
     {
         m_pause = !m_pause;
     }
-    m_handDetection.eventHandling(event);
 }
 
 void Source_Camera::save(Save & save) const
@@ -319,21 +323,34 @@ cv::Mat Source_Camera::getTopography()
     return m_data;
 }
 
-std::vector<Gesture> Source_Camera::getGestures()
+std::vector<MarkerData> Source_Camera::getMarkers()
 {
-    if (m_pause) { return m_handDetection.m_gestures; }
-    // Get points and convert to integers
-    auto pointsF = m_warper.getPoints();
-    std::vector<cv::Point> points = {
-        pointsF[0],
-        pointsF[1],
-        pointsF[3],
-        pointsF[2]
-    };
+    std::vector<MarkerData> markers;
+    for (int i = 0; i < m_markerDetector.markerIds.size(); ++i)
+    {
+        MarkerData data;
+        data.id = m_markerDetector.markerIds[i];
+        auto& corners = m_markerDetector.markerCorners[i];
+        m_warper.transformPoints(corners);
+        data.center = std::accumulate(corners.begin(), corners.end(), cv::Point2f()) / 4.0;
+        markers.push_back(data);
+    }
+    return markers;
+}
 
-    // Identify gestures
-    m_handDetection.identifyGestures(points);
+// Function that detects the area taken up by hands / arms and ignores it
+void Source_Camera::removeHands(const cv::Mat& input, cv::Mat& output, float maxDistance, float minDistance)
+{
+    if (m_previous.total() <= 0) // For the first frame
+    {
+        m_previous = input.clone();
+        output = input;
+        return;
+    }
+    // Normalize
+    cv::Mat normalized;
+    normalized = 1.f - (input - minDistance) / (maxDistance - minDistance);
 
-    // Return reference to gesture array
-    return m_handDetection.m_gestures;
+    input.copyTo(m_previous, (normalized < m_handThresh) & (normalized > 0.0));
+    output = m_previous.clone();
 }

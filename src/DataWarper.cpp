@@ -164,6 +164,11 @@ void DataWarper::render(sf::RenderWindow & window)
     }
 }
 
+void DataWarper::transformPoints(std::vector<cv::Point2f> & points) const
+{
+    cv::perspectiveTransform(points, points, m_warpMatrix);
+}
+
 void DataWarper::generateWarpMatrix()
 {
     PROFILE_FUNCTION();

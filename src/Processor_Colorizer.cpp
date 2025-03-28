@@ -77,12 +77,12 @@ void Processor_Colorizer::load(const Save & save)
     m_projector.load(save);
 }
 
-void Processor_Colorizer::processTopography(const cv::Mat & data, float deltaTime)
+void Processor_Colorizer::processTopography(const IntermediateData& data)
 {
     PROFILE_FUNCTION();
     {
         PROFILE_SCOPE("Calibration TransformProjection");
-        m_projector.project(data, m_cvTransformedDepthImage32f);
+        m_projector.project(data.topography, m_cvTransformedDepthImage32f);
     }
 
     // Draw warped depth image
