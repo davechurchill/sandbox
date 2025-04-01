@@ -129,9 +129,11 @@ cv::Mat VectorField::computeBFS(const cv::Mat& grid, int spacing, float terrainW
 // Charney
 ////////////////////////
 
-// This function does very little work unless dimensions have changed,
-// so not a target for optimization
-bool VectorField::ComputeContext::update(const cv::Mat& grid) {
+VectorField::ComputeContext::ComputeContext(const cv::Mat& grid, double friction, double windVelocity, double reductionFactor) :
+    friction(friction),
+    windVelocity(windVelocity),
+    reductionFactor(reductionFactor)
+{
     bool dimensionsChanged = false;
 
     if (grid.cols != width)
@@ -184,8 +186,6 @@ bool VectorField::ComputeContext::update(const cv::Mat& grid) {
             h[j] = sum / height;
         }
     }
-
-    return dimensionsChanged;
 }
 
 inline double VectorField::greensTerm(double friction, int n, double nSquared_Minus_sSquared, double x)
@@ -281,7 +281,7 @@ void VectorField::ComputeContext::computeWindTrajectories()
 cv::Mat VectorField::computePhysics(const cv::Mat& grid, bool compute)
 {
     static bool initialized = false;
-    static ComputeContext context{ 0.5, 0.4 };
+    static cv::Mat directions{};
 
     if (!initialized)
     {
@@ -290,9 +290,10 @@ cv::Mat VectorField::computePhysics(const cv::Mat& grid, bool compute)
     }
 
     if (compute) {
-        context.update(grid);
+        ComputeContext context{ grid, 0.5, 0.4 };
         context.computeWindTrajectories();
+        directions = context.uv.clone();
     }
 
-    return context.uv;
+    return directions;
 }

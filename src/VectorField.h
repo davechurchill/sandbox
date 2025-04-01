@@ -40,7 +40,10 @@ namespace VectorField
     inline double greensTerm(double friction, int n, double nSquared_Minus_sSquared, double x);
     inline double greens(double friction, double x);
 
-    struct ComputeContext {
+    class ComputeContext {
+        void init(const cv::Mat& grid);
+
+    public:
         const double friction;
         const double windVelocity;
         const double reductionFactor;
@@ -58,14 +61,8 @@ namespace VectorField
         cv::Mat zMat;
         cv::Mat uv;
 
-        ComputeContext(double friction, double windVelocity, double reductionFactor = 0.4) :
-            friction(friction),
-            windVelocity(windVelocity),
-            reductionFactor(reductionFactor)
-        {
-        }
+        ComputeContext(const cv::Mat& grid, double friction, double windVelocity, double reductionFactor = 0.4);
 
-        bool update(const cv::Mat& grid);
         void computeWindTrajectories();
     };
 
