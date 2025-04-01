@@ -4,47 +4,49 @@
 #include "ParticleManager.h"
 #include "VectorField.h"
 
-namespace {
-    bool checkSimilar(const cv::Mat& mat1, const cv::Mat& mat2, double tolerance = 0.1) {
-        if (mat1.size() != mat2.size())
-        {
-            return false;
-        }
+const char* ParticleManager::AlgorithmNames[(size_t)ParticleManager::Algorithm::Count] = { "Charney & Eliassen", "BFS" };
 
-        double error = cv::norm(mat1, mat2, cv::NORM_L2);
-        double normFactor = cv::norm(mat1, cv::NORM_L2);
-
-        if (normFactor > 0)
-        {
-            error /= normFactor;
-        }
-
-        return error < tolerance;
+bool ParticleManager::checkSimilar(const cv::Mat& mat1, const cv::Mat& mat2, double tolerance) {
+    if (mat1.size() != mat2.size())
+    {
+        return false;
     }
+
+    double error = cv::norm(mat1, mat2, cv::NORM_L2);
+    double normFactor = cv::norm(mat1, cv::NORM_L2);
+
+    if (normFactor > 0)
+    {
+        error /= normFactor;
+    }
+
+    return error < tolerance;
 }
 
-void ParticleManager::update(ParticleAlgorithm algorithm, const cv::Mat& data, float deltaTime)
+void ParticleManager::update(Algorithm algorithm, const cv::Mat& data, float deltaTime)
 {
     const int pixelWidth = data.cols;
     const int pixelHeight = data.rows;
 
-    static ParticleAlgorithm previousAlgorithm = algorithm;
+    static Algorithm previousAlgorithm = algorithm;
     if (algorithm != previousAlgorithm)
     {
         previousAlgorithm = algorithm;
         reset();
     }
 
+    auto& selectedParameters = parameters[(size_t)algorithm];
+
     // TODO: DYNAMIC! BAD! BAD! BAD!
     cv::Mat directions;
 
     switch (algorithm)
     {
-    case ParticleAlgorithm::BFS: {
-        directions = VectorField::computeBFS(data, cellSize, terrainWeight);
+    case Algorithm::BFS: {
+        directions = VectorField::computeBFS(data, selectedParameters.cellSize, selectedParameters.terrainWeight);
         break;
     }
-    case ParticleAlgorithm::CharneyEliassen: {
+    case Algorithm::CharneyEliassen: {
         static cv::Mat oldData = cv::Mat();
 
         bool compute = false;
@@ -79,12 +81,12 @@ void ParticleManager::update(ParticleAlgorithm algorithm, const cv::Mat& data, f
         directions = cv::Mat::zeros(data.cols, data.rows, CV_64FC2);
     }
 
-    if (m_particles.size() != particleCount)
+    if (m_particles.size() != selectedParameters.particleCount)
     {
         m_particles.clear();
-        m_particles.reserve(particleCount);
+        m_particles.reserve(selectedParameters.particleCount);
 
-        for (int i = 0; i < particleCount; ++i)
+        for (int i = 0; i < selectedParameters.particleCount; ++i)
         {
             m_particles.emplace_back(Particle{ (double)(rand() % pixelWidth), (double)(rand() % pixelHeight) });
         }
@@ -119,16 +121,16 @@ void ParticleManager::update(ParticleAlgorithm algorithm, const cv::Mat& data, f
         sf::Vector2<double> particlePos = { particle.pos.x, particle.pos.y };
 
         // Only BFS uses cellSize
-        if (algorithm == ParticleAlgorithm::BFS) {
-            particlePos.x /= cellSize;
-            particlePos.y /= cellSize;
+        if (algorithm == ParticleManager::Algorithm::BFS) {
+            particlePos.x /= selectedParameters.cellSize;
+            particlePos.y /= selectedParameters.cellSize;
         }
 
         // TODO: Is (int) this the best way to round here?
         auto& dir = directions.at<cv::Vec2d>((int)particlePos.y, (int)particlePos.x);
 
-        particle.pos.x += dir[0] * particleSpeed * deltaTime;
-        particle.pos.y += dir[1] * particleSpeed * deltaTime;
+        particle.pos.x += dir[0] * selectedParameters.particleSpeed * deltaTime;
+        particle.pos.y += dir[1] * selectedParameters.particleSpeed * deltaTime;
 
         if (particle.pos.x >= pixelWidth - 1)
         {
@@ -138,7 +140,7 @@ void ParticleManager::update(ParticleAlgorithm algorithm, const cv::Mat& data, f
         }
 
         particle.trail.push_back({ particle.pos.x, particle.pos.y });
-        while (particle.trail.size() > trailLength)
+        while (particle.trail.size() > selectedParameters.trailLength)
         {
             particle.trail.erase(particle.trail.begin());
         }

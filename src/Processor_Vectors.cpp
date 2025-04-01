@@ -4,7 +4,6 @@
 #include "Profiler.hpp"
 #include "Tools.h"
 
-const char* Processor_Vectors::m_algorithms[] = { "Charney & Eliassen", "BFS" };
 const char* Processor_Vectors::m_shaders[] = { "Popsicle", "Blue", "Red", "Terrain", "Animating Water", "None" };
 
 void Processor_Vectors::init()
@@ -16,22 +15,27 @@ void Processor_Vectors::imgui()
 {
     PROFILE_FUNCTION();
 
-    ImGui::Combo("Algorithm", &m_selectedAlgorithmIndex, m_algorithms, IM_ARRAYSIZE(m_algorithms));
+    auto selectedAlgorithm = (ParticleManager::Algorithm)m_selectedAlgorithmIndex;
+    auto& selectedParameters = m_particleManager.parameters[m_selectedAlgorithmIndex];
+
+    ImGui::Combo("Algorithm", &m_selectedAlgorithmIndex, ParticleManager::AlgorithmNames, (size_t)ParticleManager::Algorithm::Count);
+
+
     ImGui::Combo("Color Scheme", &m_selectedShaderIndex, m_shaders, IM_ARRAYSIZE(m_shaders));
 
     ImGui::Checkbox("##Contours", &m_drawContours);
     ImGui::SameLine();
     ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
 
-    ImGui::InputInt("Particles", &m_particleManager.particleCount);
-    ImGui::SliderInt("Trail Length", &m_particleManager.trailLength, 1, 32);
-    ImGui::SliderFloat("Particle Speed", &m_particleManager.particleSpeed, 0.0f, 1000.0f, "%.1f");
-    ImGui::SliderFloat("Particle Alpha", &m_particleManager.particleAlpha, 0.f, 1.f);
+    ImGui::InputInt("Particles", &selectedParameters.particleCount);
+    ImGui::SliderInt("Trail Length", &selectedParameters.trailLength, 1, 32);
+    ImGui::SliderFloat("Particle Speed", &selectedParameters.particleSpeed, 0.0f, 1000.0f, "%.1f");
+    ImGui::SliderFloat("Particle Alpha", &selectedParameters.particleAlpha, 0.f, 1.f);
 
-    if ((ParticleAlgorithm)m_selectedAlgorithmIndex == ParticleAlgorithm::BFS)
+    if (selectedAlgorithm == ParticleManager::Algorithm::BFS)
     {
-        ImGui::SliderInt("Cell Size", &m_particleManager.cellSize, 1, 128);
-        ImGui::SliderFloat("Terrain Weight", &m_particleManager.terrainWeight, 0.0f, 1.0f, "%.3f");
+        ImGui::SliderInt("Cell Size", &selectedParameters.cellSize, 1, 128);
+        ImGui::SliderFloat("Terrain Weight", &selectedParameters.terrainWeight, 0.0f, 1.0f, "%.3f");
     }
     
     if (ImGui::Button("Reset Particles"))
@@ -52,6 +56,8 @@ void Processor_Vectors::render(sf::RenderWindow& window)
 {
     PROFILE_FUNCTION();
 
+    auto& selectedParameters = m_particleManager.parameters[m_selectedAlgorithmIndex];
+
     {
         PROFILE_SCOPE("Draw Transformed Image");
 
@@ -67,7 +73,7 @@ void Processor_Vectors::render(sf::RenderWindow& window)
         m_shader.setUniform("contour", m_drawContours);
         m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
         m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
-        m_shader.setUniform("particleAlpha", m_particleManager.particleAlpha);
+        m_shader.setUniform("particleAlpha", selectedParameters.particleAlpha);
 
         window.draw(m_sfTransformedDepthSprite, &m_shader);
     }
@@ -101,6 +107,9 @@ void Processor_Vectors::processTopography(const cv::Mat& data, float deltaTime)
 {
     PROFILE_FUNCTION();
 
+    auto selectedAlgorithm = (ParticleManager::Algorithm)m_selectedAlgorithmIndex;
+    auto& selectedParameters = m_particleManager.parameters[m_selectedAlgorithmIndex];
+
     // Reset particles if data dimensions change
     static int dataSize[2] = { data.rows, data.cols };
     if (dataSize[0] != data.rows || dataSize[1] != data.cols)
@@ -116,7 +125,7 @@ void Processor_Vectors::processTopography(const cv::Mat& data, float deltaTime)
     {
         PROFILE_SCOPE("Update Particles");
 
-        m_particleManager.update((ParticleAlgorithm)m_selectedAlgorithmIndex, data, deltaTime);
+        m_particleManager.update(selectedAlgorithm, data, deltaTime);
 
         for (auto& particle : m_particleManager.getParticles())
         {
@@ -124,7 +133,7 @@ void Processor_Vectors::processTopography(const cv::Mat& data, float deltaTime)
             {
                 auto& [x, y] = particle.trail[i];
                 particleGrid.at<uint8_t>((int)round(y), (int)round(x)) =
-                    255 - (m_particleManager.trailLength - i - 1) * 255 / (m_particleManager.trailLength + 1);
+                    255 - (selectedParameters.trailLength - i - 1) * 255 / (selectedParameters.trailLength + 1);
             }
 
             particleGrid.at<uint8_t>((int)round(particle.pos.y), (int)round(particle.pos.x)) = 255;
