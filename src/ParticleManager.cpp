@@ -135,7 +135,11 @@ void ParticleManager::update(Algorithm algorithm, const cv::Mat& data, float del
         if (particle.pos.x >= pixelWidth - 1)
         {
             particle.pos.x = std::fmod(particle.pos.x, (double)(pixelWidth - 1));
-            particle.pos.y = rand() % pixelHeight;
+
+            if (algorithm == ParticleManager::Algorithm::BFS) {
+                particle.pos.y = rand() % pixelHeight;
+            }
+            
             particle.trail.clear();
         }
 
