@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\HandDetection.cpp" />
     <ClCompile Include="..\src\HeatGrid.cpp" />
     <ClCompile Include="..\src\ParticleManager.cpp" />
     <ClCompile Include="..\src\Processor_Heat.cpp" />
@@ -44,9 +43,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Grid.hpp" />
-    <ClInclude Include="..\src\GestureClassifier.hpp" />
-    <ClInclude Include="..\src\HandDetection.h" />
     <ClInclude Include="..\src\HeatGrid.h" />
+    <ClInclude Include="..\src\MarkerData.h" />
+    <ClInclude Include="..\src\MarkerDetector.hpp" />
     <ClInclude Include="..\src\ParticleManager.h" />
     <ClInclude Include="..\src\Processor_Heat.h" />
     <ClInclude Include="..\src\GoodAssert.h" />
