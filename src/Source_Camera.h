@@ -3,7 +3,7 @@
 #include "TopographySource.h"
 #include "CameraFilters.hpp"
 #include "DataWarper.h"
-#include "HandDetection.h"
+#include "MarkerDetector.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <librealsense2/rs.hpp>
@@ -22,8 +22,12 @@ class Source_Camera : public TopographySource
     bool                m_cameraConnected = false;
 
     DataWarper          m_warper;
-    HandDetection       m_handDetection;
+
     bool                m_detectHands = true;
+    cv::Mat             m_previous;
+    float               m_handThresh = 0.855f;
+
+    MarkerDetector      m_markerDetector;
 
     CameraFilters       m_filters;
     alignment           m_alignment = alignment::depth;
@@ -54,11 +58,10 @@ class Source_Camera : public TopographySource
     bool                m_drawColor = false;
 
     bool                m_pause = false;
-    bool                m_showGestureRecognition = false;
-    sf::Sprite          m_gestureGraphic;
 
     void connectToCamera();
     void captureImages();
+    void removeHands(const cv::Mat& input, cv::Mat& output, float maxDistance, float minDistance);
 
 public:
     void init();
@@ -69,7 +72,6 @@ public:
     void load(const Save & save);
 
     cv::Mat getTopography();
-
-    std::vector<Gesture> getGestures();
+    std::vector<MarkerData> getMarkers();
 
 };
