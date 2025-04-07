@@ -40,8 +40,6 @@ void Scene_Main::init()
     registerProcessor<Processor_Heat>("Heat");
     registerProcessor<Processor_Vectors>("Vectors");
     m_processorMap.emplace("None", []() {return nullptr; });
-
-    load();
 }
 
 void Scene_Main::onFrame(float deltaTime)

@@ -42,9 +42,6 @@ class Scene_Main : public Scene
     void sProcessEvent(const sf::Event & event);
     void sRender();
 
-    void load();
-    void save();
-
     void setSource(const std::string & source);
     void setProcessor(const std::string & processor);
 
@@ -72,4 +69,7 @@ public:
     {
         m_processorMap.emplace(name, std::make_shared<T>);
     }
+
+    void load();
+    void save();
 };

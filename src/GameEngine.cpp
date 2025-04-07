@@ -5,6 +5,7 @@
 #include "imgui-SFML.h"
 
 #include <iostream>
+#include <Scene_Main.h>
 
 GameEngine::GameEngine()
 {
@@ -72,6 +73,7 @@ void GameEngine::update()
 
 void GameEngine::run()
 {
+    std::dynamic_pointer_cast<Scene_Main>(currentScene())->load();
     while (isRunning())
     {
         update();
