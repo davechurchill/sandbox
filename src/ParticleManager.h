@@ -17,22 +17,54 @@ struct Particle
 
 class ParticleManager {
     std::vector<Particle> m_particles{};
-    bool m_resetRequested = false;
+    int m_framesUntilReset = 0;
+
+    bool checkSimilar(const cv::Mat& mat1, const cv::Mat& mat2, double tolerance = 0.1);
 
 public:
-    int cellSize = 8;
-    int trailLength = 4;
-    int particleCount = 30000;
-    float terrainWeight = 0.2f;
-    float particleSpeed = 120.0;
+    enum class Algorithm {
+        CharneyEliassen,
+        BFS,
+        Count,
+    };
 
-    ParticleManager() = default;
+    static const char* AlgorithmNames[];
 
-    void update(const cv::Mat& data, float deltaTime);
+    struct AlgorithmParameters {
+        int cellSize;
+        int trailLength;
+        int particleCount;
+        float terrainWeight;
+        float particleSpeed;
+        float particleAlpha;
 
-    void reset()
+        AlgorithmParameters() = default;
+
+        AlgorithmParameters(int trailLength, int particleCount, float particleSpeed, int cellSize = 8, float terrainWeight = 0.2f, float particleAlpha = 0.85f) :
+            trailLength(trailLength),
+            particleCount(particleCount),
+            particleSpeed(particleSpeed),
+            particleAlpha(particleAlpha),
+            cellSize(cellSize),
+            terrainWeight(terrainWeight)
+        {
+        }
+    };
+
+    std::vector<AlgorithmParameters> parameters;
+
+    ParticleManager() {
+        parameters = std::vector<AlgorithmParameters>((size_t)Algorithm::Count);
+
+        parameters[(size_t)Algorithm::CharneyEliassen] = AlgorithmParameters(8, 4000, 160.f);
+        parameters[(size_t)Algorithm::BFS] = AlgorithmParameters(4, 30000, 120.f);
+    };
+
+    void update(Algorithm algorithm, const cv::Mat& data, float deltaTime);
+
+    void reset(int frames = 1)
     {
-        m_resetRequested = true;
+        m_framesUntilReset = std::max(m_framesUntilReset, std::max(frames, 1));
     }
 
     const std::vector<Particle>& getParticles() const

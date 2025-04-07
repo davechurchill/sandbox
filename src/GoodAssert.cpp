@@ -6,14 +6,16 @@
 #include <sstream>
 #include <chrono>
 
-std::string CurrentDateTime() 
+std::string CurrentDateTime()
 {
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
-    std::tm* ptm = std::localtime(&now_time);
+    std::tm timeinfo;
+
+    localtime_s(&timeinfo, &now_time);
 
     std::ostringstream oss;
-    oss << std::put_time(ptm, "%Y-%m-%d %H:%M:%S");
+    oss << std::put_time(&timeinfo, "%Y-%m-%d %H:%M:%S");
     return oss.str();
 }
 

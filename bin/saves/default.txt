@@ -1,5 +1,5 @@
 source Camera
-processor Colorizer
+processor Vectors
 align 0
 gaussianBlur 1
 maxDistance 1.13
@@ -19,7 +19,7 @@ holeFill 1
 warpPoints 149 66 705 74 152 367 692 362 
 applyHeightAdjustment 0
 planarPoints 150 0 75 150 0 75 
-projectionPoints 7 61 1866 92 0 1078 1870 1078 
+projectionPoints 52 86 1876 78 58 1038 1868 1046 
 drawLines 1
 selectedShaderIndex 4
 drawContours 1
