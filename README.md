@@ -8,9 +8,10 @@
 
 The hardware used for our sandbox is as follows:
 
-- Any computer with a decent CPU / GPU
-- Intel RealSense Depth Camera D455
+- Any Windows computer with a decent CPU / GPU
+- Intel RealSense Depth Camera D455 
 - BenQ 1080p DLP Gaming Projector TH575
+- A sandbox configured so the projector fills the entire box, and the camera sees the entire box
 
 Our software is written in C++ and uses the following external libraries:
 
