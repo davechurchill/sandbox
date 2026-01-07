@@ -1,11 +1,8 @@
+# MUN AI & Games Lab Augmented Reality Sandbox
 
 ![sandbox](https://davechurchill.ca/files/images/sandbox/sandbox_github.jpg)
 
 [Sandbox Image Gallery](https://davechurchill.ca/files/images/sandbox/)
-
-# sandbox
-
-Code for the MUN AI and Games Lab Sandbox project
 
 # Hardware
 
