@@ -6,10 +6,11 @@
 
 # Hardware
 
-The hardware used for our sandbox is as follows, but is not required to be followed exactly:
+The hardware used for our sandbox is as follows:
 
-
+- Any computer with a decent CPU / GPU
 - Intel RealSense Depth Camera D455
+- BenQ 1080p DLP Gaming Projector TH575
 
 # Installation
 
