@@ -4,13 +4,19 @@
 
 [Sandbox Image Gallery](https://davechurchill.ca/files/images/sandbox/)
 
-# Hardware
+# Hardware and Software
 
 The hardware used for our sandbox is as follows:
 
 - Any computer with a decent CPU / GPU
 - Intel RealSense Depth Camera D455
 - BenQ 1080p DLP Gaming Projector TH575
+
+Our software is written in C++ and uses the following external libraries:
+
+- SFML 2.6.2
+- Realsense SDK
+- OpenCV 4.8.0
 
 # Installation
 
