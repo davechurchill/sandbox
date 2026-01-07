@@ -2,6 +2,17 @@
 
 Code for the MUN AI and Games Lab Sandbox project
 
+![sandbox](https://davechurchill.ca/files/images/sandbox/sandbox_github.jpg)
+
+[Sandbox Image Gallery](https://davechurchill.ca/files/images/sandbox/)
+
+# Hardware
+
+The hardware used for our sandbox is as follows, but is not required to be followed exactly:
+
+
+- Intel RealSense Depth Camera D455
+
 # Installation
 
 This program uses sfml, the realsense sdk, and opencv, which must be installed separately.
