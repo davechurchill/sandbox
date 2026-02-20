@@ -35,6 +35,7 @@ struct Save
     cv::Point2f warpPoints[4] = { {100, 100}, {200, 100}, {100, 200}, {200, 200} };
     bool applyHeightAdjustment = false;
     cv::Point2f planarPoints[3] = { {150, 0}, {75, 150}, {0, 75} };
+    float dataSize = 1.0f;
 
     //sandbox projector
     cv::Point2f projectionPoints[4] = { {400, 400}, {500, 400}, {400, 500}, {500, 500} };
@@ -92,6 +93,8 @@ struct Save
         }
         fout << '\n';
 
+        fout << "dataSize " << dataSize << '\n';
+
         fout << "projectionPoints ";
         for (auto p : projectionPoints)
         {
@@ -146,6 +149,7 @@ struct Save
                     p = { x,y };
                 }
             }
+            if (temp == "dataSize") { fin >> dataSize; }
             if (temp == "planarPoints")
             {
                 float x, y;

@@ -1,9 +1,9 @@
 source Camera
-processor Vectors
+processor Colorizer
 align 0
 gaussianBlur 1
-maxDistance 1.13
-minDistance 0.9
+maxDistance 1.181
+minDistance 0.987
 drawDepth 1
 drawColor 1
 fpsSetting 1
@@ -16,10 +16,11 @@ temporalAlpha 0.099
 temporalDelta 72
 temporalPersistance 3
 holeFill 1
-warpPoints 149 66 705 74 152 367 692 362 
+warpPoints 204 84 708 91 200 347 690 361 
 applyHeightAdjustment 0
 planarPoints 150 0 75 150 0 75 
-projectionPoints 52 86 1876 78 58 1038 1868 1046 
+dataSize 0.471
+projectionPoints 34 90 1881 105 45 1075 1857 1076 
 drawLines 1
 selectedShaderIndex 4
 drawContours 1

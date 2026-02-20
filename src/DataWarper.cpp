@@ -38,7 +38,7 @@ void DataWarper::imgui()
     }
     ImGui::Text("Plane Norm: [%f, %f, %f]", m_plane[0], m_plane[1], m_plane[2]);
 
-    if (ImGui::SliderFloat("Data Size", &m_dataSize, 0.1f, 1.0f))
+    if (ImGui::SliderFloat("Data Size", &m_dataSize, 0.1f, 2.0f))
     {
         generateWarpMatrix();
     }
@@ -193,11 +193,14 @@ void DataWarper::save(Save & save) const
 {
     std::copy(std::cbegin(m_warpPoints), std::cend(m_warpPoints), std::begin(save.warpPoints));
     save.applyHeightAdjustment = m_applyHeightAdjustment;
+    save.dataSize = m_dataSize;
     std::copy(std::cbegin(m_planarPoints), std::cend(m_planarPoints), std::begin(save.planarPoints));
 }
 void DataWarper::load(const Save & save)
 {
     std::copy(std::cbegin(save.warpPoints), std::cend(save.warpPoints), std::begin(m_warpPoints));
     m_applyHeightAdjustment = save.applyHeightAdjustment;
+    m_dataSize = save.dataSize;
     std::copy(std::cbegin(save.planarPoints), std::cend(save.planarPoints), std::begin(m_planarPoints));
+    generateWarpMatrix();
 }
