@@ -47,7 +47,7 @@ void Processor_Vectors::imgui()
 
     if (ImGui::Button("Reload Shader"))
     {
-        m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
+        m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Fragment);
     }
     m_projector.imgui();
 }

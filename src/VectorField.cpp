@@ -248,8 +248,6 @@ void VectorField::ComputeContext::computeWindTrajectories()
 
     // Compute raw trajectories
 
-    double normalFactor = 0.0;
-
     // Iterating over [1, height - 1) and [0, width)
     cv::parallel_for_(cv::Range(0, (height - 2) * width), [&](const cv::Range& range) {
         for (int r = range.start; r < range.end; ++r)
@@ -265,17 +263,31 @@ void VectorField::ComputeContext::computeWindTrajectories()
             vec[0] = (zMat.at<double>(y + 1, x) - zMat.at<double>(y - 1, x)) / dy * -G_OVER_F;
             vec[1] = (zMat.at<double>(y, xPlus) - zMat.at<double>(y, xMinus)) / dx * G_OVER_F;
 
-            const double maxComponent = std::max(std::abs(vec[0]), std::abs(vec[1]));
-            normalFactor = std::max(normalFactor, maxComponent);
         }
     });
 
-    // Normalize u and v and apply constant velocity
+    double normalFactor = 0.0;
+    for (int y = 0; y < height; ++y)
+    {
+        for (int x = 0; x < width; ++x)
+        {
+            const cv::Vec2d& vec = uv.at<cv::Vec2d>(y, x);
+            normalFactor = std::max(normalFactor, std::max(std::abs(vec[0]), std::abs(vec[1])));
+        }
+    }
 
-    uv.forEach<cv::Vec2d>([&, normalFactor](cv::Vec2d& vec, const int* position) {
-        vec /= normalFactor;
-        vec[0] += windVelocity;
-    });
+    // Normalize u and v and apply constant velocity
+    if (normalFactor <= 1e-12)
+    {
+        uv.setTo(cv::Scalar(windVelocity, 0.0));
+    }
+    else
+    {
+        uv.forEach<cv::Vec2d>([&, normalFactor](cv::Vec2d& vec, const int* position) {
+            vec /= normalFactor;
+            vec[0] += windVelocity;
+        });
+    }
 }
 
 cv::Mat VectorField::computePhysics(const cv::Mat& grid, bool compute)

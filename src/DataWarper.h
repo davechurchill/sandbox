@@ -23,9 +23,11 @@ class DataWarper
 
     // Height Adjustment
     float                           m_plane[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    float                           m_baseHeight;
+    float                           m_baseHeight = 0.0f;
     bool                            m_updatePlane = false;
+    bool                            m_planeValid = false;
     bool                            m_applyHeightAdjustment = false;
+    bool                            m_warpValid = false;
 
     void generateWarpMatrix();
 
@@ -40,7 +42,7 @@ public:
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void render(sf::RenderWindow & window);
 
-    inline bool shouldAdjustHeight() const { return m_applyHeightAdjustment; }
+    inline bool shouldAdjustHeight() const { return m_applyHeightAdjustment && (m_updatePlane || m_planeValid); }
     inline const cv::Point2f* getPoints() const { return m_warpPoints; }
 
     void transformPoints(std::vector<cv::Point2f>& points) const;

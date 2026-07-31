@@ -6,6 +6,19 @@
 #include <xmmintrin.h> // For SSE intrinsics
 #include <omp.h>
 
+namespace
+{
+    void zeroBoundary(cv::Mat& matrix)
+    {
+        if (matrix.empty()) { return; }
+
+        matrix.row(0).setTo(0.0f);
+        if (matrix.rows > 1) { matrix.row(matrix.rows - 1).setTo(0.0f); }
+        matrix.col(0).setTo(0.0f);
+        if (matrix.cols > 1) { matrix.col(matrix.cols - 1).setTo(0.0f); }
+    }
+}
+
 
 void setRectValue(cv::Mat& mat, const cv::Rect& rect, float value)
 {
@@ -79,6 +92,7 @@ void HeatGrid::updateSources()
     {
         setRectValue(m_temps, source.m_area, source.m_temp);
     }
+    zeroBoundary(m_temps);
 }
 
 void HeatGrid::formulaAvg(const cv::Mat& kMat)
@@ -357,8 +371,11 @@ void HeatGrid::formulaHeatKernel(const cv::Mat& kMat)
     // Use cv::Laplacian for efficiency
     cv::Laplacian(m_temps, m_workingTemps, CV_32F);
 
-    // Multiply and scale in one step
-    cv::multiply(m_workingTemps, kMat, m_workingTemps, dt);
+    // Match the conductivity used by the other heat-equation implementations.
+    cv::Mat conductivity;
+    cv::multiply(kMat, kMat, conductivity);
+    cv::multiply(conductivity, kMat, conductivity);
+    cv::multiply(m_workingTemps, conductivity, m_workingTemps, dt);
 
     // Update m_temps directly
     cv::add(m_temps, m_workingTemps, m_temps);

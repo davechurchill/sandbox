@@ -66,6 +66,7 @@ void Processor_Heat::imgui()
     if (ImGui::Button("Clear Sources"))
     {
         m_heatGrid.clearSources();
+        m_selectedSource = 0;
     }
 
     ImGui::Separator();
@@ -135,8 +136,8 @@ void Processor_Heat::processEvent(const sf::Event& event, const sf::Vector2f& mo
     cv::Point mousePoint{ (int)mousePos.y, (int)mousePos.x };
     //cv::Point mousePoint((int)ms.y, (int)ms.x);
 
-
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Left) &&
+        m_selectedSource >= 0 && m_selectedSource < (int)m_heatGrid.getSources().size())
     {
         sf::Vector2f diff = mouse - m_previousMouse;
 

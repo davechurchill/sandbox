@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include <SFML/System/Time.hpp>
 
 #include "ParticleManager.h"
@@ -27,6 +28,7 @@ void ParticleManager::update(Algorithm algorithm, const cv::Mat& data, float del
 {
     const int pixelWidth = data.cols;
     const int pixelHeight = data.rows;
+    if (pixelWidth <= 0 || pixelHeight <= 0) { return; }
 
     static Algorithm previousAlgorithm = algorithm;
     if (algorithm != previousAlgorithm)
@@ -132,11 +134,23 @@ void ParticleManager::update(Algorithm algorithm, const cv::Mat& data, float del
         particle.pos.x += dir[0] * selectedParameters.particleSpeed * deltaTime;
         particle.pos.y += dir[1] * selectedParameters.particleSpeed * deltaTime;
 
-        if (particle.pos.x >= pixelWidth - 1)
+        const double maxX = (double)std::max(pixelWidth - 1, 0);
+        const double maxY = (double)std::max(pixelHeight - 1, 0);
+        const bool xOutOfBounds = particle.pos.x < 0.0 || particle.pos.x >= maxX;
+        const bool yOutOfBounds = particle.pos.y < 0.0 || particle.pos.y >= maxY;
+        if (xOutOfBounds || yOutOfBounds)
         {
-            particle.pos.x = std::fmod(particle.pos.x, (double)(pixelWidth - 1));
+            const auto wrap = [](double value, int size)
+            {
+                const double extent = (double)std::max(size - 1, 1);
+                value = std::fmod(value, extent);
+                return value < 0.0 ? value + extent : value;
+            };
 
-            if (algorithm == ParticleManager::Algorithm::BFS) {
+            particle.pos.x = wrap(particle.pos.x, pixelWidth);
+            particle.pos.y = wrap(particle.pos.y, pixelHeight);
+
+            if (algorithm == ParticleManager::Algorithm::BFS && xOutOfBounds) {
                 particle.pos.y = rand() % pixelHeight;
             }
             

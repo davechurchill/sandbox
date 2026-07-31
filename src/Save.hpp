@@ -149,6 +149,7 @@ struct Save
                     p = { x,y };
                 }
             }
+            if (temp == "applyHeightAdjustment") { fin >> applyHeightAdjustment; }
             if (temp == "dataSize") { fin >> dataSize; }
             if (temp == "planarPoints")
             {

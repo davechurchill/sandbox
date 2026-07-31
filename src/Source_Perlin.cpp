@@ -4,6 +4,8 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 
+#include <algorithm>
+
 void Source_Perlin::init()
 {
     calculateNoise();
@@ -11,6 +13,12 @@ void Source_Perlin::init()
 
 void Source_Perlin::calculateNoise()
 {
+    constexpr int minSeedSize = 1;
+    constexpr int maxSeedSize = 10;
+    m_seedSize = std::clamp(m_seedSize, minSeedSize, maxSeedSize);
+    m_octaves = std::clamp(m_octaves, 1, m_seedSize);
+    m_persistance = std::max(m_persistance, 0.01f);
+
     m_perlin = Perlin2DNew((int)(1 << m_seedSize), (int)(1 << m_seedSize), m_seed);
     m_grid = m_perlin.GeneratePerlinNoise(m_octaves, m_persistance);
     m_topography = cv::Mat(cv::Size((int)m_grid.width(), (int)m_grid.height()), CV_32F, (void *)m_grid.data(), cv::Mat::AUTO_STEP);

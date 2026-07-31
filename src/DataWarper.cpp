@@ -4,6 +4,7 @@
 #include "imgui.h"
 #include "Tools.h"
 #include <fstream>
+#include <cmath>
 
 #include <iostream>
 #include <opencv2/highgui.hpp>
@@ -31,7 +32,10 @@ void DataWarper::imgui()
  
     ImGui::Checkbox("Draw Camera Region", &m_drawCameraRegion);
 
-    ImGui::Checkbox("Apply Height Adjust", &m_applyHeightAdjustment);
+    if (ImGui::Checkbox("Apply Height Adjust", &m_applyHeightAdjustment) && m_applyHeightAdjustment)
+    {
+        m_updatePlane = true;
+    }
     if (ImGui::Button("Update Height Adjustment"))
     {
         m_updatePlane = true;
@@ -52,6 +56,11 @@ void DataWarper::transformRect(const cv::Mat& input, cv::Mat& output)
     {
         generateWarpMatrix();
     }
+    if (!m_warpValid || m_warpMatrix.empty())
+    {
+        output.release();
+        return;
+    }
     cv::warpPerspective(input, output, m_warpMatrix, cv::Size(m_width, m_height));
 }
 
@@ -61,6 +70,17 @@ void DataWarper::heightAdjustment(cv::Mat & matrix)
 
     if (m_updatePlane)
     {
+        const auto pointIsInBounds = [&matrix](const cv::Point2f& point)
+        {
+            return point.x >= 0 && point.x < matrix.cols && point.y >= 0 && point.y < matrix.rows;
+        };
+
+        if (matrix.empty() || !pointIsInBounds(m_planarPoints[0]) || !pointIsInBounds(m_planarPoints[1]) || !pointIsInBounds(m_planarPoints[2]))
+        {
+            m_planeValid = false;
+            return;
+        }
+
         float firstPointZ = matrix.at<float>((int)m_planarPoints[0].y, (int)m_planarPoints[0].x);
         m_baseHeight = matrix.at<float>((int)m_planarPoints[1].y, (int)m_planarPoints[1].x);
         float thirdPointZ = matrix.at<float>((int)m_planarPoints[2].y, (int)m_planarPoints[2].x);
@@ -72,9 +92,18 @@ void DataWarper::heightAdjustment(cv::Mat & matrix)
         m_plane[1] = vect_A[2] * vect_B[0] - vect_A[0] * vect_B[2];
         m_plane[2] = vect_A[0] * vect_B[1] - vect_A[1] * vect_B[0];
 
+        if (std::abs(m_plane[2]) < 1e-6f)
+        {
+            m_planeValid = false;
+            return;
+        }
+
         m_plane[3] = -(m_plane[0] * m_planarPoints[1].x + m_plane[1] * m_planarPoints[1].y + m_plane[2] * m_baseHeight);
         m_updatePlane = false;
+        m_planeValid = true;
     }
+
+    if (!m_planeValid) { return; }
 
     int width = matrix.cols;
     int height = matrix.rows;
@@ -120,6 +149,8 @@ void DataWarper::processEvent(const sf::Event & event, const sf::Vector2f & mous
         {
             m_planarPoints[m_dragPlanarPoint] = cv::Point((int)mouse.x, (int)mouse.y);
             m_planarCircles[m_dragPlanarPoint].setPosition(mouse);
+            m_planeValid = false;
+            m_updatePlane = m_applyHeightAdjustment;
         }
     }
 }
@@ -166,6 +197,7 @@ void DataWarper::render(sf::RenderWindow & window)
 
 void DataWarper::transformPoints(std::vector<cv::Point2f> & points) const
 {
+    if (!m_warpValid || m_warpMatrix.empty()) { return; }
     cv::perspectiveTransform(points, points, m_warpMatrix);
 }
 
@@ -177,8 +209,18 @@ void DataWarper::generateWarpMatrix()
     cv::Point2f line2 = m_warpPoints[0] - m_warpPoints[2];
     float w = sqrtf(line1.dot(line1));
     float h = sqrtf(line2.dot(line2));
-    m_width = (int)(w * m_dataSize);
-    m_height = (int)(h * m_dataSize);
+    std::vector<cv::Point2f> corners = { m_warpPoints[0], m_warpPoints[1], m_warpPoints[3], m_warpPoints[2] };
+    if (w < 1.0f || h < 1.0f || std::abs(cv::contourArea(corners)) < 1.0)
+    {
+        return;
+    }
+
+    const int width = (int)(w * m_dataSize);
+    const int height = (int)(h * m_dataSize);
+    if (width <= 0 || height <= 0) { return; }
+
+    m_width = width;
+    m_height = height;
 
     cv::Point2f dstPoints[] = {
             cv::Point2f(0, 0),
@@ -187,6 +229,7 @@ void DataWarper::generateWarpMatrix()
             cv::Point2f((float)m_width, (float)m_height),
     };
     m_warpMatrix = cv::getPerspectiveTransform(m_warpPoints, dstPoints);
+    m_warpValid = true;
 }
 
 void DataWarper::save(Save & save) const
@@ -202,5 +245,7 @@ void DataWarper::load(const Save & save)
     m_applyHeightAdjustment = save.applyHeightAdjustment;
     m_dataSize = save.dataSize;
     std::copy(std::cbegin(save.planarPoints), std::cend(save.planarPoints), std::begin(m_planarPoints));
+    m_planeValid = false;
+    m_updatePlane = m_applyHeightAdjustment;
     generateWarpMatrix();
 }

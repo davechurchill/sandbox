@@ -92,7 +92,7 @@ unsigned int GameEngine::width() const
 
 unsigned int GameEngine::height() const
 {
-    return m_window.getSize().x;
+    return m_window.getSize().y;
 }
 
 float GameEngine::framerate() const

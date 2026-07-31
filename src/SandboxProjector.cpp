@@ -5,6 +5,7 @@
 #include "Tools.h"
 
 #include <fstream>
+#include <cmath>
 #include <iostream>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
@@ -24,6 +25,12 @@ SandBoxProjector::SandBoxProjector()
 
 void SandBoxProjector::project(const cv::Mat & input, cv::Mat & output)
 {
+    if (input.empty())
+    {
+        output.release();
+        return;
+    }
+
     // Check to see if data matrix has changed in size and generate the projection matrix again if so
     int width = input.cols;
     int height = input.rows;
@@ -32,6 +39,12 @@ void SandBoxProjector::project(const cv::Mat & input, cv::Mat & output)
         m_dataWidth = width;
         m_dataHeight = height;
         generateProjection();
+    }
+
+    if (!m_projectionValid || m_projectionMatrix.empty())
+    {
+        output.release();
+        return;
     }
 
     // Apply projection
@@ -102,6 +115,8 @@ void SandBoxProjector::generateProjection()
 {
     PROFILE_FUNCTION();
 
+    if (m_dataWidth <= 0 || m_dataHeight <= 0) { return; }
+
     cv::Point2f dataCorners[] = {
             cv::Point2f(0, 0),
             cv::Point2f((float)m_dataWidth, 0),
@@ -111,26 +126,31 @@ void SandBoxProjector::generateProjection()
 
     cv::Point2f boxPoints[] = { m_projectionPoints[0], m_projectionPoints[1], m_projectionPoints[2], m_projectionPoints[3] };
 
-    m_minXY.x = boxPoints[0].x;
-    m_minXY.y = boxPoints[0].y;
+    sf::Vector2f minXY = { boxPoints[0].x, boxPoints[0].y };
     float maxX = boxPoints[0].x;
     float maxY = boxPoints[0].y;
     for (int i = 0; i < 4; i++)
     {
-        if (boxPoints[i].x < m_minXY.x) { m_minXY.x = boxPoints[i].x; }
+        if (boxPoints[i].x < minXY.x)   { minXY.x = boxPoints[i].x; }
         if (boxPoints[i].x > maxX)      { maxX = boxPoints[i].x; }
-        if (boxPoints[i].y < m_minXY.y) { m_minXY.y = boxPoints[i].y; }
+        if (boxPoints[i].y < minXY.y)   { minXY.y = boxPoints[i].y; }
         if (boxPoints[i].y > maxY)      { maxY = boxPoints[i].y; }
     }
 
     for (int i = 0; i < 4; i++)
     {
-        boxPoints[i].x -= m_minXY.x;
-        boxPoints[i].y -= m_minXY.y;
+        boxPoints[i].x -= minXY.x;
+        boxPoints[i].y -= minXY.y;
     }
-    int boxWidth = (int)(maxX - m_minXY.x);
-    int boxHeight = (int)(maxY - m_minXY.y);
+    int boxWidth = (int)(maxX - minXY.x);
+    int boxHeight = (int)(maxY - minXY.y);
+    std::vector<cv::Point2f> polygon = { boxPoints[0], boxPoints[1], boxPoints[3], boxPoints[2] };
+    if (boxWidth < 1 || boxHeight < 1 || std::abs(cv::contourArea(polygon)) < 1.0)
+    {
+        return;
+    }
 
+    m_minXY = minXY;
     float ratio = (float)boxHeight / boxWidth;
     m_finalWidth = (int)(m_dataWidth * 1.5f);
     m_finalHeight = (int)(m_finalWidth * ratio);
@@ -143,6 +163,7 @@ void SandBoxProjector::generateProjection()
     }
 
     m_projectionMatrix = cv::getPerspectiveTransform(dataCorners, boxPoints);
+    m_projectionValid = true;
 }
 
 void SandBoxProjector::save(Save& save) const

@@ -20,6 +20,7 @@ class SandBoxProjector
     sf::Vector2f                    m_boxScale;
     bool                            m_drawLines = true;
     bool                            m_drawProjection = true;
+    bool                            m_projectionValid = false;
 
     void generateProjection();
 
