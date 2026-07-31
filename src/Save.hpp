@@ -26,6 +26,14 @@ struct Save
     float persistance = 0.5f;
     bool drawGrid = false;
 
+    // waves
+    int waveAnimationMode = 1;
+    float waveFrequency = 0.35f;
+    float waveAmplitude = 0.47f;
+    float waveSeparation = 96.0f;
+    float waveSize = 32.0f;
+    bool waveSizeIsRadius = false;
+
     // filters
     float temporalAlpha = 0.047f;
     int temporalDelta = 72;
@@ -77,6 +85,12 @@ struct Save
         fout << "seedSize " << seedSize << '\n';
         fout << "persistance " << persistance << '\n';
         fout << "drawGrid " << drawGrid << '\n';
+        fout << "waveAnimationMode " << waveAnimationMode << '\n';
+        fout << "waveFrequency " << waveFrequency << '\n';
+        fout << "waveAmplitude " << waveAmplitude << '\n';
+        fout << "waveSeparation " << waveSeparation << '\n';
+        fout << "waveSize " << waveSize << '\n';
+        fout << "waveSizeIsRadius " << waveSizeIsRadius << '\n';
         fout << "temporalAlpha " << temporalAlpha << '\n';
         fout << "temporalDelta " << temporalDelta << '\n';
         fout << "temporalPersistance " << temporalPersistance << '\n';
@@ -125,6 +139,10 @@ struct Save
             return;
         }
 
+        // Defaults also identify saves created before Wave Size became a pixel radius.
+        waveSize = 32.0f;
+        waveSizeIsRadius = false;
+
         std::string temp;
         while (fin >> temp)
         {
@@ -143,6 +161,12 @@ struct Save
             if (temp == "seedSize") { fin >> seedSize; }
             if (temp == "persistance") { fin >> persistance; }
             if (temp == "drawGrid") { fin >> drawGrid; }
+            if (temp == "waveAnimationMode") { fin >> waveAnimationMode; }
+            if (temp == "waveFrequency") { fin >> waveFrequency; }
+            if (temp == "waveAmplitude") { fin >> waveAmplitude; }
+            if (temp == "waveSeparation") { fin >> waveSeparation; }
+            if (temp == "waveSize") { fin >> waveSize; }
+            if (temp == "waveSizeIsRadius") { fin >> waveSizeIsRadius; }
             if (temp == "temporalAlpha") { fin >> temporalAlpha; }
             if (temp == "temporalDelta") { fin >> temporalDelta; }
             if (temp == "temporalPersistance") { fin >> temporalPersistance; }

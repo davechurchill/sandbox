@@ -79,7 +79,8 @@ class Processor_Balls : public TopographyProcessor, public TopographyOverlay
         const sf::Vector2f & position,
         const sf::Vector2f & direction,
         const sf::Color & color,
-        float rotation) const;
+        float rotation,
+        float visualScale) const;
 
 public:
     void init();

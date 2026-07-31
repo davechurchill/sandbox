@@ -19,6 +19,7 @@ class Scene_Main : public Scene
     Save                m_save;
 
     bool                m_drawUI = true;
+    bool                m_doubleSizeUI = true;
     ViewController      m_viewController;
     sf::Vector2i        m_mouseScreen;
     sf::Vector2f        m_mouseWorld;
@@ -45,6 +46,7 @@ class Scene_Main : public Scene
     void sUserInput();  
     void sProcessEvent(const sf::Event & event);
     void sRender();
+    void applyUIScale();
 
     void setSource(const std::string & source);
     void setProcessor(const std::string & processor);

@@ -3,9 +3,12 @@
 #include "Profiler.hpp"
 
 #include "Processor_Balls.h"
+#include "Overlay_Cloth.h"
 #include "Overlay_CloudSimulation.h"
+#include "Overlay_SmokeFire.h"
 #include "Overlay_Weather.h"
 #include "Processor_Colorizer.h"
+#include "Processor_FishPond.h"
 #include "Processor_Heat.h"
 #include "Processor_Minecraft.h"
 #include "Processor_Nature.h"
@@ -16,6 +19,7 @@
 #include "Source_PaintBrush.h"
 #include "Source_Perlin.h"
 #include "Source_Snapshot.h"
+#include "Source_Waves.h"
 
 #include <fstream>
 #include <iostream>
@@ -28,6 +32,13 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 
+namespace
+{
+    ImGuiStyle DefaultUIStyle;
+    float DefaultUIFontScale = 1.0f;
+    bool DefaultUIStyleCaptured = false;
+}
+
 
 Scene_Main::Scene_Main(GameEngine * game)
     : Scene(game)
@@ -37,15 +48,22 @@ Scene_Main::Scene_Main(GameEngine * game)
 
 void Scene_Main::init()
 {
-    ImGui::GetStyle().ScaleAllSizes(2.0f);
-    ImGui::GetIO().FontGlobalScale = 2.0f;
+    if (!DefaultUIStyleCaptured)
+    {
+        DefaultUIStyle = ImGui::GetStyle();
+        DefaultUIFontScale = ImGui::GetIO().FontGlobalScale;
+        DefaultUIStyleCaptured = true;
+    }
+    applyUIScale();
 
     registerSource<Source_Camera>("Camera");
     registerSource<Source_PaintBrush>("PaintBrush");
     registerSource<Source_Perlin>("Perlin");
     registerSource<Source_Snapshot>("Snapshot");
+    registerSource<Source_Waves>("Waves");
 
     registerProcessor<Processor_Colorizer>("Colorizer");
+    registerProcessor<Processor_FishPond>("Fish Pond");
     registerProcessor<Processor_Heat>("Heat");
     registerProcessor<Processor_Minecraft>("Minecraft");
     registerProcessor<Processor_Nature>("Nature");
@@ -54,11 +72,26 @@ void Scene_Main::init()
 
     registerOverlay<Processor_Nature>("Animals");
     registerOverlay<Processor_Balls>("Balls");
+    registerOverlay<Overlay_Cloth>("Cloth Sheet");
     registerOverlay<Overlay_CloudSimulation>("Cloud Simulation");
+    registerOverlay<Overlay_SmokeFire>("Smoke and Fire");
     registerOverlay<Processor_Vectors>("Vectors");
     registerOverlay<Overlay_Weather>("Weather");
     registerOverlay<Processor_WaterFlow>("WaterFlow");
     m_overlayMap.emplace("None", []() {return nullptr; });
+}
+
+void Scene_Main::applyUIScale()
+{
+    if (!DefaultUIStyleCaptured)
+    {
+        return;
+    }
+
+    const float scale = m_doubleSizeUI ? 2.0f : 1.0f;
+    ImGui::GetStyle() = DefaultUIStyle;
+    ImGui::GetStyle().ScaleAllSizes(scale);
+    ImGui::GetIO().FontGlobalScale = DefaultUIFontScale * scale;
 }
 
 void Scene_Main::onFrame(float deltaTime)
@@ -134,7 +167,12 @@ void Scene_Main::sUserInput()
     while (main.pollEvent(event))
     {
         ImGui::SFML::ProcessEvent(main, event);
-        m_viewController.processEvent(main, event);
+        const bool uiOwnsMouseWheel = event.type == sf::Event::MouseWheelScrolled
+            && ImGui::GetIO().WantCaptureMouse;
+        if (!uiOwnsMouseWheel)
+        {
+            m_viewController.processEvent(main, event);
+        }
         sProcessEvent(event);
 
         // happens whenever the mouse is being moved
@@ -224,6 +262,20 @@ void Scene_Main::renderUI()
     {
         if (ImGui::BeginMenu("Menu"))
         {
+            if (ImGui::BeginMenu("UI Size"))
+            {
+                if (ImGui::MenuItem("Default", nullptr, !m_doubleSizeUI))
+                {
+                    m_doubleSizeUI = false;
+                    applyUIScale();
+                }
+                if (ImGui::MenuItem("Double", nullptr, m_doubleSizeUI))
+                {
+                    m_doubleSizeUI = true;
+                    applyUIScale();
+                }
+                ImGui::EndMenu();
+            }
             if (ImGui::MenuItem("Toggle Display Window", "F"))
             {
                 toggleDisplayWindow();
@@ -248,7 +300,11 @@ void Scene_Main::renderUI()
             ImGui::EndMenu();
         }
 
-        ImGui::Text("Framerate: %d", (int)m_game->framerate());
+        const std::string framerateText = std::to_string((int)m_game->framerate()) + " fps";
+        const float rightAlignedX = ImGui::GetWindowContentRegionMax().x
+            - ImGui::CalcTextSize(framerateText.c_str()).x;
+        ImGui::SetCursorPosX(std::max(ImGui::GetCursorPosX(), rightAlignedX));
+        ImGui::TextUnformatted(framerateText.c_str());
 
         ImGui::EndMainMenuBar();
     }

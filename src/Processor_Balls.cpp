@@ -563,9 +563,10 @@ void Processor_Balls::drawBall(
     const sf::Vector2f & position,
     const sf::Vector2f & direction,
     const sf::Color & color,
-    float rotation) const
+    float rotation,
+    float visualScale) const
 {
-    const float radius = m_ballSize * 0.5f;
+    const float radius = m_ballSize * 0.5f * visualScale;
     const float directionLength = std::sqrt(direction.x * direction.x + direction.y * direction.y);
     const sf::Vector2f forward = directionLength > 0.001f
         ? direction / directionLength
@@ -738,12 +739,16 @@ void Processor_Balls::renderBalls(sf::RenderWindow & window)
             continue;
         }
 
+        float terrainHeight = 0.5f;
+        sampleTerrainHeight(m_topography, m_balls[index].position, terrainHeight);
+        const float visualScale = 0.88f + std::clamp(terrainHeight, 0.0f, 1.0f) * 0.24f;
         drawBall(
             window,
             { origin.x + point.x * scale, origin.y + point.y * scale },
             { ahead.x - point.x, ahead.y - point.y },
             m_balls[index].color,
-            m_balls[index].rotation);
+            m_balls[index].rotation,
+            visualScale);
     }
 }
 
