@@ -30,6 +30,9 @@ public:
     virtual void load(const Save& save) = 0;
     virtual SandBoxProjector & projector() = 0;
 
+    virtual void onSourceChanged() {}
+    virtual bool usesCanvasInput() const { return false; }
+
     virtual bool isTerrainWalkable(const cv::Mat & terrain, const cv::Point2f & position) const
     {
         if (terrain.empty() || terrain.type() != CV_32F

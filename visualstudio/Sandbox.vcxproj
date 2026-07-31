@@ -26,6 +26,7 @@
     <ClCompile Include="..\src\Overlay_Weather.cpp" />
     <ClCompile Include="..\src\Processor_Balls.cpp" />
     <ClCompile Include="..\src\Processor_FishPond.cpp" />
+    <ClCompile Include="..\src\Processor_ForestFire.cpp" />
     <ClCompile Include="..\src\HeatGrid.cpp" />
     <ClCompile Include="..\src\ParticleManager.cpp" />
     <ClCompile Include="..\src\Processor_Heat.cpp" />
@@ -62,6 +63,7 @@
     <ClInclude Include="..\src\Overlay_Weather.h" />
     <ClInclude Include="..\src\Processor_Balls.h" />
     <ClInclude Include="..\src\Processor_FishPond.h" />
+    <ClInclude Include="..\src\Processor_ForestFire.h" />
     <ClInclude Include="..\src\Grid.hpp" />
     <ClInclude Include="..\src\HeatGrid.h" />
     <ClInclude Include="..\src\MarkerData.h" />
@@ -106,6 +108,7 @@
     <None Include="..\bin\shaders\shader_balls.frag" />
     <None Include="..\bin\shaders\shader_contour_color.frag" />
     <None Include="..\bin\shaders\shader_fish_pond.frag" />
+    <None Include="..\bin\shaders\shader_forest_fire.frag" />
     <None Include="..\bin\shaders\shader_heat.frag" />
     <None Include="..\bin\shaders\shader_minecraft.frag" />
     <None Include="..\bin\shaders\shader_nature.frag" />

@@ -1,5 +1,7 @@
 source Snapshot
 processor Nature
+overlay None
+doubleSizeUI 0
 align 0
 gaussianBlur 1
 maxDistance 1.181
@@ -12,6 +14,12 @@ seed 13
 seedSize 9
 persistance 0.5
 drawGrid 0
+waveAnimationMode 1
+waveFrequency 0.35
+waveAmplitude 0.47
+waveSeparation 96
+waveSize 32
+waveSizeIsRadius 0
 temporalAlpha 0.099
 temporalDelta 72
 temporalPersistance 3
@@ -26,3 +34,4 @@ selectedShaderIndex 4
 drawContours 1
 numberOfContourLines 19
 drawProjection 1
+minecraftBlockSize 12

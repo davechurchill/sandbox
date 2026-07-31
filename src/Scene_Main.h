@@ -14,12 +14,20 @@
 
 class Scene_Main : public Scene
 {
+    enum class ControlTab
+    {
+        Source,
+        Processor,
+        Overlay
+    };
+
     cv::Mat             m_topography;
 
     Save                m_save;
 
     bool                m_drawUI = true;
     bool                m_doubleSizeUI = true;
+    ControlTab          m_activeControlTab = ControlTab::Source;
     ViewController      m_viewController;
     sf::Vector2i        m_mouseScreen;
     sf::Vector2f        m_mouseWorld;

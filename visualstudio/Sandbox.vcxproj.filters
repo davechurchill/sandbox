@@ -22,6 +22,9 @@
     <ClCompile Include="..\src\Processor_FishPond.cpp">
       <Filter>processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Processor_ForestFire.cpp">
+      <Filter>processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\imgui\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
@@ -133,6 +136,9 @@
       <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Processor_FishPond.h">
+      <Filter>processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Processor_ForestFire.h">
       <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Scene.h">
@@ -256,6 +262,9 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="..\bin\shaders\shader_fish_pond.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\shader_forest_fire.frag">
       <Filter>shaders</Filter>
     </None>
     <None Include="..\bin\shaders\shader_heat.frag">

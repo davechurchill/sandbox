@@ -10,6 +10,7 @@
 #include "Overlay_Weather.h"
 #include "Processor_Colorizer.h"
 #include "Processor_FishPond.h"
+#include "Processor_ForestFire.h"
 #include "Processor_Heat.h"
 #include "Processor_Minecraft.h"
 #include "Processor_Nature.h"
@@ -38,6 +39,23 @@ namespace
     ImGuiStyle DefaultUIStyle;
     float DefaultUIFontScale = 1.0f;
     bool DefaultUIStyleCaptured = false;
+
+    bool isMouseControlEvent(const sf::Event & event)
+    {
+        switch (event.type)
+        {
+        case sf::Event::MouseMoved:
+        case sf::Event::MouseButtonPressed:
+        case sf::Event::MouseButtonReleased:
+        case sf::Event::MouseWheelMoved:
+        case sf::Event::MouseWheelScrolled:
+        case sf::Event::MouseEntered:
+        case sf::Event::MouseLeft:
+            return true;
+        default:
+            return false;
+        }
+    }
 }
 
 
@@ -65,6 +83,7 @@ void Scene_Main::init()
 
     registerProcessor<Processor_Colorizer>("Colorizer");
     registerProcessor<Processor_FishPond>("Fish Pond");
+    registerProcessor<Processor_ForestFire>("Forest Fire");
     registerProcessor<Processor_Heat>("Heat");
     registerProcessor<Processor_Minecraft>("Minecraft");
     registerProcessor<Processor_Nature>("Nature");
@@ -162,8 +181,6 @@ void Scene_Main::sUserInput()
     PROFILE_FUNCTION();
 
     bool displayOpen = m_game->displayWindow().isOpen();
-    const bool overlayUsesCanvasInput = m_overlay && m_overlay->usesCanvasInput();
-
     auto & main = mainWindow();
     sf::Event event;
     while (main.pollEvent(event))
@@ -184,22 +201,19 @@ void Scene_Main::sUserInput()
             m_mouseWorld = main.mapPixelToCoords(m_mouseScreen);
         }
 
-        const bool overlayOwnsLeftDrag = overlayUsesCanvasInput && m_processor && !displayOpen
-            && ((event.type == sf::Event::MouseButtonPressed
-                    && event.mouseButton.button == sf::Mouse::Left)
-                || (event.type == sf::Event::MouseMoved
-                    && sf::Mouse::isButtonPressed(sf::Mouse::Left)));
-        if (m_source && !overlayOwnsLeftDrag)
+        const bool mouseControlEvent = isMouseControlEvent(event);
+        if (m_source
+            && (!mouseControlEvent || m_activeControlTab == ControlTab::Source))
         {
             m_source->processEvent(event, m_mouseWorld);
         }
         if (m_processor && !displayOpen)
         {
-            if (overlayUsesCanvasInput)
+            if (m_activeControlTab == ControlTab::Overlay && m_overlay)
             {
                 m_overlay->processOverlayEvent(event, m_mouseWorld, *m_processor);
             }
-            else
+            else if (!mouseControlEvent || m_activeControlTab == ControlTab::Processor)
             {
                 m_processor->processEvent(event, m_mouseWorld);
             }
@@ -216,11 +230,12 @@ void Scene_Main::sUserInput()
 
             if (m_processor)
             {
-                if (overlayUsesCanvasInput)
+                const bool mouseControlEvent = isMouseControlEvent(displayEvent);
+                if (m_activeControlTab == ControlTab::Overlay && m_overlay)
                 {
                     m_overlay->processOverlayEvent(displayEvent, m_mouseDisplay, *m_processor);
                 }
-                else
+                else if (!mouseControlEvent || m_activeControlTab == ControlTab::Processor)
                 {
                     m_processor->processEvent(displayEvent, m_mouseDisplay);
                 }
@@ -318,6 +333,7 @@ void Scene_Main::renderUI()
 
     if (ImGui::BeginTabItem("Source"))
     {
+        m_activeControlTab = ControlTab::Source;
         if (ImGui::BeginCombo("Selected Source", m_sourceID.c_str()))
         {
             for (auto & [name, _] : m_sourceMap)
@@ -342,6 +358,7 @@ void Scene_Main::renderUI()
 
     if (ImGui::BeginTabItem("Processor"))
     {
+        m_activeControlTab = ControlTab::Processor;
         if (ImGui::BeginCombo("Selected Processor", m_processorID.c_str()))
         {
             for (auto & [name, _] : m_processorMap)
@@ -365,6 +382,7 @@ void Scene_Main::renderUI()
 
     if (ImGui::BeginTabItem("Overlay"))
     {
+        m_activeControlTab = ControlTab::Overlay;
         if (ImGui::BeginCombo("Selected Overlay", m_overlayID.c_str()))
         {
             for (auto & [name, _] : m_overlayMap)
@@ -409,6 +427,7 @@ void Scene_Main::save()
     m_save.source = m_sourceID;
     m_save.processor = m_processorID;
     m_save.overlay = m_overlayID;
+    m_save.doubleSizeUI = m_doubleSizeUI;
 
     m_save.saveToFile("saves/" + m_saveFile);
 }
@@ -428,6 +447,8 @@ void Scene_Main::load()
     // First find and initialize the source and processor
     m_save.overlay = "None";
     m_save.loadFromFile(file);
+    m_doubleSizeUI = m_save.doubleSizeUI;
+    applyUIScale();
 
     // Migrate saves for processors that moved to overlays.
     if (m_save.processor == "Balls")
@@ -458,6 +479,7 @@ void Scene_Main::load()
 
 void Scene_Main::setSource(const std::string & source)
 {
+    const bool sourceChanged = !m_source || source != m_sourceID;
     if (m_source) { m_source->save(m_save); }
     m_sourceID = source;
     if (m_sourceMap.contains(source))
@@ -472,6 +494,10 @@ void Scene_Main::setSource(const std::string & source)
     {
         m_source->init();
         m_source->load(m_save);
+    }
+    if (sourceChanged && m_processor)
+    {
+        m_processor->onSourceChanged();
     }
 }
 

@@ -9,6 +9,7 @@ struct Save
     std::string source = "Camera";
     std::string processor = "Colorizer";
     std::string overlay = "None";
+    bool doubleSizeUI = true;
 
     // camera
     int align = 0;
@@ -73,6 +74,7 @@ struct Save
         fout << "source " << source << '\n';
         fout << "processor " << processor << '\n';
         fout << "overlay " << overlay << '\n';
+        fout << "doubleSizeUI " << doubleSizeUI << '\n';
         fout << "align " << align << '\n';
         fout << "gaussianBlur " << gaussianBlur << '\n';
         fout << "maxDistance " << maxDistance << '\n';
@@ -142,6 +144,7 @@ struct Save
         // Defaults also identify saves created before Wave Size became a pixel radius.
         waveSize = 32.0f;
         waveSizeIsRadius = false;
+        doubleSizeUI = true;
 
         std::string temp;
         while (fin >> temp)
@@ -149,6 +152,7 @@ struct Save
             if (temp == "source") { fin >> source; }
             if (temp == "processor") { fin >> processor; }
             if (temp == "overlay") { fin >> overlay; }
+            if (temp == "doubleSizeUI") { fin >> doubleSizeUI; }
             if (temp == "align") { fin >> align; }
             if (temp == "gaussianBlur") { fin >> gaussianBlur; }
             if (temp == "maxDistance") { fin >> maxDistance; }
