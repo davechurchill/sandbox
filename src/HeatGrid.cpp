@@ -47,9 +47,10 @@ void HeatGrid::update(const cv::Mat& kMat, int iterations)
     if (kMatSize.width <= 0 || kMatSize.height <= 0) { return; }
 
     // Boundaries are permanently at 0, all other cells are also initialized to 0
-    if (m_temps.size() != kMat.size())
+    if (m_restartRequested || m_temps.size() != kMat.size())
     {
         m_temps = cv::Mat(kMat.size(), CV_32F, 0.f);
+        m_restartRequested = false;
     }
 
     // make sure heat sources are in their place

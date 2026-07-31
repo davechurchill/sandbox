@@ -126,15 +126,7 @@ void Processor_Heat::processEvent(const sf::Event& event, const sf::Vector2f& mo
 {
     PROFILE_FUNCTION();
     
-    const bool draggingProjection = m_projector.processEvent(event, mouse);
-
-    sf::Vector2f ms = mouse;
-    ms /= m_projector.getTransformedScale();
-    ms -= m_projector.getTransformedPosition();
-    cv::Mat projectedMat = (cv::Mat_<double>(1, 3) << ms.x, ms.y, 1.f) * m_projector.getProjectionMatrix().inv();
-    sf::Vector2f mousePos = sf::Vector2f{ (float)projectedMat.at<double>(0, 0), (float)projectedMat.at<double>(0, 1) };
-    cv::Point mousePoint{ (int)mousePos.y, (int)mousePos.x };
-    //cv::Point mousePoint((int)ms.y, (int)ms.x);
+    m_projector.processEvent(event, mouse);
 
     if (sf::Mouse::isButtonPressed(sf::Mouse::Left) &&
         m_selectedSource >= 0 && m_selectedSource < (int)m_heatGrid.getSources().size())

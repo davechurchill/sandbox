@@ -24,7 +24,7 @@ protected:
     size_t              m_simulationSpeed = 1;
     bool                m_running = true;
     ImGuiStyle          m_originalStyle;
-    float               m_framerate;
+    float               m_framerate = 0.0f;
 
     void update();
 
