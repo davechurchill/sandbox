@@ -76,7 +76,6 @@ void Processor_TerrainLighting::render(sf::RenderWindow & window)
         }
     }
 
-    m_projector.render(window);
 }
 
 void Processor_TerrainLighting::processEvent(const sf::Event & event, const sf::Vector2f & mouse)

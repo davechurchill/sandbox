@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SandboxProjector.h"
+#include "TopographyOverlay.h"
 #include "TopographyProcessor.h"
 
 #include <opencv2/opencv.hpp>
@@ -9,7 +10,7 @@
 #include <random>
 #include <vector>
 
-class Processor_Nature : public TopographyProcessor
+class Processor_Nature : public TopographyProcessor, public TopographyOverlay
 {
     struct Sheep
     {
@@ -53,6 +54,7 @@ class Processor_Nature : public TopographyProcessor
     bool                m_wolfCreated = false;
     bool                m_hasFrame = false;
     bool                m_shaderLoaded = false;
+    TopographyProcessor * m_overlayProcessor = nullptr;
 
     void reloadShader();
     void resetAnimals();
@@ -83,6 +85,19 @@ public:
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void save(Save & save) const;
     void load(const Save & save);
+    SandBoxProjector & projector() { return m_projector; }
+    bool isTerrainWalkable(const cv::Mat & terrain, const cv::Point2f & position) const;
 
     void processTopography(const IntermediateData & data);
+
+    void initOverlay();
+    void imguiOverlay();
+    void processTopographyOverlay(const IntermediateData & data, TopographyProcessor & processor);
+    void renderOverlay(sf::RenderWindow & window, TopographyProcessor & processor);
+    void processOverlayEvent(
+        const sf::Event & event,
+        const sf::Vector2f & mouse,
+        TopographyProcessor & processor);
+    void saveOverlay(Save & save) const;
+    void loadOverlay(const Save & save);
 };

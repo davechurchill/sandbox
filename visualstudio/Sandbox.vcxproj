@@ -19,10 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\Overlay_CloudSimulation.cpp" />
+    <ClCompile Include="..\src\Overlay_Weather.cpp" />
     <ClCompile Include="..\src\Processor_Balls.cpp" />
     <ClCompile Include="..\src\HeatGrid.cpp" />
     <ClCompile Include="..\src\ParticleManager.cpp" />
     <ClCompile Include="..\src\Processor_Heat.cpp" />
+    <ClCompile Include="..\src\Processor_Minecraft.cpp" />
     <ClCompile Include="..\src\Processor_Nature.cpp" />
     <ClCompile Include="..\src\Processor_TerrainLighting.cpp" />
     <ClCompile Include="..\src\GoodAssert.cpp" />
@@ -47,6 +50,8 @@
     <ClCompile Include="..\src\Tools.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\Overlay_CloudSimulation.h" />
+    <ClInclude Include="..\src\Overlay_Weather.h" />
     <ClInclude Include="..\src\Processor_Balls.h" />
     <ClInclude Include="..\src\Grid.hpp" />
     <ClInclude Include="..\src\HeatGrid.h" />
@@ -54,6 +59,7 @@
     <ClInclude Include="..\src\MarkerDetector.hpp" />
     <ClInclude Include="..\src\ParticleManager.h" />
     <ClInclude Include="..\src\Processor_Heat.h" />
+    <ClInclude Include="..\src\Processor_Minecraft.h" />
     <ClInclude Include="..\src\Processor_Nature.h" />
     <ClInclude Include="..\src\Processor_TerrainLighting.h" />
     <ClInclude Include="..\src\GoodAssert.h" />
@@ -79,6 +85,7 @@
     <ClInclude Include="..\src\Timer.hpp" />
     <ClInclude Include="..\src\Tools.h" />
     <ClInclude Include="..\src\TopographyProcessor.h" />
+    <ClInclude Include="..\src\TopographyOverlay.h" />
     <ClInclude Include="..\src\TopographySource.h" />
     <ClCompile Include="..\src\VectorField.cpp" />
     <ClInclude Include="..\src\VectorField.h" />
@@ -88,6 +95,7 @@
     <None Include="..\bin\shaders\shader_balls.frag" />
     <None Include="..\bin\shaders\shader_contour_color.frag" />
     <None Include="..\bin\shaders\shader_heat.frag" />
+    <None Include="..\bin\shaders\shader_minecraft.frag" />
     <None Include="..\bin\shaders\shader_nature.frag" />
     <None Include="..\bin\shaders\shader_terrain_lighting.frag" />
     <None Include="..\bin\shaders\shader_vector_fields.frag" />

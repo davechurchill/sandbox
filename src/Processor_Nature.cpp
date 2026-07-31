@@ -50,19 +50,6 @@ void Processor_Nature::imgui()
     {
         ImGui::SliderFloat("Pond Level", &m_waterLevel, 0.05f, 0.60f);
     }
-
-    ImGui::Separator();
-    ImGui::Text("Sheep: %d", (int)m_sheep.size());
-    ImGui::TextUnformatted(m_wolfCreated ? "Wolf: hunting" : "Wolf: waiting for terrain");
-    ImGui::SliderFloat("Sheep Speed", &m_sheepSpeed, 0.1f, 3.0f);
-    ImGui::SliderFloat("Sheep Size", &m_sheepSize, 5.0f, 24.0f);
-    ImGui::TextUnformatted("Left mouse: add sheep");
-
-    if (ImGui::Button("Reset Animals"))
-    {
-        resetAnimals();
-    }
-    ImGui::SameLine();
     if (ImGui::Button("Reload Shader"))
     {
         reloadShader();
@@ -85,7 +72,18 @@ void Processor_Nature::randomizeDirection(Sheep & sheep)
 
 bool Processor_Nature::isValidTerrainPosition(const cv::Mat & terrain, const cv::Point2f & position) const
 {
-    if (terrain.empty() || position.x < 0.0f || position.y < 0.0f
+    if (m_overlayProcessor)
+    {
+        return m_overlayProcessor->isTerrainWalkable(terrain, position);
+    }
+
+    return isTerrainWalkable(terrain, position);
+}
+
+bool Processor_Nature::isTerrainWalkable(const cv::Mat & terrain, const cv::Point2f & position) const
+{
+    if (terrain.empty() || terrain.type() != CV_32F
+        || position.x < 0.0f || position.y < 0.0f
         || position.x >= terrain.cols || position.y >= terrain.rows)
     {
         return false;
@@ -592,20 +590,21 @@ void Processor_Nature::updateWolf(const cv::Mat & terrain, float deltaTime)
 
 bool Processor_Nature::mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point2f & terrainPosition)
 {
-    if (m_topography.empty())
+    if (m_topography.empty() || !m_overlayProcessor)
     {
         return false;
     }
 
-    const float scale = m_projector.getTransformedScale();
+    SandBoxProjector & overlayProjector = m_overlayProcessor->projector();
+    const float scale = overlayProjector.getTransformedScale();
     if (!std::isfinite(scale) || scale <= 0.0f)
     {
         return false;
     }
 
-    const sf::Vector2f offset = mouse - m_projector.getTransformedPosition();
+    const sf::Vector2f offset = mouse - overlayProjector.getTransformedPosition();
     std::vector<cv::Point2f> point = { { offset.x / scale, offset.y / scale } };
-    const cv::Mat projection = m_projector.getProjectionMatrix();
+    const cv::Mat projection = overlayProjector.getProjectionMatrix();
     if (projection.empty())
     {
         return false;
@@ -708,13 +707,14 @@ void Processor_Nature::drawSheep(
 
 void Processor_Nature::renderSheep(sf::RenderWindow & window)
 {
-    if (m_sheep.empty())
+    if (m_sheep.empty() || !m_overlayProcessor)
     {
         return;
     }
 
-    const cv::Mat projection = m_projector.getProjectionMatrix();
-    const float scale = m_projector.getTransformedScale();
+    SandBoxProjector & overlayProjector = m_overlayProcessor->projector();
+    const cv::Mat projection = overlayProjector.getProjectionMatrix();
+    const float scale = overlayProjector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
     {
         return;
@@ -731,7 +731,7 @@ void Processor_Nature::renderSheep(sf::RenderWindow & window)
     }
     cv::perspectiveTransform(projectedPoints, projectedPoints, projection);
 
-    const sf::Vector2f origin = m_projector.getTransformedPosition();
+    const sf::Vector2f origin = overlayProjector.getTransformedPosition();
     for (size_t index = 0; index < m_sheep.size(); index++)
     {
         const cv::Point2f & point = projectedPoints[index * 2];
@@ -842,13 +842,14 @@ void Processor_Nature::drawWolf(
 
 void Processor_Nature::renderWolf(sf::RenderWindow & window)
 {
-    if (!m_wolfCreated)
+    if (!m_wolfCreated || !m_overlayProcessor)
     {
         return;
     }
 
-    const cv::Mat projection = m_projector.getProjectionMatrix();
-    const float scale = m_projector.getTransformedScale();
+    SandBoxProjector & overlayProjector = m_overlayProcessor->projector();
+    const cv::Mat projection = overlayProjector.getProjectionMatrix();
+    const float scale = overlayProjector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
     {
         return;
@@ -871,7 +872,7 @@ void Processor_Nature::renderWolf(sf::RenderWindow & window)
         return;
     }
 
-    const sf::Vector2f origin = m_projector.getTransformedPosition();
+    const sf::Vector2f origin = overlayProjector.getTransformedPosition();
     drawWolf(
         window,
         { origin.x + point.x * scale, origin.y + point.y * scale },
@@ -901,27 +902,12 @@ void Processor_Nature::render(sf::RenderWindow & window)
             window.draw(m_sprite);
         }
 
-        renderSheep(window);
-        renderWolf(window);
     }
-
-    m_projector.render(window);
 }
 
 void Processor_Nature::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
-    const bool draggingProjection = m_projector.processEvent(event, mouse);
-    if (event.type != sf::Event::MouseButtonPressed || event.mouseButton.button != sf::Mouse::Left
-        || draggingProjection || ImGui::GetIO().WantCaptureMouse)
-    {
-        return;
-    }
-
-    cv::Point2f terrainPosition;
-    if (mapMouseToTerrain(mouse, terrainPosition))
-    {
-        spawnSheep(terrainPosition);
-    }
+    m_projector.processEvent(event, mouse);
 }
 
 void Processor_Nature::save(Save & save) const
@@ -944,6 +930,54 @@ void Processor_Nature::processTopography(const IntermediateData & data)
         return;
     }
 
+    m_topography = data.topography;
+    m_topographySize = data.topography.size();
+
+    m_projector.project(m_topography, m_projectedTopography);
+    if (m_projectedTopography.empty())
+    {
+        m_hasFrame = false;
+        return;
+    }
+
+    m_image = Tools::matToSfImage(m_projectedTopography);
+    m_texture.loadFromImage(m_image);
+    m_texture.setSmooth(true);
+    m_sprite.setTexture(m_texture, true);
+    m_hasFrame = true;
+}
+
+void Processor_Nature::initOverlay()
+{
+    resetAnimals();
+}
+
+void Processor_Nature::imguiOverlay()
+{
+    PROFILE_FUNCTION();
+
+    ImGui::Text("Sheep: %d", (int)m_sheep.size());
+    ImGui::TextUnformatted(m_wolfCreated ? "Wolf: hunting" : "Wolf: waiting for terrain");
+    ImGui::SliderFloat("Sheep Speed", &m_sheepSpeed, 0.1f, 3.0f);
+    ImGui::SliderFloat("Sheep Size", &m_sheepSize, 5.0f, 24.0f);
+    ImGui::TextUnformatted("Left mouse: add sheep");
+
+    if (ImGui::Button("Reset Animals"))
+    {
+        resetAnimals();
+    }
+}
+
+void Processor_Nature::processTopographyOverlay(
+    const IntermediateData & data,
+    TopographyProcessor & processor)
+{
+    if (data.topography.empty() || data.topography.type() != CV_32F)
+    {
+        return;
+    }
+
+    m_overlayProcessor = &processor;
     if (m_topographySize.width > 0 && m_topographySize.height > 0
         && m_topographySize != data.topography.size())
     {
@@ -965,17 +999,41 @@ void Processor_Nature::processTopography(const IntermediateData & data)
     m_topographySize = data.topography.size();
     updateSheep(m_topography, data.deltaTime);
     updateWolf(m_topography, data.deltaTime);
+}
 
-    m_projector.project(m_topography, m_projectedTopography);
-    if (m_projectedTopography.empty())
+void Processor_Nature::renderOverlay(
+    sf::RenderWindow & window,
+    TopographyProcessor & processor)
+{
+    m_overlayProcessor = &processor;
+    renderSheep(window);
+    renderWolf(window);
+}
+
+void Processor_Nature::processOverlayEvent(
+    const sf::Event & event,
+    const sf::Vector2f & mouse,
+    TopographyProcessor & processor)
+{
+    m_overlayProcessor = &processor;
+    const bool draggingProjection = processor.projector().processEvent(event, mouse);
+    if (event.type != sf::Event::MouseButtonPressed || event.mouseButton.button != sf::Mouse::Left
+        || draggingProjection || ImGui::GetIO().WantCaptureMouse)
     {
-        m_hasFrame = false;
         return;
     }
 
-    m_image = Tools::matToSfImage(m_projectedTopography);
-    m_texture.loadFromImage(m_image);
-    m_texture.setSmooth(true);
-    m_sprite.setTexture(m_texture, true);
-    m_hasFrame = true;
+    cv::Point2f terrainPosition;
+    if (mapMouseToTerrain(mouse, terrainPosition))
+    {
+        spawnSheep(terrainPosition);
+    }
+}
+
+void Processor_Nature::saveOverlay(Save &) const
+{
+}
+
+void Processor_Nature::loadOverlay(const Save &)
+{
 }

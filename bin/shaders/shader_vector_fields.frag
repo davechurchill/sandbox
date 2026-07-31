@@ -5,6 +5,7 @@ uniform bool contour;
 uniform int numberOfContourLines;
 uniform float u_time;
 uniform float particleAlpha;
+uniform bool overlayOnly;
 
 void popsicle(float c);
 void blue(float c);
@@ -20,6 +21,19 @@ void main()
 	vec4 pixel_color = texture2D(currentTexture, coord);
 	float c = pixel_color[0];
 	float p = pixel_color[1];
+
+	if (overlayOnly)
+	{
+		if (p <= 0.001)
+		{
+			gl_FragColor = vec4(0.0);
+			return;
+		}
+		float strength = clamp(p, 0.0, 1.0);
+		vec3 particleColor = vec3(0.8 + strength / 5.0, 0.8 + strength / 5.0, 1.0);
+		gl_FragColor = vec4(clamp(particleColor, 0.0, 1.0), strength * particleAlpha);
+		return;
+	}
 
 	if (c < 0.02 || c > 0.99)
 	{

@@ -11,21 +11,31 @@ void Processor_Vectors::init()
     m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Fragment);
 }
 
+SandBoxProjector & Processor_Vectors::activeProjector()
+{
+    return m_overlayProcessor ? m_overlayProcessor->projector() : m_projector;
+}
+
 void Processor_Vectors::imgui()
+{
+    imguiControls(false);
+}
+
+void Processor_Vectors::imguiControls(bool overlayOnly)
 {
     PROFILE_FUNCTION();
 
+    ImGui::Combo("Algorithm", &m_selectedAlgorithmIndex, ParticleManager::AlgorithmNames, (size_t)ParticleManager::Algorithm::Count);
     auto selectedAlgorithm = (ParticleManager::Algorithm)m_selectedAlgorithmIndex;
     auto& selectedParameters = m_particleManager.parameters[m_selectedAlgorithmIndex];
 
-    ImGui::Combo("Algorithm", &m_selectedAlgorithmIndex, ParticleManager::AlgorithmNames, (size_t)ParticleManager::Algorithm::Count);
-
-
-    ImGui::Combo("Color Scheme", &m_selectedShaderIndex, m_shaders, IM_ARRAYSIZE(m_shaders));
-
-    ImGui::Checkbox("##Contours", &m_drawContours);
-    ImGui::SameLine();
-    ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
+    if (!overlayOnly)
+    {
+        ImGui::Combo("Color Scheme", &m_selectedShaderIndex, m_shaders, IM_ARRAYSIZE(m_shaders));
+        ImGui::Checkbox("##Contours", &m_drawContours);
+        ImGui::SameLine();
+        ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
+    }
 
     ImGui::InputInt("Particles", &selectedParameters.particleCount);
     ImGui::SliderInt("Trail Length", &selectedParameters.trailLength, 1, 32);
@@ -49,20 +59,28 @@ void Processor_Vectors::imgui()
     {
         m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Fragment);
     }
-    m_projector.imgui();
+    if (!overlayOnly)
+    {
+        m_projector.imgui();
+    }
 }
 
 void Processor_Vectors::render(sf::RenderWindow& window)
 {
     PROFILE_FUNCTION();
+    renderVectors(window, false);
+}
 
+void Processor_Vectors::renderVectors(sf::RenderWindow & window, bool overlayOnly)
+{
     auto& selectedParameters = m_particleManager.parameters[m_selectedAlgorithmIndex];
 
     {
         PROFILE_SCOPE("Draw Transformed Image");
 
-        m_sfTransformedDepthSprite.setPosition(m_projector.getTransformedPosition());
-        float scale = m_projector.getTransformedScale();
+        SandBoxProjector & projector = activeProjector();
+        m_sfTransformedDepthSprite.setPosition(projector.getTransformedPosition());
+        float scale = projector.getTransformedScale();
         m_sfTransformedDepthSprite.setScale(scale, scale);
 
         //Use static so that it does not get initilialized every time this function is called
@@ -74,17 +92,17 @@ void Processor_Vectors::render(sf::RenderWindow& window)
         m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
         m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
         m_shader.setUniform("particleAlpha", selectedParameters.particleAlpha);
+        m_shader.setUniform("overlayOnly", overlayOnly);
 
         window.draw(m_sfTransformedDepthSprite, &m_shader);
     }
 
-    m_projector.render(window);
 }
 
 void Processor_Vectors::processEvent(const sf::Event& event, const sf::Vector2f& mouse)
 {
     PROFILE_FUNCTION();
-    m_projector.processEvent(event, mouse);
+    activeProjector().processEvent(event, mouse);
 }
 
 void Processor_Vectors::save(Save& save) const
@@ -143,8 +161,9 @@ void Processor_Vectors::processTopography(const IntermediateData& data)
     
     {
         PROFILE_SCOPE("Calibration TransformProjection");
-        m_projector.project(top, m_cvTransformedDepthImage32f);
-        m_projector.project(particleGrid, m_cvTransformedParticleGrid32f);
+        SandBoxProjector & projector = activeProjector();
+        projector.project(top, m_cvTransformedDepthImage32f);
+        projector.project(particleGrid, m_cvTransformedParticleGrid32f);
     }
 
     // Draw warped depth image
@@ -187,4 +206,46 @@ void Processor_Vectors::processTopography(const IntermediateData& data)
             m_sfTransformedDepthSprite.setTexture(m_sfTransformedDepthTexture, true);
         }
     }
+}
+
+void Processor_Vectors::initOverlay()
+{
+    m_particleManager.reset();
+    m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Fragment);
+}
+
+void Processor_Vectors::imguiOverlay()
+{
+    imguiControls(true);
+}
+
+void Processor_Vectors::processTopographyOverlay(
+    const IntermediateData & data,
+    TopographyProcessor & processor)
+{
+    m_overlayProcessor = &processor;
+    processTopography(data);
+}
+
+void Processor_Vectors::renderOverlay(
+    sf::RenderWindow & window,
+    TopographyProcessor & processor)
+{
+    m_overlayProcessor = &processor;
+    renderVectors(window, true);
+}
+
+void Processor_Vectors::processOverlayEvent(
+    const sf::Event &,
+    const sf::Vector2f &,
+    TopographyProcessor &)
+{
+}
+
+void Processor_Vectors::saveOverlay(Save &) const
+{
+}
+
+void Processor_Vectors::loadOverlay(const Save &)
+{
 }

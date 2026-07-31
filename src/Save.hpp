@@ -8,6 +8,7 @@ struct Save
     // main
     std::string source = "Camera";
     std::string processor = "Colorizer";
+    std::string overlay = "None";
 
     // camera
     int align = 0;
@@ -47,6 +48,9 @@ struct Save
     int numberOfContourLines = 15;
     bool drawProjection = true;
 
+    // Minecraft
+    int minecraftBlockSize = 12;
+
 
     void saveToFile(const std::string & filename)
     {
@@ -60,6 +64,7 @@ struct Save
 
         fout << "source " << source << '\n';
         fout << "processor " << processor << '\n';
+        fout << "overlay " << overlay << '\n';
         fout << "align " << align << '\n';
         fout << "gaussianBlur " << gaussianBlur << '\n';
         fout << "maxDistance " << maxDistance << '\n';
@@ -107,6 +112,7 @@ struct Save
         fout << "drawContours " << drawContours << '\n';
         fout << "numberOfContourLines " << numberOfContourLines << '\n';
         fout << "drawProjection " << drawProjection << '\n';
+        fout << "minecraftBlockSize " << minecraftBlockSize << '\n';
     }
 
     void loadFromFile(const std::string & filename)
@@ -124,6 +130,7 @@ struct Save
         {
             if (temp == "source") { fin >> source; }
             if (temp == "processor") { fin >> processor; }
+            if (temp == "overlay") { fin >> overlay; }
             if (temp == "align") { fin >> align; }
             if (temp == "gaussianBlur") { fin >> gaussianBlur; }
             if (temp == "maxDistance") { fin >> maxDistance; }
@@ -174,6 +181,7 @@ struct Save
             if (temp == "drawContours") { fin >> drawContours; }
             if (temp == "numberOfContourLines") { fin >> numberOfContourLines; }
             if (temp == "drawProjection") { fin >> drawProjection; }
+            if (temp == "minecraftBlockSize") { fin >> minecraftBlockSize; }
         }
     }
 };

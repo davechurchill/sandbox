@@ -3,6 +3,7 @@
 uniform sampler2D currentTexture;
 uniform vec3 waterColor;
 uniform float waterOpacity;
+uniform bool overlayOnly;
 
 vec3 terrainColor(float height)
 {
@@ -38,6 +39,14 @@ void main()
     vec3 deepWater = mix(waterColor, vec3(0.01, 0.08, 0.24), clamp(water, 0.0, 1.0));
     float coverage = clamp(max(water, trail * 0.55) * waterOpacity, 0.0, 1.0);
     float highlight = smoothstep(0.55, 1.0, water) * 0.22;
+
+    if (overlayOnly)
+    {
+        vec3 overlayColor = clamp(deepWater + vec3(highlight), 0.0, 1.0);
+        gl_FragColor = vec4(overlayColor, coverage);
+        return;
+    }
+
     vec3 result = mix(terrain, deepWater, coverage) + vec3(highlight);
 
     gl_FragColor = vec4(clamp(result, 0.0, 1.0), 1.0);

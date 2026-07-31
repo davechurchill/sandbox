@@ -46,6 +46,7 @@ public:
     void processEvent(const sf::Event& event, const sf::Vector2f& mouse);
     void save(Save& save) const;
     void load(const Save& save);
+    SandBoxProjector & projector() { return m_projector; }
 
     void processTopography(const IntermediateData& data);
 };

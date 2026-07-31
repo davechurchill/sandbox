@@ -1,12 +1,13 @@
 #pragma once
 
 #include "SandboxProjector.h"
+#include "TopographyOverlay.h"
 #include "TopographyProcessor.h"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
 
-class Processor_WaterFlow : public TopographyProcessor
+class Processor_WaterFlow : public TopographyProcessor, public TopographyOverlay
 {
     SandBoxProjector    m_projector;
 
@@ -31,19 +32,23 @@ class Processor_WaterFlow : public TopographyProcessor
     float               m_waterColor[3] = { 0.04f, 0.35f, 1.0f };
     float               m_rainRadius = 32.0f;
     int                 m_simulationSteps = 2;
-    int                 m_rainMode = 0;
+    int                 m_rainMode = 1;
     bool                m_hasFrame = false;
     bool                m_shaderLoaded = false;
     bool                m_rainBrushActive = false;
     bool                m_rainPulsePending = false;
     cv::Point2f         m_rainBrushPosition;
+    TopographyProcessor * m_overlayProcessor = nullptr;
 
+    SandBoxProjector & activeProjector();
     void ensureSimulationSize(const cv::Size & size);
     void addRain(const cv::Mat & terrain, float amount);
     void simulate(const cv::Mat & terrain, float deltaTime);
     void buildImage(const cv::Mat & terrain);
     void resetWater();
     void reloadShader();
+    void imguiControls(bool showProjector);
+    void renderWater(sf::RenderWindow & window, bool overlayOnly);
     bool mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point2f & terrainPosition);
 
 public:
@@ -53,6 +58,19 @@ public:
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void save(Save & save) const;
     void load(const Save & save);
+    SandBoxProjector & projector() { return m_projector; }
 
     void processTopography(const IntermediateData & data);
+
+    bool usesCanvasInput() const override { return m_rainMode == 1; }
+    void initOverlay();
+    void imguiOverlay();
+    void processTopographyOverlay(const IntermediateData & data, TopographyProcessor & processor);
+    void renderOverlay(sf::RenderWindow & window, TopographyProcessor & processor);
+    void processOverlayEvent(
+        const sf::Event & event,
+        const sf::Vector2f & mouse,
+        TopographyProcessor & processor);
+    void saveOverlay(Save & save) const;
+    void loadOverlay(const Save & save);
 };

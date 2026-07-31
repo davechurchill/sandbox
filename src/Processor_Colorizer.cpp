@@ -53,7 +53,6 @@ void Processor_Colorizer::render(sf::RenderWindow & window)
         window.draw(m_sfTransformedDepthSprite, &m_shader);
     }
 
-    m_projector.render(window);
 }
 
 void Processor_Colorizer::processEvent(const sf::Event & event, const sf::Vector2f & mouse)

@@ -13,6 +13,7 @@ namespace
 {
     constexpr const char * BallsShaderPath = "shaders/shader_balls.frag";
     constexpr float RadiansToDegrees = 57.29577951308232f;
+    constexpr size_t MaxBallTrails = 400;
 
     bool isTerrainCell(float height)
     {
@@ -23,6 +24,11 @@ namespace
 void Processor_Balls::init()
 {
     reloadShader();
+}
+
+SandBoxProjector & Processor_Balls::activeProjector()
+{
+    return m_overlayProcessor ? m_overlayProcessor->projector() : m_projector;
 }
 
 void Processor_Balls::reloadShader()
@@ -37,6 +43,7 @@ void Processor_Balls::reloadShader()
 void Processor_Balls::resetBalls()
 {
     m_balls.clear();
+    m_trails.clear();
     m_defaultBallCreated = true;
     m_randomResetPending = true;
 }
@@ -83,6 +90,12 @@ void Processor_Balls::imgui()
     ImGui::SliderFloat("Rolling Resistance", &m_rollingResistance, 0.0f, 4.0f);
     ImGui::SliderFloat("Ball Size", &m_ballSize, 6.0f, 40.0f);
     ImGui::SliderFloat("Ball Bounciness", &m_ballRestitution, 0.0f, 1.0f);
+    if (ImGui::Checkbox("Lava Appearance", &m_lavaAppearance)
+        && m_lavaAppearance && m_trailLength <= 0.0f)
+    {
+        m_trailLength = 3.0f;
+    }
+    ImGui::SliderFloat("Trail Length", &m_trailLength, 0.0f, 10.0f, "%.1f sec");
 
     ImGui::TextUnformatted("Left mouse: add ball");
 
@@ -254,8 +267,9 @@ void Processor_Balls::resolveBallCollisions(const cv::Mat & terrain)
 {
     const float visibleBallDiameter = m_ballSize * 1.10f;
     const float fallbackMinimumDistance = getTerrainBallRadius(terrain) * 2.0f * 1.10f;
-    const cv::Mat projection = m_projector.getProjectionMatrix();
-    const float projectorScale = m_projector.getTransformedScale();
+    SandBoxProjector & projector = activeProjector();
+    const cv::Mat projection = projector.getProjectionMatrix();
+    const float projectorScale = projector.getTransformedScale();
     const bool useProjectedDistance = !projection.empty()
         && std::isfinite(projectorScale) && projectorScale > 0.0f;
 
@@ -514,6 +528,33 @@ void Processor_Balls::updateBalls(const cv::Mat & terrain, float deltaTime)
         ball.rotation = std::fmod(
             ball.rotation + finalSpeed * dt / terrainRadius * RadiansToDegrees,
             360.0f);
+        ball.trailTimer += dt;
+        if (m_trailLength > 0.0f && finalSpeed > 0.15f && ball.trailTimer >= 0.05f)
+        {
+            m_trails.push_back({
+                ball.position,
+                m_lavaAppearance ? sf::Color(255, 78, 8) : ball.color,
+                m_trailLength,
+                m_trailLength,
+                m_lavaAppearance });
+            ball.trailTimer = 0.0f;
+        }
+    }
+
+    for (BallTrail & trail : m_trails)
+    {
+        trail.remaining -= dt;
+    }
+    std::erase_if(m_trails, [](const BallTrail & trail) { return trail.remaining <= 0.0f; });
+    if (m_trailLength <= 0.0f)
+    {
+        m_trails.clear();
+    }
+    else if (m_trails.size() > MaxBallTrails)
+    {
+        m_trails.erase(
+            m_trails.begin(),
+            m_trails.begin() + (m_trails.size() - MaxBallTrails));
     }
 }
 
@@ -537,6 +578,33 @@ void Processor_Balls::drawBall(
     shadow.setScale(1.18f, 0.72f);
     shadow.setFillColor(sf::Color(0, 0, 0, 105));
     window.draw(shadow);
+
+    if (m_lavaAppearance)
+    {
+        const float glowRadius = radius * 1.55f;
+        sf::CircleShape glow(glowRadius, 28);
+        glow.setOrigin(glowRadius, glowRadius);
+        glow.setPosition(position);
+        glow.setFillColor(sf::Color(255, 45, 0, 75));
+        window.draw(glow, sf::BlendAdd);
+
+        sf::CircleShape lavaBall(radius, 18);
+        lavaBall.setOrigin(radius, radius);
+        lavaBall.setPosition(position);
+        lavaBall.setRotation(rotation);
+        lavaBall.setFillColor(sf::Color(185, 48, 18));
+        lavaBall.setOutlineColor(sf::Color(38, 25, 22));
+        lavaBall.setOutlineThickness(std::max(1.0f, radius * 0.10f));
+        window.draw(lavaBall);
+
+        sf::RectangleShape crack({ radius * 1.28f, std::max(1.5f, radius * 0.14f) });
+        crack.setOrigin(crack.getSize().x * 0.5f, crack.getSize().y * 0.5f);
+        crack.setPosition(position);
+        crack.setRotation(heading + rotation);
+        crack.setFillColor(sf::Color(255, 180, 35, 245));
+        window.draw(crack, sf::BlendAdd);
+        return;
+    }
 
     sf::CircleShape ball(radius, 40);
     ball.setOrigin(radius, radius);
@@ -570,15 +638,65 @@ void Processor_Balls::drawBall(
     window.draw(highlight);
 }
 
+void Processor_Balls::renderBallTrails(sf::RenderWindow & window)
+{
+    if (m_trails.empty())
+    {
+        return;
+    }
+
+    SandBoxProjector & projector = activeProjector();
+    const cv::Mat projection = projector.getProjectionMatrix();
+    const float scale = projector.getTransformedScale();
+    if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
+    {
+        return;
+    }
+
+    std::vector<cv::Point2f> points;
+    points.reserve(m_trails.size());
+    for (const BallTrail & trail : m_trails)
+    {
+        points.push_back(trail.position);
+    }
+    cv::perspectiveTransform(points, points, projection);
+
+    const sf::Vector2f origin = projector.getTransformedPosition();
+    for (size_t i = 0; i < m_trails.size(); i++)
+    {
+        if (!std::isfinite(points[i].x) || !std::isfinite(points[i].y))
+        {
+            continue;
+        }
+
+        const BallTrail & trail = m_trails[i];
+        const float life = trail.lifetime > 0.0f
+            ? std::clamp(trail.remaining / trail.lifetime, 0.0f, 1.0f)
+            : 0.0f;
+        const float radius = m_ballSize * 0.20f * (0.55f + life * 0.45f);
+        sf::CircleShape mark(radius, 16);
+        mark.setOrigin(radius, radius);
+        mark.setPosition(origin.x + points[i].x * scale, origin.y + points[i].y * scale);
+        mark.setFillColor(sf::Color(
+            trail.color.r,
+            trail.color.g,
+            trail.color.b,
+            (sf::Uint8)((trail.lava ? 110.0f : 75.0f) * life)));
+        window.draw(mark, trail.lava ? sf::BlendAdd : sf::BlendAlpha);
+    }
+}
+
 void Processor_Balls::renderBalls(sf::RenderWindow & window)
 {
+    renderBallTrails(window);
     if (m_balls.empty())
     {
         return;
     }
 
-    const cv::Mat projection = m_projector.getProjectionMatrix();
-    const float scale = m_projector.getTransformedScale();
+    SandBoxProjector & projector = activeProjector();
+    const cv::Mat projection = projector.getProjectionMatrix();
+    const float scale = projector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
     {
         return;
@@ -609,7 +727,7 @@ void Processor_Balls::renderBalls(sf::RenderWindow & window)
     }
     cv::perspectiveTransform(projectedPoints, projectedPoints, projection);
 
-    const sf::Vector2f origin = m_projector.getTransformedPosition();
+    const sf::Vector2f origin = projector.getTransformedPosition();
     for (size_t index = 0; index < m_balls.size(); index++)
     {
         const cv::Point2f & point = projectedPoints[index * 2];
@@ -653,7 +771,6 @@ void Processor_Balls::render(sf::RenderWindow & window)
         renderBalls(window);
     }
 
-    m_projector.render(window);
 }
 
 bool Processor_Balls::mapMouseToTerrain(
@@ -665,15 +782,16 @@ bool Processor_Balls::mapMouseToTerrain(
         return false;
     }
 
-    const float scale = m_projector.getTransformedScale();
+    SandBoxProjector & projector = activeProjector();
+    const float scale = projector.getTransformedScale();
     if (!std::isfinite(scale) || scale <= 0.0f)
     {
         return false;
     }
 
-    const sf::Vector2f offset = mouse - m_projector.getTransformedPosition();
+    const sf::Vector2f offset = mouse - projector.getTransformedPosition();
     std::vector<cv::Point2f> point = { { offset.x / scale, offset.y / scale } };
-    const cv::Mat projection = m_projector.getProjectionMatrix();
+    const cv::Mat projection = projector.getProjectionMatrix();
     if (projection.empty())
     {
         return false;
@@ -692,7 +810,7 @@ bool Processor_Balls::mapMouseToTerrain(
 
 void Processor_Balls::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
-    const bool draggingProjection = m_projector.processEvent(event, mouse);
+    const bool draggingProjection = activeProjector().processEvent(event, mouse);
     if (event.type != sf::Event::MouseButtonPressed || event.mouseButton.button != sf::Mouse::Left
         || draggingProjection || ImGui::GetIO().WantCaptureMouse)
     {
@@ -738,6 +856,11 @@ void Processor_Balls::processTopography(const IntermediateData & data)
             ball.velocity.x *= xScale;
             ball.velocity.y *= yScale;
         }
+        for (BallTrail & trail : m_trails)
+        {
+            trail.position.x *= xScale;
+            trail.position.y *= yScale;
+        }
     }
 
     m_topography = data.topography;
@@ -756,4 +879,95 @@ void Processor_Balls::processTopography(const IntermediateData & data)
     m_texture.setSmooth(true);
     m_sprite.setTexture(m_texture, true);
     m_hasFrame = true;
+}
+
+void Processor_Balls::initOverlay()
+{
+    m_balls.clear();
+    m_trails.clear();
+    m_defaultBallCreated = false;
+    m_randomResetPending = false;
+}
+
+void Processor_Balls::imguiOverlay()
+{
+    PROFILE_FUNCTION();
+
+    ImGui::Text("Balls: %d", (int)m_balls.size());
+    ImGui::SliderFloat("Gravity", &m_gravity, 0.0f, 5000.0f, "%.0f");
+    ImGui::SliderFloat("Ball Speed Multiplier", &m_ballSpeedMultiplier, 0.1f, 4.0f, "%.1fx");
+    ImGui::SliderFloat("Rolling Resistance", &m_rollingResistance, 0.0f, 4.0f);
+    ImGui::SliderFloat("Ball Size", &m_ballSize, 6.0f, 40.0f);
+    ImGui::SliderFloat("Ball Bounciness", &m_ballRestitution, 0.0f, 1.0f);
+    if (ImGui::Checkbox("Lava Appearance", &m_lavaAppearance)
+        && m_lavaAppearance && m_trailLength <= 0.0f)
+    {
+        m_trailLength = 3.0f;
+    }
+    ImGui::SliderFloat("Trail Length", &m_trailLength, 0.0f, 10.0f, "%.1f sec");
+    ImGui::TextUnformatted("Left mouse: add ball");
+
+    if (ImGui::Button("Reset Balls"))
+    {
+        resetBalls();
+    }
+}
+
+void Processor_Balls::processTopographyOverlay(
+    const IntermediateData & data,
+    TopographyProcessor & processor)
+{
+    if (data.topography.empty() || data.topography.type() != CV_32F)
+    {
+        return;
+    }
+
+    m_overlayProcessor = &processor;
+    if (m_topographySize.width > 0 && m_topographySize.height > 0
+        && m_topographySize != data.topography.size())
+    {
+        const float xScale = (float)data.topography.cols / m_topographySize.width;
+        const float yScale = (float)data.topography.rows / m_topographySize.height;
+        for (Ball & ball : m_balls)
+        {
+            ball.position.x *= xScale;
+            ball.position.y *= yScale;
+            ball.velocity.x *= xScale;
+            ball.velocity.y *= yScale;
+        }
+        for (BallTrail & trail : m_trails)
+        {
+            trail.position.x *= xScale;
+            trail.position.y *= yScale;
+        }
+    }
+
+    m_topography = data.topography;
+    m_topographySize = data.topography.size();
+    updateBalls(m_topography, data.deltaTime);
+}
+
+void Processor_Balls::renderOverlay(
+    sf::RenderWindow & window,
+    TopographyProcessor & processor)
+{
+    m_overlayProcessor = &processor;
+    renderBalls(window);
+}
+
+void Processor_Balls::processOverlayEvent(
+    const sf::Event & event,
+    const sf::Vector2f & mouse,
+    TopographyProcessor & processor)
+{
+    m_overlayProcessor = &processor;
+    processEvent(event, mouse);
+}
+
+void Processor_Balls::saveOverlay(Save &) const
+{
+}
+
+void Processor_Balls::loadOverlay(const Save &)
+{
 }

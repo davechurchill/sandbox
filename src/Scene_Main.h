@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "TopographySource.h"
 #include "TopographyProcessor.h"
+#include "TopographyOverlay.h"
 #include "ViewController.hpp"
 #include "Save.hpp"
 
@@ -27,12 +28,15 @@ class Scene_Main : public Scene
 
     std::string         m_sourceID = "Camera";
     std::string         m_processorID = "Colorizer";
+    std::string         m_overlayID = "None";
 
     std::shared_ptr<TopographySource>       m_source;
     std::shared_ptr<TopographyProcessor>    m_processor;
+    std::shared_ptr<TopographyOverlay>      m_overlay;
 
     std::map<std::string, std::function<std::shared_ptr<TopographySource>()>> m_sourceMap;
     std::map<std::string, std::function<std::shared_ptr<TopographyProcessor>()>> m_processorMap;
+    std::map<std::string, std::function<std::shared_ptr<TopographyOverlay>()>> m_overlayMap;
 
     bool                m_switchWindows = false;
 
@@ -44,6 +48,7 @@ class Scene_Main : public Scene
 
     void setSource(const std::string & source);
     void setProcessor(const std::string & processor);
+    void setOverlay(const std::string & overlay);
     void toggleDisplayWindow();
 
     void saveDataDump();
@@ -69,6 +74,13 @@ public:
     void registerProcessor(const std::string & name)
     {
         m_processorMap.emplace(name, std::make_shared<T>);
+    }
+
+    template <class T>
+        requires (std::is_base_of<TopographyOverlay, T>::value)
+    void registerOverlay(const std::string & name)
+    {
+        m_overlayMap.emplace(name, std::make_shared<T>);
     }
 
     void load();

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SandboxProjector.h"
+#include "TopographyOverlay.h"
 #include "TopographyProcessor.h"
 
 #include <opencv2/opencv.hpp>
@@ -9,7 +10,7 @@
 #include <random>
 #include <vector>
 
-class Processor_Balls : public TopographyProcessor
+class Processor_Balls : public TopographyProcessor, public TopographyOverlay
 {
     struct Ball
     {
@@ -17,6 +18,16 @@ class Processor_Balls : public TopographyProcessor
         cv::Point2f velocity;
         sf::Color color = sf::Color(190, 58, 42);
         float rotation = 0.0f;
+        float trailTimer = 0.0f;
+    };
+
+    struct BallTrail
+    {
+        cv::Point2f position;
+        sf::Color color;
+        float remaining = 0.0f;
+        float lifetime = 0.0f;
+        bool lava = false;
     };
 
     SandBoxProjector    m_projector;
@@ -31,18 +42,23 @@ class Processor_Balls : public TopographyProcessor
     sf::Shader          m_shader;
 
     std::vector<Ball>   m_balls;
+    std::vector<BallTrail> m_trails;
     std::mt19937        m_random{ std::random_device{}() };
 
     float               m_gravity = 1800.0f;
     float               m_ballSpeedMultiplier = 1.0f;
-    float               m_rollingResistance = 0.8f;
+    float               m_rollingResistance = 0.4f;
     float               m_ballSize = 18.0f;
     float               m_ballRestitution = 0.65f;
+    float               m_trailLength = 0.0f;
+    bool                m_lavaAppearance = false;
     bool                m_defaultBallCreated = false;
     bool                m_randomResetPending = false;
     bool                m_hasFrame = false;
     bool                m_shaderLoaded = false;
+    TopographyProcessor * m_overlayProcessor = nullptr;
 
+    SandBoxProjector & activeProjector();
     void reloadShader();
     void resetBalls();
     sf::Color randomBallColor();
@@ -56,6 +72,7 @@ class Processor_Balls : public TopographyProcessor
     float getTerrainBallRadius(const cv::Mat & terrain) const;
     void resolveBallCollisions(const cv::Mat & terrain);
     void updateBalls(const cv::Mat & terrain, float deltaTime);
+    void renderBallTrails(sf::RenderWindow & window);
     void renderBalls(sf::RenderWindow & window);
     void drawBall(
         sf::RenderWindow & window,
@@ -71,6 +88,18 @@ public:
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void save(Save & save) const;
     void load(const Save & save);
+    SandBoxProjector & projector() { return m_projector; }
 
     void processTopography(const IntermediateData & data);
+
+    void initOverlay();
+    void imguiOverlay();
+    void processTopographyOverlay(const IntermediateData & data, TopographyProcessor & processor);
+    void renderOverlay(sf::RenderWindow & window, TopographyProcessor & processor);
+    void processOverlayEvent(
+        const sf::Event & event,
+        const sf::Vector2f & mouse,
+        TopographyProcessor & processor);
+    void saveOverlay(Save & save) const;
+    void loadOverlay(const Save & save);
 };

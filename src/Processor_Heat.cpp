@@ -119,7 +119,6 @@ void Processor_Heat::render(sf::RenderWindow& window)
         }
     }
 
-    m_projector.render(window);
 }
 
 void Processor_Heat::processEvent(const sf::Event& event, const sf::Vector2f& mouse)

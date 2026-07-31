@@ -3,8 +3,11 @@
 #include "Profiler.hpp"
 
 #include "Processor_Balls.h"
+#include "Overlay_CloudSimulation.h"
+#include "Overlay_Weather.h"
 #include "Processor_Colorizer.h"
 #include "Processor_Heat.h"
+#include "Processor_Minecraft.h"
 #include "Processor_Nature.h"
 #include "Processor_TerrainLighting.h"
 #include "Processor_Vectors.h"
@@ -42,14 +45,20 @@ void Scene_Main::init()
     registerSource<Source_Perlin>("Perlin");
     registerSource<Source_Snapshot>("Snapshot");
 
-    registerProcessor<Processor_Balls>("Balls");
     registerProcessor<Processor_Colorizer>("Colorizer");
     registerProcessor<Processor_Heat>("Heat");
+    registerProcessor<Processor_Minecraft>("Minecraft");
     registerProcessor<Processor_Nature>("Nature");
     registerProcessor<Processor_TerrainLighting>("TerrainLighting");
-    registerProcessor<Processor_Vectors>("Vectors");
-    registerProcessor<Processor_WaterFlow>("WaterFlow");
     m_processorMap.emplace("None", []() {return nullptr; });
+
+    registerOverlay<Processor_Nature>("Animals");
+    registerOverlay<Processor_Balls>("Balls");
+    registerOverlay<Overlay_CloudSimulation>("Cloud Simulation");
+    registerOverlay<Processor_Vectors>("Vectors");
+    registerOverlay<Overlay_Weather>("Weather");
+    registerOverlay<Processor_WaterFlow>("WaterFlow");
+    m_overlayMap.emplace("None", []() {return nullptr; });
 }
 
 void Scene_Main::onFrame(float deltaTime)
@@ -62,6 +71,10 @@ void Scene_Main::onFrame(float deltaTime)
         data.topography = m_topography;
         data.markers = m_source->getMarkers();
         m_processor->processTopography(data);
+        if (m_overlay)
+        {
+            m_overlay->processTopographyOverlay(data, *m_processor);
+        }
     }
 
     sUserInput();
@@ -114,6 +127,7 @@ void Scene_Main::sUserInput()
     PROFILE_FUNCTION();
 
     bool displayOpen = m_game->displayWindow().isOpen();
+    const bool overlayUsesCanvasInput = m_overlay && m_overlay->usesCanvasInput();
 
     auto & main = mainWindow();
     sf::Event event;
@@ -130,10 +144,25 @@ void Scene_Main::sUserInput()
             m_mouseWorld = main.mapPixelToCoords(m_mouseScreen);
         }
 
-        if (m_source) { m_source->processEvent(event, m_mouseWorld); }
+        const bool overlayOwnsLeftDrag = overlayUsesCanvasInput && m_processor && !displayOpen
+            && ((event.type == sf::Event::MouseButtonPressed
+                    && event.mouseButton.button == sf::Mouse::Left)
+                || (event.type == sf::Event::MouseMoved
+                    && sf::Mouse::isButtonPressed(sf::Mouse::Left)));
+        if (m_source && !overlayOwnsLeftDrag)
+        {
+            m_source->processEvent(event, m_mouseWorld);
+        }
         if (m_processor && !displayOpen)
         {
-            m_processor->processEvent(event, m_mouseWorld);
+            if (overlayUsesCanvasInput)
+            {
+                m_overlay->processOverlayEvent(event, m_mouseWorld, *m_processor);
+            }
+            else
+            {
+                m_processor->processEvent(event, m_mouseWorld);
+            }
         }
     }
 
@@ -145,7 +174,17 @@ void Scene_Main::sUserInput()
         {
             sProcessEvent(displayEvent);
 
-            if (m_processor) { m_processor->processEvent(displayEvent, m_mouseDisplay); }
+            if (m_processor)
+            {
+                if (overlayUsesCanvasInput)
+                {
+                    m_overlay->processOverlayEvent(displayEvent, m_mouseDisplay, *m_processor);
+                }
+                else
+                {
+                    m_processor->processEvent(displayEvent, m_mouseDisplay);
+                }
+            }
 
             // happens whenever the mouse is being moved
             if (displayEvent.type == sf::Event::MouseMoved)
@@ -166,14 +205,15 @@ void Scene_Main::sRender()
 
     if (m_source) { m_source->render(mainWindow()); }
     if (!m_processor) { return; }
-    if (m_game->displayWindow().isOpen())
+    sf::RenderWindow & target = m_game->displayWindow().isOpen()
+        ? displayWindow()
+        : mainWindow();
+    m_processor->render(target);
+    if (m_overlay)
     {
-        m_processor->render(displayWindow());
+        m_overlay->renderOverlay(target, *m_processor);
     }
-    else
-    {
-        m_processor->render(mainWindow());
-    }
+    m_processor->projector().render(target);
 }
 
 void Scene_Main::renderUI()
@@ -263,6 +303,36 @@ void Scene_Main::renderUI()
         ImGui::EndTabItem();
     }
 
+    // Overlay
+
+    if (ImGui::BeginTabItem("Overlay"))
+    {
+        if (ImGui::BeginCombo("Selected Overlay", m_overlayID.c_str()))
+        {
+            for (auto & [name, _] : m_overlayMap)
+            {
+                bool selected = name == m_overlayID;
+                if (ImGui::Selectable(name.c_str(), &selected))
+                {
+                    setOverlay(name);
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::Separator();
+
+        if (m_overlay)
+        {
+            if (m_overlay->usesCanvasInput())
+            {
+                ImGui::TextWrapped("Left-click canvas input controls the selected overlay.");
+            }
+            m_overlay->imguiOverlay();
+        }
+
+        ImGui::EndTabItem();
+    }
+
     ImGui::EndTabBar();
     ImGui::End();
 }
@@ -276,9 +346,11 @@ void Scene_Main::save()
 
     if (m_source) { m_source->save(m_save); }
     if (m_processor) { m_processor->save(m_save); }
+    if (m_overlay) { m_overlay->saveOverlay(m_save); }
 
     m_save.source = m_sourceID;
     m_save.processor = m_processorID;
+    m_save.overlay = m_overlayID;
 
     m_save.saveToFile("saves/" + m_saveFile);
 }
@@ -296,11 +368,34 @@ void Scene_Main::load()
     std::string file = "saves/" + m_saveFile;
 
     // First find and initialize the source and processor
+    m_save.overlay = "None";
     m_save.loadFromFile(file);
+
+    // Migrate saves for processors that moved to overlays.
+    if (m_save.processor == "Balls")
+    {
+        m_save.processor = "Colorizer";
+        m_save.overlay = "Balls";
+    }
+    if (m_save.processor == "WaterFlow")
+    {
+        m_save.processor = "Colorizer";
+        m_save.overlay = "WaterFlow";
+    }
+    if (m_save.processor == "Vectors")
+    {
+        m_save.processor = "Colorizer";
+        m_save.overlay = "Vectors";
+    }
+    if (m_save.overlay == "Lava Rocks")
+    {
+        m_save.overlay = "Balls";
+    }
 
     // This initializes the source and processor, even if there was no save file
     setSource(m_save.source);
     setProcessor(m_save.processor);
+    setOverlay(m_save.overlay);
 }
 
 void Scene_Main::setSource(const std::string & source)
@@ -338,6 +433,26 @@ void Scene_Main::setProcessor(const std::string & processor)
     {
         m_processor->init();
         m_processor->load(m_save);
+    }
+}
+
+void Scene_Main::setOverlay(const std::string & overlay)
+{
+    if (m_overlay) { m_overlay->saveOverlay(m_save); }
+    m_overlayID = overlay;
+    if (m_overlayMap.contains(overlay))
+    {
+        m_overlay = m_overlayMap.at(overlay)();
+    }
+    else
+    {
+        m_overlayID = "None";
+        m_overlay = m_overlayMap.at("None")();
+    }
+    if (m_overlay)
+    {
+        m_overlay->initOverlay();
+        m_overlay->loadOverlay(m_save);
     }
 }
 

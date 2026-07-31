@@ -22,6 +22,11 @@ void Processor_WaterFlow::init()
     reloadShader();
 }
 
+SandBoxProjector & Processor_WaterFlow::activeProjector()
+{
+    return m_overlayProcessor ? m_overlayProcessor->projector() : m_projector;
+}
+
 void Processor_WaterFlow::reloadShader()
 {
     m_shaderLoaded = m_shader.loadFromFile(WaterShaderPath, sf::Shader::Fragment);
@@ -241,7 +246,7 @@ void Processor_WaterFlow::buildImage(const cv::Mat & terrain)
 
     std::vector<cv::Mat> channels = { terrain8u, wetness8u, currentWater8u, alpha };
     cv::merge(channels, m_encodedImage);
-    m_projector.project(m_encodedImage, m_projectedImage);
+    activeProjector().project(m_encodedImage, m_projectedImage);
 
     if (m_projectedImage.empty())
     {
@@ -257,6 +262,11 @@ void Processor_WaterFlow::buildImage(const cv::Mat & terrain)
 }
 
 void Processor_WaterFlow::imgui()
+{
+    imguiControls(true);
+}
+
+void Processor_WaterFlow::imguiControls(bool showProjector)
 {
     PROFILE_FUNCTION();
 
@@ -274,7 +284,7 @@ void Processor_WaterFlow::imgui()
         ImGui::TextUnformatted("Left mouse: release rain");
     }
 
-    ImGui::SliderFloat("Flow Speed", &m_flowSpeed, 0.0f, 40.0f);
+    ImGui::SliderFloat("Flow Speed", &m_flowSpeed, 0.0f, 200.0f);
     ImGui::SliderFloat("Evaporation", &m_evaporation, 0.0f, 1.0f);
     ImGui::SliderFloat("Water Depth Scale", &m_waterDepthScale, 0.01f, 1.0f);
     ImGui::SliderInt("Simulation Steps", &m_simulationSteps, 1, 8);
@@ -293,38 +303,45 @@ void Processor_WaterFlow::imgui()
         reloadShader();
     }
 
-    ImGui::Separator();
-    m_projector.imgui();
+    if (showProjector)
+    {
+        ImGui::Separator();
+        m_projector.imgui();
+    }
 }
 
 void Processor_WaterFlow::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
+    renderWater(window, false);
+}
 
+void Processor_WaterFlow::renderWater(sf::RenderWindow & window, bool overlayOnly)
+{
     if (m_hasFrame)
     {
-        m_sprite.setPosition(m_projector.getTransformedPosition());
-        const float scale = m_projector.getTransformedScale();
+        SandBoxProjector & projector = activeProjector();
+        m_sprite.setPosition(projector.getTransformedPosition());
+        const float scale = projector.getTransformedScale();
         m_sprite.setScale(scale, scale);
 
         if (m_shaderLoaded)
         {
             m_shader.setUniform("waterColor", sf::Glsl::Vec3(m_waterColor[0], m_waterColor[1], m_waterColor[2]));
             m_shader.setUniform("waterOpacity", m_waterOpacity);
+            m_shader.setUniform("overlayOnly", overlayOnly);
             window.draw(m_sprite, &m_shader);
         }
-        else
+        else if (!overlayOnly)
         {
             window.draw(m_sprite);
         }
     }
-
-    m_projector.render(window);
 }
 
 void Processor_WaterFlow::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
-    const bool draggingProjection = m_projector.processEvent(event, mouse);
+    const bool draggingProjection = activeProjector().processEvent(event, mouse);
 
     if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
     {
@@ -358,15 +375,16 @@ bool Processor_WaterFlow::mapMouseToTerrain(const sf::Vector2f & mouse, cv::Poin
         return false;
     }
 
-    const float scale = m_projector.getTransformedScale();
+    SandBoxProjector & projector = activeProjector();
+    const float scale = projector.getTransformedScale();
     if (!std::isfinite(scale) || scale <= 0.0f)
     {
         return false;
     }
 
-    const sf::Vector2f offset = mouse - m_projector.getTransformedPosition();
+    const sf::Vector2f offset = mouse - projector.getTransformedPosition();
     std::vector<cv::Point2f> point = { { offset.x / scale, offset.y / scale } };
-    const cv::Mat projection = m_projector.getProjectionMatrix();
+    const cv::Mat projection = projector.getProjectionMatrix();
     if (projection.empty())
     {
         return false;
@@ -407,4 +425,55 @@ void Processor_WaterFlow::processTopography(const IntermediateData & data)
 
     simulate(data.topography, data.deltaTime);
     buildImage(data.topography);
+}
+
+void Processor_WaterFlow::initOverlay()
+{
+    resetWater();
+    reloadShader();
+}
+
+void Processor_WaterFlow::imguiOverlay()
+{
+    imguiControls(false);
+}
+
+void Processor_WaterFlow::processTopographyOverlay(
+    const IntermediateData & data,
+    TopographyProcessor & processor)
+{
+    if (data.topography.empty() || data.topography.type() != CV_32F)
+    {
+        m_hasFrame = false;
+        return;
+    }
+
+    m_overlayProcessor = &processor;
+    simulate(data.topography, data.deltaTime);
+    buildImage(data.topography);
+}
+
+void Processor_WaterFlow::renderOverlay(
+    sf::RenderWindow & window,
+    TopographyProcessor & processor)
+{
+    m_overlayProcessor = &processor;
+    renderWater(window, true);
+}
+
+void Processor_WaterFlow::processOverlayEvent(
+    const sf::Event & event,
+    const sf::Vector2f & mouse,
+    TopographyProcessor & processor)
+{
+    m_overlayProcessor = &processor;
+    processEvent(event, mouse);
+}
+
+void Processor_WaterFlow::saveOverlay(Save &) const
+{
+}
+
+void Processor_WaterFlow::loadOverlay(const Save &)
+{
 }
