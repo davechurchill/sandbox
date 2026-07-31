@@ -8,7 +8,13 @@
 struct Particle
 {
     sf::Vector2<double> pos{ 0.0, 0.0 };
+    sf::Vector2<double> direction{ 1.0, 0.0 };
     std::vector<sf::Vector2<double>> trail{};
+    double height = 1.0;
+    double speedMultiplier = 1.0;
+    int avoidanceSide = 0;
+    bool traversingTerrain = false;
+    bool encounteredTraversalTerrain = false;
 
     Particle(double x, double y) : pos({ x, y })
     {
@@ -18,35 +24,30 @@ struct Particle
 class ParticleManager {
     std::vector<Particle> m_particles{};
     int m_framesUntilReset = 0;
-
-    bool checkSimilar(const cv::Mat& mat1, const cv::Mat& mat2, double tolerance = 0.1);
+    double m_spawnAccumulator = 0.0;
 
 public:
     enum class Algorithm {
-        CharneyEliassen,
-        BFS,
+        Steering,
         Count,
     };
 
-    static const char* AlgorithmNames[];
-
     struct AlgorithmParameters {
-        int cellSize;
         int trailLength;
-        int particleCount;
-        float terrainWeight;
+        float spawnRate;
         float particleSpeed;
         float particleAlpha;
+        float minimumWindHeight = 0.05f;
+        float maximumWindHeight = 1.0f;
+        float steeringDistance = 28.0f;
 
         AlgorithmParameters() = default;
 
-        AlgorithmParameters(int trailLength, int particleCount, float particleSpeed, int cellSize = 8, float terrainWeight = 0.2f, float particleAlpha = 0.85f) :
+        AlgorithmParameters(int trailLength, float spawnRate, float particleSpeed, float particleAlpha = 0.85f) :
             trailLength(trailLength),
-            particleCount(particleCount),
+            spawnRate(spawnRate),
             particleSpeed(particleSpeed),
-            particleAlpha(particleAlpha),
-            cellSize(cellSize),
-            terrainWeight(terrainWeight)
+            particleAlpha(particleAlpha)
         {
         }
     };
@@ -56,11 +57,10 @@ public:
     ParticleManager() {
         parameters = std::vector<AlgorithmParameters>((size_t)Algorithm::Count);
 
-        parameters[(size_t)Algorithm::CharneyEliassen] = AlgorithmParameters(8, 4000, 160.f);
-        parameters[(size_t)Algorithm::BFS] = AlgorithmParameters(4, 30000, 120.f);
+        parameters[(size_t)Algorithm::Steering] = AlgorithmParameters(4, 5000.0f, 120.f, 1.0f);
     };
 
-    void update(Algorithm algorithm, const cv::Mat& data, float deltaTime);
+    void update(const cv::Mat& data, float deltaTime);
 
     void reset(int frames = 1)
     {
@@ -70,5 +70,10 @@ public:
     const std::vector<Particle>& getParticles() const
     {
         return m_particles;
+    }
+
+    size_t getParticleCount() const
+    {
+        return m_particles.size();
     }
 };

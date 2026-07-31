@@ -3,6 +3,7 @@
 #include "Profiler.hpp"
 
 #include "Processor_Balls.h"
+#include "Overlay_BFS.h"
 #include "Overlay_Cloth.h"
 #include "Overlay_CloudSimulation.h"
 #include "Overlay_SmokeFire.h"
@@ -71,6 +72,7 @@ void Scene_Main::init()
     m_processorMap.emplace("None", []() {return nullptr; });
 
     registerOverlay<Processor_Nature>("Animals");
+    registerOverlay<Overlay_BFS>("BFS");
     registerOverlay<Processor_Balls>("Balls");
     registerOverlay<Overlay_Cloth>("Cloth Sheet");
     registerOverlay<Overlay_CloudSimulation>("Cloud Simulation");

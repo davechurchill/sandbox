@@ -14,7 +14,7 @@ namespace VectorField
     // BFS
     ////////////////////////
 
-    cv::Mat computeBFS(const cv::Mat& grid, int spacing, float terrainWeight);
+    cv::Mat computeBFS(const cv::Mat& grid, int spacing, float heightPenalty);
 
     ////////////////////////
     // Charney

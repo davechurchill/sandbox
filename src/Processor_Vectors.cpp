@@ -25,9 +25,9 @@ void Processor_Vectors::imguiControls(bool overlayOnly)
 {
     PROFILE_FUNCTION();
 
-    ImGui::Combo("Algorithm", &m_selectedAlgorithmIndex, ParticleManager::AlgorithmNames, (size_t)ParticleManager::Algorithm::Count);
-    auto selectedAlgorithm = (ParticleManager::Algorithm)m_selectedAlgorithmIndex;
-    auto& selectedParameters = m_particleManager.parameters[m_selectedAlgorithmIndex];
+    ImGui::TextUnformatted("Mode: Steering");
+    auto& selectedParameters = m_particleManager.parameters[
+        (size_t)ParticleManager::Algorithm::Steering];
 
     if (!overlayOnly)
     {
@@ -37,15 +37,29 @@ void Processor_Vectors::imguiControls(bool overlayOnly)
         ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
     }
 
-    ImGui::InputInt("Particles", &selectedParameters.particleCount);
+    ImGui::SliderFloat("Spawn Rate", &selectedParameters.spawnRate, 0.0f, 20000.0f, "%.0f / sec");
+    ImGui::Text("Active Particles: %zu", m_particleManager.getParticleCount());
     ImGui::SliderInt("Trail Length", &selectedParameters.trailLength, 1, 32);
-    ImGui::SliderFloat("Particle Speed", &selectedParameters.particleSpeed, 0.0f, 1000.0f, "%.1f");
+    ImGui::SliderFloat("Base Particle Speed", &selectedParameters.particleSpeed, 0.0f, 1000.0f, "%.1f");
     ImGui::SliderFloat("Particle Alpha", &selectedParameters.particleAlpha, 0.f, 1.f);
 
-    if (selectedAlgorithm == ParticleManager::Algorithm::BFS)
+    ImGui::SliderFloat("Steering Distance", &selectedParameters.steeringDistance, 4.0f, 128.0f, "%.0f px");
+    bool heightRangeChanged = ImGui::SliderFloat(
+        "Minimum Wind Height",
+        &selectedParameters.minimumWindHeight,
+        0.0f,
+        1.0f);
+    heightRangeChanged |= ImGui::SliderFloat(
+        "Maximum Wind Height",
+        &selectedParameters.maximumWindHeight,
+        0.0f,
+        1.0f);
+    selectedParameters.maximumWindHeight = std::max(
+        selectedParameters.maximumWindHeight,
+        selectedParameters.minimumWindHeight);
+    if (heightRangeChanged)
     {
-        ImGui::SliderInt("Cell Size", &selectedParameters.cellSize, 1, 128);
-        ImGui::SliderFloat("Terrain Weight", &selectedParameters.terrainWeight, 0.0f, 1.0f, "%.3f");
+        m_particleManager.reset();
     }
     
     if (ImGui::Button("Reset Particles"))
@@ -73,7 +87,8 @@ void Processor_Vectors::render(sf::RenderWindow& window)
 
 void Processor_Vectors::renderVectors(sf::RenderWindow & window, bool overlayOnly)
 {
-    auto& selectedParameters = m_particleManager.parameters[m_selectedAlgorithmIndex];
+    auto& selectedParameters = m_particleManager.parameters[
+        (size_t)ParticleManager::Algorithm::Steering];
 
     {
         PROFILE_SCOPE("Draw Transformed Image");
@@ -93,6 +108,7 @@ void Processor_Vectors::renderVectors(sf::RenderWindow & window, bool overlayOnl
         m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
         m_shader.setUniform("particleAlpha", selectedParameters.particleAlpha);
         m_shader.setUniform("overlayOnly", overlayOnly);
+        m_shader.setUniform("reverseDepthAlpha", true);
 
         window.draw(m_sfTransformedDepthSprite, &m_shader);
     }
@@ -126,8 +142,8 @@ void Processor_Vectors::processTopography(const IntermediateData& data)
     PROFILE_FUNCTION();
     const cv::Mat& top = data.topography;
 
-    auto selectedAlgorithm = (ParticleManager::Algorithm)m_selectedAlgorithmIndex;
-    auto& selectedParameters = m_particleManager.parameters[m_selectedAlgorithmIndex];
+    auto& selectedParameters = m_particleManager.parameters[
+        (size_t)ParticleManager::Algorithm::Steering];
 
     // Reset particles if data dimensions change
     static int dataSize[2] = { top.rows, top.cols };
@@ -139,23 +155,95 @@ void Processor_Vectors::processTopography(const IntermediateData& data)
     }
 
     cv::Mat particleGrid = cv::Mat(top.rows, top.cols, CV_8U, 0.0);
+    cv::Mat particleHeightGrid = cv::Mat(top.rows, top.cols, CV_8U, 0.0);
     cv::Mat m_cvTransformedParticleGrid32f;
+    cv::Mat transformedParticleHeightGrid;
 
     {
         PROFILE_SCOPE("Update Particles");
 
-        m_particleManager.update(selectedAlgorithm, top, data.deltaTime);
+        m_particleManager.update(top, data.deltaTime);
+
+        const auto drawParticle = [&]
+        (
+            int centerX,
+            int centerY,
+            int intensity,
+            double height,
+            double halfLength,
+            double halfWidth,
+            const sf::Vector2<double> & direction
+        )
+        {
+            const uint8_t heightValue = (uint8_t)std::round(
+                std::clamp(height, 0.0, 1.0) * 255.0);
+            const double directionLength = std::sqrt(
+                direction.x * direction.x + direction.y * direction.y);
+            const double directionX = directionLength > 0.000001
+                ? direction.x / directionLength
+                : 1.0;
+            const double directionY = directionLength > 0.000001
+                ? direction.y / directionLength
+                : 0.0;
+            const int extent = (int)std::ceil(halfLength + halfWidth);
+            for (int offsetY = -extent; offsetY <= extent; offsetY++)
+            {
+                for (int offsetX = -extent; offsetX <= extent; offsetX++)
+                {
+                    const double along = offsetX * directionX + offsetY * directionY;
+                    const double across = -offsetX * directionY + offsetY * directionX;
+                    if (std::abs(along) > halfLength || std::abs(across) > halfWidth)
+                    {
+                        continue;
+                    }
+                    const int x = centerX + offsetX;
+                    const int y = centerY + offsetY;
+                    if (x < 0 || y < 0 || x >= particleGrid.cols || y >= particleGrid.rows)
+                    {
+                        continue;
+                    }
+
+                    const uint8_t value = (uint8_t)std::clamp(
+                        intensity,
+                        0,
+                        255);
+                    uint8_t & existingValue = particleGrid.at<uint8_t>(y, x);
+                    uint8_t & existingHeight = particleHeightGrid.at<uint8_t>(y, x);
+                    if (value > existingValue
+                        || (value == existingValue && heightValue > existingHeight))
+                    {
+                        existingValue = value;
+                        existingHeight = heightValue;
+                    }
+                }
+            }
+        };
 
         for (auto& particle : m_particleManager.getParticles())
         {
+            const double particleHeight = particle.height;
             for (int i = 0; i < particle.trail.size(); ++i)
             {
                 auto& [x, y] = particle.trail[i];
-                particleGrid.at<uint8_t>((int)round(y), (int)round(x)) =
-                    255 - (selectedParameters.trailLength - i - 1) * 255 / (selectedParameters.trailLength + 1);
+                drawParticle(
+                    (int)std::round(x),
+                    (int)std::round(y),
+                    255 - (selectedParameters.trailLength - i - 1) * 255
+                        / (selectedParameters.trailLength + 1),
+                    particleHeight,
+                    0.45,
+                    0.45,
+                    particle.direction);
             }
 
-            particleGrid.at<uint8_t>((int)round(particle.pos.y), (int)round(particle.pos.x)) = 255;
+            drawParticle(
+                (int)std::round(particle.pos.x),
+                (int)std::round(particle.pos.y),
+                255,
+                particleHeight,
+                1.5 + particleHeight * 1.5,
+                0.55 + particleHeight * 0.50,
+                particle.direction);
         }
     }
     
@@ -164,6 +252,7 @@ void Processor_Vectors::processTopography(const IntermediateData& data)
         SandBoxProjector & projector = activeProjector();
         projector.project(top, m_cvTransformedDepthImage32f);
         projector.project(particleGrid, m_cvTransformedParticleGrid32f);
+        projector.project(particleHeightGrid, transformedParticleHeightGrid);
     }
 
     // Draw warped depth image
@@ -191,6 +280,7 @@ void Processor_Vectors::processTopography(const IntermediateData& data)
                 for (int j = 0; j < rgb.cols; ++j)
                 {
                     rgb.at<cv::Vec4b>(i, j)[1] = m_cvTransformedParticleGrid32f.at<uint8_t>(i, j);
+                    rgb.at<cv::Vec4b>(i, j)[2] = transformedParticleHeightGrid.at<uint8_t>(i, j);
                 }
             }
 

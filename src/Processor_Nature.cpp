@@ -755,7 +755,7 @@ void Processor_Nature::drawWolf(
     const sf::Vector2f & position,
     const sf::Vector2f & direction) const
 {
-    const float size = m_sheepSize * 1.12f;
+    const float size = m_sheepSize * 1.45f;
     const float directionLength = std::sqrt(direction.x * direction.x + direction.y * direction.y);
     const sf::Vector2f forward = directionLength > 0.001f
         ? direction / directionLength

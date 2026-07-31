@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="..\src\Overlay_BFS.cpp">
+      <Filter>processors\vectors</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\Overlay_Cloth.cpp">
       <Filter>processors</Filter>
     </ClCompile>
@@ -111,6 +114,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\Overlay_BFS.h">
+      <Filter>processors\vectors</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\Overlay_Cloth.h">
       <Filter>processors</Filter>
     </ClInclude>
@@ -240,6 +246,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\shaders\shader_ball_sphere.frag">
+      <Filter>shaders</Filter>
+    </None>
     <None Include="..\bin\shaders\shader_balls.frag">
       <Filter>shaders</Filter>
     </None>

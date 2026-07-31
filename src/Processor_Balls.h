@@ -40,6 +40,7 @@ class Processor_Balls : public TopographyProcessor, public TopographyOverlay
     sf::Texture         m_texture;
     sf::Sprite          m_sprite;
     sf::Shader          m_shader;
+    sf::Shader          m_ballShader;
 
     std::vector<Ball>   m_balls;
     std::vector<BallTrail> m_trails;
@@ -56,6 +57,7 @@ class Processor_Balls : public TopographyProcessor, public TopographyOverlay
     bool                m_randomResetPending = false;
     bool                m_hasFrame = false;
     bool                m_shaderLoaded = false;
+    bool                m_ballShaderLoaded = false;
     TopographyProcessor * m_overlayProcessor = nullptr;
 
     SandBoxProjector & activeProjector();
@@ -80,7 +82,8 @@ class Processor_Balls : public TopographyProcessor, public TopographyOverlay
         const sf::Vector2f & direction,
         const sf::Color & color,
         float rotation,
-        float visualScale) const;
+        float visualScale,
+        float movementAmount);
 
 public:
     void init();

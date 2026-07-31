@@ -6,6 +6,7 @@ uniform int numberOfContourLines;
 uniform float u_time;
 uniform float particleAlpha;
 uniform bool overlayOnly;
+uniform bool reverseDepthAlpha;
 
 void popsicle(float c);
 void blue(float c);
@@ -13,7 +14,7 @@ void red(float c);
 void terrain(float c);
 void animate(float b);
 void animatedWater(float c);
-void drawTrails(float p, vec2 coord);
+void drawTrails(float p, float particleHeight, vec2 coord);
 
 void main()
 {
@@ -21,6 +22,7 @@ void main()
 	vec4 pixel_color = texture2D(currentTexture, coord);
 	float c = pixel_color[0];
 	float p = pixel_color[1];
+	float particleHeight = pixel_color[2];
 
 	if (overlayOnly)
 	{
@@ -30,8 +32,18 @@ void main()
 			return;
 		}
 		float strength = clamp(p, 0.0, 1.0);
-		vec3 particleColor = vec3(0.8 + strength / 5.0, 0.8 + strength / 5.0, 1.0);
-		gl_FragColor = vec4(clamp(particleColor, 0.0, 1.0), strength * particleAlpha);
+		vec3 deepColor = vec3(0.055, 0.125, 0.230);
+		vec3 highColor = vec3(0.86, 0.91, 1.00);
+		vec3 particleColor = reverseDepthAlpha
+			? vec3(1.0)
+			: mix(deepColor, highColor, particleHeight);
+		float inverseHeight = 1.0 - clamp(particleHeight, 0.0, 1.0);
+		float depthVisibility = reverseDepthAlpha
+			? 0.04 + 1.50 * pow(inverseHeight, 1.70)
+			: 1.0;
+		gl_FragColor = vec4(
+			clamp(particleColor, 0.0, 1.0),
+			clamp(strength * particleAlpha * depthVisibility, 0.0, 1.0));
 		return;
 	}
 
@@ -90,7 +102,7 @@ void main()
 		}
 	}
 
-	drawTrails(p, coord);
+	drawTrails(p, particleHeight, coord);
 }
 
 void popsicle(float c) {
@@ -258,14 +270,24 @@ void animatedWater(float c)
 	}
 }
 
-void drawTrails(float p, vec2 coord)
+void drawTrails(float p, float particleHeight, vec2 coord)
 {
 	if (p > 0)
 	{
-		vec4 pixel_color = vec4(gl_FragColor[0], gl_FragColor[1], gl_FragColor[2], 1.0) * (1 - particleAlpha);
-		vec4 wind_color = vec4(0.8 + p / 5, 0.8 + p / 5, 1.0, 1.0) * particleAlpha;
-		vec4 result = pixel_color + wind_color;
-
-		gl_FragColor = vec4(result[0], result[1], result[2], 1.0);
+		vec3 deepColor = vec3(0.055, 0.125, 0.230);
+		vec3 highColor = vec3(0.86, 0.91, 1.00);
+		vec3 windColor = reverseDepthAlpha
+			? vec3(1.0)
+			: mix(deepColor, highColor, particleHeight);
+		float inverseHeight = 1.0 - clamp(particleHeight, 0.0, 1.0);
+		float depthVisibility = reverseDepthAlpha
+			? 0.04 + 1.50 * pow(inverseHeight, 1.70)
+			: 1.0;
+		float blendAmount = clamp(clamp(p, 0.0, 1.0)
+			* particleAlpha
+			* depthVisibility, 0.0, 1.0);
+		gl_FragColor = vec4(
+			mix(gl_FragColor.rgb, windColor, blendAmount),
+			1.0);
 	}
 }

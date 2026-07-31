@@ -12,6 +12,7 @@
 namespace
 {
     constexpr const char * BallsShaderPath = "shaders/shader_balls.frag";
+    constexpr const char * BallSphereShaderPath = "shaders/shader_ball_sphere.frag";
     constexpr float RadiansToDegrees = 57.29577951308232f;
     constexpr size_t MaxBallTrails = 400;
 
@@ -38,6 +39,9 @@ void Processor_Balls::reloadShader()
     {
         m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
     }
+    m_ballShaderLoaded = m_ballShader.loadFromFile(
+        BallSphereShaderPath,
+        sf::Shader::Fragment);
 }
 
 void Processor_Balls::resetBalls()
@@ -564,7 +568,8 @@ void Processor_Balls::drawBall(
     const sf::Vector2f & direction,
     const sf::Color & color,
     float rotation,
-    float visualScale) const
+    float visualScale,
+    float movementAmount)
 {
     const float radius = m_ballSize * 0.5f * visualScale;
     const float directionLength = std::sqrt(direction.x * direction.x + direction.y * direction.y);
@@ -579,6 +584,50 @@ void Processor_Balls::drawBall(
     shadow.setScale(1.18f, 0.72f);
     shadow.setFillColor(sf::Color(0, 0, 0, 105));
     window.draw(shadow);
+
+    if (m_ballShaderLoaded)
+    {
+        if (m_lavaAppearance)
+        {
+            const float glowRadius = radius * 1.55f;
+            sf::CircleShape glow(glowRadius, 36);
+            glow.setOrigin(glowRadius, glowRadius);
+            glow.setPosition(position);
+            glow.setFillColor(sf::Color(255, 45, 0, 68));
+            window.draw(glow, sf::BlendAdd);
+        }
+
+        sf::CircleShape shadedBall(radius, 64);
+        shadedBall.setOrigin(radius, radius);
+        shadedBall.setPosition(position);
+        shadedBall.setFillColor(sf::Color::White);
+
+        const sf::Vector2i centerPixel = window.mapCoordsToPixel(position);
+        const sf::Vector2i radiusPixel = window.mapCoordsToPixel(
+            position + sf::Vector2f(radius, 0.0f));
+        const float shaderRadius = std::max(1.0f, std::sqrt(
+            (float)((radiusPixel.x - centerPixel.x) * (radiusPixel.x - centerPixel.x)
+                + (radiusPixel.y - centerPixel.y) * (radiusPixel.y - centerPixel.y))));
+        m_ballShader.setUniform("ballCenter", sf::Glsl::Vec2(
+            (float)centerPixel.x,
+            (float)window.getSize().y - centerPixel.y));
+        m_ballShader.setUniform("ballRadius", shaderRadius);
+        m_ballShader.setUniform("baseColor", sf::Glsl::Vec4(
+            color.r / 255.0f,
+            color.g / 255.0f,
+            color.b / 255.0f,
+            1.0f));
+        m_ballShader.setUniform("rotation", rotation);
+        m_ballShader.setUniform("movementDirection", sf::Glsl::Vec2(
+            forward.x,
+            -forward.y));
+        m_ballShader.setUniform("movementAmount", movementAmount);
+        m_ballShader.setUniform("lavaMode", m_lavaAppearance ? 1 : 0);
+        static sf::Clock shaderClock;
+        m_ballShader.setUniform("u_time", shaderClock.getElapsedTime().asSeconds());
+        window.draw(shadedBall, &m_ballShader);
+        return;
+    }
 
     if (m_lavaAppearance)
     {
@@ -618,15 +667,18 @@ void Processor_Balls::drawBall(
     ball.setOutlineThickness(std::max(1.0f, radius * 0.10f));
     window.draw(ball);
 
-    sf::RectangleShape rollingMark({ radius * 1.28f, std::max(1.5f, radius * 0.14f) });
-    rollingMark.setOrigin(rollingMark.getSize().x * 0.5f, rollingMark.getSize().y * 0.5f);
-    rollingMark.setPosition(position);
-    rollingMark.setRotation(heading + rotation);
-    rollingMark.setFillColor(sf::Color(
-        (sf::Uint8)(color.r * 0.55f),
-        (sf::Uint8)(color.g * 0.55f),
-        (sf::Uint8)(color.b * 0.55f)));
-    window.draw(rollingMark);
+    if (movementAmount > 0.0f)
+    {
+        sf::RectangleShape rollingMark({ radius * 0.82f, std::max(1.5f, radius * 0.14f) });
+        rollingMark.setOrigin(0.0f, rollingMark.getSize().y * 0.5f);
+        rollingMark.setPosition(position);
+        rollingMark.setRotation(heading);
+        rollingMark.setFillColor(sf::Color(
+            (sf::Uint8)(color.r * 0.55f),
+            (sf::Uint8)(color.g * 0.55f),
+            (sf::Uint8)(color.b * 0.55f)));
+        window.draw(rollingMark);
+    }
 
     sf::CircleShape highlight(std::max(1.5f, radius * 0.20f), 20);
     highlight.setOrigin(highlight.getRadius(), highlight.getRadius());
@@ -748,7 +800,12 @@ void Processor_Balls::renderBalls(sf::RenderWindow & window)
             { ahead.x - point.x, ahead.y - point.y },
             m_balls[index].color,
             m_balls[index].rotation,
-            visualScale);
+            visualScale,
+            std::sqrt(
+                m_balls[index].velocity.x * m_balls[index].velocity.x
+                + m_balls[index].velocity.y * m_balls[index].velocity.y) > 0.05f
+                ? 1.0f
+                : 0.0f);
     }
 }
 
@@ -888,6 +945,7 @@ void Processor_Balls::processTopography(const IntermediateData & data)
 
 void Processor_Balls::initOverlay()
 {
+    reloadShader();
     m_balls.clear();
     m_trails.clear();
     m_defaultBallCreated = false;
