@@ -6,6 +6,7 @@
 #include "Processor_Heat.h"
 #include "Processor_Vectors.h"
 #include "Source_Camera.h"
+#include "Source_PaintBrush.h"
 #include "Source_Perlin.h"
 #include "Source_Snapshot.h"
 
@@ -33,6 +34,7 @@ void Scene_Main::init()
     ImGui::GetIO().FontGlobalScale = 2.0f;
 
     registerSource<Source_Camera>("Camera");
+    registerSource<Source_PaintBrush>("PaintBrush");
     registerSource<Source_Perlin>("Perlin");
     registerSource<Source_Snapshot>("Snapshot");
 

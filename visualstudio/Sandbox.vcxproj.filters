@@ -64,6 +64,9 @@
     <ClCompile Include="..\src\Source_Camera.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Source_PaintBrush.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\Source_Perlin.cpp">
       <Filter>sources</Filter>
     </ClCompile>
@@ -146,6 +149,9 @@
       <Filter>sources</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Source_Camera.h">
+      <Filter>sources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_PaintBrush.h">
       <Filter>sources</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Source_Perlin.h">

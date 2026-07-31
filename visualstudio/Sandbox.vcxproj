@@ -25,6 +25,7 @@
     <ClCompile Include="..\src\GoodAssert.cpp" />
     <ClCompile Include="..\src\Processor_Vectors.cpp" />
     <ClCompile Include="..\src\Source_Camera.cpp" />
+    <ClCompile Include="..\src\Source_PaintBrush.cpp" />
     <ClCompile Include="..\src\Processor_Colorizer.cpp" />
     <ClCompile Include="..\src\DataWarper.cpp" />
     <ClCompile Include="..\src\GameEngine.cpp" />
@@ -54,6 +55,7 @@
     <ClInclude Include="..\src\Sandbox.h" />
     <ClInclude Include="..\src\Save.hpp" />
     <ClInclude Include="..\src\Source_Camera.h" />
+    <ClInclude Include="..\src\Source_PaintBrush.h" />
     <ClInclude Include="..\src\CameraFilters.hpp" />
     <ClInclude Include="..\src\Processor_Colorizer.h" />
     <ClInclude Include="..\src\DataWarper.h" />
