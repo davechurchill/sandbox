@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="..\src\Processor_Balls.cpp">
+      <Filter>processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\imgui\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
@@ -37,6 +40,12 @@
     <ClCompile Include="..\src\Processor_Heat.cpp">
       <Filter>processors\heat</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Processor_TerrainLighting.cpp">
+      <Filter>processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Processor_Nature.cpp">
+      <Filter>processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\HeatGrid.cpp">
       <Filter>processors\heat</Filter>
     </ClCompile>
@@ -61,6 +70,9 @@
     <ClCompile Include="..\src\Processor_Vectors.cpp">
       <Filter>processors\vectors</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Processor_WaterFlow.cpp">
+      <Filter>processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\Source_Camera.cpp">
       <Filter>sources</Filter>
     </ClCompile>
@@ -78,6 +90,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\Processor_Balls.h">
+      <Filter>processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\Scene.h">
       <Filter>scenes</Filter>
     </ClInclude>
@@ -107,6 +122,12 @@
     </ClInclude>
     <ClInclude Include="..\src\Processor_Heat.h">
       <Filter>processors\heat</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Processor_TerrainLighting.h">
+      <Filter>processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Processor_Nature.h">
+      <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\HeatGrid.h">
       <Filter>processors\heat</Filter>
@@ -145,6 +166,9 @@
     <ClInclude Include="..\src\Processor_Vectors.h">
       <Filter>processors\vectors</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Processor_WaterFlow.h">
+      <Filter>processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\TopographySource.h">
       <Filter>sources</Filter>
     </ClInclude>
@@ -171,13 +195,25 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\shaders\shader_balls.frag">
+      <Filter>shaders</Filter>
+    </None>
     <None Include="..\bin\shaders\shader_contour_color.frag">
       <Filter>shaders</Filter>
     </None>
     <None Include="..\bin\shaders\shader_heat.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\bin\shaders\shader_terrain_lighting.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\shader_nature.frag">
+      <Filter>shaders</Filter>
+    </None>
     <None Include="..\bin\shaders\shader_vector_fields.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\shader_water_flow.frag">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

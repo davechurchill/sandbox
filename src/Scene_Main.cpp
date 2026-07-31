@@ -2,9 +2,13 @@
 #include "GameEngine.h"
 #include "Profiler.hpp"
 
+#include "Processor_Balls.h"
 #include "Processor_Colorizer.h"
 #include "Processor_Heat.h"
+#include "Processor_Nature.h"
+#include "Processor_TerrainLighting.h"
 #include "Processor_Vectors.h"
+#include "Processor_WaterFlow.h"
 #include "Source_Camera.h"
 #include "Source_PaintBrush.h"
 #include "Source_Perlin.h"
@@ -38,9 +42,13 @@ void Scene_Main::init()
     registerSource<Source_Perlin>("Perlin");
     registerSource<Source_Snapshot>("Snapshot");
 
+    registerProcessor<Processor_Balls>("Balls");
     registerProcessor<Processor_Colorizer>("Colorizer");
     registerProcessor<Processor_Heat>("Heat");
+    registerProcessor<Processor_Nature>("Nature");
+    registerProcessor<Processor_TerrainLighting>("TerrainLighting");
     registerProcessor<Processor_Vectors>("Vectors");
+    registerProcessor<Processor_WaterFlow>("WaterFlow");
     m_processorMap.emplace("None", []() {return nullptr; });
 }
 
@@ -95,17 +103,7 @@ void Scene_Main::sProcessEvent(const sf::Event& event)
 
         case sf::Keyboard::F:
         {
-            auto & display = displayWindow();
-            if (!m_game->displayWindow().isOpen())
-            {
-                m_game->displayWindow().create(sf::VideoMode(1920, 1080), "Display", sf::Style::None);
-                m_game->displayWindow().setPosition({ -1920, 0 });
-            }
-            else
-            {
-                m_game->displayWindow().close();
-                m_switchWindows = false;
-            }
+            toggleDisplayWindow();
         }
         }
     }
@@ -184,8 +182,12 @@ void Scene_Main::renderUI()
 
     if (ImGui::BeginMainMenuBar())
     {
-        if (ImGui::BeginMenu("Options"))
+        if (ImGui::BeginMenu("Menu"))
         {
+            if (ImGui::MenuItem("Toggle Display Window", "F"))
+            {
+                toggleDisplayWindow();
+            }
             if (ImGui::MenuItem("Save Settings"))
             {
                 save();
@@ -336,6 +338,20 @@ void Scene_Main::setProcessor(const std::string & processor)
     {
         m_processor->init();
         m_processor->load(m_save);
+    }
+}
+
+void Scene_Main::toggleDisplayWindow()
+{
+    if (!m_game->displayWindow().isOpen())
+    {
+        m_game->displayWindow().create(sf::VideoMode(1920, 1080), "Display", sf::Style::None);
+        m_game->displayWindow().setPosition({ -1920, 0 });
+    }
+    else
+    {
+        m_game->displayWindow().close();
+        m_switchWindows = false;
     }
 }
 

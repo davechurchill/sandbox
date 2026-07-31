@@ -19,11 +19,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\Processor_Balls.cpp" />
     <ClCompile Include="..\src\HeatGrid.cpp" />
     <ClCompile Include="..\src\ParticleManager.cpp" />
     <ClCompile Include="..\src\Processor_Heat.cpp" />
+    <ClCompile Include="..\src\Processor_Nature.cpp" />
+    <ClCompile Include="..\src\Processor_TerrainLighting.cpp" />
     <ClCompile Include="..\src\GoodAssert.cpp" />
     <ClCompile Include="..\src\Processor_Vectors.cpp" />
+    <ClCompile Include="..\src\Processor_WaterFlow.cpp" />
     <ClCompile Include="..\src\Source_Camera.cpp" />
     <ClCompile Include="..\src\Source_PaintBrush.cpp" />
     <ClCompile Include="..\src\Processor_Colorizer.cpp" />
@@ -43,15 +47,19 @@
     <ClCompile Include="..\src\Tools.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\Processor_Balls.h" />
     <ClInclude Include="..\src\Grid.hpp" />
     <ClInclude Include="..\src\HeatGrid.h" />
     <ClInclude Include="..\src\MarkerData.h" />
     <ClInclude Include="..\src\MarkerDetector.hpp" />
     <ClInclude Include="..\src\ParticleManager.h" />
     <ClInclude Include="..\src\Processor_Heat.h" />
+    <ClInclude Include="..\src\Processor_Nature.h" />
+    <ClInclude Include="..\src\Processor_TerrainLighting.h" />
     <ClInclude Include="..\src\GoodAssert.h" />
     <ClInclude Include="..\src\Logger.hpp" />
     <ClInclude Include="..\src\Processor_Vectors.h" />
+    <ClInclude Include="..\src\Processor_WaterFlow.h" />
     <ClInclude Include="..\src\Sandbox.h" />
     <ClInclude Include="..\src\Save.hpp" />
     <ClInclude Include="..\src\Source_Camera.h" />
@@ -77,9 +85,13 @@
     <ClInclude Include="..\src\ViewController.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\bin\shaders\shader_balls.frag" />
     <None Include="..\bin\shaders\shader_contour_color.frag" />
     <None Include="..\bin\shaders\shader_heat.frag" />
+    <None Include="..\bin\shaders\shader_nature.frag" />
+    <None Include="..\bin\shaders\shader_terrain_lighting.frag" />
     <None Include="..\bin\shaders\shader_vector_fields.frag" />
+    <None Include="..\bin\shaders\shader_water_flow.frag" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{08A10BC2-2DCF-4F95-A0B2-BA931971AEEA}</ProjectGuid>

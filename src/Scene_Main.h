@@ -44,6 +44,7 @@ class Scene_Main : public Scene
 
     void setSource(const std::string & source);
     void setProcessor(const std::string & processor);
+    void toggleDisplayWindow();
 
     void saveDataDump();
     

@@ -6,6 +6,12 @@
 #include <algorithm>
 #include <cmath>
 
+namespace
+{
+    constexpr float MinimumDrawableHeight = 6.0f / 255.0f;
+    constexpr float MaximumDrawableHeight = 252.0f / 255.0f;
+}
+
 void Source_PaintBrush::init()
 {
     resetCanvas();
@@ -46,7 +52,10 @@ void Source_PaintBrush::applyBrush(const sf::Vector2f & position, float directio
             if (distanceSquared <= radiusSquared)
             {
                 const float weight = std::exp(-distanceSquared / gaussianDenominator);
-                row[x] = std::clamp(row[x] + direction * m_paintAmount * weight, 0.0f, 1.0f);
+                row[x] = std::clamp(
+                    row[x] + direction * m_paintAmount * weight,
+                    MinimumDrawableHeight,
+                    MaximumDrawableHeight);
             }
         }
     }

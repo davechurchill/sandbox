@@ -1,5 +1,5 @@
 source Snapshot
-processor Colorizer
+processor Nature
 align 0
 gaussianBlur 1
 maxDistance 1.181
@@ -19,7 +19,8 @@ holeFill 1
 warpPoints 204 84 708 91 200 347 690 361 
 applyHeightAdjustment 0
 planarPoints 150 0 75 150 0 75 
-projectionPoints 34 90 1646 230 45 1075 1857 1076 
+dataSize 1
+projectionPoints 34 90 1829 77 45 1075 1857 1076 
 drawLines 1
 selectedShaderIndex 4
 drawContours 1
