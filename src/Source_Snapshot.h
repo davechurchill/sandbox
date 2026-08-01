@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Save.hpp"
-#include "TopographySource.h"
+#include "TopographySource.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>

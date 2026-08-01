@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="..\src\Overlay_BFS.cpp">
@@ -165,10 +165,10 @@
     <ClInclude Include="..\src\Save.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TopographyProcessor.h">
+    <ClInclude Include="..\src\TopographyProcessor.hpp">
       <Filter>processors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TopographyOverlay.h">
+    <ClInclude Include="..\src\TopographyOverlay.hpp">
       <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Processor_Heat.h">
@@ -213,7 +213,7 @@
     <ClInclude Include="..\src\Grid.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Sandbox.h" />
+    <ClInclude Include="..\src\Sandbox.hpp" />
     <ClInclude Include="..\src\ParticleManager.h">
       <Filter>processors\vectors</Filter>
     </ClInclude>
@@ -223,7 +223,7 @@
     <ClInclude Include="..\src\Processor_WaterFlow.h">
       <Filter>processors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TopographySource.h">
+    <ClInclude Include="..\src\TopographySource.hpp">
       <Filter>sources</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Source_Camera.h">
@@ -244,7 +244,7 @@
     <ClInclude Include="..\src\MarkerDetector.hpp">
       <Filter>camera</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\MarkerData.h">
+    <ClInclude Include="..\src\MarkerData.hpp">
       <Filter>camera</Filter>
     </ClInclude>
     <ClInclude Include="..\src\VectorField.h">

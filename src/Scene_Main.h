@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Scene.h"
-#include "TopographySource.h"
-#include "TopographyProcessor.h"
-#include "TopographyOverlay.h"
+#include "TopographySource.hpp"
+#include "TopographyProcessor.hpp"
+#include "TopographyOverlay.hpp"
 #include "ViewController.hpp"
 #include "Save.hpp"
 

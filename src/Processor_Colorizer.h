@@ -3,7 +3,7 @@
 #include "Profiler.hpp"
 #include "SandboxProjector.h"
 #include "Tools.h"
-#include "TopographyProcessor.h"
+#include "TopographyProcessor.hpp"
 
 class Processor_Colorizer : public TopographyProcessor 
 {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Save.hpp"
-#include "TopographySource.h"
+#include "TopographySource.hpp"
 #include "Perlin.hpp"
 #include "Grid.hpp"
 

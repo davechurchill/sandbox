@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TopographyProcessor.h"
+#include "TopographyProcessor.hpp"
 
 class TopographyOverlay
 {

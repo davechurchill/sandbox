@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -66,7 +66,7 @@
     <ClInclude Include="..\src\Processor_ForestFire.h" />
     <ClInclude Include="..\src\Grid.hpp" />
     <ClInclude Include="..\src\HeatGrid.h" />
-    <ClInclude Include="..\src\MarkerData.h" />
+    <ClInclude Include="..\src\MarkerData.hpp" />
     <ClInclude Include="..\src\MarkerDetector.hpp" />
     <ClInclude Include="..\src\ParticleManager.h" />
     <ClInclude Include="..\src\Processor_Heat.h" />
@@ -77,7 +77,7 @@
     <ClInclude Include="..\src\Logger.hpp" />
     <ClInclude Include="..\src\Processor_Vectors.h" />
     <ClInclude Include="..\src\Processor_WaterFlow.h" />
-    <ClInclude Include="..\src\Sandbox.h" />
+    <ClInclude Include="..\src\Sandbox.hpp" />
     <ClInclude Include="..\src\Save.hpp" />
     <ClInclude Include="..\src\Source_Camera.h" />
     <ClInclude Include="..\src\Source_PaintBrush.h" />
@@ -96,9 +96,9 @@
     <ClInclude Include="..\src\Source_Waves.h" />
     <ClInclude Include="..\src\Timer.hpp" />
     <ClInclude Include="..\src\Tools.h" />
-    <ClInclude Include="..\src\TopographyProcessor.h" />
-    <ClInclude Include="..\src\TopographyOverlay.h" />
-    <ClInclude Include="..\src\TopographySource.h" />
+    <ClInclude Include="..\src\TopographyProcessor.hpp" />
+    <ClInclude Include="..\src\TopographyOverlay.hpp" />
+    <ClInclude Include="..\src\TopographySource.hpp" />
     <ClCompile Include="..\src\VectorField.cpp" />
     <ClInclude Include="..\src\VectorField.h" />
     <ClInclude Include="..\src\ViewController.hpp" />

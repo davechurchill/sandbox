@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TopographyOverlay.h"
+#include "TopographyOverlay.hpp"
 
 #include <opencv2/core.hpp>
 #include <SFML/Graphics.hpp>

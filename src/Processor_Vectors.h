@@ -3,8 +3,8 @@
 #include "ParticleManager.h"
 #include "Profiler.hpp"
 #include "SandboxProjector.h"
-#include "TopographyOverlay.h"
-#include "TopographyProcessor.h"
+#include "TopographyOverlay.hpp"
+#include "TopographyProcessor.hpp"
 
 class Processor_Vectors : public TopographyProcessor, public TopographyOverlay
 {

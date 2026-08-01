@@ -1,8 +1,8 @@
 #pragma once
 
 #include "SandboxProjector.h"
-#include "TopographyOverlay.h"
-#include "TopographyProcessor.h"
+#include "TopographyOverlay.hpp"
+#include "TopographyProcessor.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>

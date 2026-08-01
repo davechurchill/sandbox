@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Save.hpp"
-#include "MarkerData.h"
+#include "MarkerData.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>

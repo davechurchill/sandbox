@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TopographySource.h"
+#include "TopographySource.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TopographySource.h"
+#include "TopographySource.hpp"
 #include "CameraFilters.hpp"
 #include "DataWarper.h"
 #include "MarkerDetector.hpp"
