@@ -1,5 +1,6 @@
 #include "Processor_Nature.h"
 #include "Profiler.hpp"
+#include "Tools.h"
 
 #include "imgui.h"
 
@@ -70,19 +71,23 @@ void Processor_Nature::render(sf::RenderWindow & window)
 
     if (m_hasFrame)
     {
+        m_sprite.setPosition(projector().getTransformedPosition());
+        const float scale = projector().getTransformedScale();
+        m_sprite.setScale({ scale, scale });
+
         if (m_shaderLoaded)
         {
-            const sf::Vector2u textureSize = m_surface.texture().getSize();
+            const sf::Vector2u textureSize = m_texture.getSize();
             m_shader.setUniform(
                 "texelSize",
                 sf::Glsl::Vec2(1.0f / textureSize.x, 1.0f / textureSize.y));
             m_shader.setUniform("terrainType", m_terrainType);
             m_shader.setUniform("waterLevel", m_waterLevel);
-            m_surface.draw(window, projector(), &m_shader);
+            window.draw(m_sprite, &m_shader);
         }
         else
         {
-            m_surface.draw(window, projector());
+            window.draw(m_sprite);
         }
     }
 }
@@ -121,9 +126,13 @@ void Processor_Nature::processTopography(const IntermediateData & data)
     m_topography = data.topography;
     m_topographySize = data.topography.size();
 
-    m_hasFrame = m_surface.update(
+    m_hasFrame = Tools::updateProjectedTexture(
         m_topography,
         projector(),
+        m_projectedTopography,
+        m_image,
+        m_texture,
+        m_sprite,
         true,
         "Failed to load the nature terrain texture.\n");
 }

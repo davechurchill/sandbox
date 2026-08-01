@@ -2,8 +2,11 @@
     "Scene_Main": {
         "m_sourceID": "Snapshot",
         "m_processorID": "Nature",
-        "m_overlayID": "None",
         "m_doubleSizeUI": false
+    },
+    "Overlays": {
+        "m_enabledOverlayIDs": [],
+        "m_selectedOverlayID": "Animals"
     },
     "Source_Camera": {
         "m_alignment": 0,

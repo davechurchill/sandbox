@@ -1,6 +1,7 @@
 #include "Scene_Main.h"
 #include "GameEngine.h"
 #include "Profiler.hpp"
+#include "Tools.h"
 
 #include <algorithm>
 #include <chrono>
@@ -371,9 +372,9 @@ void Scene_Main::sUserInput()
         }
         else if (m_session.processor() && !displayOpen)
         {
-            if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
+            if (m_activeControlTab == ControlTab::Overlay && m_session.inputOverlay())
             {
-                m_session.overlay()->processOverlayEvent(
+                m_session.inputOverlay()->processOverlayEvent(
                     event,
                     m_mouseWorld,
                     *m_session.processor());
@@ -421,9 +422,9 @@ void Scene_Main::sUserInput()
             }
             else if (m_session.processor())
             {
-                if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
+                if (m_activeControlTab == ControlTab::Overlay && m_session.inputOverlay())
                 {
-                    m_session.overlay()->processOverlayEvent(
+                    m_session.inputOverlay()->processOverlayEvent(
                         displayEvent,
                         m_mouseDisplay,
                         *m_session.processor());
@@ -457,21 +458,26 @@ void Scene_Main::sRender()
         ? displayWindow()
         : mainWindow();
     if (showProjectedDepth
-        && m_projectedDepthSurface.update(
+        && Tools::updateProjectedTexture(
             m_session.topography(),
             m_session.projector(),
+            m_projectedDepthImage,
+            m_projectedDepthSfImage,
+            m_projectedDepthTexture,
+            m_projectedDepthSprite,
             false,
             "Failed to load the projected depth-map texture.\n"))
     {
-        m_projectedDepthSurface.draw(target, m_session.projector());
+        m_projectedDepthSprite.setPosition(
+            m_session.projector().getTransformedPosition());
+        const float scale = m_session.projector().getTransformedScale();
+        m_projectedDepthSprite.setScale({ scale, scale });
+        target.draw(m_projectedDepthSprite);
     }
     if (m_session.processor() && m_session.projector().projectionVisible())
     {
         m_session.processor()->render(target);
-        if (m_session.overlay())
-        {
-            m_session.overlay()->renderOverlay(target, *m_session.processor());
-        }
+        m_session.renderOverlays(target);
     }
     m_session.projector().render(target);
 }
@@ -592,8 +598,8 @@ void Scene_Main::renderUI()
         {
             for (const std::string & name : m_session.overlayNames())
             {
-                bool selected = name == m_session.overlayID();
-                if (ImGui::Selectable(name.c_str(), &selected))
+                const bool selected = name == m_session.overlayID();
+                if (ImGui::Selectable(name.c_str(), selected))
                 {
                     m_session.setOverlay(name);
                 }
@@ -602,13 +608,20 @@ void Scene_Main::renderUI()
         }
         ImGui::Separator();
 
-        if (m_session.overlay())
+        if (TopographyOverlay * overlay = m_session.overlay())
         {
-            if (m_session.overlay()->usesCanvasInput())
+            bool enabled = m_session.overlayEnabled(m_session.overlayID());
+            if (ImGui::Checkbox("Enabled", &enabled))
+            {
+                m_session.setOverlayEnabled(m_session.overlayID(), enabled);
+            }
+            ImGui::Separator();
+
+            if (overlay->usesCanvasInput())
             {
                 ImGui::TextWrapped("Left-click canvas input controls the selected overlay.");
             }
-            m_session.overlay()->imguiOverlay();
+            overlay->imguiOverlay();
         }
 
         ImGui::EndTabItem();

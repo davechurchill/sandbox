@@ -1,6 +1,7 @@
 #include "Overlay_ContourLines.h"
 
 #include "Profiler.hpp"
+#include "Tools.h"
 #include "imgui.h"
 
 #include <algorithm>
@@ -52,14 +53,15 @@ void Overlay_ContourLines::processTopographyOverlay(
 
     if (!data.topography.empty())
     {
-        if (!m_surface.update(
+        m_hasFrame = Tools::updateProjectedTexture(
                 data.topography,
                 processor.projector(),
+                m_projectedTopography,
+                m_image,
+                m_texture,
+                m_sprite,
                 false,
-                "Failed to load the contour overlay texture.\n"))
-        {
-            return;
-        }
+                "Failed to load the contour overlay texture.\n");
     }
 }
 
@@ -69,10 +71,14 @@ void Overlay_ContourLines::renderOverlay(
 {
     PROFILE_FUNCTION();
 
-    if (!m_shaderLoaded || m_numberOfContourLines <= 0)
+    if (!m_hasFrame || !m_shaderLoaded || m_numberOfContourLines <= 0)
     {
         return;
     }
+
+    m_sprite.setPosition(processor.projector().getTransformedPosition());
+    const float scale = processor.projector().getTransformedScale();
+    m_sprite.setScale({ scale, scale });
 
     m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
     m_shader.setUniform("lineColor", sf::Glsl::Vec3(
@@ -80,7 +86,7 @@ void Overlay_ContourLines::renderOverlay(
         m_lineColor[1],
         m_lineColor[2]));
     m_shader.setUniform("lineOpacity", m_lineOpacity);
-    m_surface.draw(window, processor.projector(), &m_shader);
+    window.draw(m_sprite, &m_shader);
 }
 
 void Overlay_ContourLines::processOverlayEvent(

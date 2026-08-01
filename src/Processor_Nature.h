@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ProjectedSurface.h"
 #include "TopographyProcessor.hpp"
 
 #include <opencv2/opencv.hpp>
@@ -9,9 +8,12 @@
 class Processor_Nature : public TopographyProcessor
 {
     cv::Mat m_topography;
+    cv::Mat m_projectedTopography;
     cv::Size m_topographySize;
 
-    ProjectedSurface m_surface;
+    sf::Image m_image;
+    sf::Texture m_texture;
+    sf::Sprite m_sprite{ m_texture };
     sf::Shader m_shader;
 
     float m_waterLevel = 0.28f;

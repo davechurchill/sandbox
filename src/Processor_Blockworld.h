@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ProjectedSurface.h"
 #include "TopographyProcessor.hpp"
 
 #include <opencv2/opencv.hpp>
@@ -8,7 +7,10 @@
 
 class Processor_Blockworld : public TopographyProcessor
 {
-    ProjectedSurface    m_surface;
+    cv::Mat             m_projectedTopography;
+    sf::Image           m_image;
+    sf::Texture         m_texture;
+    sf::Sprite          m_sprite{ m_texture };
     sf::Shader          m_shader;
 
     int                 m_blockSize = 12;

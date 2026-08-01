@@ -1,6 +1,7 @@
 #include "Processor_FishPond.h"
 
 #include "Profiler.hpp"
+#include "Tools.h"
 #include "imgui.h"
 
 #include <algorithm>
@@ -567,19 +568,23 @@ void Processor_FishPond::render(sf::RenderWindow & window)
         return;
     }
 
+    m_sprite.setPosition(projector().getTransformedPosition());
+    const float scale = projector().getTransformedScale();
+    m_sprite.setScale({ scale, scale });
+
     if (m_shaderLoaded)
     {
         static sf::Clock time;
-        const sf::Vector2u textureSize = m_surface.texture().getSize();
+        const sf::Vector2u textureSize = m_texture.getSize();
         m_shader.setUniform("texelSize", sf::Glsl::Vec2(
             1.0f / textureSize.x,
             1.0f / textureSize.y));
         m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
-        m_surface.draw(window, projector(), &m_shader);
+        window.draw(m_sprite, &m_shader);
     }
     else
     {
-        m_surface.draw(window, projector());
+        window.draw(m_sprite);
     }
     renderFish(window);
 }
@@ -659,9 +664,13 @@ void Processor_FishPond::processTopography(const IntermediateData & data)
     m_topographySize = data.topography.size();
     updateFish(data.deltaTime);
 
-    m_hasFrame = m_surface.update(
+    m_hasFrame = Tools::updateProjectedTexture(
         m_topography,
         projector(),
+        m_projectedTopography,
+        m_image,
+        m_texture,
+        m_sprite,
         true,
         "Failed to load the fish-pond terrain texture.\n");
 }

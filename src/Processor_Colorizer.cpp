@@ -1,5 +1,6 @@
 #include "Processor_Colorizer.h"
 #include "Profiler.hpp"
+#include "Tools.h"
 
 #include "imgui.h"
 #include "imgui-SFML.h"
@@ -43,6 +44,10 @@ void Processor_Colorizer::render(sf::RenderWindow & window)
     {
         PROFILE_SCOPE("Draw Transformed Image");
 
+        m_sprite.setPosition(projector().getTransformedPosition());
+        const float scale = projector().getTransformedScale();
+        m_sprite.setScale({ scale, scale });
+
         //Use static so that it does not get initialized every time this function is called
         static sf::Clock time;
 
@@ -52,7 +57,7 @@ void Processor_Colorizer::render(sf::RenderWindow & window)
         m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
         m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
 
-        m_surface.draw(window, projector(), &m_shader);
+        window.draw(m_sprite, &m_shader);
     }
 
 }
@@ -81,11 +86,15 @@ void Processor_Colorizer::load(const Save & save)
 void Processor_Colorizer::processTopography(const IntermediateData& data)
 {
     PROFILE_FUNCTION();
-    if (!m_surface.update(
-        data.topography,
-        projector(),
-        false,
-        "Failed to load the colorizer terrain texture.\n"))
+    if (!Tools::updateProjectedTexture(
+            data.topography,
+            projector(),
+            m_projectedTopography,
+            m_image,
+            m_texture,
+            m_sprite,
+            false,
+            "Failed to load the colorizer terrain texture.\n"))
     {
         return;
     }

@@ -100,9 +100,6 @@
     <ClCompile Include="..\src\ParticleManager.cpp">
       <Filter>processors\vectors</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ProjectedSurface.cpp">
-      <Filter>processors</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Overlay_Vectors.cpp">
       <Filter>processors\vectors</Filter>
     </ClCompile>
@@ -212,9 +209,6 @@
     </ClInclude>
     <ClInclude Include="..\src\Profiler.hpp">
       <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\ProjectedSurface.h">
-      <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ViewController.hpp">
       <Filter>engine</Filter>

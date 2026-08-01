@@ -2,6 +2,9 @@
 
 #include "Tools.h"
 #include "Profiler.hpp"
+#include "SandboxProjector.h"
+
+#include <iostream>
 
 namespace Tools
 {
@@ -39,5 +42,42 @@ namespace Tools
         image.resize({ (unsigned int)rgb.cols, (unsigned int)rgb.rows }, rgb.ptr());
 
         return image;
+    }
+
+    bool updateProjectedTexture(
+        const cv::Mat & source,
+        SandBoxProjector & projector,
+        cv::Mat & projectedImage,
+        sf::Image & image,
+        sf::Texture & texture,
+        sf::Sprite & sprite,
+        bool smooth,
+        const char * textureErrorMessage)
+    {
+        PROFILE_FUNCTION();
+
+        {
+            PROFILE_SCOPE("Calibration TransformProjection");
+            projector.project(source, projectedImage);
+        }
+        if (projectedImage.empty())
+        {
+            return false;
+        }
+
+        image = matToSfImage(projectedImage);
+        if (!texture.loadFromImage(image))
+        {
+            if (textureErrorMessage)
+            {
+                std::cerr << textureErrorMessage;
+            }
+            const sf::Vector2u textureSize = texture.getSize();
+            return textureSize.x > 0 && textureSize.y > 0;
+        }
+
+        texture.setSmooth(smooth);
+        sprite.setTexture(texture, true);
+        return true;
     }
 }

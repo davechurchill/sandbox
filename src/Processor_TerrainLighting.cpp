@@ -1,5 +1,6 @@
 #include "Processor_TerrainLighting.h"
 #include "Profiler.hpp"
+#include "Tools.h"
 
 #include "imgui.h"
 
@@ -52,6 +53,10 @@ void Processor_TerrainLighting::render(sf::RenderWindow & window)
 
     if (m_hasFrame)
     {
+        m_sprite.setPosition(projector().getTransformedPosition());
+        const float scale = projector().getTransformedScale();
+        m_sprite.setScale({ scale, scale });
+
         if (m_shaderLoaded)
         {
             m_shader.setUniform("lightAzimuth", m_lightAzimuth);
@@ -60,15 +65,15 @@ void Processor_TerrainLighting::render(sf::RenderWindow & window)
             m_shader.setUniform("shadowStrength", m_shadowStrength);
             m_shader.setUniform("heightStrength", m_heightStrength);
             m_shader.setUniform("palette", m_palette);
-            const sf::Vector2u textureSize = m_surface.texture().getSize();
+            const sf::Vector2u textureSize = m_texture.getSize();
             m_shader.setUniform("texelSize", sf::Glsl::Vec2(
                 1.0f / textureSize.x,
                 1.0f / textureSize.y));
-            m_surface.draw(window, projector(), &m_shader);
+            window.draw(m_sprite, &m_shader);
         }
         else
         {
-            m_surface.draw(window, projector());
+            window.draw(m_sprite);
         }
     }
 
@@ -112,7 +117,7 @@ bool Processor_TerrainLighting::updateLightFromMouse(const sf::Vector2f & mouse)
     }
 
     const float scale = projector().getTransformedScale();
-    const sf::Vector2u textureSize = m_surface.texture().getSize();
+    const sf::Vector2u textureSize = m_texture.getSize();
     if (!std::isfinite(scale) || scale <= 0.0f || textureSize.x == 0 || textureSize.y == 0)
     {
         return false;
@@ -169,9 +174,13 @@ void Processor_TerrainLighting::processTopography(const IntermediateData & data)
 {
     PROFILE_FUNCTION();
 
-    m_hasFrame = m_surface.update(
+    m_hasFrame = Tools::updateProjectedTexture(
         data.topography,
         projector(),
+        m_projectedTopography,
+        m_image,
+        m_texture,
+        m_sprite,
         true,
         "Failed to load the terrain-lighting texture.\n");
 }

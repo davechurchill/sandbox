@@ -33,7 +33,6 @@
     <ClCompile Include="..\src\Processor_ForestFire.cpp" />
     <ClCompile Include="..\src\HeatGrid.cpp" />
     <ClCompile Include="..\src\ParticleManager.cpp" />
-    <ClCompile Include="..\src\ProjectedSurface.cpp" />
     <ClCompile Include="..\src\Processor_Heat.cpp" />
     <ClCompile Include="..\src\Processor_Blockworld.cpp" />
     <ClCompile Include="..\src\Processor_Nature.cpp" />
@@ -93,7 +92,6 @@
     <ClInclude Include="..\src\GameEngine.h" />
     <ClInclude Include="..\src\Perlin.hpp" />
     <ClInclude Include="..\src\Profiler.hpp" />
-    <ClInclude Include="..\src\ProjectedSurface.h" />
     <ClInclude Include="..\src\RealSenseTools.hpp" />
     <ClInclude Include="..\src\SandboxProjector.h" />
     <ClInclude Include="..\src\SandboxSession.hpp" />
