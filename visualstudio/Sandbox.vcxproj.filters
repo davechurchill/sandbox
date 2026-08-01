@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\src\Overlay_AStar.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_AStar.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Overlay_BFS.cpp">
-      <Filter>processors\vectors</Filter>
+    <ClCompile Include="..\src\Visualizer_BFS.cpp">
+      <Filter>visualizers\vectors</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Overlay_Animals.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_Animals.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Overlay_Balls.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_Balls.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Overlay_Cloth.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_Cloth.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Overlay_ColorAdjustment.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_ColorAdjustment.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Overlay_ContourLines.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_ContourLines.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Overlay_SmokeFire.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_SmokeFire.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Overlay_Weather.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_Weather.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_FishPond.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_FishPond.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_ForestFire.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_ForestFire.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\imgui\imgui.cpp">
       <Filter>imgui</Filter>
@@ -52,41 +52,32 @@
     <ClCompile Include="..\src\imgui\imgui-SFML.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Scene.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Scene_Main.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\SandboxSession.cpp">
-      <Filter>scenes</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\GoodAssert.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\GameEngine.cpp">
+    <ClCompile Include="..\src\SandboxGUI.cpp">
       <Filter>engine</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Tools.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_Heat.cpp">
-      <Filter>processors\heat</Filter>
+    <ClCompile Include="..\src\Visualizer_Heat.cpp">
+      <Filter>visualizers\heat</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_TerrainLighting.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_TerrainLighting.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_Blockworld.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_Blockworld.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_Nature.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_Nature.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\HeatGrid.cpp">
-      <Filter>processors\heat</Filter>
+      <Filter>visualizers\heat</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_Colorizer.cpp">
-      <Filter>processors\colorizer</Filter>
+    <ClCompile Include="..\src\Visualizer_Colorizer.cpp">
+      <Filter>visualizers\colorizer</Filter>
     </ClCompile>
     <ClCompile Include="..\src\SandboxProjector.cpp">
       <Filter>calibration</Filter>
@@ -97,17 +88,17 @@
     <ClCompile Include="..\src\HeatGrid.cpp">
       <Filter>processors\heat</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_Heat.cpp">
+    <ClCompile Include="..\src\Visualizer_Heat.cpp">
       <Filter>processors\heat</Filter>
     </ClCompile>
     <ClCompile Include="..\src\ParticleManager.cpp">
-      <Filter>processors\vectors</Filter>
+      <Filter>visualizers\vectors</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Overlay_Vectors.cpp">
-      <Filter>processors\vectors</Filter>
+    <ClCompile Include="..\src\Visualizer_Vectors.cpp">
+      <Filter>visualizers\vectors</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Overlay_WaterFlow.cpp">
-      <Filter>processors</Filter>
+    <ClCompile Include="..\src\Visualizer_WaterFlow.cpp">
+      <Filter>visualizers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Source_Camera.cpp">
       <Filter>sources</Filter>
@@ -125,59 +116,50 @@
       <Filter>sources</Filter>
     </ClCompile>
     <ClCompile Include="..\src\VectorField.cpp">
-      <Filter>processors\vectors</Filter>
+      <Filter>visualizers\vectors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\Overlay_AStar.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_AStar.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Overlay_BFS.h">
-      <Filter>processors\vectors</Filter>
+    <ClInclude Include="..\src\Visualizer_BFS.h">
+      <Filter>visualizers\vectors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Overlay_Animals.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_Animals.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Overlay_Balls.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_Balls.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Overlay_Cloth.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_Cloth.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Overlay_ColorAdjustment.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_ColorAdjustment.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Overlay_ContourLines.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_ContourLines.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Overlay_SmokeFire.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_SmokeFire.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Overlay_Weather.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_Weather.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_FishPond.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_FishPond.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_ForestFire.h">
-      <Filter>processors</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Scene.h">
-      <Filter>scenes</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Scene_Main.h">
-      <Filter>scenes</Filter>
+    <ClInclude Include="..\src\Visualizer_ForestFire.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\SandboxSession.hpp">
-      <Filter>scenes</Filter>
+      <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Logger.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\GoodAssert.h">
-      <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\GameEngine.h">
+    <ClInclude Include="..\src\SandboxGUI.h">
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Timer.hpp">
@@ -189,29 +171,32 @@
     <ClInclude Include="..\src\Settings.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TopographyProcessor.hpp">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\TerrainContext.hpp">
+      <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TopographyOverlay.hpp">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\TerrainFrame.hpp">
+      <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_Heat.h">
-      <Filter>processors\heat</Filter>
+    <ClInclude Include="..\src\TopographyVisualizer.hpp">
+      <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_TerrainLighting.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_Heat.h">
+      <Filter>visualizers\heat</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_Blockworld.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_TerrainLighting.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_Nature.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_Blockworld.h">
+      <Filter>visualizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Visualizer_Nature.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\HeatGrid.h">
-      <Filter>processors\heat</Filter>
+      <Filter>visualizers\heat</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_Colorizer.h">
-      <Filter>processors\colorizer</Filter>
+    <ClInclude Include="..\src\Visualizer_Colorizer.h">
+      <Filter>visualizers\colorizer</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Profiler.hpp">
       <Filter>engine</Filter>
@@ -239,13 +224,13 @@
     </ClInclude>
     <ClInclude Include="..\src\Sandbox.hpp" />
     <ClInclude Include="..\src\ParticleManager.h">
-      <Filter>processors\vectors</Filter>
+      <Filter>visualizers\vectors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Overlay_Vectors.h">
-      <Filter>processors\vectors</Filter>
+    <ClInclude Include="..\src\Visualizer_Vectors.h">
+      <Filter>visualizers\vectors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Overlay_WaterFlow.h">
-      <Filter>processors</Filter>
+    <ClInclude Include="..\src\Visualizer_WaterFlow.h">
+      <Filter>visualizers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\TopographySource.hpp">
       <Filter>sources</Filter>
@@ -272,7 +257,7 @@
       <Filter>camera</Filter>
     </ClInclude>
     <ClInclude Include="..\src\VectorField.h">
-      <Filter>processors\vectors</Filter>
+      <Filter>visualizers\vectors</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -323,20 +308,8 @@
     <Filter Include="shaders">
       <UniqueIdentifier>{d081f6a3-854a-43b2-975e-21a8af03e1e1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="scenes">
-      <UniqueIdentifier>{e9d446fe-43d5-445f-a221-bb3478d9402f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="engine">
       <UniqueIdentifier>{e350c821-f171-4375-95b5-3a36cc054c80}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="processors">
-      <UniqueIdentifier>{960b045e-9a96-4ce7-8ccc-d18cfbf26950}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="processors\heat">
-      <UniqueIdentifier>{ec1db916-4f12-4bf6-b9da-a8e929c59028}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="processors\colorizer">
-      <UniqueIdentifier>{4914076f-3beb-4024-8e48-d76ad32a6dfa}</UniqueIdentifier>
     </Filter>
     <Filter Include="camera">
       <UniqueIdentifier>{4a1e8f66-f9d6-4160-b8f9-fcb860f59987}</UniqueIdentifier>
@@ -344,11 +317,20 @@
     <Filter Include="calibration">
       <UniqueIdentifier>{8274e842-7bd1-4020-b79c-6007d282d44f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="processors\vectors">
-      <UniqueIdentifier>{22e83f83-56dc-408f-9d8d-788309b022db}</UniqueIdentifier>
-    </Filter>
     <Filter Include="sources">
       <UniqueIdentifier>{023f8d89-974c-4af5-a780-8732fc50a3a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="visualizers">
+      <UniqueIdentifier>{960b045e-9a96-4ce7-8ccc-d18cfbf26950}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="visualizers\heat">
+      <UniqueIdentifier>{ec1db916-4f12-4bf6-b9da-a8e929c59028}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="visualizers\colorizer">
+      <UniqueIdentifier>{4914076f-3beb-4024-8e48-d76ad32a6dfa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="visualizers\vectors">
+      <UniqueIdentifier>{22e83f83-56dc-408f-9d8d-788309b022db}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

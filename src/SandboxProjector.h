@@ -42,6 +42,14 @@ public:
     void save(Settings & save) const;
     void load(const Settings & save);
     void project(const cv::Mat & input, cv::Mat & output);
+    [[nodiscard]] bool updateTexture(
+        const cv::Mat & source,
+        cv::Mat & projectedImage,
+        sf::Image & image,
+        sf::Texture & texture,
+        sf::Sprite & sprite,
+        bool smooth,
+        const char * textureErrorMessage);
     bool processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     bool unprojectPoint(const sf::Vector2f & point, sf::Vector2f & dataPoint);
     void render(sf::RenderWindow & window);

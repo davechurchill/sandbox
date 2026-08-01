@@ -1,5 +1,4 @@
 #pragma once
 
-#include "GameEngine.h"
-#include "Scene_Main.h"
+#include "SandboxGUI.h"
 #include "Profiler.hpp"

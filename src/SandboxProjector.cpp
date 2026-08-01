@@ -48,6 +48,42 @@ void SandBoxProjector::project(const cv::Mat & input, cv::Mat & output)
     cv::warpPerspective(input, output, m_projectionMatrix, cv::Size(m_finalWidth, m_finalHeight));
 }
 
+bool SandBoxProjector::updateTexture(
+    const cv::Mat & source,
+    cv::Mat & projectedImage,
+    sf::Image & image,
+    sf::Texture & texture,
+    sf::Sprite & sprite,
+    bool smooth,
+    const char * textureErrorMessage)
+{
+    PROFILE_FUNCTION();
+
+    {
+        PROFILE_SCOPE("Calibration TransformProjection");
+        project(source, projectedImage);
+    }
+    if (projectedImage.empty())
+    {
+        return false;
+    }
+
+    image = Tools::matToSfImage(projectedImage);
+    if (!texture.loadFromImage(image))
+    {
+        if (textureErrorMessage)
+        {
+            std::cerr << textureErrorMessage;
+        }
+        const sf::Vector2u textureSize = texture.getSize();
+        return textureSize.x > 0 && textureSize.y > 0;
+    }
+
+    texture.setSmooth(smooth);
+    sprite.setTexture(texture, true);
+    return true;
+}
+
 void SandBoxProjector::imgui()
 {
     PROFILE_FUNCTION();

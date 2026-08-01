@@ -236,6 +236,7 @@ bool Source_Snapshot::loadDataDump(const std::string & filename)
     m_sprite.setTexture(m_texture, true);
     m_loadedSnapshot = filename;
     m_loadError.clear();
+    markTerrainChanged();
     return true;
 }
 

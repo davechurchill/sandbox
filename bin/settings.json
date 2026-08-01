@@ -1,12 +1,14 @@
 {
-    "Scene_Main": {
-        "m_sourceID": "Snapshot",
-        "m_processorID": "Nature",
+    "schemaVersion": 3,
+    "SandboxGUI": {
+        "m_sourceName": "Snapshot",
         "m_doubleSizeUI": false
     },
-    "Overlays": {
-        "m_enabledOverlayIDs": [],
-        "m_selectedOverlayID": "Animals"
+    "Visualizers": {
+        "m_enabledVisualizerNames": [
+            "Nature"
+        ],
+        "m_selectedVisualizerName": "Animals"
     },
     "Source_Camera": {
         "m_alignment": 0,
@@ -109,20 +111,20 @@
         ],
         "m_lineOpacity": 1.0
     },
-    "Processor_Colorizer": {
+    "Visualizer_Colorizer": {
         "m_selectedShaderIndex": 4,
         "m_drawContours": true,
         "m_numberOfContourLines": 19
     },
-    "Processor_Heat": {
+    "Visualizer_Heat": {
         "m_drawContours": true,
         "m_numberOfContourLines": 19,
         "m_drawProjection": true
     },
-    "Processor_Blockworld": {
+    "Visualizer_Blockworld": {
         "m_blockSize": 12
     },
-    "Overlay_ContourLines": {
+    "Visualizer_ContourLines": {
         "m_lineColor": [
             0.0,
             0.0,
@@ -135,11 +137,11 @@
         "m_loadedSnapshot": "dataDumps\\snapshot.bin",
         "m_sortByName": false
     },
-    "Processor_Nature": {
+    "Visualizer_Nature": {
         "m_terrainType": 0,
         "m_waterLevel": 0.2800000011920929
     },
-    "Overlay_Animals": {
+    "Visualizer_Animals": {
         "m_sheepSpeed": 1.0,
         "m_sheepSize": 11.0
     }

@@ -98,6 +98,7 @@ void Source_Waves::updateTopography()
 
     m_image = Tools::matToSfImage(m_topography);
     m_textureDirty = true;
+    markTerrainChanged();
 }
 
 void Source_Waves::updateTexture()

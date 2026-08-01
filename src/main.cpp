@@ -6,10 +6,8 @@ int main()
 
     cv::setNumThreads(cv::getNumberOfCPUs());
 
-    GameEngine engine;
-    engine.changeScene<Scene_Main>("Menu");
-    engine.run();
+    SandboxGUI sandbox;
+    sandbox.run();
 
     return 0;
 }
-

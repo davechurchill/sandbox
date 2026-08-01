@@ -12,6 +12,20 @@ class Settings
 {
 public:
     using json = nlohmann::ordered_json;
+    static constexpr int CurrentSchemaVersion = 3;
+
+    int schemaVersion() const
+    {
+        const auto found = m_root.find("schemaVersion");
+        return found != m_root.end() && found->is_number_integer()
+            ? found->get<int>()
+            : 0;
+    }
+
+    void setCurrentSchemaVersion()
+    {
+        m_root["schemaVersion"] = CurrentSchemaVersion;
+    }
 
     json & section(const std::string & name)
     {
@@ -77,6 +91,12 @@ public:
                 return false;
             }
             m_root = std::move(loaded);
+            if (schemaVersion() > CurrentSchemaVersion)
+            {
+                std::cerr << "Settings file uses a newer schema version: " << filename << '\n';
+                m_root = json::object();
+                return false;
+            }
             return true;
         }
         catch (const std::exception & error)

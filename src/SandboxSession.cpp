@@ -1,23 +1,23 @@
 #include "SandboxSession.hpp"
 
-#include "Overlay_AStar.h"
-#include "Overlay_Animals.h"
-#include "Overlay_BFS.h"
-#include "Overlay_Balls.h"
-#include "Overlay_Cloth.h"
-#include "Overlay_ColorAdjustment.h"
-#include "Overlay_ContourLines.h"
-#include "Overlay_SmokeFire.h"
-#include "Overlay_Vectors.h"
-#include "Overlay_Weather.h"
-#include "Overlay_WaterFlow.h"
-#include "Processor_Colorizer.h"
-#include "Processor_FishPond.h"
-#include "Processor_ForestFire.h"
-#include "Processor_Heat.h"
-#include "Processor_Blockworld.h"
-#include "Processor_Nature.h"
-#include "Processor_TerrainLighting.h"
+#include "Visualizer_AStar.h"
+#include "Visualizer_Animals.h"
+#include "Visualizer_BFS.h"
+#include "Visualizer_Balls.h"
+#include "Visualizer_Cloth.h"
+#include "Visualizer_ColorAdjustment.h"
+#include "Visualizer_ContourLines.h"
+#include "Visualizer_SmokeFire.h"
+#include "Visualizer_Vectors.h"
+#include "Visualizer_WaterFlow.h"
+#include "Visualizer_Weather.h"
+#include "Visualizer_Blockworld.h"
+#include "Visualizer_Colorizer.h"
+#include "Visualizer_FishPond.h"
+#include "Visualizer_ForestFire.h"
+#include "Visualizer_Heat.h"
+#include "Visualizer_Nature.h"
+#include "Visualizer_TerrainLighting.h"
 #include "Source_Camera.h"
 #include "Source_PaintBrush.h"
 #include "Source_Perlin.h"
@@ -26,324 +26,345 @@
 
 namespace
 {
-    std::shared_ptr<TopographySource> createSource(const std::string & name)
+    std::unique_ptr<TopographySource> createSource(std::string_view name)
     {
-        if (name == "Camera") return std::make_shared<Source_Camera>();
-        if (name == "PaintBrush") return std::make_shared<Source_PaintBrush>();
-        if (name == "Perlin") return std::make_shared<Source_Perlin>();
-        if (name == "Snapshot") return std::make_shared<Source_Snapshot>();
-        if (name == "Waves") return std::make_shared<Source_Waves>();
+        if (name == "Camera") return std::make_unique<Source_Camera>();
+        if (name == "PaintBrush") return std::make_unique<Source_PaintBrush>();
+        if (name == "Perlin") return std::make_unique<Source_Perlin>();
+        if (name == "Snapshot") return std::make_unique<Source_Snapshot>();
+        if (name == "Waves") return std::make_unique<Source_Waves>();
         return nullptr;
     }
 
-    std::shared_ptr<TopographyProcessor> createProcessor(
-        const std::string & name,
-        SandBoxProjector & projector)
+    std::unique_ptr<TopographyVisualizer> createVisualizer(std::string_view name)
     {
-        std::shared_ptr<TopographyProcessor> processor;
-        if (name == "Blockworld") processor = std::make_shared<Processor_Blockworld>();
-        else if (name == "Colorizer") processor = std::make_shared<Processor_Colorizer>();
-        else if (name == "Fish Pond") processor = std::make_shared<Processor_FishPond>();
-        else if (name == "Forest Fire") processor = std::make_shared<Processor_ForestFire>();
-        else if (name == "Heat") processor = std::make_shared<Processor_Heat>();
-        else if (name == "Nature") processor = std::make_shared<Processor_Nature>();
-        else if (name == "TerrainLighting") processor = std::make_shared<Processor_TerrainLighting>();
-
-        if (processor)
-        {
-            processor->setProjector(projector);
-        }
-        return processor;
-    }
-
-    std::shared_ptr<TopographyOverlay> createOverlay(const std::string & name)
-    {
-        if (name == "Adjust Terrain Color") return std::make_shared<Overlay_ColorAdjustment>();
-        if (name == "Animals") return std::make_shared<Overlay_Animals>();
-        if (name == "BFS") return std::make_shared<Overlay_BFS>();
-        if (name == "Balls") return std::make_shared<Overlay_Balls>();
-        if (name == "Cloth Sheet") return std::make_shared<Overlay_Cloth>();
-        if (name == "Contour Lines") return std::make_shared<Overlay_ContourLines>();
-        if (name == "Pathfinding (A*)") return std::make_shared<Overlay_AStar>();
-        if (name == "Smoke and Fire") return std::make_shared<Overlay_SmokeFire>();
-        if (name == "Vectors") return std::make_shared<Overlay_Vectors>();
-        if (name == "WaterFlow") return std::make_shared<Overlay_WaterFlow>();
-        if (name == "Weather") return std::make_shared<Overlay_Weather>();
+        if (name == Visualizer_Blockworld::Name) return std::make_unique<Visualizer_Blockworld>();
+        if (name == Visualizer_Colorizer::Name) return std::make_unique<Visualizer_Colorizer>();
+        if (name == Visualizer_FishPond::Name) return std::make_unique<Visualizer_FishPond>();
+        if (name == Visualizer_ForestFire::Name) return std::make_unique<Visualizer_ForestFire>();
+        if (name == Visualizer_Heat::Name) return std::make_unique<Visualizer_Heat>();
+        if (name == Visualizer_Nature::Name) return std::make_unique<Visualizer_Nature>();
+        if (name == Visualizer_TerrainLighting::Name) return std::make_unique<Visualizer_TerrainLighting>();
+        if (name == Visualizer_ColorAdjustment::Name) return std::make_unique<Visualizer_ColorAdjustment>();
+        if (name == Visualizer_Animals::Name) return std::make_unique<Visualizer_Animals>();
+        if (name == Visualizer_BFS::Name) return std::make_unique<Visualizer_BFS>();
+        if (name == Visualizer_Balls::Name) return std::make_unique<Visualizer_Balls>();
+        if (name == Visualizer_Cloth::Name) return std::make_unique<Visualizer_Cloth>();
+        if (name == Visualizer_ContourLines::Name) return std::make_unique<Visualizer_ContourLines>();
+        if (name == Visualizer_AStar::Name) return std::make_unique<Visualizer_AStar>();
+        if (name == Visualizer_SmokeFire::Name) return std::make_unique<Visualizer_SmokeFire>();
+        if (name == Visualizer_Vectors::Name) return std::make_unique<Visualizer_Vectors>();
+        if (name == Visualizer_WaterFlow::Name) return std::make_unique<Visualizer_WaterFlow>();
+        if (name == Visualizer_Weather::Name) return std::make_unique<Visualizer_Weather>();
         return nullptr;
     }
 }
 
 SandboxSession::SandboxSession()
 {
-    setOverlay(m_overlayID, false);
+    setSource(m_sourceName, false);
+    setVisualizer(m_visualizerName, false);
+    setVisualizerEnabled(m_visualizerName, true);
 }
 
 void SandboxSession::processFrame(float deltaTime)
 {
     m_topography = m_source->getTopography();
-    if (m_processor && m_topography.rows > 0 && m_topography.cols > 0)
+    if (m_sourceRevision != m_source->revision())
     {
-        IntermediateData data;
-        data.deltaTime = deltaTime;
-        data.topography = m_topography;
-        data.markers = m_source->getMarkers();
-        m_processor->processTopography(data);
-        for (auto & [_, state] : m_overlayStates)
+        m_sourceRevision = m_source->revision();
+        ++m_terrainRevision;
+    }
+    if (m_topography.empty())
+    {
+        return;
+    }
+
+    const std::vector<MarkerData> markers = m_source->getMarkers();
+    const TerrainFrame frame { m_topography, deltaTime, markers, m_terrainRevision };
+    for (const std::string & name : visualizerNames())
+    {
+        const auto found = m_visualizerStates.find(name);
+        if (found != m_visualizerStates.end() && found->second.enabled && found->second.visualizer)
         {
-            if (state.enabled && state.overlay)
+            found->second.visualizer->process(frame);
+        }
+    }
+}
+
+const std::vector<std::string> & SandboxSession::sourceNames() const
+{
+    static const std::vector<std::string> names { "Camera", "PaintBrush", "Perlin", "Snapshot", "Waves" };
+    return names;
+}
+
+const std::vector<std::string> & SandboxSession::visualizerNames() const
+{
+    static const std::vector<std::string> names{
+        std::string(Visualizer_Blockworld::Name),
+        std::string(Visualizer_Colorizer::Name),
+        std::string(Visualizer_FishPond::Name),
+        std::string(Visualizer_ForestFire::Name),
+        std::string(Visualizer_Heat::Name),
+        std::string(Visualizer_Nature::Name),
+        std::string(Visualizer_TerrainLighting::Name),
+        std::string(Visualizer_ColorAdjustment::Name),
+        std::string(Visualizer_Animals::Name),
+        std::string(Visualizer_BFS::Name),
+        std::string(Visualizer_Balls::Name),
+        std::string(Visualizer_Cloth::Name),
+        std::string(Visualizer_ContourLines::Name),
+        std::string(Visualizer_AStar::Name),
+        std::string(Visualizer_SmokeFire::Name),
+        std::string(Visualizer_Vectors::Name),
+        std::string(Visualizer_WaterFlow::Name),
+        std::string(Visualizer_Weather::Name)
+    };
+    return names;
+}
+
+SandboxSession::VisualizerState * SandboxSession::ensureVisualizer(std::string_view name)
+{
+    const auto found = m_visualizerStates.find(name);
+    if (found != m_visualizerStates.end())
+    {
+        return found->second.visualizer ? &found->second : nullptr;
+    }
+
+    std::unique_ptr<TopographyVisualizer> visualizer = createVisualizer(name);
+    if (!visualizer)
+    {
+        return nullptr;
+    }
+
+    visualizer->setContext(m_terrainContext);
+    visualizer->init();
+    visualizer->load(m_settings);
+    const std::string visualizerName(visualizer->name());
+    const auto inserted = m_visualizerStates.emplace(
+        visualizerName,
+        VisualizerState{ std::move(visualizer), false });
+    return &inserted.first->second;
+}
+
+TopographyVisualizer * SandboxSession::visualizer() const
+{
+    const auto found = m_visualizerStates.find(m_visualizerName);
+    return found != m_visualizerStates.end()
+        ? found->second.visualizer.get()
+        : nullptr;
+}
+
+TopographyVisualizer * SandboxSession::inputVisualizer() const
+{
+    const auto found = m_visualizerStates.find(m_visualizerName);
+    return found != m_visualizerStates.end()
+        && found->second.enabled
+        ? found->second.visualizer.get()
+        : nullptr;
+}
+
+bool SandboxSession::visualizerEnabled(std::string_view name) const
+{
+    const auto found = m_visualizerStates.find(name);
+    return found != m_visualizerStates.end() && found->second.enabled;
+}
+
+void SandboxSession::setSource(std::string_view source, bool saveCurrent)
+{
+    std::string selectedName(source);
+    std::unique_ptr<TopographySource> nextSource = createSource(selectedName);
+    if (!nextSource)
+    {
+        selectedName = "Camera";
+        nextSource = createSource(selectedName);
+    }
+
+    const bool sourceChanged = !m_source || selectedName != m_sourceName;
+    if (m_source)
+    {
+        if (saveCurrent) { m_source->save(m_settings); }
+        m_source->deactivate();
+    }
+    m_sourceName = std::move(selectedName);
+    m_source = std::move(nextSource);
+    m_source->init();
+    m_source->load(m_settings);
+    m_source->activate();
+    m_sourceRevision = m_source->revision();
+    ++m_terrainRevision;
+
+    if (sourceChanged)
+    {
+        for (auto & [_, state] : m_visualizerStates)
+        {
+            if (state.visualizer)
             {
-                state.overlay->processTopographyOverlay(data, *m_processor);
+                state.visualizer->onSourceChanged();
             }
         }
     }
 }
 
-std::vector<std::string> SandboxSession::sourceNames() const
-{
-    return { "Camera", "PaintBrush", "Perlin", "Snapshot", "Waves" };
-}
-
-std::vector<std::string> SandboxSession::processorNames() const
-{
-    return {
-        "None",
-        "Blockworld",
-        "Colorizer",
-        "Fish Pond",
-        "Forest Fire",
-        "Heat",
-        "Nature",
-        "TerrainLighting"
-    };
-}
-
-std::vector<std::string> SandboxSession::overlayNames() const
-{
-    return {
-        "Adjust Terrain Color",
-        "Animals",
-        "BFS",
-        "Balls",
-        "Cloth Sheet",
-        "Contour Lines",
-        "Pathfinding (A*)",
-        "Smoke and Fire",
-        "Vectors",
-        "WaterFlow",
-        "Weather"
-    };
-}
-
-SandboxSession::OverlayState * SandboxSession::ensureOverlay(const std::string & name)
-{
-    if (name == "None")
-    {
-        return nullptr;
-    }
-
-    const auto found = m_overlayStates.find(name);
-    if (found != m_overlayStates.end())
-    {
-        return found->second.overlay ? &found->second : nullptr;
-    }
-
-    std::shared_ptr<TopographyOverlay> overlay = createOverlay(name);
-    if (!overlay)
-    {
-        return nullptr;
-    }
-
-    overlay->initOverlay();
-    overlay->loadOverlay(m_settings);
-    const auto inserted = m_overlayStates.emplace(
-        name,
-        OverlayState{ std::move(overlay), false });
-    return &inserted.first->second;
-}
-
-TopographyOverlay * SandboxSession::overlay() const
-{
-    const auto found = m_overlayStates.find(m_overlayID);
-    return found != m_overlayStates.end() ? found->second.overlay.get() : nullptr;
-}
-
-TopographyOverlay * SandboxSession::inputOverlay() const
-{
-    const auto found = m_overlayStates.find(m_overlayID);
-    return found != m_overlayStates.end() && found->second.enabled
-        ? found->second.overlay.get()
-        : nullptr;
-}
-
-bool SandboxSession::overlayEnabled(const std::string & name) const
-{
-    const auto found = m_overlayStates.find(name);
-    return found != m_overlayStates.end() && found->second.enabled;
-}
-
-void SandboxSession::setSource(const std::string & source, bool saveCurrent)
-{
-    const bool sourceChanged = !m_source || source != m_sourceID;
-    if (saveCurrent && m_source) { m_source->save(m_settings); }
-    m_sourceID = source;
-    m_source = createSource(source);
-    if (!m_source)
-    {
-        m_source = createSource("Camera");
-    }
-    if (m_source)
-    {
-        m_source->init();
-        m_source->load(m_settings);
-    }
-    if (sourceChanged && m_processor)
-    {
-        m_processor->onSourceChanged();
-    }
-}
-
-void SandboxSession::setProcessor(const std::string & processor, bool saveCurrent)
-{
-    if (saveCurrent && m_processor) { m_processor->save(m_settings); }
-    m_processorID = processor;
-    m_processor = createProcessor(processor, m_projector);
-    if (!m_processor && processor != "None")
-    {
-        m_processor = createProcessor("Colorizer", m_projector);
-    }
-    if (m_processor)
-    {
-        m_processor->init();
-        m_processor->load(m_settings);
-    }
-}
-
-void SandboxSession::setOverlay(const std::string & overlay, bool saveCurrent)
+void SandboxSession::setVisualizer(std::string_view visualizer, bool saveCurrent)
 {
     if (saveCurrent)
     {
-        if (TopographyOverlay * current = this->overlay())
+        if (TopographyVisualizer * current = this->visualizer())
         {
-            current->saveOverlay(m_settings);
+            current->save(m_settings);
         }
     }
 
-    std::string selection = overlay;
-    OverlayState * state = ensureOverlay(selection);
-    if (!state)
+    if (visualizer.empty())
     {
-        selection = overlayNames().front();
-        state = ensureOverlay(selection);
-    }
-
-    if (state)
-    {
-        m_overlayID = selection;
-    }
-    else
-    {
-        m_overlayID.clear();
-    }
-}
-
-void SandboxSession::setOverlayEnabled(const std::string & overlay, bool enabled)
-{
-    if (OverlayState * state = ensureOverlay(overlay))
-    {
-        state->enabled = enabled;
-    }
-}
-
-void SandboxSession::renderOverlays(sf::RenderWindow & window)
-{
-    if (!m_processor)
-    {
+        m_visualizerName.clear();
         return;
     }
 
-    for (auto & [_, state] : m_overlayStates)
+    std::string selectedName(visualizer);
+    VisualizerState * state = ensureVisualizer(selectedName);
+    if (!state)
     {
-        if (state.enabled && state.overlay)
+        selectedName = std::string(Visualizer_Colorizer::Name);
+        state = ensureVisualizer(selectedName);
+    }
+    if (state)
+    {
+        m_visualizerName = state->visualizer->name();
+    }
+}
+
+void SandboxSession::setVisualizerEnabled(std::string_view visualizer, bool enabled)
+{
+    VisualizerState * state = ensureVisualizer(visualizer);
+    if (state && state->enabled != enabled)
+    {
+        if (enabled) { state->visualizer->activate(); }
+        else { state->visualizer->deactivate(); }
+        state->enabled = enabled;
+        refreshWalkabilityProvider();
+    }
+}
+
+void SandboxSession::refreshWalkabilityProvider()
+{
+    const TopographyVisualizer * provider = nullptr;
+    for (const std::string & name : visualizerNames())
+    {
+        const auto found = m_visualizerStates.find(name);
+        if (found != m_visualizerStates.end()
+            && found->second.enabled
+            && found->second.visualizer
+            && found->second.visualizer->definesTerrainWalkability())
         {
-            state.overlay->renderOverlay(window, *m_processor);
+            provider = found->second.visualizer.get();
+        }
+    }
+    if (provider)
+    {
+        m_terrainContext.setWalkabilityProvider(
+            [provider](const cv::Mat & terrain, const cv::Point2f & position)
+            {
+                return provider->isTerrainWalkable(terrain, position);
+            });
+    }
+    else
+    {
+        m_terrainContext.setWalkabilityProvider({});
+    }
+}
+
+void SandboxSession::renderVisualizers(sf::RenderWindow & window)
+{
+    for (const std::string & name : visualizerNames())
+    {
+        const auto found = m_visualizerStates.find(name);
+        if (found != m_visualizerStates.end()
+            && found->second.enabled
+            && found->second.visualizer)
+        {
+            found->second.visualizer->render(window);
         }
     }
 }
 
 void SandboxSession::saveSettings(const std::string & filename, bool doubleSizeUI, const std::string & displayMonitorID)
 {
+    m_settings.setCurrentSchemaVersion();
     m_projector.save(m_settings);
-    if (m_source) { m_source->save(m_settings); }
-    if (m_processor) { m_processor->save(m_settings); }
-    for (const auto & [_, state] : m_overlayStates)
+    m_source->save(m_settings);
+    for (const auto & [_, state] : m_visualizerStates)
     {
-        if (state.overlay) { state.overlay->saveOverlay(m_settings); }
+        if (state.visualizer) { state.visualizer->save(m_settings); }
     }
 
-    Settings::json & settings = m_settings.section("Scene_Main");
-    settings["m_sourceID"] = m_sourceID;
-    settings["m_processorID"] = m_processorID;
-    settings["m_doubleSizeUI"] = doubleSizeUI;
+    Settings::json & guiSettings = m_settings.section("SandboxGUI");
+    guiSettings["m_sourceName"] = m_sourceName;
+    guiSettings["m_doubleSizeUI"] = doubleSizeUI;
 
-    Settings::json & overlaySettings = m_settings.section("Overlays");
-    overlaySettings["m_enabledOverlayIDs"] = Settings::json::array();
-    for (const auto & [name, state] : m_overlayStates)
+    Settings::json & visualizerSettings = m_settings.section("Visualizers");
+    visualizerSettings["m_enabledVisualizerNames"] = Settings::json::array();
+    for (const std::string & name : visualizerNames())
     {
-        if (state.enabled)
+        const auto found = m_visualizerStates.find(name);
+        if (found != m_visualizerStates.end() && found->second.enabled)
         {
-            overlaySettings["m_enabledOverlayIDs"].push_back(name);
+            visualizerSettings["m_enabledVisualizerNames"].push_back(name);
         }
     }
-    overlaySettings["m_selectedOverlayID"] = m_overlayID;
+    visualizerSettings["m_selectedVisualizerName"] = m_visualizerName;
 
     m_settings.section("Projection")["m_displayMonitorID"] = displayMonitorID;
-
     m_settings.saveToFile(filename);
 }
 
 bool SandboxSession::loadSettings(const std::string & filename, bool & doubleSizeUI, std::string & displayMonitorID)
 {
-    if (!m_settings.loadFromFile(filename) && m_source)
+    if (!m_settings.loadFromFile(filename))
     {
         return false;
     }
 
     m_projector.load(m_settings);
 
-    const Settings::json & settings = m_settings.section("Scene_Main");
-    std::string source = m_sourceID;
-    std::string processor = m_processorID;
-    Settings::read(settings, "m_sourceID", source);
-    Settings::read(settings, "m_processorID", processor);
-    Settings::read(settings, "m_doubleSizeUI", doubleSizeUI);
+    const Settings::json & guiSettings = m_settings.section("SandboxGUI");
+    std::string source(m_sourceName);
+    Settings::read(guiSettings, "m_sourceName", source);
+    Settings::read(guiSettings, "m_doubleSizeUI", doubleSizeUI);
     Settings::read(m_settings.section("Projection"), "m_displayMonitorID", displayMonitorID);
 
-    std::vector<std::string> enabledOverlays;
-    std::string selectedOverlay = m_overlayID;
-    const Settings::json & overlaySettings = m_settings.section("Overlays");
-    const auto enabledIDs = overlaySettings.find("m_enabledOverlayIDs");
-    if (enabledIDs != overlaySettings.end() && enabledIDs->is_array())
+    std::vector<std::string> enabledVisualizers;
+    std::string selectedVisualizer(m_visualizerName);
+    const Settings::json & visualizerSettings = m_settings.section("Visualizers");
+    const auto enabledIDs = visualizerSettings.find("m_enabledVisualizerNames");
+    if (enabledIDs != visualizerSettings.end() && enabledIDs->is_array())
     {
         for (const Settings::json & id : *enabledIDs)
         {
             if (id.is_string())
             {
-                enabledOverlays.push_back(id.get<std::string>());
+                enabledVisualizers.push_back(id.get<std::string>());
             }
         }
     }
-    Settings::read(overlaySettings, "m_selectedOverlayID", selectedOverlay);
+    Settings::read(visualizerSettings, "m_selectedVisualizerName", selectedVisualizer);
 
     setSource(source, false);
-    setProcessor(processor, false);
-    m_overlayStates.clear();
-    for (const std::string & id : enabledOverlays)
+    for (auto & [_, state] : m_visualizerStates)
     {
-        if (OverlayState * state = ensureOverlay(id))
+        if (state.enabled && state.visualizer)
         {
-            state->enabled = true;
+            state.visualizer->deactivate();
         }
     }
-    setOverlay(selectedOverlay, false);
+    m_terrainContext.setWalkabilityProvider({});
+    m_visualizerStates.clear();
+
+    for (const std::string & id : enabledVisualizers)
+    {
+        setVisualizerEnabled(id, true);
+    }
+    setVisualizer(selectedVisualizer, false);
     return true;
 }

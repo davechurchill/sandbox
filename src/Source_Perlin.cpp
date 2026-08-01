@@ -24,6 +24,7 @@ void Source_Perlin::calculateNoise()
     m_grid = m_perlin.GeneratePerlinNoise(m_octaves, m_persistance);
     m_topography = cv::Mat(cv::Size((int)m_grid.width(), (int)m_grid.height()), CV_32F, (void *)m_grid.data(), cv::Mat::AUTO_STEP);
     m_image = Tools::matToSfImage(m_topography);
+    markTerrainChanged();
 }
 
 

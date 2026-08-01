@@ -26,15 +26,13 @@ SFML 3, the Intel RealSense SDK, and OpenCV must be installed separately.
 
 Set the `SFML_DIR` environment variable to the SFML directory. For OpenCV 4.8.0, add the appropriate `opencv\build\x64\vc16\bin` directory to the system `PATH`. Installing the RealSense SDK normally provides the remaining runtime dependencies.
 
-## Processors and overlays
+## Visualizers
 
-A processor supplies the main terrain visualization. Select one from the **Processor** tab; selecting **None** disables the processed terrain display.
+A visualizer turns the current height map into an image or adds a visual effect to it. The **Visualizer** tab shows one collapsible row per visualizer, with an unlabeled checkbox that enables or disables it. Any number of different visualizers can be enabled together, with at most one instance of each type. Expanding one row closes the others and exposes that visualizer's settings.
 
-Overlays are independent effects drawn on top of the selected processor. Use the **Overlay** dropdown to choose the overlay whose settings are being edited, then use its **Enabled** checkbox to turn it on or off. Multiple overlays can be enabled at the same time. Canvas mouse input is sent according to the active tab, so source tools receive it on the **Source** tab, processor tools on the **Processor** tab, and only the selected enabled overlay on the **Overlay** tab.
+Visualizers are drawn in their listed order. Full-terrain visualizers establish the scene image, while transparent visualizers add effects over it. Enabling more than one full-terrain visualizer is allowed, but a later opaque image can cover an earlier one. Canvas mouse input goes to source tools on the **Source** tab, the expanded enabled visualizer on the **Visualizer** tab, and projection controls on the **Projection** tab. Collapsing every visualizer prevents all visualizers from receiving canvas input.
 
-Processor and overlay options are stored in `settings.json` when settings are saved.
-
-## Processors
+Visualizer options and the enabled visualizer list are stored in `settings.json` when settings are saved.
 
 ### Colorizer
 
@@ -57,7 +55,7 @@ Uses the grassy-hills Nature terrain style, including ponds and rocky high groun
 - **Tree Brush Size**, **Tree Brush Blur**, and **Tree Paint Amount** control the tree brush.
 - **Water Level** and **Rock Level** define non-burnable terrain.
 - **Spread Rate**, **Burn Rate**, **Ignition Radius**, and **Wind X/Y** control the simulation.
-- The processor reports burning cells, forested cells, and remaining fuel. It can be paused, randomly ignited, extinguished, or reset and cleared.
+- The visualizer reports burning cells, forested cells, and remaining fuel. It can be paused, randomly ignited, extinguished, or reset and cleared.
 
 ### Heat
 
@@ -85,11 +83,9 @@ Provides natural terrain colorization with four selectable styles:
 
 Applies directional lighting and terrain relief to one of four palettes: **Terrain**, **Grayscale**, **Desert**, or **Ice**. **Light Azimuth**, **Light Elevation**, **Ambient Light**, **Shadow Strength**, and **Height Strength** control the result. Left-drag on the terrain to reposition the light direction interactively.
 
-## Overlays
-
 ### Adjust Terrain Color
 
-Applies shader-based color correction to the projected terrain while preserving the selected processor's visualization. **Brightness**, **Contrast**, **Exposure**, **Saturation**, **Hue**, **Gamma**, and **Temperature** can be adjusted independently or returned to neutral with **Reset Adjustments**.
+Applies shader-based color correction to the projected terrain while preserving visualizers drawn before it. **Brightness**, **Contrast**, **Exposure**, **Saturation**, **Hue**, **Gamma**, and **Temperature** can be adjusted independently or returned to neutral with **Reset Adjustments**.
 
 ### Animals
 
@@ -123,7 +119,7 @@ Simulates an unpinned spring-mesh sheet falling and deforming over the terrain. 
 
 ### Contour Lines
 
-Adds topographic contour lines without replacing the active processor's visualization. **Contour Lines** controls the line count from 0 to 64, while **Line Color** and **Line Opacity** control their appearance.
+Adds topographic contour lines without replacing visualizers drawn before it. **Contour Lines** controls the line count from 0 to 64, while **Line Color** and **Line Opacity** control their appearance.
 
 ### Pathfinding (A*)
 

@@ -343,6 +343,7 @@ cv::Mat Source_Camera::getTopography()
     } 
 
     captureImages();
+    markTerrainChanged();
     return m_data;
 }
 

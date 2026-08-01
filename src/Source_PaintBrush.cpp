@@ -23,6 +23,7 @@ void Source_PaintBrush::resetCanvas()
     m_topography = cv::Mat(cv::Size(CanvasSize, CanvasSize), CV_32F, cv::Scalar(DefaultHeight));
     m_textureDirty = true;
     m_hasLastPaintPosition = false;
+    markTerrainChanged();
 }
 
 void Source_PaintBrush::applyBrush(const sf::Vector2f & position, float direction)
@@ -62,6 +63,7 @@ void Source_PaintBrush::applyBrush(const sf::Vector2f & position, float directio
     }
 
     m_textureDirty = true;
+    markTerrainChanged();
 }
 
 void Source_PaintBrush::paintLine(const sf::Vector2f & from, const sf::Vector2f & to, float direction)

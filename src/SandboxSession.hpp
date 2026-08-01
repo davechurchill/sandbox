@@ -1,65 +1,71 @@
 #pragma once
 
 #include "Settings.hpp"
-#include "TopographyOverlay.hpp"
-#include "TopographyProcessor.hpp"
+#include "TerrainContext.hpp"
 #include "TopographySource.hpp"
+#include "TopographyVisualizer.hpp"
 
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 class SandboxSession
 {
-    struct OverlayState
+    struct VisualizerState
     {
-        std::shared_ptr<TopographyOverlay> overlay;
+        std::unique_ptr<TopographyVisualizer> visualizer;
         bool enabled = false;
     };
 
     cv::Mat m_topography;
+    std::uint64_t m_terrainRevision = 0;
+    std::uint64_t m_sourceRevision = 0;
     Settings m_settings;
     SandBoxProjector m_projector;
+    TerrainContext m_terrainContext{ m_projector };
 
-    std::string m_sourceID = "Camera";
-    std::string m_processorID = "Colorizer";
-    std::string m_overlayID = "Animals";
+    std::string m_sourceName = "Camera";
+    std::string m_visualizerName = "Colorizer";
 
-    std::shared_ptr<TopographySource> m_source;
-    std::shared_ptr<TopographyProcessor> m_processor;
+    std::unique_ptr<TopographySource> m_source;
+    std::map<std::string, VisualizerState, std::less<>> m_visualizerStates;
 
-    std::map<std::string, OverlayState> m_overlayStates;
-
-    OverlayState * ensureOverlay(const std::string & name);
+    VisualizerState * ensureVisualizer(std::string_view name);
+    void refreshWalkabilityProvider();
 
 public:
     SandboxSession();
 
     void processFrame(float deltaTime);
 
-    TopographySource * source() const { return m_source.get(); }
-    TopographyProcessor * processor() const { return m_processor.get(); }
-    TopographyOverlay * overlay() const;
-    TopographyOverlay * inputOverlay() const;
-    bool overlayEnabled(const std::string & name) const;
+    TopographySource & source() { return *m_source; }
+    const TopographySource & source() const { return *m_source; }
+    TopographyVisualizer * visualizer() const;
+    TopographyVisualizer * inputVisualizer() const;
+    bool visualizerEnabled(std::string_view name) const;
     SandBoxProjector & projector() { return m_projector; }
     const cv::Mat & topography() const { return m_topography; }
 
-    const std::string & sourceID() const { return m_sourceID; }
-    const std::string & processorID() const { return m_processorID; }
-    const std::string & overlayID() const { return m_overlayID; }
+    const std::string & sourceName() const { return m_sourceName; }
+    const std::string & visualizerName() const { return m_visualizerName; }
 
-    std::vector<std::string> sourceNames() const;
-    std::vector<std::string> processorNames() const;
-    std::vector<std::string> overlayNames() const;
+    const std::vector<std::string> & sourceNames() const;
+    const std::vector<std::string> & visualizerNames() const;
 
-    void setSource(const std::string & source, bool saveCurrent = true);
-    void setProcessor(const std::string & processor, bool saveCurrent = true);
-    void setOverlay(const std::string & overlay, bool saveCurrent = true);
-    void setOverlayEnabled(const std::string & overlay, bool enabled);
-    void renderOverlays(sf::RenderWindow & window);
+    void setSource(std::string_view source, bool saveCurrent = true);
+    void setVisualizer(std::string_view visualizer, bool saveCurrent = true);
+    void setVisualizerEnabled(std::string_view visualizer, bool enabled);
+    void renderVisualizers(sf::RenderWindow & window);
 
-    void saveSettings(const std::string & filename, bool doubleSizeUI, const std::string & displayMonitorID);
-    bool loadSettings(const std::string & filename, bool & doubleSizeUI, std::string & displayMonitorID);
+    void saveSettings(
+        const std::string & filename,
+        bool doubleSizeUI,
+        const std::string & displayMonitorID);
+    bool loadSettings(
+        const std::string & filename,
+        bool & doubleSizeUI,
+        std::string & displayMonitorID);
 };
