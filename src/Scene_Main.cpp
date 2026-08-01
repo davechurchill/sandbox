@@ -374,10 +374,7 @@ void Scene_Main::sUserInput()
         {
             if (m_activeControlTab == ControlTab::Overlay && m_session.inputOverlay())
             {
-                m_session.inputOverlay()->processOverlayEvent(
-                    event,
-                    m_mouseWorld,
-                    *m_session.processor());
+                m_session.inputOverlay()->processOverlayEvent(event, m_mouseWorld, *m_session.processor());
             }
             else if (!mouseControlEvent || m_activeControlTab == ControlTab::Processor)
             {
