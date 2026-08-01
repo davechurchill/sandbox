@@ -20,11 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\Overlay_BFS.cpp" />
+    <ClCompile Include="..\src\Overlay_Animals.cpp" />
+    <ClCompile Include="..\src\Overlay_Balls.cpp" />
     <ClCompile Include="..\src\Overlay_Cloth.cpp" />
     <ClCompile Include="..\src\Overlay_CloudSimulation.cpp" />
     <ClCompile Include="..\src\Overlay_SmokeFire.cpp" />
+    <ClCompile Include="..\src\Overlay_Vectors.cpp" />
     <ClCompile Include="..\src\Overlay_Weather.cpp" />
-    <ClCompile Include="..\src\Processor_Balls.cpp" />
+    <ClCompile Include="..\src\Overlay_WaterFlow.cpp" />
     <ClCompile Include="..\src\Processor_FishPond.cpp" />
     <ClCompile Include="..\src\Processor_ForestFire.cpp" />
     <ClCompile Include="..\src\HeatGrid.cpp" />
@@ -34,8 +37,6 @@
     <ClCompile Include="..\src\Processor_Nature.cpp" />
     <ClCompile Include="..\src\Processor_TerrainLighting.cpp" />
     <ClCompile Include="..\src\GoodAssert.cpp" />
-    <ClCompile Include="..\src\Processor_Vectors.cpp" />
-    <ClCompile Include="..\src\Processor_WaterFlow.cpp" />
     <ClCompile Include="..\src\Source_Camera.cpp" />
     <ClCompile Include="..\src\Source_PaintBrush.cpp" />
     <ClCompile Include="..\src\Processor_Colorizer.cpp" />
@@ -48,6 +49,7 @@
     <ClCompile Include="..\src\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\src\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\src\SandboxProjector.cpp" />
+    <ClCompile Include="..\src\SandboxSession.cpp" />
     <ClCompile Include="..\src\Scene.cpp" />
     <ClCompile Include="..\src\Scene_Main.cpp" />
     <ClCompile Include="..\src\Source_Perlin.cpp" />
@@ -57,11 +59,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Overlay_BFS.h" />
+    <ClInclude Include="..\src\Overlay_Animals.h" />
+    <ClInclude Include="..\src\Overlay_Balls.h" />
     <ClInclude Include="..\src\Overlay_Cloth.h" />
     <ClInclude Include="..\src\Overlay_CloudSimulation.h" />
     <ClInclude Include="..\src\Overlay_SmokeFire.h" />
+    <ClInclude Include="..\src\Overlay_Vectors.h" />
     <ClInclude Include="..\src\Overlay_Weather.h" />
-    <ClInclude Include="..\src\Processor_Balls.h" />
+    <ClInclude Include="..\src\Overlay_WaterFlow.h" />
     <ClInclude Include="..\src\Processor_FishPond.h" />
     <ClInclude Include="..\src\Processor_ForestFire.h" />
     <ClInclude Include="..\src\Grid.hpp" />
@@ -75,8 +80,6 @@
     <ClInclude Include="..\src\Processor_TerrainLighting.h" />
     <ClInclude Include="..\src\GoodAssert.h" />
     <ClInclude Include="..\src\Logger.hpp" />
-    <ClInclude Include="..\src\Processor_Vectors.h" />
-    <ClInclude Include="..\src\Processor_WaterFlow.h" />
     <ClInclude Include="..\src\Sandbox.hpp" />
     <ClInclude Include="..\src\Save.hpp" />
     <ClInclude Include="..\src\Source_Camera.h" />
@@ -89,6 +92,7 @@
     <ClInclude Include="..\src\Profiler.hpp" />
     <ClInclude Include="..\src\RealSenseTools.hpp" />
     <ClInclude Include="..\src\SandboxProjector.h" />
+    <ClInclude Include="..\src\SandboxSession.hpp" />
     <ClInclude Include="..\src\Scene.h" />
     <ClInclude Include="..\src\Scene_Main.h" />
     <ClInclude Include="..\src\Source_Perlin.h" />

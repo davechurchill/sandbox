@@ -1,18 +1,15 @@
-#include "Processor_Balls.h"
+#include "Overlay_Balls.h"
 #include "Profiler.hpp"
-#include "Tools.h"
 
 #include "imgui.h"
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 #include <limits>
 #include <vector>
 
 namespace
 {
-    constexpr const char * BallsShaderPath = "shaders/shader_balls.frag";
     constexpr const char * BallSphereShaderPath = "shaders/shader_ball_sphere.frag";
     constexpr float RadiansToDegrees = 57.29577951308232f;
     constexpr size_t MaxBallTrails = 400;
@@ -23,29 +20,19 @@ namespace
     }
 }
 
-void Processor_Balls::init()
+SandBoxProjector & Overlay_Balls::activeProjector()
 {
-    reloadShader();
+    return m_overlayProcessor->projector();
 }
 
-SandBoxProjector & Processor_Balls::activeProjector()
+void Overlay_Balls::reloadShader()
 {
-    return m_overlayProcessor ? m_overlayProcessor->projector() : m_projector;
-}
-
-void Processor_Balls::reloadShader()
-{
-    m_shaderLoaded = m_shader.loadFromFile(BallsShaderPath, sf::Shader::Type::Fragment);
-    if (m_shaderLoaded)
-    {
-        m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
-    }
     m_ballShaderLoaded = m_ballShader.loadFromFile(
         BallSphereShaderPath,
         sf::Shader::Type::Fragment);
 }
 
-void Processor_Balls::resetBalls()
+void Overlay_Balls::resetBalls()
 {
     m_balls.clear();
     m_trails.clear();
@@ -53,7 +40,7 @@ void Processor_Balls::resetBalls()
     m_randomResetPending = true;
 }
 
-sf::Color Processor_Balls::randomBallColor()
+sf::Color Overlay_Balls::randomBallColor()
 {
     std::uniform_real_distribution<float> hueDistribution(0.0f, 360.0f);
     std::uniform_real_distribution<float> saturationDistribution(0.62f, 0.88f);
@@ -85,40 +72,7 @@ sf::Color Processor_Balls::randomBallColor()
         (std::uint8_t)std::round(blue * 255.0f));
 }
 
-void Processor_Balls::imgui()
-{
-    PROFILE_FUNCTION();
-
-    ImGui::Text("Balls: %d", (int)m_balls.size());
-    ImGui::SliderFloat("Gravity", &m_gravity, 0.0f, 5000.0f, "%.0f");
-    ImGui::SliderFloat("Ball Speed Multiplier", &m_ballSpeedMultiplier, 0.1f, 4.0f, "%.1fx");
-    ImGui::SliderFloat("Rolling Resistance", &m_rollingResistance, 0.0f, 4.0f);
-    ImGui::SliderFloat("Ball Size", &m_ballSize, 6.0f, 40.0f);
-    ImGui::SliderFloat("Ball Bounciness", &m_ballRestitution, 0.0f, 1.0f);
-    if (ImGui::Checkbox("Lava Appearance", &m_lavaAppearance)
-        && m_lavaAppearance && m_trailLength <= 0.0f)
-    {
-        m_trailLength = 3.0f;
-    }
-    ImGui::SliderFloat("Trail Length", &m_trailLength, 0.0f, 10.0f, "%.1f sec");
-
-    ImGui::TextUnformatted("Left mouse: add ball");
-
-    if (ImGui::Button("Reset Balls"))
-    {
-        resetBalls();
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Reload Shader"))
-    {
-        reloadShader();
-    }
-
-    ImGui::Separator();
-    m_projector.imgui();
-}
-
-bool Processor_Balls::isValidTerrainPosition(
+bool Overlay_Balls::isValidTerrainPosition(
     const cv::Mat & terrain,
     const cv::Point2f & position) const
 {
@@ -133,7 +87,7 @@ bool Processor_Balls::isValidTerrainPosition(
     return isTerrainCell(terrain.at<float>(y, x));
 }
 
-bool Processor_Balls::sampleTerrainHeight(
+bool Overlay_Balls::sampleTerrainHeight(
     const cv::Mat & terrain,
     const cv::Point2f & position,
     float & height) const
@@ -166,7 +120,7 @@ bool Processor_Balls::sampleTerrainHeight(
     return true;
 }
 
-bool Processor_Balls::addBall(const cv::Point2f & position)
+bool Overlay_Balls::addBall(const cv::Point2f & position)
 {
     if (!isValidTerrainPosition(m_topography, position))
     {
@@ -183,7 +137,7 @@ bool Processor_Balls::addBall(const cv::Point2f & position)
     return true;
 }
 
-bool Processor_Balls::spawnBallNearMiddle(const cv::Mat & terrain)
+bool Overlay_Balls::spawnBallNearMiddle(const cv::Mat & terrain)
 {
     if (terrain.empty())
     {
@@ -219,7 +173,7 @@ bool Processor_Balls::spawnBallNearMiddle(const cv::Mat & terrain)
     return found && addBall(bestPosition);
 }
 
-bool Processor_Balls::findRandomTerrainPosition(
+bool Overlay_Balls::findRandomTerrainPosition(
     const cv::Mat & terrain,
     cv::Point2f & position)
 {
@@ -256,19 +210,19 @@ bool Processor_Balls::findRandomTerrainPosition(
     return false;
 }
 
-bool Processor_Balls::spawnRandomBall(const cv::Mat & terrain)
+bool Overlay_Balls::spawnRandomBall(const cv::Mat & terrain)
 {
     cv::Point2f position;
     return findRandomTerrainPosition(terrain, position) && addBall(position);
 }
 
-float Processor_Balls::getTerrainBallRadius(const cv::Mat & terrain) const
+float Overlay_Balls::getTerrainBallRadius(const cv::Mat & terrain) const
 {
     const float sizeScale = m_ballSize / 18.0f;
     return std::max(1.0f, std::min(terrain.cols, terrain.rows) * 0.012f * sizeScale);
 }
 
-void Processor_Balls::resolveBallCollisions(const cv::Mat & terrain)
+void Overlay_Balls::resolveBallCollisions(const cv::Mat & terrain)
 {
     const float visibleBallDiameter = m_ballSize * 1.10f;
     const float fallbackMinimumDistance = getTerrainBallRadius(terrain) * 2.0f * 1.10f;
@@ -421,7 +375,7 @@ void Processor_Balls::resolveBallCollisions(const cv::Mat & terrain)
     }
 }
 
-void Processor_Balls::updateBalls(const cv::Mat & terrain, float deltaTime)
+void Overlay_Balls::updateBalls(const cv::Mat & terrain, float deltaTime)
 {
     if (m_randomResetPending)
     {
@@ -563,7 +517,7 @@ void Processor_Balls::updateBalls(const cv::Mat & terrain, float deltaTime)
     }
 }
 
-void Processor_Balls::drawBall(
+void Overlay_Balls::drawBall(
     sf::RenderWindow & window,
     const sf::Vector2f & position,
     const sf::Vector2f & direction,
@@ -692,7 +646,7 @@ void Processor_Balls::drawBall(
     window.draw(highlight);
 }
 
-void Processor_Balls::renderBallTrails(sf::RenderWindow & window)
+void Overlay_Balls::renderBallTrails(sf::RenderWindow & window)
 {
     if (m_trails.empty())
     {
@@ -740,7 +694,7 @@ void Processor_Balls::renderBallTrails(sf::RenderWindow & window)
     }
 }
 
-void Processor_Balls::renderBalls(sf::RenderWindow & window)
+void Overlay_Balls::renderBalls(sf::RenderWindow & window)
 {
     renderBallTrails(window);
     if (m_balls.empty())
@@ -810,33 +764,7 @@ void Processor_Balls::renderBalls(sf::RenderWindow & window)
     }
 }
 
-void Processor_Balls::render(sf::RenderWindow & window)
-{
-    PROFILE_FUNCTION();
-
-    if (m_hasFrame)
-    {
-        m_sprite.setPosition(m_projector.getTransformedPosition());
-        const float scale = m_projector.getTransformedScale();
-        m_sprite.setScale({ scale, scale });
-
-        if (m_shaderLoaded)
-        {
-            const sf::Vector2u textureSize = m_texture.getSize();
-            m_shader.setUniform("texelSize", sf::Glsl::Vec2(1.0f / textureSize.x, 1.0f / textureSize.y));
-            window.draw(m_sprite, &m_shader);
-        }
-        else
-        {
-            window.draw(m_sprite);
-        }
-
-        renderBalls(window);
-    }
-
-}
-
-bool Processor_Balls::mapMouseToTerrain(
+bool Overlay_Balls::mapMouseToTerrain(
     const sf::Vector2f & mouse,
     cv::Point2f & terrainPosition)
 {
@@ -871,7 +799,7 @@ bool Processor_Balls::mapMouseToTerrain(
     return isValidTerrainPosition(m_topography, terrainPosition);
 }
 
-void Processor_Balls::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
+void Overlay_Balls::handleInput(const sf::Event & event, const sf::Vector2f & mouse)
 {
     const bool draggingProjection = activeProjector().processEvent(event, mouse);
     const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
@@ -888,84 +816,7 @@ void Processor_Balls::processEvent(const sf::Event & event, const sf::Vector2f &
     }
 }
 
-void Processor_Balls::save(Save & save) const
-{
-    Save::Json & settings = save.section("Processor_Balls");
-    settings["m_gravity"] = m_gravity;
-    settings["m_ballSpeedMultiplier"] = m_ballSpeedMultiplier;
-    settings["m_rollingResistance"] = m_rollingResistance;
-    settings["m_ballSize"] = m_ballSize;
-    settings["m_ballRestitution"] = m_ballRestitution;
-    settings["m_trailLength"] = m_trailLength;
-    settings["m_lavaAppearance"] = m_lavaAppearance;
-    m_projector.save(save);
-}
-
-void Processor_Balls::load(const Save & save)
-{
-    const Save::Json & settings = save.section("Processor_Balls");
-    Save::read(settings, "m_gravity", m_gravity);
-    Save::read(settings, "m_ballSpeedMultiplier", m_ballSpeedMultiplier);
-    Save::read(settings, "m_rollingResistance", m_rollingResistance);
-    Save::read(settings, "m_ballSize", m_ballSize);
-    Save::read(settings, "m_ballRestitution", m_ballRestitution);
-    Save::read(settings, "m_trailLength", m_trailLength);
-    Save::read(settings, "m_lavaAppearance", m_lavaAppearance);
-    m_projector.load(save);
-}
-
-void Processor_Balls::processTopography(const IntermediateData & data)
-{
-    PROFILE_FUNCTION();
-
-    if (data.topography.empty() || data.topography.type() != CV_32F)
-    {
-        m_hasFrame = false;
-        return;
-    }
-
-    if (m_topographySize.width > 0 && m_topographySize.height > 0
-        && m_topographySize != data.topography.size())
-    {
-        const float xScale = (float)data.topography.cols / m_topographySize.width;
-        const float yScale = (float)data.topography.rows / m_topographySize.height;
-        for (Ball & ball : m_balls)
-        {
-            ball.position.x *= xScale;
-            ball.position.y *= yScale;
-            ball.velocity.x *= xScale;
-            ball.velocity.y *= yScale;
-        }
-        for (BallTrail & trail : m_trails)
-        {
-            trail.position.x *= xScale;
-            trail.position.y *= yScale;
-        }
-    }
-
-    m_topography = data.topography;
-    m_topographySize = data.topography.size();
-    updateBalls(m_topography, data.deltaTime);
-
-    m_projector.project(m_topography, m_projectedTopography);
-    if (m_projectedTopography.empty())
-    {
-        m_hasFrame = false;
-        return;
-    }
-
-    m_image = Tools::matToSfImage(m_projectedTopography);
-    if (!m_texture.loadFromImage(m_image))
-    {
-        std::cerr << "Failed to load the balls terrain texture.\n";
-        return;
-    }
-    m_texture.setSmooth(true);
-    m_sprite.setTexture(m_texture, true);
-    m_hasFrame = true;
-}
-
-void Processor_Balls::initOverlay()
+void Overlay_Balls::initOverlay()
 {
     reloadShader();
     m_balls.clear();
@@ -974,7 +825,7 @@ void Processor_Balls::initOverlay()
     m_randomResetPending = false;
 }
 
-void Processor_Balls::imguiOverlay()
+void Overlay_Balls::imguiOverlay()
 {
     PROFILE_FUNCTION();
 
@@ -998,16 +849,16 @@ void Processor_Balls::imguiOverlay()
     }
 }
 
-void Processor_Balls::processTopographyOverlay(
+void Overlay_Balls::processTopographyOverlay(
     const IntermediateData & data,
     TopographyProcessor & processor)
 {
+    m_overlayProcessor = &processor;
     if (data.topography.empty() || data.topography.type() != CV_32F)
     {
         return;
     }
 
-    m_overlayProcessor = &processor;
     if (m_topographySize.width > 0 && m_topographySize.height > 0
         && m_topographySize != data.topography.size())
     {
@@ -1032,7 +883,7 @@ void Processor_Balls::processTopographyOverlay(
     updateBalls(m_topography, data.deltaTime);
 }
 
-void Processor_Balls::renderOverlay(
+void Overlay_Balls::renderOverlay(
     sf::RenderWindow & window,
     TopographyProcessor & processor)
 {
@@ -1040,18 +891,18 @@ void Processor_Balls::renderOverlay(
     renderBalls(window);
 }
 
-void Processor_Balls::processOverlayEvent(
+void Overlay_Balls::processOverlayEvent(
     const sf::Event & event,
     const sf::Vector2f & mouse,
     TopographyProcessor & processor)
 {
     m_overlayProcessor = &processor;
-    processEvent(event, mouse);
+    handleInput(event, mouse);
 }
 
-void Processor_Balls::saveOverlay(Save & save) const
+void Overlay_Balls::saveOverlay(Save & save) const
 {
-    Save::Json & settings = save.section("Processor_Balls");
+    Save::Json & settings = save.section("Overlay_Balls");
     settings["m_gravity"] = m_gravity;
     settings["m_ballSpeedMultiplier"] = m_ballSpeedMultiplier;
     settings["m_rollingResistance"] = m_rollingResistance;
@@ -1061,9 +912,12 @@ void Processor_Balls::saveOverlay(Save & save) const
     settings["m_lavaAppearance"] = m_lavaAppearance;
 }
 
-void Processor_Balls::loadOverlay(const Save & save)
+void Overlay_Balls::loadOverlay(const Save & save)
 {
-    const Save::Json & settings = save.section("Processor_Balls");
+    const Save::Json & currentSettings = save.section("Overlay_Balls");
+    const Save::Json & settings = currentSettings.empty()
+        ? save.section("Processor_Balls")
+        : currentSettings;
     Save::read(settings, "m_gravity", m_gravity);
     Save::read(settings, "m_ballSpeedMultiplier", m_ballSpeedMultiplier);
     Save::read(settings, "m_rollingResistance", m_rollingResistance);

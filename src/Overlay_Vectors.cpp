@@ -1,46 +1,23 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
-#include "Processor_Vectors.h"
+#include "Overlay_Vectors.h"
 #include "Profiler.hpp"
 #include "Tools.h"
 
 #include <iostream>
 
-const char* Processor_Vectors::m_shaders[] = { "Popsicle", "Blue", "Red", "Terrain", "Animating Water", "None" };
-
-void Processor_Vectors::init()
+SandBoxProjector & Overlay_Vectors::activeProjector()
 {
-    if (!m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Type::Fragment))
-    {
-        std::cerr << "Failed to load the vectors shader.\n";
-    }
+    return m_overlayProcessor->projector();
 }
 
-SandBoxProjector & Processor_Vectors::activeProjector()
-{
-    return m_overlayProcessor ? m_overlayProcessor->projector() : m_projector;
-}
-
-void Processor_Vectors::imgui()
-{
-    imguiControls(false);
-}
-
-void Processor_Vectors::imguiControls(bool overlayOnly)
+void Overlay_Vectors::imguiControls()
 {
     PROFILE_FUNCTION();
 
     ImGui::TextUnformatted("Mode: Steering");
     auto& selectedParameters = m_particleManager.parameters[
         (size_t)ParticleManager::Algorithm::Steering];
-
-    if (!overlayOnly)
-    {
-        ImGui::Combo("Color Scheme", &m_selectedShaderIndex, m_shaders, IM_ARRAYSIZE(m_shaders));
-        ImGui::Checkbox("##Contours", &m_drawContours);
-        ImGui::SameLine();
-        ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
-    }
 
     ImGui::SliderFloat("Spawn Rate", &selectedParameters.spawnRate, 0.0f, 20000.0f, "%.0f / sec");
     ImGui::Text("Active Particles: %zu", m_particleManager.getParticleCount());
@@ -66,7 +43,7 @@ void Processor_Vectors::imguiControls(bool overlayOnly)
     {
         m_particleManager.reset();
     }
-    
+
     if (ImGui::Button("Reset Particles"))
     {
         m_particleManager.reset();
@@ -81,19 +58,9 @@ void Processor_Vectors::imguiControls(bool overlayOnly)
             std::cerr << "Failed to reload the vectors shader.\n";
         }
     }
-    if (!overlayOnly)
-    {
-        m_projector.imgui();
-    }
 }
 
-void Processor_Vectors::render(sf::RenderWindow& window)
-{
-    PROFILE_FUNCTION();
-    renderVectors(window, false);
-}
-
-void Processor_Vectors::renderVectors(sf::RenderWindow & window, bool overlayOnly)
+void Overlay_Vectors::renderVectors(sf::RenderWindow & window)
 {
     auto& selectedParameters = m_particleManager.parameters[
         (size_t)ParticleManager::Algorithm::Steering];
@@ -106,16 +73,8 @@ void Processor_Vectors::renderVectors(sf::RenderWindow & window, bool overlayOnl
         float scale = projector.getTransformedScale();
         m_sfTransformedDepthSprite.setScale({ scale, scale });
 
-        //Use static so that it does not get initilialized every time this function is called
-        static sf::Clock time;
-
-        //Change color scheme
-        m_shader.setUniform("shaderIndex", m_selectedShaderIndex);
-        m_shader.setUniform("contour", m_drawContours);
-        m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
-        m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
         m_shader.setUniform("particleAlpha", selectedParameters.particleAlpha);
-        m_shader.setUniform("overlayOnly", overlayOnly);
+        m_shader.setUniform("overlayOnly", true);
         m_shader.setUniform("reverseDepthAlpha", true);
 
         window.draw(m_sfTransformedDepthSprite, &m_shader);
@@ -123,50 +82,7 @@ void Processor_Vectors::renderVectors(sf::RenderWindow & window, bool overlayOnl
 
 }
 
-void Processor_Vectors::processEvent(const sf::Event& event, const sf::Vector2f& mouse)
-{
-    PROFILE_FUNCTION();
-    activeProjector().processEvent(event, mouse);
-}
-
-void Processor_Vectors::save(Save& save) const
-{
-    const auto & parameters = m_particleManager.parameters[
-        (size_t)ParticleManager::Algorithm::Steering];
-    Save::Json & settings = save.section("Processor_Vectors");
-    settings["m_selectedShaderIndex"] = m_selectedShaderIndex;
-    settings["m_drawContours"] = m_drawContours;
-    settings["m_numberOfContourLines"] = m_numberOfContourLines;
-    settings["trailLength"] = parameters.trailLength;
-    settings["spawnRate"] = parameters.spawnRate;
-    settings["particleSpeed"] = parameters.particleSpeed;
-    settings["particleAlpha"] = parameters.particleAlpha;
-    settings["minimumWindHeight"] = parameters.minimumWindHeight;
-    settings["maximumWindHeight"] = parameters.maximumWindHeight;
-    settings["steeringDistance"] = parameters.steeringDistance;
-    m_projector.save(save);
-}
-
-void Processor_Vectors::load(const Save& save)
-{
-    auto & parameters = m_particleManager.parameters[
-        (size_t)ParticleManager::Algorithm::Steering];
-    const Save::Json & settings = save.section("Processor_Vectors");
-    Save::read(settings, "m_selectedShaderIndex", m_selectedShaderIndex);
-    Save::read(settings, "m_drawContours", m_drawContours);
-    Save::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
-    Save::read(settings, "trailLength", parameters.trailLength);
-    Save::read(settings, "spawnRate", parameters.spawnRate);
-    Save::read(settings, "particleSpeed", parameters.particleSpeed);
-    Save::read(settings, "particleAlpha", parameters.particleAlpha);
-    Save::read(settings, "minimumWindHeight", parameters.minimumWindHeight);
-    Save::read(settings, "maximumWindHeight", parameters.maximumWindHeight);
-    Save::read(settings, "steeringDistance", parameters.steeringDistance);
-    m_particleManager.reset();
-    m_projector.load(save);
-}
-
-void Processor_Vectors::processTopography(const IntermediateData& data)
+void Overlay_Vectors::updateParticles(const IntermediateData& data)
 {
     PROFILE_FUNCTION();
     const cv::Mat& top = data.topography;
@@ -275,7 +191,7 @@ void Processor_Vectors::processTopography(const IntermediateData& data)
                 particle.direction);
         }
     }
-    
+
     {
         PROFILE_SCOPE("Calibration TransformProjection");
         SandBoxProjector & projector = activeProjector();
@@ -333,7 +249,7 @@ void Processor_Vectors::processTopography(const IntermediateData& data)
     }
 }
 
-void Processor_Vectors::initOverlay()
+void Overlay_Vectors::initOverlay()
 {
     m_particleManager.reset();
     if (!m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Type::Fragment))
@@ -342,42 +258,39 @@ void Processor_Vectors::initOverlay()
     }
 }
 
-void Processor_Vectors::imguiOverlay()
+void Overlay_Vectors::imguiOverlay()
 {
-    imguiControls(true);
+    imguiControls();
 }
 
-void Processor_Vectors::processTopographyOverlay(
+void Overlay_Vectors::processTopographyOverlay(
     const IntermediateData & data,
     TopographyProcessor & processor)
 {
     m_overlayProcessor = &processor;
-    processTopography(data);
+    updateParticles(data);
 }
 
-void Processor_Vectors::renderOverlay(
+void Overlay_Vectors::renderOverlay(
     sf::RenderWindow & window,
     TopographyProcessor & processor)
 {
     m_overlayProcessor = &processor;
-    renderVectors(window, true);
+    renderVectors(window);
 }
 
-void Processor_Vectors::processOverlayEvent(
+void Overlay_Vectors::processOverlayEvent(
     const sf::Event &,
     const sf::Vector2f &,
     TopographyProcessor &)
 {
 }
 
-void Processor_Vectors::saveOverlay(Save & save) const
+void Overlay_Vectors::saveOverlay(Save & save) const
 {
     const auto & parameters = m_particleManager.parameters[
         (size_t)ParticleManager::Algorithm::Steering];
-    Save::Json & settings = save.section("Processor_Vectors");
-    settings["m_selectedShaderIndex"] = m_selectedShaderIndex;
-    settings["m_drawContours"] = m_drawContours;
-    settings["m_numberOfContourLines"] = m_numberOfContourLines;
+    Save::Json & settings = save.section("Overlay_Vectors");
     settings["trailLength"] = parameters.trailLength;
     settings["spawnRate"] = parameters.spawnRate;
     settings["particleSpeed"] = parameters.particleSpeed;
@@ -387,14 +300,14 @@ void Processor_Vectors::saveOverlay(Save & save) const
     settings["steeringDistance"] = parameters.steeringDistance;
 }
 
-void Processor_Vectors::loadOverlay(const Save & save)
+void Overlay_Vectors::loadOverlay(const Save & save)
 {
     auto & parameters = m_particleManager.parameters[
         (size_t)ParticleManager::Algorithm::Steering];
-    const Save::Json & settings = save.section("Processor_Vectors");
-    Save::read(settings, "m_selectedShaderIndex", m_selectedShaderIndex);
-    Save::read(settings, "m_drawContours", m_drawContours);
-    Save::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
+    const Save::Json & currentSettings = save.section("Overlay_Vectors");
+    const Save::Json & settings = currentSettings.empty()
+        ? save.section("Processor_Vectors")
+        : currentSettings;
     Save::read(settings, "trailLength", parameters.trailLength);
     Save::read(settings, "spawnRate", parameters.spawnRate);
     Save::read(settings, "particleSpeed", parameters.particleSpeed);

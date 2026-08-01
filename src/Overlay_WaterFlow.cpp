@@ -1,4 +1,4 @@
-#include "Processor_WaterFlow.h"
+#include "Overlay_WaterFlow.h"
 #include "Profiler.hpp"
 
 #include "imgui.h"
@@ -18,17 +18,12 @@ namespace
     }
 }
 
-void Processor_WaterFlow::init()
+SandBoxProjector & Overlay_WaterFlow::activeProjector()
 {
-    reloadShader();
+    return m_overlayProcessor->projector();
 }
 
-SandBoxProjector & Processor_WaterFlow::activeProjector()
-{
-    return m_overlayProcessor ? m_overlayProcessor->projector() : m_projector;
-}
-
-void Processor_WaterFlow::reloadShader()
+void Overlay_WaterFlow::reloadShader()
 {
     m_shaderLoaded = m_shader.loadFromFile(WaterShaderPath, sf::Shader::Type::Fragment);
     if (m_shaderLoaded)
@@ -37,7 +32,7 @@ void Processor_WaterFlow::reloadShader()
     }
 }
 
-void Processor_WaterFlow::ensureSimulationSize(const cv::Size & size)
+void Overlay_WaterFlow::ensureSimulationSize(const cv::Size & size)
 {
     if (m_water.size() == size)
     {
@@ -49,7 +44,7 @@ void Processor_WaterFlow::ensureSimulationSize(const cv::Size & size)
     m_wetness = cv::Mat(size, CV_32F, 0.0f);
 }
 
-void Processor_WaterFlow::resetWater()
+void Overlay_WaterFlow::resetWater()
 {
     m_rainBrushActive = false;
     m_rainPulsePending = false;
@@ -62,7 +57,7 @@ void Processor_WaterFlow::resetWater()
     }
 }
 
-void Processor_WaterFlow::addRain(const cv::Mat & terrain, float amount)
+void Overlay_WaterFlow::addRain(const cv::Mat & terrain, float amount)
 {
     if (m_rainMode == 0)
     {
@@ -113,7 +108,7 @@ void Processor_WaterFlow::addRain(const cv::Mat & terrain, float amount)
     m_rainPulsePending = false;
 }
 
-void Processor_WaterFlow::simulate(const cv::Mat & terrain, float deltaTime)
+void Overlay_WaterFlow::simulate(const cv::Mat & terrain, float deltaTime)
 {
     ensureSimulationSize(terrain.size());
 
@@ -223,7 +218,7 @@ void Processor_WaterFlow::simulate(const cv::Mat & terrain, float deltaTime)
     }
 }
 
-void Processor_WaterFlow::buildImage(const cv::Mat & terrain)
+void Overlay_WaterFlow::buildImage(const cv::Mat & terrain)
 {
     cv::Mat terrain8u;
     terrain.convertTo(terrain8u, CV_8U, 255.0);
@@ -266,12 +261,7 @@ void Processor_WaterFlow::buildImage(const cv::Mat & terrain)
     m_hasFrame = true;
 }
 
-void Processor_WaterFlow::imgui()
-{
-    imguiControls(true);
-}
-
-void Processor_WaterFlow::imguiControls(bool showProjector)
+void Overlay_WaterFlow::imguiControls()
 {
     PROFILE_FUNCTION();
 
@@ -308,20 +298,9 @@ void Processor_WaterFlow::imguiControls(bool showProjector)
         reloadShader();
     }
 
-    if (showProjector)
-    {
-        ImGui::Separator();
-        m_projector.imgui();
-    }
 }
 
-void Processor_WaterFlow::render(sf::RenderWindow & window)
-{
-    PROFILE_FUNCTION();
-    renderWater(window, false);
-}
-
-void Processor_WaterFlow::renderWater(sf::RenderWindow & window, bool overlayOnly)
+void Overlay_WaterFlow::renderWater(sf::RenderWindow & window)
 {
     if (m_hasFrame)
     {
@@ -334,17 +313,13 @@ void Processor_WaterFlow::renderWater(sf::RenderWindow & window, bool overlayOnl
         {
             m_shader.setUniform("waterColor", sf::Glsl::Vec3(m_waterColor[0], m_waterColor[1], m_waterColor[2]));
             m_shader.setUniform("waterOpacity", m_waterOpacity);
-            m_shader.setUniform("overlayOnly", overlayOnly);
+            m_shader.setUniform("overlayOnly", true);
             window.draw(m_sprite, &m_shader);
-        }
-        else if (!overlayOnly)
-        {
-            window.draw(m_sprite);
         }
     }
 }
 
-void Processor_WaterFlow::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
+void Overlay_WaterFlow::handleInput(const sf::Event & event, const sf::Vector2f & mouse)
 {
     const bool draggingProjection = activeProjector().processEvent(event, mouse);
 
@@ -375,7 +350,7 @@ void Processor_WaterFlow::processEvent(const sf::Event & event, const sf::Vector
     }
 }
 
-bool Processor_WaterFlow::mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point2f & terrainPosition)
+bool Overlay_WaterFlow::mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point2f & terrainPosition)
 {
     if (m_water.empty())
     {
@@ -410,108 +385,52 @@ bool Processor_WaterFlow::mapMouseToTerrain(const sf::Vector2f & mouse, cv::Poin
         && terrainPosition.y >= 0.0f && terrainPosition.y < m_water.rows;
 }
 
-void Processor_WaterFlow::save(Save & save) const
-{
-    Save::Json & settings = save.section("Processor_WaterFlow");
-    settings["m_rainfall"] = m_rainfall;
-    settings["m_flowSpeed"] = m_flowSpeed;
-    settings["m_evaporation"] = m_evaporation;
-    settings["m_waterDepthScale"] = m_waterDepthScale;
-    settings["m_trailPersistence"] = m_trailPersistence;
-    settings["m_displayScale"] = m_displayScale;
-    settings["m_waterOpacity"] = m_waterOpacity;
-    settings["m_waterColor"] = { m_waterColor[0], m_waterColor[1], m_waterColor[2] };
-    settings["m_rainRadius"] = m_rainRadius;
-    settings["m_simulationSteps"] = m_simulationSteps;
-    settings["m_rainMode"] = m_rainMode;
-    m_projector.save(save);
-}
-
-void Processor_WaterFlow::load(const Save & save)
-{
-    const Save::Json & settings = save.section("Processor_WaterFlow");
-    Save::read(settings, "m_rainfall", m_rainfall);
-    Save::read(settings, "m_flowSpeed", m_flowSpeed);
-    Save::read(settings, "m_evaporation", m_evaporation);
-    Save::read(settings, "m_waterDepthScale", m_waterDepthScale);
-    Save::read(settings, "m_trailPersistence", m_trailPersistence);
-    Save::read(settings, "m_displayScale", m_displayScale);
-    Save::read(settings, "m_waterOpacity", m_waterOpacity);
-    const auto color = settings.find("m_waterColor");
-    if (color != settings.end() && color->is_array() && color->size() == 3)
-    {
-        for (size_t index = 0; index < 3; index++)
-        {
-            m_waterColor[index] = color->at(index).get<float>();
-        }
-    }
-    Save::read(settings, "m_rainRadius", m_rainRadius);
-    Save::read(settings, "m_simulationSteps", m_simulationSteps);
-    Save::read(settings, "m_rainMode", m_rainMode);
-    resetWater();
-    m_projector.load(save);
-}
-
-void Processor_WaterFlow::processTopography(const IntermediateData & data)
-{
-    PROFILE_FUNCTION();
-
-    if (data.topography.empty() || data.topography.type() != CV_32F)
-    {
-        m_hasFrame = false;
-        return;
-    }
-
-    simulate(data.topography, data.deltaTime);
-    buildImage(data.topography);
-}
-
-void Processor_WaterFlow::initOverlay()
+void Overlay_WaterFlow::initOverlay()
 {
     resetWater();
     reloadShader();
 }
 
-void Processor_WaterFlow::imguiOverlay()
+void Overlay_WaterFlow::imguiOverlay()
 {
-    imguiControls(false);
+    imguiControls();
 }
 
-void Processor_WaterFlow::processTopographyOverlay(
+void Overlay_WaterFlow::processTopographyOverlay(
     const IntermediateData & data,
     TopographyProcessor & processor)
 {
+    m_overlayProcessor = &processor;
     if (data.topography.empty() || data.topography.type() != CV_32F)
     {
         m_hasFrame = false;
         return;
     }
 
-    m_overlayProcessor = &processor;
     simulate(data.topography, data.deltaTime);
     buildImage(data.topography);
 }
 
-void Processor_WaterFlow::renderOverlay(
+void Overlay_WaterFlow::renderOverlay(
     sf::RenderWindow & window,
     TopographyProcessor & processor)
 {
     m_overlayProcessor = &processor;
-    renderWater(window, true);
+    renderWater(window);
 }
 
-void Processor_WaterFlow::processOverlayEvent(
+void Overlay_WaterFlow::processOverlayEvent(
     const sf::Event & event,
     const sf::Vector2f & mouse,
     TopographyProcessor & processor)
 {
     m_overlayProcessor = &processor;
-    processEvent(event, mouse);
+    handleInput(event, mouse);
 }
 
-void Processor_WaterFlow::saveOverlay(Save & save) const
+void Overlay_WaterFlow::saveOverlay(Save & save) const
 {
-    Save::Json & settings = save.section("Processor_WaterFlow");
+    Save::Json & settings = save.section("Overlay_WaterFlow");
     settings["m_rainfall"] = m_rainfall;
     settings["m_flowSpeed"] = m_flowSpeed;
     settings["m_evaporation"] = m_evaporation;
@@ -525,9 +444,12 @@ void Processor_WaterFlow::saveOverlay(Save & save) const
     settings["m_rainMode"] = m_rainMode;
 }
 
-void Processor_WaterFlow::loadOverlay(const Save & save)
+void Overlay_WaterFlow::loadOverlay(const Save & save)
 {
-    const Save::Json & settings = save.section("Processor_WaterFlow");
+    const Save::Json & currentSettings = save.section("Overlay_WaterFlow");
+    const Save::Json & settings = currentSettings.empty()
+        ? save.section("Processor_WaterFlow")
+        : currentSettings;
     Save::read(settings, "m_rainfall", m_rainfall);
     Save::read(settings, "m_flowSpeed", m_flowSpeed);
     Save::read(settings, "m_evaporation", m_evaporation);

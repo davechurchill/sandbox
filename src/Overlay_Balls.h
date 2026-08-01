@@ -1,8 +1,6 @@
 #pragma once
 
-#include "SandboxProjector.h"
 #include "TopographyOverlay.hpp"
-#include "TopographyProcessor.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
@@ -10,7 +8,7 @@
 #include <random>
 #include <vector>
 
-class Processor_Balls : public TopographyProcessor, public TopographyOverlay
+class Overlay_Balls : public TopographyOverlay
 {
     struct Ball
     {
@@ -30,16 +28,9 @@ class Processor_Balls : public TopographyProcessor, public TopographyOverlay
         bool lava = false;
     };
 
-    SandBoxProjector    m_projector;
-
     cv::Mat             m_topography;
-    cv::Mat             m_projectedTopography;
     cv::Size            m_topographySize;
 
-    sf::Image           m_image;
-    sf::Texture         m_texture;
-    sf::Sprite          m_sprite{ m_texture };
-    sf::Shader          m_shader;
     sf::Shader          m_ballShader;
 
     std::vector<Ball>   m_balls;
@@ -55,8 +46,6 @@ class Processor_Balls : public TopographyProcessor, public TopographyOverlay
     bool                m_lavaAppearance = false;
     bool                m_defaultBallCreated = false;
     bool                m_randomResetPending = false;
-    bool                m_hasFrame = false;
-    bool                m_shaderLoaded = false;
     bool                m_ballShaderLoaded = false;
     TopographyProcessor * m_overlayProcessor = nullptr;
 
@@ -71,6 +60,7 @@ class Processor_Balls : public TopographyProcessor, public TopographyOverlay
     bool isValidTerrainPosition(const cv::Mat & terrain, const cv::Point2f & position) const;
     bool sampleTerrainHeight(const cv::Mat & terrain, const cv::Point2f & position, float & height) const;
     bool mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point2f & terrainPosition);
+    void handleInput(const sf::Event & event, const sf::Vector2f & mouse);
     float getTerrainBallRadius(const cv::Mat & terrain) const;
     void resolveBallCollisions(const cv::Mat & terrain);
     void updateBalls(const cv::Mat & terrain, float deltaTime);
@@ -86,24 +76,18 @@ class Processor_Balls : public TopographyProcessor, public TopographyOverlay
         float movementAmount);
 
 public:
-    void init();
-    void imgui();
-    void render(sf::RenderWindow & window);
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
-    void save(Save & save) const;
-    void load(const Save & save);
-    SandBoxProjector & projector() { return m_projector; }
-
-    void processTopography(const IntermediateData & data);
-
-    void initOverlay();
-    void imguiOverlay();
-    void processTopographyOverlay(const IntermediateData & data, TopographyProcessor & processor);
-    void renderOverlay(sf::RenderWindow & window, TopographyProcessor & processor);
+    void initOverlay() override;
+    void imguiOverlay() override;
+    void processTopographyOverlay(
+        const IntermediateData & data,
+        TopographyProcessor & processor) override;
+    void renderOverlay(
+        sf::RenderWindow & window,
+        TopographyProcessor & processor) override;
     void processOverlayEvent(
         const sf::Event & event,
         const sf::Vector2f & mouse,
-        TopographyProcessor & processor);
-    void saveOverlay(Save & save) const;
-    void loadOverlay(const Save & save);
+        TopographyProcessor & processor) override;
+    void saveOverlay(Save & save) const override;
+    void loadOverlay(const Save & save) override;
 };

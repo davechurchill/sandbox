@@ -2,33 +2,10 @@
 #include "GameEngine.h"
 #include "Profiler.hpp"
 
-#include "Processor_Balls.h"
-#include "Overlay_BFS.h"
-#include "Overlay_Cloth.h"
-#include "Overlay_CloudSimulation.h"
-#include "Overlay_SmokeFire.h"
-#include "Overlay_Weather.h"
-#include "Processor_Colorizer.h"
-#include "Processor_FishPond.h"
-#include "Processor_ForestFire.h"
-#include "Processor_Heat.h"
-#include "Processor_Minecraft.h"
-#include "Processor_Nature.h"
-#include "Processor_TerrainLighting.h"
-#include "Processor_Vectors.h"
-#include "Processor_WaterFlow.h"
-#include "Source_Camera.h"
-#include "Source_PaintBrush.h"
-#include "Source_Perlin.h"
-#include "Source_Snapshot.h"
-#include "Source_Waves.h"
-
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <algorithm>
-#include <string>
 #include <chrono>
+#include <format>
+#include <string>
 
 #include <SFML/Graphics.hpp>
 #include "imgui.h"
@@ -69,31 +46,6 @@ void Scene_Main::init()
     }
     applyUIScale();
 
-    registerSource<Source_Camera>("Camera");
-    registerSource<Source_PaintBrush>("PaintBrush");
-    registerSource<Source_Perlin>("Perlin");
-    registerSource<Source_Snapshot>("Snapshot");
-    registerSource<Source_Waves>("Waves");
-
-    registerProcessor<Processor_Colorizer>("Colorizer");
-    registerProcessor<Processor_FishPond>("Fish Pond");
-    registerProcessor<Processor_ForestFire>("Forest Fire");
-    registerProcessor<Processor_Heat>("Heat");
-    registerProcessor<Processor_Minecraft>("Minecraft");
-    registerProcessor<Processor_Nature>("Nature");
-    registerProcessor<Processor_TerrainLighting>("TerrainLighting");
-    m_processorMap.emplace("None", []() {return nullptr; });
-
-    registerOverlay<Processor_Nature>("Animals");
-    registerOverlay<Overlay_BFS>("BFS");
-    registerOverlay<Processor_Balls>("Balls");
-    registerOverlay<Overlay_Cloth>("Cloth Sheet");
-    registerOverlay<Overlay_CloudSimulation>("Cloud Simulation");
-    registerOverlay<Overlay_SmokeFire>("Smoke and Fire");
-    registerOverlay<Processor_Vectors>("Vectors");
-    registerOverlay<Overlay_Weather>("Weather");
-    registerOverlay<Processor_WaterFlow>("WaterFlow");
-    m_overlayMap.emplace("None", []() {return nullptr; });
 }
 
 void Scene_Main::applyUIScale()
@@ -111,19 +63,7 @@ void Scene_Main::applyUIScale()
 
 void Scene_Main::onFrame(float deltaTime)
 {
-    m_topography = m_source->getTopography();
-    if (m_processor && m_topography.rows > 0 && m_topography.cols > 0)
-    {
-        IntermediateData data;
-        data.deltaTime = deltaTime;
-        data.topography = m_topography;
-        data.markers = m_source->getMarkers();
-        m_processor->processTopography(data);
-        if (m_overlay)
-        {
-            m_overlay->processTopographyOverlay(data, *m_processor);
-        }
-    }
+    m_session.processFrame(deltaTime);
 
     sUserInput();
     sRender();
@@ -196,20 +136,23 @@ void Scene_Main::sUserInput()
         }
 
         const bool mouseControlEvent = isMouseControlEvent(event);
-        if (m_source
+        if (m_session.source()
             && (!mouseControlEvent || m_activeControlTab == ControlTab::Source))
         {
-            m_source->processEvent(event, m_mouseWorld);
+            m_session.source()->processEvent(event, m_mouseWorld);
         }
-        if (m_processor && !displayOpen)
+        if (m_session.processor() && !displayOpen)
         {
-            if (m_activeControlTab == ControlTab::Overlay && m_overlay)
+            if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
             {
-                m_overlay->processOverlayEvent(event, m_mouseWorld, *m_processor);
+                m_session.overlay()->processOverlayEvent(
+                    event,
+                    m_mouseWorld,
+                    *m_session.processor());
             }
             else if (!mouseControlEvent || m_activeControlTab == ControlTab::Processor)
             {
-                m_processor->processEvent(event, m_mouseWorld);
+                m_session.processor()->processEvent(event, m_mouseWorld);
             }
         }
     }
@@ -222,16 +165,19 @@ void Scene_Main::sUserInput()
             const sf::Event& displayEvent = *polledEvent;
             sProcessEvent(displayEvent);
 
-            if (m_processor)
+            if (m_session.processor())
             {
                 const bool mouseControlEvent = isMouseControlEvent(displayEvent);
-                if (m_activeControlTab == ControlTab::Overlay && m_overlay)
+                if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
                 {
-                    m_overlay->processOverlayEvent(displayEvent, m_mouseDisplay, *m_processor);
+                    m_session.overlay()->processOverlayEvent(
+                        displayEvent,
+                        m_mouseDisplay,
+                        *m_session.processor());
                 }
                 else if (!mouseControlEvent || m_activeControlTab == ControlTab::Processor)
                 {
-                    m_processor->processEvent(displayEvent, m_mouseDisplay);
+                    m_session.processor()->processEvent(displayEvent, m_mouseDisplay);
                 }
             }
 
@@ -252,17 +198,17 @@ void Scene_Main::sRender()
     m_game->window().clear();
     m_game->displayWindow().clear();
 
-    if (m_source) { m_source->render(mainWindow()); }
-    if (!m_processor) { return; }
+    if (m_session.source()) { m_session.source()->render(mainWindow()); }
+    if (!m_session.processor()) { return; }
     sf::RenderWindow & target = m_game->displayWindow().isOpen()
         ? displayWindow()
         : mainWindow();
-    m_processor->render(target);
-    if (m_overlay)
+    m_session.processor()->render(target);
+    if (m_session.overlay())
     {
-        m_overlay->renderOverlay(target, *m_processor);
+        m_session.overlay()->renderOverlay(target, *m_session.processor());
     }
-    m_processor->projector().render(target);
+    m_session.processor()->projector().render(target);
 }
 
 void Scene_Main::renderUI()
@@ -328,14 +274,14 @@ void Scene_Main::renderUI()
     if (ImGui::BeginTabItem("Source"))
     {
         m_activeControlTab = ControlTab::Source;
-        if (ImGui::BeginCombo("Selected Source", m_sourceID.c_str()))
+        if (ImGui::BeginCombo("Selected Source", m_session.sourceID().c_str()))
         {
-            for (auto & [name, _] : m_sourceMap)
+            for (const std::string & name : m_session.sourceNames())
             {
-                bool selected = name == m_sourceID;
+                bool selected = name == m_session.sourceID();
                 if (ImGui::Selectable(name.c_str(), &selected))
                 {
-                    setSource(name);
+                    m_session.setSource(name);
                 }
             }
             ImGui::EndCombo();
@@ -343,7 +289,7 @@ void Scene_Main::renderUI()
 
         ImGui::Separator();
       
-        if (m_source) { m_source->imgui(); }
+        if (m_session.source()) { m_session.source()->imgui(); }
       
         ImGui::EndTabItem();
     }
@@ -353,21 +299,21 @@ void Scene_Main::renderUI()
     if (ImGui::BeginTabItem("Processor"))
     {
         m_activeControlTab = ControlTab::Processor;
-        if (ImGui::BeginCombo("Selected Processor", m_processorID.c_str()))
+        if (ImGui::BeginCombo("Selected Processor", m_session.processorID().c_str()))
         {
-            for (auto & [name, _] : m_processorMap)
+            for (const std::string & name : m_session.processorNames())
             {
-                bool selected = name == m_processorID;
+                bool selected = name == m_session.processorID();
                 if (ImGui::Selectable(name.c_str(), &selected))
                 {
-                    setProcessor(name);
+                    m_session.setProcessor(name);
                 }
             }
             ImGui::EndCombo();
         }
         ImGui::Separator();
 
-        if (m_processor) { m_processor->imgui(); }
+        if (m_session.processor()) { m_session.processor()->imgui(); }
 
         ImGui::EndTabItem();
     }
@@ -377,27 +323,27 @@ void Scene_Main::renderUI()
     if (ImGui::BeginTabItem("Overlay"))
     {
         m_activeControlTab = ControlTab::Overlay;
-        if (ImGui::BeginCombo("Selected Overlay", m_overlayID.c_str()))
+        if (ImGui::BeginCombo("Selected Overlay", m_session.overlayID().c_str()))
         {
-            for (auto & [name, _] : m_overlayMap)
+            for (const std::string & name : m_session.overlayNames())
             {
-                bool selected = name == m_overlayID;
+                bool selected = name == m_session.overlayID();
                 if (ImGui::Selectable(name.c_str(), &selected))
                 {
-                    setOverlay(name);
+                    m_session.setOverlay(name);
                 }
             }
             ImGui::EndCombo();
         }
         ImGui::Separator();
 
-        if (m_overlay)
+        if (m_session.overlay())
         {
-            if (m_overlay->usesCanvasInput())
+            if (m_session.overlay()->usesCanvasInput())
             {
                 ImGui::TextWrapped("Left-click canvas input controls the selected overlay.");
             }
-            m_overlay->imguiOverlay();
+            m_session.overlay()->imguiOverlay();
         }
 
         ImGui::EndTabItem();
@@ -410,125 +356,15 @@ void Scene_Main::renderUI()
 void Scene_Main::save()
 {
     PROFILE_FUNCTION();
-    if (m_source) { m_source->save(m_save); }
-    if (m_processor) { m_processor->save(m_save); }
-    if (m_overlay) { m_overlay->saveOverlay(m_save); }
-
-    Save::Json & settings = m_save.section("Scene_Main");
-    settings["m_sourceID"] = m_sourceID;
-    settings["m_processorID"] = m_processorID;
-    settings["m_overlayID"] = m_overlayID;
-    settings["m_doubleSizeUI"] = m_doubleSizeUI;
-
-    m_save.saveToFile(SettingsFile);
+    m_session.saveSettings(SettingsFile, m_doubleSizeUI);
 }
 
 void Scene_Main::load()
 {
     PROFILE_FUNCTION();
-    if (!m_save.loadFromFile(SettingsFile) && m_source)
+    if (m_session.loadSettings(SettingsFile, m_doubleSizeUI))
     {
-        return;
-    }
-
-    // First find and initialize the source and processor
-    const Save::Json & settings = m_save.section("Scene_Main");
-    std::string source = m_sourceID;
-    std::string processor = m_processorID;
-    std::string overlay = m_overlayID;
-    Save::read(settings, "m_sourceID", source);
-    Save::read(settings, "m_processorID", processor);
-    Save::read(settings, "m_overlayID", overlay);
-    Save::read(settings, "m_doubleSizeUI", m_doubleSizeUI);
-    applyUIScale();
-
-    // Migrate saves for processors that moved to overlays.
-    if (processor == "Balls")
-    {
-        processor = "Colorizer";
-        overlay = "Balls";
-    }
-    if (processor == "WaterFlow")
-    {
-        processor = "Colorizer";
-        overlay = "WaterFlow";
-    }
-    if (processor == "Vectors")
-    {
-        processor = "Colorizer";
-        overlay = "Vectors";
-    }
-    if (overlay == "Lava Rocks")
-    {
-        overlay = "Balls";
-    }
-
-    // This initializes the source and processor, even if there was no save file
-    setSource(source, false);
-    setProcessor(processor, false);
-    setOverlay(overlay, false);
-}
-
-void Scene_Main::setSource(const std::string & source, bool saveCurrent)
-{
-    const bool sourceChanged = !m_source || source != m_sourceID;
-    if (saveCurrent && m_source) { m_source->save(m_save); }
-    m_sourceID = source;
-    if (m_sourceMap.contains(source))
-    {
-        m_source = m_sourceMap.at(source)();
-    }
-    else
-    {
-        m_source = m_sourceMap.at("Camera")();
-    }
-    if (m_source) 
-    {
-        m_source->init();
-        m_source->load(m_save);
-    }
-    if (sourceChanged && m_processor)
-    {
-        m_processor->onSourceChanged();
-    }
-}
-
-void Scene_Main::setProcessor(const std::string & processor, bool saveCurrent)
-{
-    if (saveCurrent && m_processor) { m_processor->save(m_save); }
-    m_processorID = processor;
-    if (m_processorMap.contains(processor))
-    {
-        m_processor = m_processorMap.at(processor)();
-    }
-    else
-    {
-        m_processor = m_processorMap.at("Colorizer")();
-    }
-    if (m_processor) 
-    {
-        m_processor->init();
-        m_processor->load(m_save);
-    }
-}
-
-void Scene_Main::setOverlay(const std::string & overlay, bool saveCurrent)
-{
-    if (saveCurrent && m_overlay) { m_overlay->saveOverlay(m_save); }
-    m_overlayID = overlay;
-    if (m_overlayMap.contains(overlay))
-    {
-        m_overlay = m_overlayMap.at(overlay)();
-    }
-    else
-    {
-        m_overlayID = "None";
-        m_overlay = m_overlayMap.at("None")();
-    }
-    if (m_overlay)
-    {
-        m_overlay->initOverlay();
-        m_overlay->loadOverlay(m_save);
+        applyUIScale();
     }
 }
 
@@ -550,7 +386,7 @@ void Scene_Main::saveDataDump()
 {
     auto now = std::chrono::system_clock::now();
     cv::FileStorage fout(std::format("dataDumps/{0:%F_%H-%M-%S}_snapshot.bin", now), cv::FileStorage::WRITE);
-    fout << "matrix" << m_topography;
+    fout << "matrix" << m_session.topography();
 
 }
 

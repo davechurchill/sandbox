@@ -4,6 +4,12 @@
     <ClCompile Include="..\src\Overlay_BFS.cpp">
       <Filter>processors\vectors</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Overlay_Animals.cpp">
+      <Filter>processors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Overlay_Balls.cpp">
+      <Filter>processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\Overlay_Cloth.cpp">
       <Filter>processors</Filter>
     </ClCompile>
@@ -14,9 +20,6 @@
       <Filter>processors</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Overlay_Weather.cpp">
-      <Filter>processors</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Processor_Balls.cpp">
       <Filter>processors</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Processor_FishPond.cpp">
@@ -47,6 +50,9 @@
       <Filter>scenes</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Scene_Main.cpp">
+      <Filter>scenes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SandboxSession.cpp">
       <Filter>scenes</Filter>
     </ClCompile>
     <ClCompile Include="..\src\GoodAssert.cpp">
@@ -91,10 +97,10 @@
     <ClCompile Include="..\src\ParticleManager.cpp">
       <Filter>processors\vectors</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_Vectors.cpp">
+    <ClCompile Include="..\src\Overlay_Vectors.cpp">
       <Filter>processors\vectors</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_WaterFlow.cpp">
+    <ClCompile Include="..\src\Overlay_WaterFlow.cpp">
       <Filter>processors</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Source_Camera.cpp">
@@ -120,6 +126,12 @@
     <ClInclude Include="..\src\Overlay_BFS.h">
       <Filter>processors\vectors</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Overlay_Animals.h">
+      <Filter>processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Overlay_Balls.h">
+      <Filter>processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\Overlay_Cloth.h">
       <Filter>processors</Filter>
     </ClInclude>
@@ -132,9 +144,6 @@
     <ClInclude Include="..\src\Overlay_Weather.h">
       <Filter>processors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_Balls.h">
-      <Filter>processors</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Processor_FishPond.h">
       <Filter>processors</Filter>
     </ClInclude>
@@ -145,6 +154,9 @@
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Scene_Main.h">
+      <Filter>scenes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SandboxSession.hpp">
       <Filter>scenes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Logger.hpp">
@@ -217,10 +229,10 @@
     <ClInclude Include="..\src\ParticleManager.h">
       <Filter>processors\vectors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_Vectors.h">
+    <ClInclude Include="..\src\Overlay_Vectors.h">
       <Filter>processors\vectors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_WaterFlow.h">
+    <ClInclude Include="..\src\Overlay_WaterFlow.h">
       <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\TopographySource.hpp">

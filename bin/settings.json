@@ -64,11 +64,6 @@
         "m_drawContours": true,
         "m_numberOfContourLines": 19
     },
-    "Processor_Vectors": {
-        "m_selectedShaderIndex": 4,
-        "m_drawContours": true,
-        "m_numberOfContourLines": 19
-    },
     "Processor_Heat": {
         "m_drawContours": true,
         "m_numberOfContourLines": 19,

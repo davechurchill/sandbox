@@ -1,16 +1,12 @@
 #pragma once
 
-#include "SandboxProjector.h"
 #include "TopographyOverlay.hpp"
-#include "TopographyProcessor.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
 
-class Processor_WaterFlow : public TopographyProcessor, public TopographyOverlay
+class Overlay_WaterFlow : public TopographyOverlay
 {
-    SandBoxProjector    m_projector;
-
     cv::Mat             m_water;
     cv::Mat             m_nextWater;
     cv::Mat             m_wetness;
@@ -47,30 +43,25 @@ class Processor_WaterFlow : public TopographyProcessor, public TopographyOverlay
     void buildImage(const cv::Mat & terrain);
     void resetWater();
     void reloadShader();
-    void imguiControls(bool showProjector);
-    void renderWater(sf::RenderWindow & window, bool overlayOnly);
+    void imguiControls();
+    void renderWater(sf::RenderWindow & window);
+    void handleInput(const sf::Event & event, const sf::Vector2f & mouse);
     bool mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point2f & terrainPosition);
 
 public:
-    void init();
-    void imgui();
-    void render(sf::RenderWindow & window);
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
-    void save(Save & save) const;
-    void load(const Save & save);
-    SandBoxProjector & projector() { return m_projector; }
-
-    void processTopography(const IntermediateData & data);
-
     bool usesCanvasInput() const override { return m_rainMode == 1; }
-    void initOverlay();
-    void imguiOverlay();
-    void processTopographyOverlay(const IntermediateData & data, TopographyProcessor & processor);
-    void renderOverlay(sf::RenderWindow & window, TopographyProcessor & processor);
+    void initOverlay() override;
+    void imguiOverlay() override;
+    void processTopographyOverlay(
+        const IntermediateData & data,
+        TopographyProcessor & processor) override;
+    void renderOverlay(
+        sf::RenderWindow & window,
+        TopographyProcessor & processor) override;
     void processOverlayEvent(
         const sf::Event & event,
         const sf::Vector2f & mouse,
-        TopographyProcessor & processor);
-    void saveOverlay(Save & save) const;
-    void loadOverlay(const Save & save);
+        TopographyProcessor & processor) override;
+    void saveOverlay(Save & save) const override;
+    void loadOverlay(const Save & save) override;
 };

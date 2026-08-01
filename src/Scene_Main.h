@@ -1,11 +1,8 @@
 #pragma once
 
+#include "SandboxSession.hpp"
 #include "Scene.h"
-#include "TopographySource.hpp"
-#include "TopographyProcessor.hpp"
-#include "TopographyOverlay.hpp"
 #include "ViewController.hpp"
-#include "Save.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -21,9 +18,7 @@ class Scene_Main : public Scene
         Overlay
     };
 
-    cv::Mat             m_topography;
-
-    Save                m_save;
+    SandboxSession      m_session;
 
     bool                m_drawUI = true;
     bool                m_doubleSizeUI = true;
@@ -32,18 +27,6 @@ class Scene_Main : public Scene
     sf::Vector2i        m_mouseScreen;
     sf::Vector2f        m_mouseWorld;
     sf::Vector2f        m_mouseDisplay;
-
-    std::string         m_sourceID = "Camera";
-    std::string         m_processorID = "Colorizer";
-    std::string         m_overlayID = "None";
-
-    std::shared_ptr<TopographySource>       m_source;
-    std::shared_ptr<TopographyProcessor>    m_processor;
-    std::shared_ptr<TopographyOverlay>      m_overlay;
-
-    std::map<std::string, std::function<std::shared_ptr<TopographySource>()>> m_sourceMap;
-    std::map<std::string, std::function<std::shared_ptr<TopographyProcessor>()>> m_processorMap;
-    std::map<std::string, std::function<std::shared_ptr<TopographyOverlay>()>> m_overlayMap;
 
     bool                m_switchWindows = false;
 
@@ -54,9 +37,6 @@ class Scene_Main : public Scene
     void sRender();
     void applyUIScale();
 
-    void setSource(const std::string & source, bool saveCurrent = true);
-    void setProcessor(const std::string & processor, bool saveCurrent = true);
-    void setOverlay(const std::string & overlay, bool saveCurrent = true);
     void toggleDisplayWindow();
 
     void saveDataDump();
@@ -69,27 +49,6 @@ public:
 
     inline sf::RenderWindow & mainWindow();
     inline sf::RenderWindow & displayWindow();
-
-    template <class T>
-        requires (std::is_base_of<TopographySource, T>::value)
-    void registerSource(const std::string & name)
-    {
-        m_sourceMap.emplace(name, std::make_shared<T>);
-    }
-
-    template <class T>
-        requires (std::is_base_of<TopographyProcessor, T>::value)
-    void registerProcessor(const std::string & name)
-    {
-        m_processorMap.emplace(name, std::make_shared<T>);
-    }
-
-    template <class T>
-        requires (std::is_base_of<TopographyOverlay, T>::value)
-    void registerOverlay(const std::string & name)
-    {
-        m_overlayMap.emplace(name, std::make_shared<T>);
-    }
 
     void load();
     void save();
