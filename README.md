@@ -20,6 +20,12 @@ The software is written in C++20 and uses the following external libraries:
 - Intel RealSense SDK
 - OpenCV 4.8.0
 
+## Installation
+
+SFML 3, the Intel RealSense SDK, and OpenCV must be installed separately.
+
+Set the `SFML_DIR` environment variable to the SFML directory. For OpenCV 4.8.0, add the appropriate `opencv\build\x64\vc16\bin` directory to the system `PATH`. Installing the RealSense SDK normally provides the remaining runtime dependencies.
+
 ## Processors and overlays
 
 A processor supplies the main terrain visualization. Select one from the **Processor** tab; selecting **None** disables the processed terrain display.
@@ -141,9 +147,3 @@ Adds one of four atmospheric effects: **Rain**, **Snow**, **Fog**, or **Clouds**
 Simulates rainwater spreading downhill, accumulating in low areas, and fading through evaporation. **Rain Brush** is the default mode and releases rain only around a left-clicked or dragged point; **Uniform Rain** applies rainfall over the full terrain.
 
 Controls include **Rainfall Rate**, brush **Rain Radius**, **Flow Speed**, **Evaporation**, **Water Depth Scale**, **Simulation Steps**, **Trail Persistence**, **Water Visibility**, **Water Opacity**, and **Water Color**. **Reset Water** clears the accumulated water.
-
-## Installation
-
-SFML 3, the Intel RealSense SDK, and OpenCV must be installed separately.
-
-Set the `SFML_DIR` environment variable to the SFML directory. For OpenCV 4.8.0, add the appropriate `opencv\build\x64\vc16\bin` directory to the system `PATH`. Installing the RealSense SDK normally provides the remaining runtime dependencies.
