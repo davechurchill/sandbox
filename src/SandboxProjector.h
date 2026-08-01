@@ -20,9 +20,19 @@ class SandBoxProjector
     sf::Vector2f                    m_boxScale;
     bool                            m_drawLines = true;
     bool                            m_drawProjection = true;
+    bool                            m_drawGrid = false;
+    int                             m_gridDivisions = 8;
+    int                             m_rotationQuarterTurns = 0;
+    bool                            m_mirrorHorizontal = false;
+    bool                            m_mirrorVertical = false;
+    float                           m_handleSize = 10.0f;
+    float                           m_lineColor[3] = { 1.0f, 1.0f, 1.0f };
+    float                           m_lineOpacity = 1.0f;
     bool                            m_projectionValid = false;
 
     void generateProjection();
+    void resetProjectionPoints();
+    void updateProjectionHandles();
 
 public:
 

@@ -36,8 +36,6 @@ void Processor_Minecraft::imgui()
         reloadShader();
     }
 
-    ImGui::Separator();
-    m_projector.imgui();
 }
 
 void Processor_Minecraft::render(sf::RenderWindow & window)

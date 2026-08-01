@@ -47,8 +47,6 @@ void Processor_Nature::imgui()
         reloadShader();
     }
 
-    ImGui::Separator();
-    m_projector.imgui();
 }
 
 bool Processor_Nature::isTerrainWalkable(

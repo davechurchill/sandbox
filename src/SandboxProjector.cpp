@@ -4,6 +4,9 @@
 #include "imgui.h"
 #include "Tools.h"
 
+#include <algorithm>
+#include <array>
+#include <cstdint>
 #include <fstream>
 #include <cmath>
 #include <iostream>
@@ -13,14 +16,8 @@
 
 SandBoxProjector::SandBoxProjector()
 {
-    float radius = 10.0;
-    sf::CircleShape circle(radius, 64);
-    circle.setOrigin({ radius, radius });
-    circle.setFillColor(sf::Color::Green);
-
-    // create the circles for the display correction
-    circle.setFillColor(sf::Color::Magenta);
-    m_projectionCircles = std::vector<sf::CircleShape>(4, circle);
+    m_projectionCircles = std::vector<sf::CircleShape>(4, sf::CircleShape(m_handleSize, 64));
+    updateProjectionHandles();
 }
 
 void SandBoxProjector::project(const cv::Mat & input, cv::Mat & output)
@@ -57,6 +54,90 @@ void SandBoxProjector::imgui()
 
     ImGui::Checkbox("Show Projection", &m_drawProjection);
     ImGui::Checkbox("Show Projection Lines", &m_drawLines);
+
+    if (ImGui::Button("Reset Corners"))
+    {
+        resetProjectionPoints();
+    }
+
+    ImGui::Separator();
+    ImGui::Checkbox("Show Calibration Grid", &m_drawGrid);
+    if (m_drawGrid)
+    {
+        ImGui::SliderInt("Grid Divisions", &m_gridDivisions, 2, 32);
+    }
+
+    ImGui::Separator();
+    ImGui::TextUnformatted("Corner Coordinates");
+    const char * cornerLabels[] = {
+        "Top Left",
+        "Top Right",
+        "Bottom Left",
+        "Bottom Right"
+    };
+    bool pointsChanged = false;
+    for (size_t index = 0; index < std::size(m_projectionPoints); index++)
+    {
+        pointsChanged |= ImGui::InputFloat2(
+            cornerLabels[index],
+            &m_projectionPoints[index].x,
+            "%.1f");
+    }
+    if (pointsChanged)
+    {
+        updateProjectionHandles();
+        generateProjection();
+    }
+
+    ImGui::Separator();
+    const char * rotations[] = {
+        "0 degrees",
+        "90 degrees clockwise",
+        "180 degrees",
+        "270 degrees clockwise"
+    };
+    bool orientationChanged = ImGui::Combo(
+        "Rotation",
+        &m_rotationQuarterTurns,
+        rotations,
+        IM_ARRAYSIZE(rotations));
+    orientationChanged |= ImGui::Checkbox("Mirror Horizontally", &m_mirrorHorizontal);
+    orientationChanged |= ImGui::Checkbox("Mirror Vertically", &m_mirrorVertical);
+    if (orientationChanged)
+    {
+        generateProjection();
+    }
+
+    ImGui::Separator();
+    if (ImGui::SliderFloat("Handle Size", &m_handleSize, 3.0f, 30.0f, "%.0f px"))
+    {
+        updateProjectionHandles();
+    }
+    ImGui::ColorEdit3("Line Color", m_lineColor);
+    ImGui::SliderFloat("Line Opacity", &m_lineOpacity, 0.0f, 1.0f);
+}
+
+void SandBoxProjector::resetProjectionPoints()
+{
+    m_dragPoint = -1;
+    m_projectionPoints[0] = { 400.0f, 400.0f };
+    m_projectionPoints[1] = { 500.0f, 400.0f };
+    m_projectionPoints[2] = { 400.0f, 500.0f };
+    m_projectionPoints[3] = { 500.0f, 500.0f };
+    updateProjectionHandles();
+    generateProjection();
+}
+
+void SandBoxProjector::updateProjectionHandles()
+{
+    for (size_t index = 0; index < m_projectionCircles.size(); index++)
+    {
+        sf::CircleShape & circle = m_projectionCircles[index];
+        circle.setRadius(m_handleSize);
+        circle.setOrigin({ m_handleSize, m_handleSize });
+        circle.setFillColor(sf::Color::Magenta);
+        circle.setPosition({ m_projectionPoints[index].x, m_projectionPoints[index].y });
+    }
 }
 
 bool SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
@@ -95,6 +176,46 @@ void SandBoxProjector::render(sf::RenderWindow & window)
 {
     if (!m_drawProjection) { return; }
     PROFILE_FUNCTION();
+
+    const auto colorChannel = [](float value)
+    {
+        return (std::uint8_t)std::round(std::clamp(value, 0.0f, 1.0f) * 255.0f);
+    };
+    const sf::Color lineColor(
+        colorChannel(m_lineColor[0]),
+        colorChannel(m_lineColor[1]),
+        colorChannel(m_lineColor[2]),
+        colorChannel(m_lineOpacity));
+
+    if (m_drawGrid)
+    {
+        const auto interpolate = [](const cv::Point2f & start, const cv::Point2f & end, float amount)
+        {
+            return sf::Vector2f(
+                start.x + (end.x - start.x) * amount,
+                start.y + (end.y - start.y) * amount);
+        };
+
+        sf::VertexArray gridVertices(sf::PrimitiveType::Lines);
+        for (int division = 1; division < m_gridDivisions; division++)
+        {
+            const float amount = (float)division / m_gridDivisions;
+            gridVertices.append(sf::Vertex(
+                interpolate(m_projectionPoints[0], m_projectionPoints[1], amount),
+                lineColor));
+            gridVertices.append(sf::Vertex(
+                interpolate(m_projectionPoints[2], m_projectionPoints[3], amount),
+                lineColor));
+            gridVertices.append(sf::Vertex(
+                interpolate(m_projectionPoints[0], m_projectionPoints[2], amount),
+                lineColor));
+            gridVertices.append(sf::Vertex(
+                interpolate(m_projectionPoints[1], m_projectionPoints[3], amount),
+                lineColor));
+        }
+        window.draw(gridVertices);
+    }
+
     if (m_drawLines)
     {
         for (size_t i = 0; i < m_projectionCircles.size(); ++i)
@@ -104,11 +225,11 @@ void SandBoxProjector::render(sf::RenderWindow & window)
         }
 
         sf::VertexArray projectionVertices(sf::PrimitiveType::LineStrip);
-        projectionVertices.append(sf::Vertex(m_projectionCircles[0].getPosition()));
-        projectionVertices.append(sf::Vertex(m_projectionCircles[1].getPosition()));
-        projectionVertices.append(sf::Vertex(m_projectionCircles[3].getPosition()));
-        projectionVertices.append(sf::Vertex(m_projectionCircles[2].getPosition()));
-        projectionVertices.append(sf::Vertex(m_projectionCircles[0].getPosition()));
+        projectionVertices.append(sf::Vertex(m_projectionCircles[0].getPosition(), lineColor));
+        projectionVertices.append(sf::Vertex(m_projectionCircles[1].getPosition(), lineColor));
+        projectionVertices.append(sf::Vertex(m_projectionCircles[3].getPosition(), lineColor));
+        projectionVertices.append(sf::Vertex(m_projectionCircles[2].getPosition(), lineColor));
+        projectionVertices.append(sf::Vertex(m_projectionCircles[0].getPosition(), lineColor));
         window.draw(projectionVertices);
     }
 }
@@ -119,12 +240,33 @@ void SandBoxProjector::generateProjection()
 
     if (m_dataWidth <= 0 || m_dataHeight <= 0) { return; }
 
-    cv::Point2f dataCorners[] = {
-            cv::Point2f(0, 0),
-            cv::Point2f((float)m_dataWidth, 0),
-            cv::Point2f(0, (float)m_dataHeight),
-            cv::Point2f((float)m_dataWidth, (float)m_dataHeight),
+    std::array<cv::Point2f, 4> dataCorners = {
+        cv::Point2f(0, 0),
+        cv::Point2f((float)m_dataWidth, 0),
+        cv::Point2f(0, (float)m_dataHeight),
+        cv::Point2f((float)m_dataWidth, (float)m_dataHeight),
     };
+
+    if (m_mirrorHorizontal)
+    {
+        std::swap(dataCorners[0], dataCorners[1]);
+        std::swap(dataCorners[2], dataCorners[3]);
+    }
+    if (m_mirrorVertical)
+    {
+        std::swap(dataCorners[0], dataCorners[2]);
+        std::swap(dataCorners[1], dataCorners[3]);
+    }
+    for (int turn = 0; turn < m_rotationQuarterTurns; turn++)
+    {
+        const std::array<cv::Point2f, 4> previousCorners = dataCorners;
+        dataCorners = {
+            previousCorners[2],
+            previousCorners[0],
+            previousCorners[3],
+            previousCorners[1]
+        };
+    }
 
     cv::Point2f boxPoints[] = { m_projectionPoints[0], m_projectionPoints[1], m_projectionPoints[2], m_projectionPoints[3] };
 
@@ -164,13 +306,14 @@ void SandBoxProjector::generateProjection()
         boxPoints[i].y *= m_boxScale.y;
     }
 
-    m_projectionMatrix = cv::getPerspectiveTransform(dataCorners, boxPoints);
+    m_projectionMatrix = cv::getPerspectiveTransform(dataCorners.data(), boxPoints);
     m_projectionValid = true;
 }
 
 void SandBoxProjector::save(Save& save) const
 {
-    Save::Json & settings = save.section("SandBoxProjector");
+    save.settings.erase("SandBoxProjector");
+    Save::Json & settings = save.section("Projection");
     settings["m_projectionPoints"] = Save::Json::array();
     for (const cv::Point2f & point : m_projectionPoints)
     {
@@ -178,11 +321,22 @@ void SandBoxProjector::save(Save& save) const
     }
     settings["m_drawLines"] = m_drawLines;
     settings["m_drawProjection"] = m_drawProjection;
+    settings["m_drawGrid"] = m_drawGrid;
+    settings["m_gridDivisions"] = m_gridDivisions;
+    settings["m_rotationQuarterTurns"] = m_rotationQuarterTurns;
+    settings["m_mirrorHorizontal"] = m_mirrorHorizontal;
+    settings["m_mirrorVertical"] = m_mirrorVertical;
+    settings["m_handleSize"] = m_handleSize;
+    settings["m_lineColor"] = { m_lineColor[0], m_lineColor[1], m_lineColor[2] };
+    settings["m_lineOpacity"] = m_lineOpacity;
 }
 
 void SandBoxProjector::load(const Save& save)
 {
-    const Save::Json & settings = save.section("SandBoxProjector");
+    const Save::Json & currentSettings = save.section("Projection");
+    const Save::Json & settings = currentSettings.empty()
+        ? save.section("SandBoxProjector")
+        : currentSettings;
     const auto points = settings.find("m_projectionPoints");
     if (points != settings.end() && points->is_array() && points->size() == 4)
     {
@@ -197,4 +351,29 @@ void SandBoxProjector::load(const Save& save)
     }
     Save::read(settings, "m_drawLines", m_drawLines);
     Save::read(settings, "m_drawProjection", m_drawProjection);
+    Save::read(settings, "m_drawGrid", m_drawGrid);
+    Save::read(settings, "m_gridDivisions", m_gridDivisions);
+    Save::read(settings, "m_rotationQuarterTurns", m_rotationQuarterTurns);
+    Save::read(settings, "m_mirrorHorizontal", m_mirrorHorizontal);
+    Save::read(settings, "m_mirrorVertical", m_mirrorVertical);
+    Save::read(settings, "m_handleSize", m_handleSize);
+    const auto color = settings.find("m_lineColor");
+    if (color != settings.end() && color->is_array() && color->size() == 3)
+    {
+        for (size_t index = 0; index < 3; index++)
+        {
+            m_lineColor[index] = color->at(index).get<float>();
+        }
+    }
+    Save::read(settings, "m_lineOpacity", m_lineOpacity);
+
+    m_gridDivisions = std::clamp(m_gridDivisions, 2, 32);
+    m_rotationQuarterTurns = std::clamp(m_rotationQuarterTurns, 0, 3);
+    m_handleSize = std::clamp(m_handleSize, 3.0f, 30.0f);
+    for (float & channel : m_lineColor)
+    {
+        channel = std::clamp(channel, 0.0f, 1.0f);
+    }
+    m_lineOpacity = std::clamp(m_lineOpacity, 0.0f, 1.0f);
+    updateProjectionHandles();
 }

@@ -49,7 +49,7 @@
         "m_separation": 96.0,
         "m_waveSize": 32.0
     },
-    "SandBoxProjector": {
+    "Projection": {
         "m_projectionPoints": [
             [34.0, 90.0],
             [1829.0, 77.0],
@@ -57,7 +57,16 @@
             [1857.0, 1076.0]
         ],
         "m_drawLines": true,
-        "m_drawProjection": true
+        "m_drawProjection": true,
+        "m_drawGrid": false,
+        "m_gridDivisions": 8,
+        "m_rotationQuarterTurns": 0,
+        "m_mirrorHorizontal": false,
+        "m_mirrorVertical": false,
+        "m_displayMonitorID": "",
+        "m_handleSize": 10.0,
+        "m_lineColor": [1.0, 1.0, 1.0],
+        "m_lineOpacity": 1.0
     },
     "Processor_Colorizer": {
         "m_selectedShaderIndex": 4,
@@ -71,5 +80,13 @@
     },
     "Processor_Minecraft": {
         "m_blockSize": 12
+    },
+    "Source_Snapshot": {
+        "m_loadedSnapshot": "dataDumps\\snapshot.bin",
+        "m_sortByName": false
+    },
+    "Processor_Nature": {
+        "m_terrainType": 0,
+        "m_waterLevel": 0.2800000011920929
     }
 }

@@ -78,7 +78,6 @@ void Processor_Heat::imgui()
     }
 
     ImGui::Separator();
-    m_projector.imgui();
 
     if (ImGui::Button("Reload Shader"))
     {

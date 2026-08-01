@@ -9,12 +9,15 @@
 
 #include <opencv2/opencv.hpp>   // Include OpenCV API
 
+#include <string>
+
 class Scene_Main : public Scene
 {
     enum class ControlTab
     {
         Source,
         Processor,
+        Projection,
         Overlay
     };
 
@@ -27,6 +30,7 @@ class Scene_Main : public Scene
     sf::Vector2i        m_mouseScreen;
     sf::Vector2f        m_mouseWorld;
     sf::Vector2f        m_mouseDisplay;
+    std::string         m_displayMonitorID;
 
     bool                m_switchWindows = false;
 
@@ -38,6 +42,7 @@ class Scene_Main : public Scene
     void applyUIScale();
 
     void toggleDisplayWindow();
+    void openDisplayWindow();
 
     void saveDataDump();
     

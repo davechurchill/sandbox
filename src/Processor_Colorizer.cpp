@@ -35,7 +35,6 @@ void Processor_Colorizer::imgui()
             std::cerr << "Failed to reload the colorizer shader.\n";
         }
     }
-    m_projector.imgui();
 }
 
 void Processor_Colorizer::render(sf::RenderWindow & window)

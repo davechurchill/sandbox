@@ -46,8 +46,6 @@ void Processor_TerrainLighting::imgui()
         reloadShader();
     }
 
-    ImGui::Separator();
-    m_projector.imgui();
 }
 
 void Processor_TerrainLighting::render(sf::RenderWindow & window)

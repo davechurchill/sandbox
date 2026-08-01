@@ -644,8 +644,6 @@ void Processor_ForestFire::imgui()
         reloadShader();
     }
 
-    ImGui::Separator();
-    m_projector.imgui();
 }
 
 void Processor_ForestFire::render(sf::RenderWindow & window)

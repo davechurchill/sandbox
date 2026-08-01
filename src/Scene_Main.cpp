@@ -5,7 +5,16 @@
 #include <algorithm>
 #include <chrono>
 #include <format>
+#include <limits>
 #include <string>
+#include <vector>
+
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
+#endif
 
 #include <SFML/Graphics.hpp>
 #include "imgui.h"
@@ -17,6 +26,187 @@ namespace
     float DefaultUIFontScale = 1.0f;
     bool DefaultUIStyleCaptured = false;
     constexpr const char * SettingsFile = "settings.json";
+
+    struct DisplayTarget
+    {
+        sf::VideoMode mode;
+        sf::Vector2i position;
+    };
+
+    struct MonitorOption
+    {
+        std::string id;
+        std::string label;
+    };
+
+#if defined(_WIN32)
+    BOOL CALLBACK collectMonitor(
+        HMONITOR monitor,
+        HDC,
+        LPRECT,
+        LPARAM monitorListAddress)
+    {
+        auto & monitors = *reinterpret_cast<std::vector<HMONITOR> *>(monitorListAddress);
+        monitors.push_back(monitor);
+        return TRUE;
+    }
+
+    std::vector<HMONITOR> getMonitors()
+    {
+        std::vector<HMONITOR> monitors;
+        if (!EnumDisplayMonitors(
+            nullptr,
+            nullptr,
+            collectMonitor,
+            reinterpret_cast<LPARAM>(&monitors)))
+        {
+            monitors.clear();
+        }
+        return monitors;
+    }
+
+    bool getMonitorInfo(HMONITOR monitor, MONITORINFOEXA & info)
+    {
+        info = {};
+        info.cbSize = sizeof(info);
+        return GetMonitorInfoA(monitor, &info) != FALSE;
+    }
+
+    DisplayTarget makeDisplayTarget(const MONITORINFOEXA & info)
+    {
+        const LONG width = info.rcMonitor.right - info.rcMonitor.left;
+        const LONG height = info.rcMonitor.bottom - info.rcMonitor.top;
+        return {
+            sf::VideoMode({ (unsigned int)width, (unsigned int)height }),
+            { info.rcMonitor.left, info.rcMonitor.top }
+        };
+    }
+
+    std::vector<MonitorOption> getMonitorOptions(const sf::Window & mainWindow)
+    {
+        std::vector<MonitorOption> options;
+        const HMONITOR mainMonitor = MonitorFromWindow(
+            mainWindow.getNativeHandle(),
+            MONITOR_DEFAULTTOPRIMARY);
+
+        for (HMONITOR monitor : getMonitors())
+        {
+            MONITORINFOEXA info{};
+            if (!getMonitorInfo(monitor, info))
+            {
+                continue;
+            }
+
+            std::string displayName = info.szDevice;
+            if (displayName.starts_with("\\\\.\\"))
+            {
+                displayName.erase(0, 4);
+            }
+
+            const bool isMain = monitor == mainMonitor;
+            const bool isPrimary = (info.dwFlags & MONITORINFOF_PRIMARY) != 0;
+            std::string role;
+            if (isMain && isPrimary) { role = " [Main, Primary]"; }
+            else if (isMain) { role = " [Main]"; }
+            else if (isPrimary) { role = " [Primary]"; }
+
+            const LONG width = info.rcMonitor.right - info.rcMonitor.left;
+            const LONG height = info.rcMonitor.bottom - info.rcMonitor.top;
+            options.push_back({
+                info.szDevice,
+                std::format(
+                    "{} - {}x{} at ({}, {}){}",
+                    displayName,
+                    width,
+                    height,
+                    info.rcMonitor.left,
+                    info.rcMonitor.top,
+                    role)
+            });
+        }
+        return options;
+    }
+
+    DisplayTarget getDisplayTarget(
+        const sf::Window & mainWindow,
+        const std::string & selectedMonitorID)
+    {
+        DisplayTarget target{ sf::VideoMode::getDesktopMode(), { 0, 0 } };
+        const HMONITOR mainMonitor = MonitorFromWindow(
+            mainWindow.getNativeHandle(),
+            MONITOR_DEFAULTTOPRIMARY);
+
+        const std::vector<HMONITOR> monitors = getMonitors();
+        if (!selectedMonitorID.empty())
+        {
+            for (HMONITOR monitor : monitors)
+            {
+                MONITORINFOEXA info{};
+                if (getMonitorInfo(monitor, info)
+                    && selectedMonitorID == info.szDevice)
+                {
+                    return makeDisplayTarget(info);
+                }
+            }
+        }
+
+        MONITORINFOEXA mainInfo{};
+        if (!mainMonitor || !getMonitorInfo(mainMonitor, mainInfo))
+        {
+            return target;
+        }
+
+        HMONITOR selectedMonitor = mainMonitor;
+        MONITORINFOEXA selectedInfo = mainInfo;
+        long long closestDistance = std::numeric_limits<long long>::max();
+        const long long mainCenterX = (long long)mainInfo.rcMonitor.left
+            + mainInfo.rcMonitor.right;
+        const long long mainCenterY = (long long)mainInfo.rcMonitor.top
+            + mainInfo.rcMonitor.bottom;
+
+        for (HMONITOR monitor : monitors)
+        {
+            if (monitor == mainMonitor)
+            {
+                continue;
+            }
+
+            MONITORINFOEXA info{};
+            if (!getMonitorInfo(monitor, info))
+            {
+                continue;
+            }
+
+            const long long deltaX = (long long)info.rcMonitor.left
+                + info.rcMonitor.right - mainCenterX;
+            const long long deltaY = (long long)info.rcMonitor.top
+                + info.rcMonitor.bottom - mainCenterY;
+            const long long distance = deltaX * deltaX + deltaY * deltaY;
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                selectedMonitor = monitor;
+                selectedInfo = info;
+            }
+        }
+
+        return selectedMonitor ? makeDisplayTarget(selectedInfo) : target;
+    }
+#else
+    std::vector<MonitorOption> getMonitorOptions(const sf::Window &)
+    {
+        const sf::VideoMode desktop = sf::VideoMode::getDesktopMode();
+        return {{
+            "Desktop",
+            std::format("Desktop - {}x{}", desktop.size.x, desktop.size.y)
+        }};
+    }
+
+    DisplayTarget getDisplayTarget(const sf::Window &, const std::string &)
+    {
+        return { sf::VideoMode::getDesktopMode(), { 0, 0 } };
+    }
+#endif
 
     bool isMouseControlEvent(const sf::Event & event)
     {
@@ -143,7 +333,11 @@ void Scene_Main::sUserInput()
         }
         if (m_session.processor() && !displayOpen)
         {
-            if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
+            if (m_activeControlTab == ControlTab::Projection)
+            {
+                m_session.processor()->projector().processEvent(event, m_mouseWorld);
+            }
+            else if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
             {
                 m_session.overlay()->processOverlayEvent(
                     event,
@@ -168,7 +362,13 @@ void Scene_Main::sUserInput()
             if (m_session.processor())
             {
                 const bool mouseControlEvent = isMouseControlEvent(displayEvent);
-                if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
+                if (m_activeControlTab == ControlTab::Projection)
+                {
+                    m_session.processor()->projector().processEvent(
+                        displayEvent,
+                        m_mouseDisplay);
+                }
+                else if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
                 {
                     m_session.overlay()->processOverlayEvent(
                         displayEvent,
@@ -349,6 +549,76 @@ void Scene_Main::renderUI()
         ImGui::EndTabItem();
     }
 
+    // Projection
+
+    if (ImGui::BeginTabItem("Projection"))
+    {
+        m_activeControlTab = ControlTab::Projection;
+
+        const std::vector<MonitorOption> monitorOptions = getMonitorOptions(m_game->window());
+        std::string monitorPreview = "Automatic (nearest other monitor)";
+        bool selectedMonitorAvailable = m_displayMonitorID.empty();
+        for (const MonitorOption & option : monitorOptions)
+        {
+            if (option.id == m_displayMonitorID)
+            {
+                monitorPreview = option.label;
+                selectedMonitorAvailable = true;
+                break;
+            }
+        }
+        if (!selectedMonitorAvailable)
+        {
+            monitorPreview = "Unavailable monitor (using Automatic)";
+        }
+
+        bool monitorChanged = false;
+        if (ImGui::BeginCombo("Display Monitor", monitorPreview.c_str()))
+        {
+            if (ImGui::Selectable(
+                "Automatic (nearest other monitor)",
+                m_displayMonitorID.empty()))
+            {
+                monitorChanged = !m_displayMonitorID.empty();
+                m_displayMonitorID.clear();
+            }
+            for (const MonitorOption & option : monitorOptions)
+            {
+                if (ImGui::Selectable(
+                    option.label.c_str(),
+                    option.id == m_displayMonitorID))
+                {
+                    monitorChanged = option.id != m_displayMonitorID;
+                    m_displayMonitorID = option.id;
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        if (monitorChanged && m_game->displayWindow().isOpen())
+        {
+            m_game->displayWindow().close();
+            openDisplayWindow();
+        }
+
+        if (ImGui::Button("Toggle Display Window"))
+        {
+            toggleDisplayWindow();
+        }
+        ImGui::Separator();
+
+        if (m_session.processor())
+        {
+            m_session.processor()->projector().imgui();
+        }
+        else
+        {
+            ImGui::TextUnformatted("Select a processor to configure its projection.");
+        }
+
+        ImGui::EndTabItem();
+    }
+
     ImGui::EndTabBar();
     ImGui::End();
 }
@@ -356,15 +626,25 @@ void Scene_Main::renderUI()
 void Scene_Main::save()
 {
     PROFILE_FUNCTION();
-    m_session.saveSettings(SettingsFile, m_doubleSizeUI);
+    m_session.saveSettings(SettingsFile, m_doubleSizeUI, m_displayMonitorID);
 }
 
 void Scene_Main::load()
 {
     PROFILE_FUNCTION();
-    if (m_session.loadSettings(SettingsFile, m_doubleSizeUI))
+    const std::string previousDisplayMonitorID = m_displayMonitorID;
+    if (m_session.loadSettings(
+        SettingsFile,
+        m_doubleSizeUI,
+        m_displayMonitorID))
     {
         applyUIScale();
+        if (m_game->displayWindow().isOpen()
+            && previousDisplayMonitorID != m_displayMonitorID)
+        {
+            m_game->displayWindow().close();
+            openDisplayWindow();
+        }
     }
 }
 
@@ -372,14 +652,22 @@ void Scene_Main::toggleDisplayWindow()
 {
     if (!m_game->displayWindow().isOpen())
     {
-        m_game->displayWindow().create(sf::VideoMode({ 1920, 1080 }), "Display", sf::Style::None);
-        m_game->displayWindow().setPosition({ -1920, 0 });
+        openDisplayWindow();
     }
     else
     {
         m_game->displayWindow().close();
         m_switchWindows = false;
     }
+}
+
+void Scene_Main::openDisplayWindow()
+{
+    const DisplayTarget target = getDisplayTarget(
+        m_game->window(),
+        m_displayMonitorID);
+    m_game->displayWindow().create(target.mode, "Display", sf::Style::None);
+    m_game->displayWindow().setPosition(target.position);
 }
 
 void Scene_Main::saveDataDump()

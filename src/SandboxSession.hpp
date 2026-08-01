@@ -82,6 +82,12 @@ public:
     void setProcessor(const std::string & processor, bool saveCurrent = true);
     void setOverlay(const std::string & overlay, bool saveCurrent = true);
 
-    void saveSettings(const std::string & filename, bool doubleSizeUI);
-    bool loadSettings(const std::string & filename, bool & doubleSizeUI);
+    void saveSettings(
+        const std::string & filename,
+        bool doubleSizeUI,
+        const std::string & displayMonitorID);
+    bool loadSettings(
+        const std::string & filename,
+        bool & doubleSizeUI,
+        std::string & displayMonitorID);
 };

@@ -29,9 +29,16 @@ namespace
     {
         std::vector<std::string> names;
         names.reserve(factories.size());
+        if (factories.contains("None"))
+        {
+            names.push_back("None");
+        }
         for (const auto & [name, _] : factories)
         {
-            names.push_back(name);
+            if (name != "None")
+            {
+                names.push_back(name);
+            }
         }
         return names;
     }
@@ -166,7 +173,10 @@ void SandboxSession::setOverlay(const std::string & overlay, bool saveCurrent)
     }
 }
 
-void SandboxSession::saveSettings(const std::string & filename, bool doubleSizeUI)
+void SandboxSession::saveSettings(
+    const std::string & filename,
+    bool doubleSizeUI,
+    const std::string & displayMonitorID)
 {
     if (m_source) { m_source->save(m_save); }
     if (m_processor) { m_processor->save(m_save); }
@@ -177,11 +187,15 @@ void SandboxSession::saveSettings(const std::string & filename, bool doubleSizeU
     settings["m_processorID"] = m_processorID;
     settings["m_overlayID"] = m_overlayID;
     settings["m_doubleSizeUI"] = doubleSizeUI;
+    m_save.section("Projection")["m_displayMonitorID"] = displayMonitorID;
 
     m_save.saveToFile(filename);
 }
 
-bool SandboxSession::loadSettings(const std::string & filename, bool & doubleSizeUI)
+bool SandboxSession::loadSettings(
+    const std::string & filename,
+    bool & doubleSizeUI,
+    std::string & displayMonitorID)
 {
     if (!m_save.loadFromFile(filename) && m_source)
     {
@@ -196,6 +210,10 @@ bool SandboxSession::loadSettings(const std::string & filename, bool & doubleSiz
     Save::read(settings, "m_processorID", processor);
     Save::read(settings, "m_overlayID", overlay);
     Save::read(settings, "m_doubleSizeUI", doubleSizeUI);
+    Save::read(
+        m_save.section("Projection"),
+        "m_displayMonitorID",
+        displayMonitorID);
 
     if (processor == "Balls")
     {

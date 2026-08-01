@@ -558,8 +558,6 @@ void Processor_FishPond::imgui()
     }
     ImGui::TextUnformatted("Left mouse: add fish");
 
-    ImGui::Separator();
-    m_projector.imgui();
 }
 
 void Processor_FishPond::render(sf::RenderWindow & window)
