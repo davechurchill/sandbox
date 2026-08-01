@@ -99,18 +99,18 @@ void Processor_Nature::processEvent(
     projector().processEvent(event, mouse);
 }
 
-void Processor_Nature::save(Save & save) const
+void Processor_Nature::save(Settings & save) const
 {
-    Save::Json & settings = save.section("Processor_Nature");
+    Settings::json & settings = save.section("Processor_Nature");
     settings["m_terrainType"] = m_terrainType;
     settings["m_waterLevel"] = m_waterLevel;
 }
 
-void Processor_Nature::load(const Save & save)
+void Processor_Nature::load(const Settings & save)
 {
-    const Save::Json & settings = save.section("Processor_Nature");
-    Save::read(settings, "m_terrainType", m_terrainType);
-    Save::read(settings, "m_waterLevel", m_waterLevel);
+    const Settings::json & settings = save.section("Processor_Nature");
+    Settings::read(settings, "m_terrainType", m_terrainType);
+    Settings::read(settings, "m_waterLevel", m_waterLevel);
 }
 
 void Processor_Nature::processTopography(const IntermediateData & data)

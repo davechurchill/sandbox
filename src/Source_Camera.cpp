@@ -297,9 +297,9 @@ void Source_Camera::processEvent(const sf::Event & event, const sf::Vector2f & m
     }
 }
 
-void Source_Camera::save(Save & save) const
+void Source_Camera::save(Settings & save) const
 {
-    Save::Json & settings = save.section("Source_Camera");
+    Settings::json & settings = save.section("Source_Camera");
     settings["m_alignment"] = (int)m_alignment;
     settings["m_gaussianBlur"] = m_gaussianBlur;
     settings["m_maxDistance"] = m_maxDistance;
@@ -312,20 +312,20 @@ void Source_Camera::save(Save & save) const
     m_filters.save(save);
     m_warper.save(save);
 }
-void Source_Camera::load(const Save & save)
+void Source_Camera::load(const Settings & save)
 {
-    const Save::Json & settings = save.section("Source_Camera");
+    const Settings::json & settings = save.section("Source_Camera");
     int alignmentValue = (int)m_alignment;
-    Save::read(settings, "m_alignment", alignmentValue);
+    Settings::read(settings, "m_alignment", alignmentValue);
     m_alignment = static_cast<alignment>(alignmentValue);
-    Save::read(settings, "m_gaussianBlur", m_gaussianBlur);
-    Save::read(settings, "m_maxDistance", m_maxDistance);
-    Save::read(settings, "m_minDistance", m_minDistance);
-    Save::read(settings, "m_drawColor", m_drawColor);
-    Save::read(settings, "m_drawDepth", m_drawDepth);
-    Save::read(settings, "m_fpsSetting", m_fpsSetting);
-    Save::read(settings, "m_detectHands", m_detectHands);
-    Save::read(settings, "m_handThresh", m_handThresh);
+    Settings::read(settings, "m_gaussianBlur", m_gaussianBlur);
+    Settings::read(settings, "m_maxDistance", m_maxDistance);
+    Settings::read(settings, "m_minDistance", m_minDistance);
+    Settings::read(settings, "m_drawColor", m_drawColor);
+    Settings::read(settings, "m_drawDepth", m_drawDepth);
+    Settings::read(settings, "m_fpsSetting", m_fpsSetting);
+    Settings::read(settings, "m_detectHands", m_detectHands);
+    Settings::read(settings, "m_handThresh", m_handThresh);
     m_filters.load(save);
     m_warper.load(save);
 }

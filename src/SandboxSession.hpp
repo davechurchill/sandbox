@@ -1,23 +1,17 @@
 #pragma once
 
-#include "Save.hpp"
+#include "Settings.hpp"
 #include "TopographyOverlay.hpp"
 #include "TopographyProcessor.hpp"
 #include "TopographySource.hpp"
 
-#include <functional>
 #include <map>
 #include <memory>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 class SandboxSession
 {
-    using SourceFactory = std::function<std::shared_ptr<TopographySource>()>;
-    using ProcessorFactory = std::function<std::shared_ptr<TopographyProcessor>(SandBoxProjector &)>;
-    using OverlayFactory = std::function<std::shared_ptr<TopographyOverlay>()>;
-
     struct OverlayState
     {
         std::shared_ptr<TopographyOverlay> overlay;
@@ -25,7 +19,7 @@ class SandboxSession
     };
 
     cv::Mat m_topography;
-    Save m_save;
+    Settings m_settings;
     SandBoxProjector m_projector;
 
     std::string m_sourceID = "Camera";
@@ -35,43 +29,9 @@ class SandboxSession
     std::shared_ptr<TopographySource> m_source;
     std::shared_ptr<TopographyProcessor> m_processor;
 
-    std::map<std::string, SourceFactory> m_sourceMap;
-    std::map<std::string, ProcessorFactory> m_processorMap;
-    std::map<std::string, OverlayFactory> m_overlayMap;
     std::map<std::string, OverlayState> m_overlayStates;
 
-    template <class T>
-        requires (std::is_base_of_v<TopographySource, T>
-            && !std::is_base_of_v<TopographyProcessor, T>
-            && !std::is_base_of_v<TopographyOverlay, T>)
-    void registerSource(const std::string & name)
-    {
-        m_sourceMap.emplace(name, std::make_shared<T>);
-    }
-
-    template <class T>
-        requires (std::is_base_of_v<TopographyProcessor, T>
-            && !std::is_base_of_v<TopographyOverlay, T>)
-    void registerProcessor(const std::string & name)
-    {
-        m_processorMap.emplace(name, [](SandBoxProjector & projector)
-        {
-            std::shared_ptr<T> processor = std::make_shared<T>();
-            processor->setProjector(projector);
-            return processor;
-        });
-    }
-
-    template <class T>
-        requires (std::is_base_of_v<TopographyOverlay, T>
-            && !std::is_base_of_v<TopographyProcessor, T>)
-    void registerOverlay(const std::string & name)
-    {
-        m_overlayMap.emplace(name, std::make_shared<T>);
-    }
-
     OverlayState * ensureOverlay(const std::string & name);
-    void registerComponents();
 
 public:
     SandboxSession();
@@ -100,12 +60,6 @@ public:
     void setOverlayEnabled(const std::string & overlay, bool enabled);
     void renderOverlays(sf::RenderWindow & window);
 
-    void saveSettings(
-        const std::string & filename,
-        bool doubleSizeUI,
-        const std::string & displayMonitorID);
-    bool loadSettings(
-        const std::string & filename,
-        bool & doubleSizeUI,
-        std::string & displayMonitorID);
+    void saveSettings(const std::string & filename, bool doubleSizeUI, const std::string & displayMonitorID);
+    bool loadSettings(const std::string & filename, bool & doubleSizeUI, std::string & displayMonitorID);
 };

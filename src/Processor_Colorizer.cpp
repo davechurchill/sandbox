@@ -68,19 +68,19 @@ void Processor_Colorizer::processEvent(const sf::Event & event, const sf::Vector
     projector().processEvent(event, mouse);
 }
 
-void Processor_Colorizer::save(Save & save) const
+void Processor_Colorizer::save(Settings & save) const
 {
-    Save::Json & settings = save.section("Processor_Colorizer");
+    Settings::json & settings = save.section("Processor_Colorizer");
     settings["m_selectedShaderIndex"] = m_selectedShaderIndex;
     settings["m_drawContours"] = m_drawContours;
     settings["m_numberOfContourLines"] = m_numberOfContourLines;
 }
-void Processor_Colorizer::load(const Save & save)
+void Processor_Colorizer::load(const Settings & save)
 {
-    const Save::Json & settings = save.section("Processor_Colorizer");
-    Save::read(settings, "m_selectedShaderIndex", m_selectedShaderIndex);
-    Save::read(settings, "m_drawContours", m_drawContours);
-    Save::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
+    const Settings::json & settings = save.section("Processor_Colorizer");
+    Settings::read(settings, "m_selectedShaderIndex", m_selectedShaderIndex);
+    Settings::read(settings, "m_drawContours", m_drawContours);
+    Settings::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
 }
 
 void Processor_Colorizer::processTopography(const IntermediateData& data)

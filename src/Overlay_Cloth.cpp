@@ -446,9 +446,9 @@ void Overlay_Cloth::processOverlayEvent(
     }
 }
 
-void Overlay_Cloth::saveOverlay(Save & save) const
+void Overlay_Cloth::saveOverlay(Settings & save) const
 {
-    Save::Json & settings = save.section("Overlay_Cloth");
+    Settings::json & settings = save.section("Overlay_Cloth");
     settings["m_cellsX"] = m_cellsX;
     settings["m_cellsY"] = m_cellsY;
     settings["m_clothSize"] = m_clothSize;
@@ -460,17 +460,17 @@ void Overlay_Cloth::saveOverlay(Save & save) const
     settings["m_windY"] = m_windY;
 }
 
-void Overlay_Cloth::loadOverlay(const Save & save)
+void Overlay_Cloth::loadOverlay(const Settings & save)
 {
-    const Save::Json & settings = save.section("Overlay_Cloth");
-    Save::read(settings, "m_cellsX", m_cellsX);
-    Save::read(settings, "m_cellsY", m_cellsY);
-    Save::read(settings, "m_clothSize", m_clothSize);
-    Save::read(settings, "m_sheetTransparency", m_sheetTransparency);
-    Save::read(settings, "m_stiffness", m_stiffness);
-    Save::read(settings, "m_damping", m_damping);
-    Save::read(settings, "m_gravity", m_gravity);
-    Save::read(settings, "m_windX", m_windX);
-    Save::read(settings, "m_windY", m_windY);
+    const Settings::json & settings = save.section("Overlay_Cloth");
+    Settings::read(settings, "m_cellsX", m_cellsX);
+    Settings::read(settings, "m_cellsY", m_cellsY);
+    Settings::read(settings, "m_clothSize", m_clothSize);
+    Settings::read(settings, "m_sheetTransparency", m_sheetTransparency);
+    Settings::read(settings, "m_stiffness", m_stiffness);
+    Settings::read(settings, "m_damping", m_damping);
+    Settings::read(settings, "m_gravity", m_gravity);
+    Settings::read(settings, "m_windX", m_windX);
+    Settings::read(settings, "m_windY", m_windY);
     m_resetPending = true;
 }

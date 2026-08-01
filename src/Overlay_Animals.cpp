@@ -904,19 +904,16 @@ void Overlay_Animals::processOverlayEvent(
     }
 }
 
-void Overlay_Animals::saveOverlay(Save & save) const
+void Overlay_Animals::saveOverlay(Settings & save) const
 {
-    Save::Json & settings = save.section("Overlay_Animals");
+    Settings::json & settings = save.section("Overlay_Animals");
     settings["m_sheepSpeed"] = m_sheepSpeed;
     settings["m_sheepSize"] = m_sheepSize;
 }
 
-void Overlay_Animals::loadOverlay(const Save & save)
+void Overlay_Animals::loadOverlay(const Settings & save)
 {
-    const Save::Json & currentSettings = save.section("Overlay_Animals");
-    const Save::Json & settings = currentSettings.empty()
-        ? save.section("Overlay_Nature")
-        : currentSettings;
-    Save::read(settings, "m_sheepSpeed", m_sheepSpeed);
-    Save::read(settings, "m_sheepSize", m_sheepSize);
+    const Settings::json & settings = save.section("Overlay_Animals");
+    Settings::read(settings, "m_sheepSpeed", m_sheepSpeed);
+    Settings::read(settings, "m_sheepSize", m_sheepSize);
 }

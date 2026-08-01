@@ -19,11 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\Overlay_AStar.cpp" />
     <ClCompile Include="..\src\Overlay_BFS.cpp" />
     <ClCompile Include="..\src\Overlay_Animals.cpp" />
     <ClCompile Include="..\src\Overlay_Balls.cpp" />
     <ClCompile Include="..\src\Overlay_Cloth.cpp" />
-    <ClCompile Include="..\src\Overlay_CloudSimulation.cpp" />
+    <ClCompile Include="..\src\Overlay_ColorAdjustment.cpp" />
     <ClCompile Include="..\src\Overlay_ContourLines.cpp" />
     <ClCompile Include="..\src\Overlay_SmokeFire.cpp" />
     <ClCompile Include="..\src\Overlay_Vectors.cpp" />
@@ -59,11 +60,12 @@
     <ClCompile Include="..\src\Tools.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\Overlay_AStar.h" />
     <ClInclude Include="..\src\Overlay_BFS.h" />
     <ClInclude Include="..\src\Overlay_Animals.h" />
     <ClInclude Include="..\src\Overlay_Balls.h" />
     <ClInclude Include="..\src\Overlay_Cloth.h" />
-    <ClInclude Include="..\src\Overlay_CloudSimulation.h" />
+    <ClInclude Include="..\src\Overlay_ColorAdjustment.h" />
     <ClInclude Include="..\src\Overlay_ContourLines.h" />
     <ClInclude Include="..\src\Overlay_SmokeFire.h" />
     <ClInclude Include="..\src\Overlay_Vectors.h" />
@@ -83,7 +85,7 @@
     <ClInclude Include="..\src\GoodAssert.h" />
     <ClInclude Include="..\src\Logger.hpp" />
     <ClInclude Include="..\src\Sandbox.hpp" />
-    <ClInclude Include="..\src\Save.hpp" />
+    <ClInclude Include="..\src\Settings.hpp" />
     <ClInclude Include="..\src\Source_Camera.h" />
     <ClInclude Include="..\src\Source_PaintBrush.h" />
     <ClInclude Include="..\src\CameraFilters.hpp" />
@@ -113,6 +115,7 @@
     <None Include="..\bin\shaders\shader_ball_sphere.frag" />
     <None Include="..\bin\shaders\shader_balls.frag" />
     <None Include="..\bin\shaders\shader_contour_color.frag" />
+    <None Include="..\bin\shaders\shader_color_adjustment.frag" />
     <None Include="..\bin\shaders\shader_contour_overlay.frag" />
     <None Include="..\bin\shaders\shader_fish_pond.frag" />
     <None Include="..\bin\shaders\shader_forest_fire.frag" />

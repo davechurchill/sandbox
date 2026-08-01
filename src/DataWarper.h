@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <fstream>
 
-#include "Save.hpp"
+#include "Settings.hpp"
 
 class DataWarper
 {
@@ -35,8 +35,8 @@ public:
 
     DataWarper();
     void imgui();
-    void save(Save & save) const;
-    void load(const Save & save);
+    void save(Settings & save) const;
+    void load(const Settings & save);
     void transformRect(const cv::Mat & input, cv::Mat & output);
     void heightAdjustment(cv::Mat & matrix);
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);

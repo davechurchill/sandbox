@@ -5,7 +5,7 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 #include "Profiler.hpp"
-#include "Save.hpp"
+#include "Settings.hpp"
 
 #include <fstream>
 
@@ -66,21 +66,21 @@ public:
         }
     }
 
-    void save(Save & save) const
+    void save(Settings & save) const
     {
-        Save::Json & settings = save.section("CameraFilters");
+        Settings::json & settings = save.section("CameraFilters");
         settings["m_smoothAlphaTemporal"] = m_smoothAlphaTemporal;
         settings["m_smoothDeltaTemporal"] = m_smoothDeltaTemporal;
         settings["m_persistanceTemporal"] = m_persistanceTemporal;
         settings["m_holeFill"] = m_holeFill;
     }
 
-    void load(const Save & save)
+    void load(const Settings & save)
     {
-        const Save::Json & settings = save.section("CameraFilters");
-        Save::read(settings, "m_smoothAlphaTemporal", m_smoothAlphaTemporal);
-        Save::read(settings, "m_smoothDeltaTemporal", m_smoothDeltaTemporal);
-        Save::read(settings, "m_persistanceTemporal", m_persistanceTemporal);
-        Save::read(settings, "m_holeFill", m_holeFill);
+        const Settings::json & settings = save.section("CameraFilters");
+        Settings::read(settings, "m_smoothAlphaTemporal", m_smoothAlphaTemporal);
+        Settings::read(settings, "m_smoothDeltaTemporal", m_smoothDeltaTemporal);
+        Settings::read(settings, "m_persistanceTemporal", m_persistanceTemporal);
+        Settings::read(settings, "m_holeFill", m_holeFill);
     }
 };

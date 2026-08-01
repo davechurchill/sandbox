@@ -20,6 +20,6 @@ public:
         const sf::Event & event,
         const sf::Vector2f & mouse,
         TopographyProcessor & processor) = 0;
-    virtual void saveOverlay(Save & save) const = 0;
-    virtual void loadOverlay(const Save & save) = 0;
+    virtual void saveOverlay(Settings & save) const = 0;
+    virtual void loadOverlay(const Settings & save) = 0;
 };

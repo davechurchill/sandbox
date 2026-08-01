@@ -234,10 +234,10 @@ void DataWarper::generateWarpMatrix()
     m_warpValid = true;
 }
 
-void DataWarper::save(Save & save) const
+void DataWarper::save(Settings & save) const
 {
-    Save::Json & settings = save.section("DataWarper");
-    settings["m_warpPoints"] = Save::Json::array();
+    Settings::json & settings = save.section("DataWarper");
+    settings["m_warpPoints"] = Settings::json::array();
     for (const cv::Point2f & point : m_warpPoints)
     {
         settings["m_warpPoints"].push_back({ point.x, point.y });
@@ -245,15 +245,15 @@ void DataWarper::save(Save & save) const
     settings["m_applyHeightAdjustment"] = m_applyHeightAdjustment;
     settings["m_dataSize"] = m_dataSize;
     settings["m_drawCameraRegion"] = m_drawCameraRegion;
-    settings["m_planarPoints"] = Save::Json::array();
+    settings["m_planarPoints"] = Settings::json::array();
     for (const cv::Point2f & point : m_planarPoints)
     {
         settings["m_planarPoints"].push_back({ point.x, point.y });
     }
 }
-void DataWarper::load(const Save & save)
+void DataWarper::load(const Settings & save)
 {
-    const Save::Json & settings = save.section("DataWarper");
+    const Settings::json & settings = save.section("DataWarper");
     const auto readPointArray = [&settings](const char * key, cv::Point2f * points, size_t count)
     {
         const auto found = settings.find(key);
@@ -263,7 +263,7 @@ void DataWarper::load(const Save & save)
         }
         for (size_t index = 0; index < count; index++)
         {
-            const Save::Json & point = found->at(index);
+            const Settings::json & point = found->at(index);
             if (point.is_array() && point.size() == 2)
             {
                 points[index] = { point[0].get<float>(), point[1].get<float>() };
@@ -271,9 +271,9 @@ void DataWarper::load(const Save & save)
         }
     };
     readPointArray("m_warpPoints", m_warpPoints, 4);
-    Save::read(settings, "m_applyHeightAdjustment", m_applyHeightAdjustment);
-    Save::read(settings, "m_dataSize", m_dataSize);
-    Save::read(settings, "m_drawCameraRegion", m_drawCameraRegion);
+    Settings::read(settings, "m_applyHeightAdjustment", m_applyHeightAdjustment);
+    Settings::read(settings, "m_dataSize", m_dataSize);
+    Settings::read(settings, "m_drawCameraRegion", m_drawCameraRegion);
     readPointArray("m_planarPoints", m_planarPoints, 3);
     m_planeValid = false;
     m_updatePlane = m_applyHeightAdjustment;

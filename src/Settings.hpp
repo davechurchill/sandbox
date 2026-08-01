@@ -8,31 +8,30 @@
 #include <string>
 #include <utility>
 
-struct Save
+class Settings
 {
-    using Json = nlohmann::ordered_json;
+public:
+    using json = nlohmann::ordered_json;
 
-    Json settings = Json::object();
-
-    Json & section(const std::string & name)
+    json & section(const std::string & name)
     {
-        Json & value = settings[name];
+        json & value = m_root[name];
         if (!value.is_object())
         {
-            value = Json::object();
+            value = json::object();
         }
         return value;
     }
 
-    const Json & section(const std::string & name) const
+    const json & section(const std::string & name) const
     {
-        static const Json empty = Json::object();
-        const auto found = settings.find(name);
-        return found != settings.end() && found->is_object() ? *found : empty;
+        static const json empty = json::object();
+        const auto found = m_root.find(name);
+        return found != m_root.end() && found->is_object() ? *found : empty;
     }
 
     template <typename T>
-    static void read(const Json & object, const char * key, T & value)
+    static void read(const json & object, const char * key, T & value)
     {
         const auto found = object.find(key);
         if (found != object.end())
@@ -50,7 +49,7 @@ struct Save
             return false;
         }
 
-        output << std::setw(4) << settings << '\n';
+        output << std::setw(4) << m_root << '\n';
         if (!output)
         {
             std::cerr << "Failed while writing settings file: " << filename << '\n';
@@ -70,14 +69,14 @@ struct Save
 
         try
         {
-            Json loaded;
+            json loaded;
             input >> loaded;
             if (!loaded.is_object())
             {
                 std::cerr << "Settings file root must be a JSON object: " << filename << '\n';
                 return false;
             }
-            settings = std::move(loaded);
+            m_root = std::move(loaded);
             return true;
         }
         catch (const std::exception & error)
@@ -86,4 +85,7 @@ struct Save
             return false;
         }
     }
+
+private:
+    json m_root = json::object();
 };

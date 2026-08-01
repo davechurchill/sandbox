@@ -156,16 +156,16 @@ void Processor_Heat::processEvent(const sf::Event& event, const sf::Vector2f& mo
     m_previousMouse = mouse;
 }
 
-void Processor_Heat::save(Save& save) const
+void Processor_Heat::save(Settings& save) const
 {
-    Save::Json & settings = save.section("Processor_Heat");
+    Settings::json & settings = save.section("Processor_Heat");
     settings["m_drawContours"] = m_drawContours;
     settings["m_numberOfContourLines"] = m_numberOfContourLines;
     settings["m_drawProjection"] = m_drawProjection;
     settings["m_iterations"] = m_iterations;
     settings["m_selectedSource"] = m_selectedSource;
     settings["m_algorithm"] = (int)m_heatGrid.m_algorithm;
-    settings["m_sources"] = Save::Json::array();
+    settings["m_sources"] = Settings::json::array();
     for (const HeatSource & source : m_heatGrid.getSources())
     {
         settings["m_sources"].push_back({
@@ -179,24 +179,24 @@ void Processor_Heat::save(Save& save) const
         });
     }
 }
-void Processor_Heat::load(const Save& save)
+void Processor_Heat::load(const Settings& save)
 {
-    const Save::Json & settings = save.section("Processor_Heat");
-    Save::read(settings, "m_drawContours", m_drawContours);
-    Save::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
-    Save::read(settings, "m_drawProjection", m_drawProjection);
-    Save::read(settings, "m_iterations", m_iterations);
-    Save::read(settings, "m_selectedSource", m_selectedSource);
+    const Settings::json & settings = save.section("Processor_Heat");
+    Settings::read(settings, "m_drawContours", m_drawContours);
+    Settings::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
+    Settings::read(settings, "m_drawProjection", m_drawProjection);
+    Settings::read(settings, "m_iterations", m_iterations);
+    Settings::read(settings, "m_selectedSource", m_selectedSource);
     int algorithm = (int)m_heatGrid.m_algorithm;
-    Save::read(settings, "m_algorithm", algorithm);
+    Settings::read(settings, "m_algorithm", algorithm);
     m_heatGrid.m_algorithm = (Algorithms)algorithm;
     const auto sources = settings.find("m_sources");
     if (sources != settings.end() && sources->is_array())
     {
         m_heatGrid.clearSources();
-        for (const Save::Json & sourceSettings : *sources)
+        for (const Settings::json & sourceSettings : *sources)
         {
-            const Save::Json & areaSettings = sourceSettings.at("m_area");
+            const Settings::json & areaSettings = sourceSettings.at("m_area");
             const cv::Rect area(
                 areaSettings.at("x").get<int>(),
                 areaSettings.at("y").get<int>(),

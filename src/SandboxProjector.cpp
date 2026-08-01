@@ -237,18 +237,10 @@ void SandBoxProjector::render(sf::RenderWindow & window)
         for (int division = 1; division < m_gridDivisions; division++)
         {
             const float amount = (float)division / m_gridDivisions;
-            gridVertices.append(sf::Vertex(
-                interpolate(m_projectionPoints[0], m_projectionPoints[1], amount),
-                lineColor));
-            gridVertices.append(sf::Vertex(
-                interpolate(m_projectionPoints[2], m_projectionPoints[3], amount),
-                lineColor));
-            gridVertices.append(sf::Vertex(
-                interpolate(m_projectionPoints[0], m_projectionPoints[2], amount),
-                lineColor));
-            gridVertices.append(sf::Vertex(
-                interpolate(m_projectionPoints[1], m_projectionPoints[3], amount),
-                lineColor));
+            gridVertices.append(sf::Vertex(interpolate(m_projectionPoints[0], m_projectionPoints[1], amount), lineColor));
+            gridVertices.append(sf::Vertex(interpolate(m_projectionPoints[2], m_projectionPoints[3], amount), lineColor));
+            gridVertices.append(sf::Vertex(interpolate(m_projectionPoints[0], m_projectionPoints[2], amount), lineColor));
+            gridVertices.append(sf::Vertex(interpolate(m_projectionPoints[1], m_projectionPoints[3], amount), lineColor));
         }
         window.draw(gridVertices);
     }
@@ -344,11 +336,10 @@ void SandBoxProjector::generateProjection()
     m_projectionValid = true;
 }
 
-void SandBoxProjector::save(Save& save) const
+void SandBoxProjector::save(Settings& save) const
 {
-    save.settings.erase("SandBoxProjector");
-    Save::Json & settings = save.section("Projection");
-    settings["m_projectionPoints"] = Save::Json::array();
+    Settings::json & settings = save.section("Projection");
+    settings["m_projectionPoints"] = Settings::json::array();
     for (const cv::Point2f & point : m_projectionPoints)
     {
         settings["m_projectionPoints"].push_back({ point.x, point.y });
@@ -366,33 +357,30 @@ void SandBoxProjector::save(Save& save) const
     settings["m_lineOpacity"] = m_lineOpacity;
 }
 
-void SandBoxProjector::load(const Save& save)
+void SandBoxProjector::load(const Settings& save)
 {
-    const Save::Json & currentSettings = save.section("Projection");
-    const Save::Json & settings = currentSettings.empty()
-        ? save.section("SandBoxProjector")
-        : currentSettings;
+    const Settings::json & settings = save.section("Projection");
     const auto points = settings.find("m_projectionPoints");
     if (points != settings.end() && points->is_array() && points->size() == 4)
     {
         for (size_t index = 0; index < 4; index++)
         {
-            const Save::Json & point = points->at(index);
+            const Settings::json & point = points->at(index);
             if (point.is_array() && point.size() == 2)
             {
                 m_projectionPoints[index] = { point[0].get<float>(), point[1].get<float>() };
             }
         }
     }
-    Save::read(settings, "m_drawLines", m_drawLines);
-    Save::read(settings, "m_drawProjection", m_drawProjection);
-    Save::read(settings, "m_drawProjectedDepthMap", m_drawProjectedDepthMap);
-    Save::read(settings, "m_drawGrid", m_drawGrid);
-    Save::read(settings, "m_gridDivisions", m_gridDivisions);
-    Save::read(settings, "m_rotationQuarterTurns", m_rotationQuarterTurns);
-    Save::read(settings, "m_mirrorHorizontal", m_mirrorHorizontal);
-    Save::read(settings, "m_mirrorVertical", m_mirrorVertical);
-    Save::read(settings, "m_handleSize", m_handleSize);
+    Settings::read(settings, "m_drawLines", m_drawLines);
+    Settings::read(settings, "m_drawProjection", m_drawProjection);
+    Settings::read(settings, "m_drawProjectedDepthMap", m_drawProjectedDepthMap);
+    Settings::read(settings, "m_drawGrid", m_drawGrid);
+    Settings::read(settings, "m_gridDivisions", m_gridDivisions);
+    Settings::read(settings, "m_rotationQuarterTurns", m_rotationQuarterTurns);
+    Settings::read(settings, "m_mirrorHorizontal", m_mirrorHorizontal);
+    Settings::read(settings, "m_mirrorVertical", m_mirrorVertical);
+    Settings::read(settings, "m_handleSize", m_handleSize);
     const auto color = settings.find("m_lineColor");
     if (color != settings.end() && color->is_array() && color->size() == 3)
     {
@@ -401,7 +389,7 @@ void SandBoxProjector::load(const Save& save)
             m_lineColor[index] = color->at(index).get<float>();
         }
     }
-    Save::read(settings, "m_lineOpacity", m_lineOpacity);
+    Settings::read(settings, "m_lineOpacity", m_lineOpacity);
 
     m_gridDivisions = std::clamp(m_gridDivisions, 2, 32);
     m_rotationQuarterTurns = std::clamp(m_rotationQuarterTurns, 0, 3);

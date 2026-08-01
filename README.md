@@ -87,6 +87,10 @@ Applies directional lighting and terrain relief to one of four palettes: **Terra
 
 ## Overlays
 
+### Adjust Terrain Color
+
+Applies shader-based color correction to the projected terrain while preserving the selected processor's visualization. **Brightness**, **Contrast**, **Exposure**, **Saturation**, **Hue**, **Gamma**, and **Temperature** can be adjusted independently or returned to neutral with **Reset Adjustments**.
+
 ### Animals
 
 Adds a top-down wildlife simulation. Two sheep and one wolf are created by default when suitable terrain is available. Sheep wander with smooth steering, slow down uphill, avoid obstacles and nearby threats, and turn to face their movement direction. The slightly faster and larger wolf steers toward the nearest sheep; nearby sheep flee, and a sheep is removed when caught.
@@ -117,13 +121,13 @@ Simulates an unpinned spring-mesh sheet falling and deforming over the terrain. 
 - **Cells X/Y** independently set mesh resolution from 2 to 64 cells per axis.
 - **Cloth Size**, **Sheet Transparency**, **Spring Stiffness**, **Damping**, **Gravity**, and **Wind X/Y** control its shape and motion.
 
-### Cloud Simulation
-
-Moves individual clouds from left to right and wraps them back to the left. Clouds steer around terrain at or above their configured altitude and relocate to open air if necessary after wrapping. **Cloud Height**, **Cloud Count** (1 to 24), **Cloud Speed**, and **Cloud Size** are adjustable.
-
 ### Contour Lines
 
 Adds topographic contour lines without replacing the active processor's visualization. **Contour Lines** controls the line count from 0 to 64, while **Line Color** and **Line Opacity** control their appearance.
+
+### Pathfinding (A*)
+
+Calculates an eight-directional A* path over the current terrain every frame. Before each search, signed slopes are cached for every cell and movement direction using a five-tile directional average, reducing sensitivity to single-cell depth noise. The first left click sets the green start point, the second sets the red goal, and the next click begins a new pair. **Movement Length** makes each action advance from 1 to 32 cells and uses the same value as the goal-reached radius; every intermediate cell, corner, and slope is still validated. **Uphill Slope Penalty** and **Downhill Slope Penalty** independently make steep elevation changes more expensive so the search prefers flatter routes when available. **Maximum Legal Slope** completely rejects moves whose absolute averaged slope exceeds its threshold. **Path Thickness** controls the rendered path width. The UI reports geometric distance, slope-weighted cost, nodes expanded, open- and closed-list sizes, and total search time.
 
 ### Smoke and Fire
 

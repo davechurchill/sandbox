@@ -148,9 +148,9 @@ bool Processor_TerrainLighting::updateLightFromMouse(const sf::Vector2f & mouse)
     return true;
 }
 
-void Processor_TerrainLighting::save(Save & save) const
+void Processor_TerrainLighting::save(Settings & save) const
 {
-    Save::Json & settings = save.section("Processor_TerrainLighting");
+    Settings::json & settings = save.section("Processor_TerrainLighting");
     settings["m_palette"] = m_palette;
     settings["m_lightAzimuth"] = m_lightAzimuth;
     settings["m_lightElevation"] = m_lightElevation;
@@ -159,15 +159,15 @@ void Processor_TerrainLighting::save(Save & save) const
     settings["m_heightStrength"] = m_heightStrength;
 }
 
-void Processor_TerrainLighting::load(const Save & save)
+void Processor_TerrainLighting::load(const Settings & save)
 {
-    const Save::Json & settings = save.section("Processor_TerrainLighting");
-    Save::read(settings, "m_palette", m_palette);
-    Save::read(settings, "m_lightAzimuth", m_lightAzimuth);
-    Save::read(settings, "m_lightElevation", m_lightElevation);
-    Save::read(settings, "m_ambientLight", m_ambientLight);
-    Save::read(settings, "m_shadowStrength", m_shadowStrength);
-    Save::read(settings, "m_heightStrength", m_heightStrength);
+    const Settings::json & settings = save.section("Processor_TerrainLighting");
+    Settings::read(settings, "m_palette", m_palette);
+    Settings::read(settings, "m_lightAzimuth", m_lightAzimuth);
+    Settings::read(settings, "m_lightElevation", m_lightElevation);
+    Settings::read(settings, "m_ambientLight", m_ambientLight);
+    Settings::read(settings, "m_shadowStrength", m_shadowStrength);
+    Settings::read(settings, "m_heightStrength", m_heightStrength);
 }
 
 void Processor_TerrainLighting::processTopography(const IntermediateData & data)

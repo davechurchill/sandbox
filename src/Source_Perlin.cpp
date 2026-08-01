@@ -84,9 +84,9 @@ void Source_Perlin::processEvent(const sf::Event & event, const sf::Vector2f & m
     }
 }
 
-void Source_Perlin::save(Save & save) const
+void Source_Perlin::save(Settings & save) const
 {
-    Save::Json & settings = save.section("Source_Perlin");
+    Settings::json & settings = save.section("Source_Perlin");
     settings["m_octaves"] = m_octaves;
     settings["m_seed"] = m_seed;
     settings["m_seedSize"] = m_seedSize;
@@ -94,14 +94,14 @@ void Source_Perlin::save(Save & save) const
     settings["m_drawGrid"] = m_drawGrid;
 }
 
-void Source_Perlin::load(const Save & save)
+void Source_Perlin::load(const Settings & save)
 {
-    const Save::Json & settings = save.section("Source_Perlin");
-    Save::read(settings, "m_octaves", m_octaves);
-    Save::read(settings, "m_seed", m_seed);
-    Save::read(settings, "m_seedSize", m_seedSize);
-    Save::read(settings, "m_persistance", m_persistance);
-    Save::read(settings, "m_drawGrid", m_drawGrid);
+    const Settings::json & settings = save.section("Source_Perlin");
+    Settings::read(settings, "m_octaves", m_octaves);
+    Settings::read(settings, "m_seed", m_seed);
+    Settings::read(settings, "m_seedSize", m_seedSize);
+    Settings::read(settings, "m_persistance", m_persistance);
+    Settings::read(settings, "m_drawGrid", m_drawGrid);
     calculateNoise();
 }
 

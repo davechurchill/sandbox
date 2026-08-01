@@ -1,10 +1,11 @@
 #include "SandboxSession.hpp"
 
+#include "Overlay_AStar.h"
 #include "Overlay_Animals.h"
 #include "Overlay_BFS.h"
 #include "Overlay_Balls.h"
 #include "Overlay_Cloth.h"
-#include "Overlay_CloudSimulation.h"
+#include "Overlay_ColorAdjustment.h"
 #include "Overlay_ContourLines.h"
 #include "Overlay_SmokeFire.h"
 #include "Overlay_Vectors.h"
@@ -23,63 +24,58 @@
 #include "Source_Snapshot.h"
 #include "Source_Waves.h"
 
-#include <algorithm>
-
 namespace
 {
-    template <typename Factory>
-    std::vector<std::string> registeredNames(const std::map<std::string, Factory> & factories)
+    std::shared_ptr<TopographySource> createSource(const std::string & name)
     {
-        std::vector<std::string> names;
-        names.reserve(factories.size());
-        if (factories.contains("None"))
+        if (name == "Camera") return std::make_shared<Source_Camera>();
+        if (name == "PaintBrush") return std::make_shared<Source_PaintBrush>();
+        if (name == "Perlin") return std::make_shared<Source_Perlin>();
+        if (name == "Snapshot") return std::make_shared<Source_Snapshot>();
+        if (name == "Waves") return std::make_shared<Source_Waves>();
+        return nullptr;
+    }
+
+    std::shared_ptr<TopographyProcessor> createProcessor(
+        const std::string & name,
+        SandBoxProjector & projector)
+    {
+        std::shared_ptr<TopographyProcessor> processor;
+        if (name == "Blockworld") processor = std::make_shared<Processor_Blockworld>();
+        else if (name == "Colorizer") processor = std::make_shared<Processor_Colorizer>();
+        else if (name == "Fish Pond") processor = std::make_shared<Processor_FishPond>();
+        else if (name == "Forest Fire") processor = std::make_shared<Processor_ForestFire>();
+        else if (name == "Heat") processor = std::make_shared<Processor_Heat>();
+        else if (name == "Nature") processor = std::make_shared<Processor_Nature>();
+        else if (name == "TerrainLighting") processor = std::make_shared<Processor_TerrainLighting>();
+
+        if (processor)
         {
-            names.push_back("None");
+            processor->setProjector(projector);
         }
-        for (const auto & [name, _] : factories)
-        {
-            if (name != "None")
-            {
-                names.push_back(name);
-            }
-        }
-        return names;
+        return processor;
+    }
+
+    std::shared_ptr<TopographyOverlay> createOverlay(const std::string & name)
+    {
+        if (name == "Adjust Terrain Color") return std::make_shared<Overlay_ColorAdjustment>();
+        if (name == "Animals") return std::make_shared<Overlay_Animals>();
+        if (name == "BFS") return std::make_shared<Overlay_BFS>();
+        if (name == "Balls") return std::make_shared<Overlay_Balls>();
+        if (name == "Cloth Sheet") return std::make_shared<Overlay_Cloth>();
+        if (name == "Contour Lines") return std::make_shared<Overlay_ContourLines>();
+        if (name == "Pathfinding (A*)") return std::make_shared<Overlay_AStar>();
+        if (name == "Smoke and Fire") return std::make_shared<Overlay_SmokeFire>();
+        if (name == "Vectors") return std::make_shared<Overlay_Vectors>();
+        if (name == "WaterFlow") return std::make_shared<Overlay_WaterFlow>();
+        if (name == "Weather") return std::make_shared<Overlay_Weather>();
+        return nullptr;
     }
 }
 
 SandboxSession::SandboxSession()
 {
-    registerComponents();
     setOverlay(m_overlayID, false);
-}
-
-void SandboxSession::registerComponents()
-{
-    registerSource<Source_Camera>("Camera");
-    registerSource<Source_PaintBrush>("PaintBrush");
-    registerSource<Source_Perlin>("Perlin");
-    registerSource<Source_Snapshot>("Snapshot");
-    registerSource<Source_Waves>("Waves");
-
-    registerProcessor<Processor_Colorizer>("Colorizer");
-    registerProcessor<Processor_FishPond>("Fish Pond");
-    registerProcessor<Processor_ForestFire>("Forest Fire");
-    registerProcessor<Processor_Heat>("Heat");
-    registerProcessor<Processor_Blockworld>("Blockworld");
-    registerProcessor<Processor_Nature>("Nature");
-    registerProcessor<Processor_TerrainLighting>("TerrainLighting");
-    m_processorMap.emplace("None", [](SandBoxProjector &) { return nullptr; });
-
-    registerOverlay<Overlay_Animals>("Animals");
-    registerOverlay<Overlay_BFS>("BFS");
-    registerOverlay<Overlay_Balls>("Balls");
-    registerOverlay<Overlay_Cloth>("Cloth Sheet");
-    registerOverlay<Overlay_CloudSimulation>("Cloud Simulation");
-    registerOverlay<Overlay_ContourLines>("Contour Lines");
-    registerOverlay<Overlay_SmokeFire>("Smoke and Fire");
-    registerOverlay<Overlay_Vectors>("Vectors");
-    registerOverlay<Overlay_Weather>("Weather");
-    registerOverlay<Overlay_WaterFlow>("WaterFlow");
 }
 
 void SandboxSession::processFrame(float deltaTime)
@@ -104,37 +100,65 @@ void SandboxSession::processFrame(float deltaTime)
 
 std::vector<std::string> SandboxSession::sourceNames() const
 {
-    return registeredNames(m_sourceMap);
+    return { "Camera", "PaintBrush", "Perlin", "Snapshot", "Waves" };
 }
 
 std::vector<std::string> SandboxSession::processorNames() const
 {
-    return registeredNames(m_processorMap);
+    return {
+        "None",
+        "Blockworld",
+        "Colorizer",
+        "Fish Pond",
+        "Forest Fire",
+        "Heat",
+        "Nature",
+        "TerrainLighting"
+    };
 }
 
 std::vector<std::string> SandboxSession::overlayNames() const
 {
-    return registeredNames(m_overlayMap);
+    return {
+        "Adjust Terrain Color",
+        "Animals",
+        "BFS",
+        "Balls",
+        "Cloth Sheet",
+        "Contour Lines",
+        "Pathfinding (A*)",
+        "Smoke and Fire",
+        "Vectors",
+        "WaterFlow",
+        "Weather"
+    };
 }
 
 SandboxSession::OverlayState * SandboxSession::ensureOverlay(const std::string & name)
 {
-    if (name == "None" || !m_overlayMap.contains(name))
+    if (name == "None")
     {
         return nullptr;
     }
 
-    OverlayState & state = m_overlayStates[name];
-    if (!state.overlay)
+    const auto found = m_overlayStates.find(name);
+    if (found != m_overlayStates.end())
     {
-        state.overlay = m_overlayMap.at(name)();
-        if (state.overlay)
-        {
-            state.overlay->initOverlay();
-            state.overlay->loadOverlay(m_save);
-        }
+        return found->second.overlay ? &found->second : nullptr;
     }
-    return state.overlay ? &state : nullptr;
+
+    std::shared_ptr<TopographyOverlay> overlay = createOverlay(name);
+    if (!overlay)
+    {
+        return nullptr;
+    }
+
+    overlay->initOverlay();
+    overlay->loadOverlay(m_settings);
+    const auto inserted = m_overlayStates.emplace(
+        name,
+        OverlayState{ std::move(overlay), false });
+    return &inserted.first->second;
 }
 
 TopographyOverlay * SandboxSession::overlay() const
@@ -160,20 +184,17 @@ bool SandboxSession::overlayEnabled(const std::string & name) const
 void SandboxSession::setSource(const std::string & source, bool saveCurrent)
 {
     const bool sourceChanged = !m_source || source != m_sourceID;
-    if (saveCurrent && m_source) { m_source->save(m_save); }
+    if (saveCurrent && m_source) { m_source->save(m_settings); }
     m_sourceID = source;
-    if (m_sourceMap.contains(source))
+    m_source = createSource(source);
+    if (!m_source)
     {
-        m_source = m_sourceMap.at(source)();
-    }
-    else
-    {
-        m_source = m_sourceMap.at("Camera")();
+        m_source = createSource("Camera");
     }
     if (m_source)
     {
         m_source->init();
-        m_source->load(m_save);
+        m_source->load(m_settings);
     }
     if (sourceChanged && m_processor)
     {
@@ -183,20 +204,17 @@ void SandboxSession::setSource(const std::string & source, bool saveCurrent)
 
 void SandboxSession::setProcessor(const std::string & processor, bool saveCurrent)
 {
-    if (saveCurrent && m_processor) { m_processor->save(m_save); }
+    if (saveCurrent && m_processor) { m_processor->save(m_settings); }
     m_processorID = processor;
-    if (m_processorMap.contains(processor))
+    m_processor = createProcessor(processor, m_projector);
+    if (!m_processor && processor != "None")
     {
-        m_processor = m_processorMap.at(processor)(m_projector);
-    }
-    else
-    {
-        m_processor = m_processorMap.at("Colorizer")(m_projector);
+        m_processor = createProcessor("Colorizer", m_projector);
     }
     if (m_processor)
     {
         m_processor->init();
-        m_processor->load(m_save);
+        m_processor->load(m_settings);
     }
 }
 
@@ -206,22 +224,19 @@ void SandboxSession::setOverlay(const std::string & overlay, bool saveCurrent)
     {
         if (TopographyOverlay * current = this->overlay())
         {
-            current->saveOverlay(m_save);
+            current->saveOverlay(m_settings);
         }
     }
 
     std::string selection = overlay;
-    if (!m_overlayMap.contains(selection))
+    OverlayState * state = ensureOverlay(selection);
+    if (!state)
     {
-        if (m_overlayMap.empty())
-        {
-            m_overlayID.clear();
-            return;
-        }
-        selection = m_overlayMap.begin()->first;
+        selection = overlayNames().front();
+        state = ensureOverlay(selection);
     }
 
-    if (ensureOverlay(selection))
+    if (state)
     {
         m_overlayID = selection;
     }
@@ -231,9 +246,7 @@ void SandboxSession::setOverlay(const std::string & overlay, bool saveCurrent)
     }
 }
 
-void SandboxSession::setOverlayEnabled(
-    const std::string & overlay,
-    bool enabled)
+void SandboxSession::setOverlayEnabled(const std::string & overlay, bool enabled)
 {
     if (OverlayState * state = ensureOverlay(overlay))
     {
@@ -257,27 +270,23 @@ void SandboxSession::renderOverlays(sf::RenderWindow & window)
     }
 }
 
-void SandboxSession::saveSettings(
-    const std::string & filename,
-    bool doubleSizeUI,
-    const std::string & displayMonitorID)
+void SandboxSession::saveSettings(const std::string & filename, bool doubleSizeUI, const std::string & displayMonitorID)
 {
-    m_projector.save(m_save);
-    if (m_source) { m_source->save(m_save); }
-    if (m_processor) { m_processor->save(m_save); }
+    m_projector.save(m_settings);
+    if (m_source) { m_source->save(m_settings); }
+    if (m_processor) { m_processor->save(m_settings); }
     for (const auto & [_, state] : m_overlayStates)
     {
-        if (state.overlay) { state.overlay->saveOverlay(m_save); }
+        if (state.overlay) { state.overlay->saveOverlay(m_settings); }
     }
 
-    Save::Json & settings = m_save.section("Scene_Main");
+    Settings::json & settings = m_settings.section("Scene_Main");
     settings["m_sourceID"] = m_sourceID;
     settings["m_processorID"] = m_processorID;
-    settings.erase("m_overlayID");
     settings["m_doubleSizeUI"] = doubleSizeUI;
 
-    Save::Json & overlaySettings = m_save.section("Overlays");
-    overlaySettings["m_enabledOverlayIDs"] = Save::Json::array();
+    Settings::json & overlaySettings = m_settings.section("Overlays");
+    overlaySettings["m_enabledOverlayIDs"] = Settings::json::array();
     for (const auto & [name, state] : m_overlayStates)
     {
         if (state.enabled)
@@ -287,98 +296,43 @@ void SandboxSession::saveSettings(
     }
     overlaySettings["m_selectedOverlayID"] = m_overlayID;
 
-    m_save.section("Projection")["m_displayMonitorID"] = displayMonitorID;
+    m_settings.section("Projection")["m_displayMonitorID"] = displayMonitorID;
 
-    m_save.saveToFile(filename);
+    m_settings.saveToFile(filename);
 }
 
-bool SandboxSession::loadSettings(
-    const std::string & filename,
-    bool & doubleSizeUI,
-    std::string & displayMonitorID)
+bool SandboxSession::loadSettings(const std::string & filename, bool & doubleSizeUI, std::string & displayMonitorID)
 {
-    if (!m_save.loadFromFile(filename) && m_source)
+    if (!m_settings.loadFromFile(filename) && m_source)
     {
         return false;
     }
 
-    m_projector.load(m_save);
+    m_projector.load(m_settings);
 
-    const Save::Json & settings = m_save.section("Scene_Main");
+    const Settings::json & settings = m_settings.section("Scene_Main");
     std::string source = m_sourceID;
     std::string processor = m_processorID;
-    std::string legacyOverlay;
-    Save::read(settings, "m_sourceID", source);
-    Save::read(settings, "m_processorID", processor);
-    Save::read(settings, "m_overlayID", legacyOverlay);
-    Save::read(settings, "m_doubleSizeUI", doubleSizeUI);
-    Save::read(
-        m_save.section("Projection"),
-        "m_displayMonitorID",
-        displayMonitorID);
+    Settings::read(settings, "m_sourceID", source);
+    Settings::read(settings, "m_processorID", processor);
+    Settings::read(settings, "m_doubleSizeUI", doubleSizeUI);
+    Settings::read(m_settings.section("Projection"), "m_displayMonitorID", displayMonitorID);
 
     std::vector<std::string> enabledOverlays;
     std::string selectedOverlay = m_overlayID;
-    const Save::Json & overlaySettings = m_save.section("Overlays");
+    const Settings::json & overlaySettings = m_settings.section("Overlays");
     const auto enabledIDs = overlaySettings.find("m_enabledOverlayIDs");
-    const bool hasMultiOverlaySettings = enabledIDs != overlaySettings.end()
-        && enabledIDs->is_array();
-    if (hasMultiOverlaySettings)
+    if (enabledIDs != overlaySettings.end() && enabledIDs->is_array())
     {
-        for (const Save::Json & id : *enabledIDs)
+        for (const Settings::json & id : *enabledIDs)
         {
             if (id.is_string())
             {
                 enabledOverlays.push_back(id.get<std::string>());
             }
         }
-        Save::read(overlaySettings, "m_selectedOverlayID", selectedOverlay);
     }
-    else if (!legacyOverlay.empty() && legacyOverlay != "None")
-    {
-        enabledOverlays.push_back(legacyOverlay);
-        selectedOverlay = legacyOverlay;
-    }
-
-    const auto normalizeOverlayID = [](std::string id)
-    {
-        return id == "Lava Rocks" ? std::string("Balls") : id;
-    };
-    for (std::string & id : enabledOverlays)
-    {
-        id = normalizeOverlayID(id);
-    }
-    selectedOverlay = normalizeOverlayID(selectedOverlay);
-
-    const auto enableMigratedOverlay = [&](const std::string & id)
-    {
-        if (std::find(enabledOverlays.begin(), enabledOverlays.end(), id)
-            == enabledOverlays.end())
-        {
-            enabledOverlays.push_back(id);
-        }
-        selectedOverlay = id;
-    };
-
-    if (processor == "Minecraft")
-    {
-        processor = "Blockworld";
-    }
-    if (processor == "Balls")
-    {
-        processor = "Colorizer";
-        enableMigratedOverlay("Balls");
-    }
-    if (processor == "WaterFlow")
-    {
-        processor = "Colorizer";
-        enableMigratedOverlay("WaterFlow");
-    }
-    if (processor == "Vectors")
-    {
-        processor = "Colorizer";
-        enableMigratedOverlay("Vectors");
-    }
+    Settings::read(overlaySettings, "m_selectedOverlayID", selectedOverlay);
 
     setSource(source, false);
     setProcessor(processor, false);

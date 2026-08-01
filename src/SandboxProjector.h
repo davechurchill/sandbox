@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <fstream>
 
-#include "Save.hpp"
+#include "Settings.hpp"
 
 class SandBoxProjector
 {
@@ -39,8 +39,8 @@ public:
 
     SandBoxProjector();
     void imgui();
-    void save(Save & save) const;
-    void load(const Save & save);
+    void save(Settings & save) const;
+    void load(const Settings & save);
     void project(const cv::Mat & input, cv::Mat & output);
     bool processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     bool unprojectPoint(const sf::Vector2f & point, sf::Vector2f & dataPoint);

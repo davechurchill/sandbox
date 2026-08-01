@@ -428,9 +428,9 @@ void Overlay_WaterFlow::processOverlayEvent(
     handleInput(event, mouse);
 }
 
-void Overlay_WaterFlow::saveOverlay(Save & save) const
+void Overlay_WaterFlow::saveOverlay(Settings & save) const
 {
-    Save::Json & settings = save.section("Overlay_WaterFlow");
+    Settings::json & settings = save.section("Overlay_WaterFlow");
     settings["m_rainfall"] = m_rainfall;
     settings["m_flowSpeed"] = m_flowSpeed;
     settings["m_evaporation"] = m_evaporation;
@@ -444,19 +444,16 @@ void Overlay_WaterFlow::saveOverlay(Save & save) const
     settings["m_rainMode"] = m_rainMode;
 }
 
-void Overlay_WaterFlow::loadOverlay(const Save & save)
+void Overlay_WaterFlow::loadOverlay(const Settings & save)
 {
-    const Save::Json & currentSettings = save.section("Overlay_WaterFlow");
-    const Save::Json & settings = currentSettings.empty()
-        ? save.section("Processor_WaterFlow")
-        : currentSettings;
-    Save::read(settings, "m_rainfall", m_rainfall);
-    Save::read(settings, "m_flowSpeed", m_flowSpeed);
-    Save::read(settings, "m_evaporation", m_evaporation);
-    Save::read(settings, "m_waterDepthScale", m_waterDepthScale);
-    Save::read(settings, "m_trailPersistence", m_trailPersistence);
-    Save::read(settings, "m_displayScale", m_displayScale);
-    Save::read(settings, "m_waterOpacity", m_waterOpacity);
+    const Settings::json & settings = save.section("Overlay_WaterFlow");
+    Settings::read(settings, "m_rainfall", m_rainfall);
+    Settings::read(settings, "m_flowSpeed", m_flowSpeed);
+    Settings::read(settings, "m_evaporation", m_evaporation);
+    Settings::read(settings, "m_waterDepthScale", m_waterDepthScale);
+    Settings::read(settings, "m_trailPersistence", m_trailPersistence);
+    Settings::read(settings, "m_displayScale", m_displayScale);
+    Settings::read(settings, "m_waterOpacity", m_waterOpacity);
     const auto color = settings.find("m_waterColor");
     if (color != settings.end() && color->is_array() && color->size() == 3)
     {
@@ -465,8 +462,8 @@ void Overlay_WaterFlow::loadOverlay(const Save & save)
             m_waterColor[index] = color->at(index).get<float>();
         }
     }
-    Save::read(settings, "m_rainRadius", m_rainRadius);
-    Save::read(settings, "m_simulationSteps", m_simulationSteps);
-    Save::read(settings, "m_rainMode", m_rainMode);
+    Settings::read(settings, "m_rainRadius", m_rainRadius);
+    Settings::read(settings, "m_simulationSteps", m_simulationSteps);
+    Settings::read(settings, "m_rainMode", m_rainMode);
     resetWater();
 }

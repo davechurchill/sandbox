@@ -96,20 +96,20 @@ void Overlay_ContourLines::processOverlayEvent(
 {
 }
 
-void Overlay_ContourLines::saveOverlay(Save & save) const
+void Overlay_ContourLines::saveOverlay(Settings & save) const
 {
-    Save::Json & settings = save.section("Overlay_ContourLines");
+    Settings::json & settings = save.section("Overlay_ContourLines");
     settings["m_lineColor"] = m_lineColor;
     settings["m_lineOpacity"] = m_lineOpacity;
     settings["m_numberOfContourLines"] = m_numberOfContourLines;
 }
 
-void Overlay_ContourLines::loadOverlay(const Save & save)
+void Overlay_ContourLines::loadOverlay(const Settings & save)
 {
-    const Save::Json & settings = save.section("Overlay_ContourLines");
-    Save::read(settings, "m_lineColor", m_lineColor);
-    Save::read(settings, "m_lineOpacity", m_lineOpacity);
-    Save::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
+    const Settings::json & settings = save.section("Overlay_ContourLines");
+    Settings::read(settings, "m_lineColor", m_lineColor);
+    Settings::read(settings, "m_lineOpacity", m_lineOpacity);
+    Settings::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
 
     for (float & channel : m_lineColor)
     {

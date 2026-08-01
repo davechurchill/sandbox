@@ -286,11 +286,11 @@ void Overlay_Vectors::processOverlayEvent(
 {
 }
 
-void Overlay_Vectors::saveOverlay(Save & save) const
+void Overlay_Vectors::saveOverlay(Settings & save) const
 {
     const auto & parameters = m_particleManager.parameters[
         (size_t)ParticleManager::Algorithm::Steering];
-    Save::Json & settings = save.section("Overlay_Vectors");
+    Settings::json & settings = save.section("Overlay_Vectors");
     settings["trailLength"] = parameters.trailLength;
     settings["spawnRate"] = parameters.spawnRate;
     settings["particleSpeed"] = parameters.particleSpeed;
@@ -300,20 +300,17 @@ void Overlay_Vectors::saveOverlay(Save & save) const
     settings["steeringDistance"] = parameters.steeringDistance;
 }
 
-void Overlay_Vectors::loadOverlay(const Save & save)
+void Overlay_Vectors::loadOverlay(const Settings & save)
 {
     auto & parameters = m_particleManager.parameters[
         (size_t)ParticleManager::Algorithm::Steering];
-    const Save::Json & currentSettings = save.section("Overlay_Vectors");
-    const Save::Json & settings = currentSettings.empty()
-        ? save.section("Processor_Vectors")
-        : currentSettings;
-    Save::read(settings, "trailLength", parameters.trailLength);
-    Save::read(settings, "spawnRate", parameters.spawnRate);
-    Save::read(settings, "particleSpeed", parameters.particleSpeed);
-    Save::read(settings, "particleAlpha", parameters.particleAlpha);
-    Save::read(settings, "minimumWindHeight", parameters.minimumWindHeight);
-    Save::read(settings, "maximumWindHeight", parameters.maximumWindHeight);
-    Save::read(settings, "steeringDistance", parameters.steeringDistance);
+    const Settings::json & settings = save.section("Overlay_Vectors");
+    Settings::read(settings, "trailLength", parameters.trailLength);
+    Settings::read(settings, "spawnRate", parameters.spawnRate);
+    Settings::read(settings, "particleSpeed", parameters.particleSpeed);
+    Settings::read(settings, "particleAlpha", parameters.particleAlpha);
+    Settings::read(settings, "minimumWindHeight", parameters.minimumWindHeight);
+    Settings::read(settings, "maximumWindHeight", parameters.maximumWindHeight);
+    Settings::read(settings, "steeringDistance", parameters.steeringDistance);
     m_particleManager.reset();
 }

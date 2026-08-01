@@ -239,19 +239,19 @@ bool Source_Snapshot::loadDataDump(const std::string & filename)
     return true;
 }
 
-void Source_Snapshot::save(Save & save) const
+void Source_Snapshot::save(Settings & save) const
 {
-    Save::Json & settings = save.section("Source_Snapshot");
+    Settings::json & settings = save.section("Source_Snapshot");
     settings["m_loadedSnapshot"] = m_loadedSnapshot;
     settings["m_sortByName"] = m_sortByName;
 }
 
-void Source_Snapshot::load(const Save & save)
+void Source_Snapshot::load(const Settings & save)
 {
-    const Save::Json & settings = save.section("Source_Snapshot");
+    const Settings::json & settings = save.section("Source_Snapshot");
     std::string loadedSnapshot;
-    Save::read(settings, "m_loadedSnapshot", loadedSnapshot);
-    Save::read(settings, "m_sortByName", m_sortByName);
+    Settings::read(settings, "m_loadedSnapshot", loadedSnapshot);
+    Settings::read(settings, "m_sortByName", m_sortByName);
     sortSnapshotFiles();
     if (!loadedSnapshot.empty())
     {

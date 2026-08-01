@@ -70,19 +70,16 @@ void Processor_Blockworld::processEvent(const sf::Event & event, const sf::Vecto
     projector().processEvent(event, mouse);
 }
 
-void Processor_Blockworld::save(Save & save) const
+void Processor_Blockworld::save(Settings & save) const
 {
-    Save::Json & settings = save.section("Processor_Blockworld");
+    Settings::json & settings = save.section("Processor_Blockworld");
     settings["m_blockSize"] = m_blockSize;
 }
 
-void Processor_Blockworld::load(const Save & save)
+void Processor_Blockworld::load(const Settings & save)
 {
-    const Save::Json & currentSettings = save.section("Processor_Blockworld");
-    const Save::Json & settings = currentSettings.empty()
-        ? save.section("Processor_Minecraft")
-        : currentSettings;
-    Save::read(settings, "m_blockSize", m_blockSize);
+    const Settings::json & settings = save.section("Processor_Blockworld");
+    Settings::read(settings, "m_blockSize", m_blockSize);
     m_blockSize = std::clamp(m_blockSize, 2, 48);
 }
 

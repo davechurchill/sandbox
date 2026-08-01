@@ -138,5 +138,9 @@
     "Processor_Nature": {
         "m_terrainType": 0,
         "m_waterLevel": 0.2800000011920929
+    },
+    "Overlay_Animals": {
+        "m_sheepSpeed": 1.0,
+        "m_sheepSize": 11.0
     }
 }

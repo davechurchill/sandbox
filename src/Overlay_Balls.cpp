@@ -900,9 +900,9 @@ void Overlay_Balls::processOverlayEvent(
     handleInput(event, mouse);
 }
 
-void Overlay_Balls::saveOverlay(Save & save) const
+void Overlay_Balls::saveOverlay(Settings & save) const
 {
-    Save::Json & settings = save.section("Overlay_Balls");
+    Settings::json & settings = save.section("Overlay_Balls");
     settings["m_gravity"] = m_gravity;
     settings["m_ballSpeedMultiplier"] = m_ballSpeedMultiplier;
     settings["m_rollingResistance"] = m_rollingResistance;
@@ -912,17 +912,14 @@ void Overlay_Balls::saveOverlay(Save & save) const
     settings["m_lavaAppearance"] = m_lavaAppearance;
 }
 
-void Overlay_Balls::loadOverlay(const Save & save)
+void Overlay_Balls::loadOverlay(const Settings & save)
 {
-    const Save::Json & currentSettings = save.section("Overlay_Balls");
-    const Save::Json & settings = currentSettings.empty()
-        ? save.section("Processor_Balls")
-        : currentSettings;
-    Save::read(settings, "m_gravity", m_gravity);
-    Save::read(settings, "m_ballSpeedMultiplier", m_ballSpeedMultiplier);
-    Save::read(settings, "m_rollingResistance", m_rollingResistance);
-    Save::read(settings, "m_ballSize", m_ballSize);
-    Save::read(settings, "m_ballRestitution", m_ballRestitution);
-    Save::read(settings, "m_trailLength", m_trailLength);
-    Save::read(settings, "m_lavaAppearance", m_lavaAppearance);
+    const Settings::json & settings = save.section("Overlay_Balls");
+    Settings::read(settings, "m_gravity", m_gravity);
+    Settings::read(settings, "m_ballSpeedMultiplier", m_ballSpeedMultiplier);
+    Settings::read(settings, "m_rollingResistance", m_rollingResistance);
+    Settings::read(settings, "m_ballSize", m_ballSize);
+    Settings::read(settings, "m_ballRestitution", m_ballRestitution);
+    Settings::read(settings, "m_trailLength", m_trailLength);
+    Settings::read(settings, "m_lavaAppearance", m_lavaAppearance);
 }

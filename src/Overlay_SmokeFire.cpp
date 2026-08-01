@@ -524,9 +524,9 @@ void Overlay_SmokeFire::processOverlayEvent(
     }
 }
 
-void Overlay_SmokeFire::saveOverlay(Save & save) const
+void Overlay_SmokeFire::saveOverlay(Settings & save) const
 {
-    Save::Json & settings = save.section("Overlay_SmokeFire");
+    Settings::json & settings = save.section("Overlay_SmokeFire");
     settings["m_fireSize"] = m_fireSize;
     settings["m_fireLifetime"] = m_fireLifetime;
     settings["m_spreadRate"] = m_spreadRate;
@@ -536,15 +536,15 @@ void Overlay_SmokeFire::saveOverlay(Save & save) const
     settings["m_windY"] = m_windY;
 }
 
-void Overlay_SmokeFire::loadOverlay(const Save & save)
+void Overlay_SmokeFire::loadOverlay(const Settings & save)
 {
-    const Save::Json & settings = save.section("Overlay_SmokeFire");
-    Save::read(settings, "m_fireSize", m_fireSize);
-    Save::read(settings, "m_fireLifetime", m_fireLifetime);
-    Save::read(settings, "m_spreadRate", m_spreadRate);
-    Save::read(settings, "m_smokeAmount", m_smokeAmount);
-    Save::read(settings, "m_buoyancy", m_buoyancy);
-    Save::read(settings, "m_windX", m_windX);
-    Save::read(settings, "m_windY", m_windY);
+    const Settings::json & settings = save.section("Overlay_SmokeFire");
+    Settings::read(settings, "m_fireSize", m_fireSize);
+    Settings::read(settings, "m_fireLifetime", m_fireLifetime);
+    Settings::read(settings, "m_spreadRate", m_spreadRate);
+    Settings::read(settings, "m_smokeAmount", m_smokeAmount);
+    Settings::read(settings, "m_buoyancy", m_buoyancy);
+    Settings::read(settings, "m_windX", m_windX);
+    Settings::read(settings, "m_windY", m_windY);
     resetSimulation();
 }

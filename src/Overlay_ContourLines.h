@@ -34,6 +34,6 @@ public:
         const sf::Event & event,
         const sf::Vector2f & mouse,
         TopographyProcessor & processor) override;
-    void saveOverlay(Save & save) const override;
-    void loadOverlay(const Save & save) override;
+    void saveOverlay(Settings & save) const override;
+    void loadOverlay(const Settings & save) override;
 };

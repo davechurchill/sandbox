@@ -171,20 +171,20 @@ void Source_PaintBrush::processEvent(const sf::Event & event, const sf::Vector2f
     }
 }
 
-void Source_PaintBrush::save(Save & save) const
+void Source_PaintBrush::save(Settings & save) const
 {
-    Save::Json & settings = save.section("Source_PaintBrush");
+    Settings::json & settings = save.section("Source_PaintBrush");
     settings["m_brushSize"] = m_brushSize;
     settings["m_brushBlur"] = m_brushBlur;
     settings["m_paintAmount"] = m_paintAmount;
 }
 
-void Source_PaintBrush::load(const Save & save)
+void Source_PaintBrush::load(const Settings & save)
 {
-    const Save::Json & settings = save.section("Source_PaintBrush");
-    Save::read(settings, "m_brushSize", m_brushSize);
-    Save::read(settings, "m_brushBlur", m_brushBlur);
-    Save::read(settings, "m_paintAmount", m_paintAmount);
+    const Settings::json & settings = save.section("Source_PaintBrush");
+    Settings::read(settings, "m_brushSize", m_brushSize);
+    Settings::read(settings, "m_brushBlur", m_brushBlur);
+    Settings::read(settings, "m_paintAmount", m_paintAmount);
 }
 
 cv::Mat Source_PaintBrush::getTopography()

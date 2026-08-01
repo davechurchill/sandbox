@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Save.hpp"
+#include "Settings.hpp"
 #include "MarkerData.hpp"
 #include "SandboxProjector.h"
 
@@ -29,8 +29,8 @@ public:
     virtual void imgui() = 0;
     virtual void render(sf::RenderWindow& window) = 0;
     virtual void processEvent(const sf::Event& event, const sf::Vector2f& mouse) = 0;
-    virtual void save(Save& save) const = 0;
-    virtual void load(const Save& save) = 0;
+    virtual void save(Settings& save) const = 0;
+    virtual void load(const Settings& save) = 0;
 
     void setProjector(SandBoxProjector & projector) { m_projector = &projector; }
     SandBoxProjector & projector()

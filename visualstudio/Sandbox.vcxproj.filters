@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="..\src\Overlay_AStar.cpp">
+      <Filter>processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\Overlay_BFS.cpp">
       <Filter>processors\vectors</Filter>
     </ClCompile>
@@ -13,7 +16,7 @@
     <ClCompile Include="..\src\Overlay_Cloth.cpp">
       <Filter>processors</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Overlay_CloudSimulation.cpp">
+    <ClCompile Include="..\src\Overlay_ColorAdjustment.cpp">
       <Filter>processors</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Overlay_ContourLines.cpp">
@@ -126,6 +129,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\Overlay_AStar.h">
+      <Filter>processors</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\Overlay_BFS.h">
       <Filter>processors\vectors</Filter>
     </ClInclude>
@@ -138,7 +144,7 @@
     <ClInclude Include="..\src\Overlay_Cloth.h">
       <Filter>processors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Overlay_CloudSimulation.h">
+    <ClInclude Include="..\src\Overlay_ColorAdjustment.h">
       <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Overlay_ContourLines.h">
@@ -180,7 +186,7 @@
     <ClInclude Include="..\src\Tools.h">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Save.hpp">
+    <ClInclude Include="..\src\Settings.hpp">
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\TopographyProcessor.hpp">
@@ -277,6 +283,9 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="..\bin\shaders\shader_contour_color.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\shader_color_adjustment.frag">
       <Filter>shaders</Filter>
     </None>
     <None Include="..\bin\shaders\shader_contour_overlay.frag">

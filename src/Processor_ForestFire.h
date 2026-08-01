@@ -89,8 +89,8 @@ public:
     void imgui() override;
     void render(sf::RenderWindow & window) override;
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
-    void save(Save & save) const override;
-    void load(const Save & save) override;
+    void save(Settings & save) const override;
+    void load(const Settings & save) override;
     void onSourceChanged() override;
     bool usesCanvasInput() const override { return true; }
     void processTopography(const IntermediateData & data) override;
