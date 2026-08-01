@@ -71,16 +71,18 @@ void Processor_Colorizer::processEvent(const sf::Event & event, const sf::Vector
 
 void Processor_Colorizer::save(Save & save) const
 {
-    save.selectedShaderIndex = m_selectedShaderIndex;
-    save.drawContours = m_drawContours;
-    save.numberOfContourLines = m_numberOfContourLines;
+    Save::Json & settings = save.section("Processor_Colorizer");
+    settings["m_selectedShaderIndex"] = m_selectedShaderIndex;
+    settings["m_drawContours"] = m_drawContours;
+    settings["m_numberOfContourLines"] = m_numberOfContourLines;
     m_projector.save(save);
 }
 void Processor_Colorizer::load(const Save & save)
 {
-    m_selectedShaderIndex = save.selectedShaderIndex;
-    m_drawContours = save.drawContours;
-    m_numberOfContourLines = save.numberOfContourLines;
+    const Save::Json & settings = save.section("Processor_Colorizer");
+    Save::read(settings, "m_selectedShaderIndex", m_selectedShaderIndex);
+    Save::read(settings, "m_drawContours", m_drawContours);
+    Save::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
     m_projector.load(save);
 }
 

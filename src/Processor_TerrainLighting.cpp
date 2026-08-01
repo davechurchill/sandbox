@@ -150,11 +150,25 @@ bool Processor_TerrainLighting::updateLightFromMouse(const sf::Vector2f & mouse)
 
 void Processor_TerrainLighting::save(Save & save) const
 {
+    Save::Json & settings = save.section("Processor_TerrainLighting");
+    settings["m_palette"] = m_palette;
+    settings["m_lightAzimuth"] = m_lightAzimuth;
+    settings["m_lightElevation"] = m_lightElevation;
+    settings["m_ambientLight"] = m_ambientLight;
+    settings["m_shadowStrength"] = m_shadowStrength;
+    settings["m_heightStrength"] = m_heightStrength;
     m_projector.save(save);
 }
 
 void Processor_TerrainLighting::load(const Save & save)
 {
+    const Save::Json & settings = save.section("Processor_TerrainLighting");
+    Save::read(settings, "m_palette", m_palette);
+    Save::read(settings, "m_lightAzimuth", m_lightAzimuth);
+    Save::read(settings, "m_lightElevation", m_lightElevation);
+    Save::read(settings, "m_ambientLight", m_ambientLight);
+    Save::read(settings, "m_shadowStrength", m_shadowStrength);
+    Save::read(settings, "m_heightStrength", m_heightStrength);
     m_projector.load(save);
 }
 

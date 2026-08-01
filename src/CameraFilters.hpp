@@ -68,17 +68,19 @@ public:
 
     void save(Save & save) const
     {
-        save.temporalAlpha = m_smoothAlphaTemporal;
-        save.temporalDelta = m_smoothDeltaTemporal;
-        save.temporalPersistance = m_persistanceTemporal;
-        save.holeFill = m_holeFill;
+        Save::Json & settings = save.section("CameraFilters");
+        settings["m_smoothAlphaTemporal"] = m_smoothAlphaTemporal;
+        settings["m_smoothDeltaTemporal"] = m_smoothDeltaTemporal;
+        settings["m_persistanceTemporal"] = m_persistanceTemporal;
+        settings["m_holeFill"] = m_holeFill;
     }
 
     void load(const Save & save)
     {
-        m_smoothAlphaTemporal = save.temporalAlpha;
-        m_smoothDeltaTemporal = save.temporalDelta;
-        m_persistanceTemporal = save.temporalPersistance;
-        m_holeFill = save.holeFill;
+        const Save::Json & settings = save.section("CameraFilters");
+        Save::read(settings, "m_smoothAlphaTemporal", m_smoothAlphaTemporal);
+        Save::read(settings, "m_smoothDeltaTemporal", m_smoothDeltaTemporal);
+        Save::read(settings, "m_persistanceTemporal", m_persistanceTemporal);
+        Save::read(settings, "m_holeFill", m_holeFill);
     }
 };

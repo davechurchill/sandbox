@@ -131,17 +131,38 @@ void Processor_Vectors::processEvent(const sf::Event& event, const sf::Vector2f&
 
 void Processor_Vectors::save(Save& save) const
 {
-    save.selectedShaderIndex = m_selectedShaderIndex;
-    save.drawContours = m_drawContours;
-    save.numberOfContourLines = m_numberOfContourLines;
+    const auto & parameters = m_particleManager.parameters[
+        (size_t)ParticleManager::Algorithm::Steering];
+    Save::Json & settings = save.section("Processor_Vectors");
+    settings["m_selectedShaderIndex"] = m_selectedShaderIndex;
+    settings["m_drawContours"] = m_drawContours;
+    settings["m_numberOfContourLines"] = m_numberOfContourLines;
+    settings["trailLength"] = parameters.trailLength;
+    settings["spawnRate"] = parameters.spawnRate;
+    settings["particleSpeed"] = parameters.particleSpeed;
+    settings["particleAlpha"] = parameters.particleAlpha;
+    settings["minimumWindHeight"] = parameters.minimumWindHeight;
+    settings["maximumWindHeight"] = parameters.maximumWindHeight;
+    settings["steeringDistance"] = parameters.steeringDistance;
     m_projector.save(save);
 }
 
 void Processor_Vectors::load(const Save& save)
 {
-    m_selectedShaderIndex = save.selectedShaderIndex;
-    m_drawContours = save.drawContours;
-    m_numberOfContourLines = save.numberOfContourLines;
+    auto & parameters = m_particleManager.parameters[
+        (size_t)ParticleManager::Algorithm::Steering];
+    const Save::Json & settings = save.section("Processor_Vectors");
+    Save::read(settings, "m_selectedShaderIndex", m_selectedShaderIndex);
+    Save::read(settings, "m_drawContours", m_drawContours);
+    Save::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
+    Save::read(settings, "trailLength", parameters.trailLength);
+    Save::read(settings, "spawnRate", parameters.spawnRate);
+    Save::read(settings, "particleSpeed", parameters.particleSpeed);
+    Save::read(settings, "particleAlpha", parameters.particleAlpha);
+    Save::read(settings, "minimumWindHeight", parameters.minimumWindHeight);
+    Save::read(settings, "maximumWindHeight", parameters.maximumWindHeight);
+    Save::read(settings, "steeringDistance", parameters.steeringDistance);
+    m_particleManager.reset();
     m_projector.load(save);
 }
 
@@ -349,10 +370,37 @@ void Processor_Vectors::processOverlayEvent(
 {
 }
 
-void Processor_Vectors::saveOverlay(Save &) const
+void Processor_Vectors::saveOverlay(Save & save) const
 {
+    const auto & parameters = m_particleManager.parameters[
+        (size_t)ParticleManager::Algorithm::Steering];
+    Save::Json & settings = save.section("Processor_Vectors");
+    settings["m_selectedShaderIndex"] = m_selectedShaderIndex;
+    settings["m_drawContours"] = m_drawContours;
+    settings["m_numberOfContourLines"] = m_numberOfContourLines;
+    settings["trailLength"] = parameters.trailLength;
+    settings["spawnRate"] = parameters.spawnRate;
+    settings["particleSpeed"] = parameters.particleSpeed;
+    settings["particleAlpha"] = parameters.particleAlpha;
+    settings["minimumWindHeight"] = parameters.minimumWindHeight;
+    settings["maximumWindHeight"] = parameters.maximumWindHeight;
+    settings["steeringDistance"] = parameters.steeringDistance;
 }
 
-void Processor_Vectors::loadOverlay(const Save &)
+void Processor_Vectors::loadOverlay(const Save & save)
 {
+    auto & parameters = m_particleManager.parameters[
+        (size_t)ParticleManager::Algorithm::Steering];
+    const Save::Json & settings = save.section("Processor_Vectors");
+    Save::read(settings, "m_selectedShaderIndex", m_selectedShaderIndex);
+    Save::read(settings, "m_drawContours", m_drawContours);
+    Save::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
+    Save::read(settings, "trailLength", parameters.trailLength);
+    Save::read(settings, "spawnRate", parameters.spawnRate);
+    Save::read(settings, "particleSpeed", parameters.particleSpeed);
+    Save::read(settings, "particleAlpha", parameters.particleAlpha);
+    Save::read(settings, "minimumWindHeight", parameters.minimumWindHeight);
+    Save::read(settings, "maximumWindHeight", parameters.maximumWindHeight);
+    Save::read(settings, "steeringDistance", parameters.steeringDistance);
+    m_particleManager.reset();
 }

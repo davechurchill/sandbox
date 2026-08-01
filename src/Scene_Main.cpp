@@ -39,6 +39,7 @@ namespace
     ImGuiStyle DefaultUIStyle;
     float DefaultUIFontScale = 1.0f;
     bool DefaultUIStyleCaptured = false;
+    constexpr const char * SettingsFile = "settings.json";
 
     bool isMouseControlEvent(const sf::Event & event)
     {
@@ -409,71 +410,69 @@ void Scene_Main::renderUI()
 void Scene_Main::save()
 {
     PROFILE_FUNCTION();
-    std::ofstream current("currentSave.txt");
-    current << m_saveFile << '\n';
-    current.close();
-
     if (m_source) { m_source->save(m_save); }
     if (m_processor) { m_processor->save(m_save); }
     if (m_overlay) { m_overlay->saveOverlay(m_save); }
 
-    m_save.source = m_sourceID;
-    m_save.processor = m_processorID;
-    m_save.overlay = m_overlayID;
-    m_save.doubleSizeUI = m_doubleSizeUI;
+    Save::Json & settings = m_save.section("Scene_Main");
+    settings["m_sourceID"] = m_sourceID;
+    settings["m_processorID"] = m_processorID;
+    settings["m_overlayID"] = m_overlayID;
+    settings["m_doubleSizeUI"] = m_doubleSizeUI;
 
-    m_save.saveToFile("saves/" + m_saveFile);
+    m_save.saveToFile(SettingsFile);
 }
 
 void Scene_Main::load()
 {
     PROFILE_FUNCTION();
-    std::ifstream current("currentSave.txt");
-    if (current.good())
+    if (!m_save.loadFromFile(SettingsFile) && m_source)
     {
-        current >> m_saveFile;
+        return;
     }
-    current.close();
-
-    std::string file = "saves/" + m_saveFile;
 
     // First find and initialize the source and processor
-    m_save.overlay = "None";
-    m_save.loadFromFile(file);
-    m_doubleSizeUI = m_save.doubleSizeUI;
+    const Save::Json & settings = m_save.section("Scene_Main");
+    std::string source = m_sourceID;
+    std::string processor = m_processorID;
+    std::string overlay = m_overlayID;
+    Save::read(settings, "m_sourceID", source);
+    Save::read(settings, "m_processorID", processor);
+    Save::read(settings, "m_overlayID", overlay);
+    Save::read(settings, "m_doubleSizeUI", m_doubleSizeUI);
     applyUIScale();
 
     // Migrate saves for processors that moved to overlays.
-    if (m_save.processor == "Balls")
+    if (processor == "Balls")
     {
-        m_save.processor = "Colorizer";
-        m_save.overlay = "Balls";
+        processor = "Colorizer";
+        overlay = "Balls";
     }
-    if (m_save.processor == "WaterFlow")
+    if (processor == "WaterFlow")
     {
-        m_save.processor = "Colorizer";
-        m_save.overlay = "WaterFlow";
+        processor = "Colorizer";
+        overlay = "WaterFlow";
     }
-    if (m_save.processor == "Vectors")
+    if (processor == "Vectors")
     {
-        m_save.processor = "Colorizer";
-        m_save.overlay = "Vectors";
+        processor = "Colorizer";
+        overlay = "Vectors";
     }
-    if (m_save.overlay == "Lava Rocks")
+    if (overlay == "Lava Rocks")
     {
-        m_save.overlay = "Balls";
+        overlay = "Balls";
     }
 
     // This initializes the source and processor, even if there was no save file
-    setSource(m_save.source);
-    setProcessor(m_save.processor);
-    setOverlay(m_save.overlay);
+    setSource(source, false);
+    setProcessor(processor, false);
+    setOverlay(overlay, false);
 }
 
-void Scene_Main::setSource(const std::string & source)
+void Scene_Main::setSource(const std::string & source, bool saveCurrent)
 {
     const bool sourceChanged = !m_source || source != m_sourceID;
-    if (m_source) { m_source->save(m_save); }
+    if (saveCurrent && m_source) { m_source->save(m_save); }
     m_sourceID = source;
     if (m_sourceMap.contains(source))
     {
@@ -494,9 +493,9 @@ void Scene_Main::setSource(const std::string & source)
     }
 }
 
-void Scene_Main::setProcessor(const std::string & processor)
+void Scene_Main::setProcessor(const std::string & processor, bool saveCurrent)
 {
-    if (m_processor) { m_processor->save(m_save); }
+    if (saveCurrent && m_processor) { m_processor->save(m_save); }
     m_processorID = processor;
     if (m_processorMap.contains(processor))
     {
@@ -513,9 +512,9 @@ void Scene_Main::setProcessor(const std::string & processor)
     }
 }
 
-void Scene_Main::setOverlay(const std::string & overlay)
+void Scene_Main::setOverlay(const std::string & overlay, bool saveCurrent)
 {
-    if (m_overlay) { m_overlay->saveOverlay(m_save); }
+    if (saveCurrent && m_overlay) { m_overlay->saveOverlay(m_save); }
     m_overlayID = overlay;
     if (m_overlayMap.contains(overlay))
     {

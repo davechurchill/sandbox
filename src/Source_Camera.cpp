@@ -299,25 +299,33 @@ void Source_Camera::processEvent(const sf::Event & event, const sf::Vector2f & m
 
 void Source_Camera::save(Save & save) const
 {
-    save.align = (int)m_alignment;
-    save.gaussianBlur = m_gaussianBlur;
-    save.maxDistance = m_maxDistance;
-    save.minDistance = m_minDistance;
-    save.drawColor = m_drawColor;
-    save.drawDepth = m_drawDepth;
-    save.fpsSetting = m_fpsSetting;
+    Save::Json & settings = save.section("Source_Camera");
+    settings["m_alignment"] = (int)m_alignment;
+    settings["m_gaussianBlur"] = m_gaussianBlur;
+    settings["m_maxDistance"] = m_maxDistance;
+    settings["m_minDistance"] = m_minDistance;
+    settings["m_drawColor"] = m_drawColor;
+    settings["m_drawDepth"] = m_drawDepth;
+    settings["m_fpsSetting"] = m_fpsSetting;
+    settings["m_detectHands"] = m_detectHands;
+    settings["m_handThresh"] = m_handThresh;
     m_filters.save(save);
     m_warper.save(save);
 }
 void Source_Camera::load(const Save & save)
 {
-    m_alignment = static_cast<alignment>(save.align);
-    m_gaussianBlur = save.gaussianBlur;
-    m_maxDistance = save.maxDistance;
-    m_minDistance = save.minDistance;
-    m_drawColor = save.drawColor;
-    m_drawDepth = save.drawDepth;
-    m_fpsSetting = save.fpsSetting;
+    const Save::Json & settings = save.section("Source_Camera");
+    int alignmentValue = (int)m_alignment;
+    Save::read(settings, "m_alignment", alignmentValue);
+    m_alignment = static_cast<alignment>(alignmentValue);
+    Save::read(settings, "m_gaussianBlur", m_gaussianBlur);
+    Save::read(settings, "m_maxDistance", m_maxDistance);
+    Save::read(settings, "m_minDistance", m_minDistance);
+    Save::read(settings, "m_drawColor", m_drawColor);
+    Save::read(settings, "m_drawDepth", m_drawDepth);
+    Save::read(settings, "m_fpsSetting", m_fpsSetting);
+    Save::read(settings, "m_detectHands", m_detectHands);
+    Save::read(settings, "m_handThresh", m_handThresh);
     m_filters.load(save);
     m_warper.load(save);
 }

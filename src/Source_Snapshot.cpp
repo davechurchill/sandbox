@@ -241,11 +241,22 @@ bool Source_Snapshot::loadDataDump(const std::string & filename)
 
 void Source_Snapshot::save(Save & save) const
 {
+    Save::Json & settings = save.section("Source_Snapshot");
+    settings["m_loadedSnapshot"] = m_loadedSnapshot;
+    settings["m_sortByName"] = m_sortByName;
 }
 
 void Source_Snapshot::load(const Save & save)
 {
-
+    const Save::Json & settings = save.section("Source_Snapshot");
+    std::string loadedSnapshot;
+    Save::read(settings, "m_loadedSnapshot", loadedSnapshot);
+    Save::read(settings, "m_sortByName", m_sortByName);
+    sortSnapshotFiles();
+    if (!loadedSnapshot.empty())
+    {
+        loadDataDump(loadedSnapshot);
+    }
 }
 
 cv::Mat Source_Snapshot::getTopography()

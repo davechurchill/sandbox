@@ -151,26 +151,27 @@ void Source_Waves::processEvent(const sf::Event &, const sf::Vector2f &)
 
 void Source_Waves::save(Save & save) const
 {
-    save.waveAnimationMode = m_animationMode;
-    save.waveFrequency = m_frequency;
-    save.waveAmplitude = m_amplitude;
-    save.waveSeparation = m_separation;
-    save.waveSize = m_waveSize;
-    save.waveSizeIsRadius = true;
+    Save::Json & settings = save.section("Source_Waves");
+    settings["m_animationMode"] = m_animationMode;
+    settings["m_frequency"] = m_frequency;
+    settings["m_amplitude"] = m_amplitude;
+    settings["m_separation"] = m_separation;
+    settings["m_waveSize"] = m_waveSize;
 }
 
 void Source_Waves::load(const Save & save)
 {
-    m_animationMode = std::clamp(save.waveAnimationMode, 0, 1);
-    m_frequency = std::clamp(save.waveFrequency, 0.0f, 3.0f);
-    m_amplitude = std::clamp(save.waveAmplitude, 0.0f, 0.475f);
-    m_separation = std::clamp(save.waveSeparation, 8.0f, 256.0f);
-    float savedWaveSize = save.waveSize;
-    if (!save.waveSizeIsRadius && savedWaveSize <= 3.0f)
-    {
-        savedWaveSize *= m_separation / 3.0f;
-    }
-    m_waveSize = std::clamp(savedWaveSize, 1.0f, m_separation * 0.5f);
+    const Save::Json & settings = save.section("Source_Waves");
+    Save::read(settings, "m_animationMode", m_animationMode);
+    Save::read(settings, "m_frequency", m_frequency);
+    Save::read(settings, "m_amplitude", m_amplitude);
+    Save::read(settings, "m_separation", m_separation);
+    Save::read(settings, "m_waveSize", m_waveSize);
+    m_animationMode = std::clamp(m_animationMode, 0, 1);
+    m_frequency = std::clamp(m_frequency, 0.0f, 3.0f);
+    m_amplitude = std::clamp(m_amplitude, 0.0f, 0.475f);
+    m_separation = std::clamp(m_separation, 8.0f, 256.0f);
+    m_waveSize = std::clamp(m_waveSize, 1.0f, m_separation * 0.5f);
     m_clock.restart();
 }
 

@@ -33,8 +33,6 @@ class Scene_Main : public Scene
     sf::Vector2f        m_mouseWorld;
     sf::Vector2f        m_mouseDisplay;
 
-    std::string         m_saveFile = "default.txt";
-
     std::string         m_sourceID = "Camera";
     std::string         m_processorID = "Colorizer";
     std::string         m_overlayID = "None";
@@ -56,9 +54,9 @@ class Scene_Main : public Scene
     void sRender();
     void applyUIScale();
 
-    void setSource(const std::string & source);
-    void setProcessor(const std::string & processor);
-    void setOverlay(const std::string & overlay);
+    void setSource(const std::string & source, bool saveCurrent = true);
+    void setProcessor(const std::string & processor, bool saveCurrent = true);
+    void setOverlay(const std::string & overlay, bool saveCurrent = true);
     void toggleDisplayWindow();
 
     void saveDataDump();

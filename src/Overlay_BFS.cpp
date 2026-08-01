@@ -284,10 +284,25 @@ void Overlay_BFS::processOverlayEvent(
 {
 }
 
-void Overlay_BFS::saveOverlay(Save &) const
+void Overlay_BFS::saveOverlay(Save & save) const
 {
+    Save::Json & settings = save.section("Overlay_BFS");
+    settings["m_trailLength"] = m_trailLength;
+    settings["m_cellSize"] = m_cellSize;
+    settings["m_spawnRate"] = m_spawnRate;
+    settings["m_particleSpeed"] = m_particleSpeed;
+    settings["m_particleAlpha"] = m_particleAlpha;
+    settings["m_heightPenalty"] = m_heightPenalty;
 }
 
-void Overlay_BFS::loadOverlay(const Save &)
+void Overlay_BFS::loadOverlay(const Save & save)
 {
+    const Save::Json & settings = save.section("Overlay_BFS");
+    Save::read(settings, "m_trailLength", m_trailLength);
+    Save::read(settings, "m_cellSize", m_cellSize);
+    Save::read(settings, "m_spawnRate", m_spawnRate);
+    Save::read(settings, "m_particleSpeed", m_particleSpeed);
+    Save::read(settings, "m_particleAlpha", m_particleAlpha);
+    Save::read(settings, "m_heightPenalty", m_heightPenalty);
+    m_resetRequested = true;
 }

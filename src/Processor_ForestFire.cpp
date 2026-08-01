@@ -757,11 +757,36 @@ void Processor_ForestFire::processEvent(
 
 void Processor_ForestFire::save(Save & save) const
 {
+    Save::Json & settings = save.section("Processor_ForestFire");
+    settings["m_waterLevel"] = m_waterLevel;
+    settings["m_rockLevel"] = m_rockLevel;
+    settings["m_treeBrushSize"] = m_treeBrushSize;
+    settings["m_treeBrushBlur"] = m_treeBrushBlur;
+    settings["m_treePaintAmount"] = m_treePaintAmount;
+    settings["m_spreadRate"] = m_spreadRate;
+    settings["m_burnRate"] = m_burnRate;
+    settings["m_windX"] = m_windX;
+    settings["m_windY"] = m_windY;
+    settings["m_ignitionRadius"] = m_ignitionRadius;
+    settings["m_paused"] = m_paused;
     m_projector.save(save);
 }
 
 void Processor_ForestFire::load(const Save & save)
 {
+    const Save::Json & settings = save.section("Processor_ForestFire");
+    Save::read(settings, "m_waterLevel", m_waterLevel);
+    Save::read(settings, "m_rockLevel", m_rockLevel);
+    Save::read(settings, "m_treeBrushSize", m_treeBrushSize);
+    Save::read(settings, "m_treeBrushBlur", m_treeBrushBlur);
+    Save::read(settings, "m_treePaintAmount", m_treePaintAmount);
+    Save::read(settings, "m_spreadRate", m_spreadRate);
+    Save::read(settings, "m_burnRate", m_burnRate);
+    Save::read(settings, "m_windX", m_windX);
+    Save::read(settings, "m_windY", m_windY);
+    Save::read(settings, "m_ignitionRadius", m_ignitionRadius);
+    Save::read(settings, "m_paused", m_paused);
+    m_resetRequested = true;
     m_projector.load(save);
 }
 

@@ -86,20 +86,22 @@ void Source_Perlin::processEvent(const sf::Event & event, const sf::Vector2f & m
 
 void Source_Perlin::save(Save & save) const
 {
-    save.octaves = m_octaves;
-    save.seed = m_seed;
-    save.seedSize = m_seedSize;
-    save.persistance = m_persistance;
-    save.drawGrid = m_drawGrid;
+    Save::Json & settings = save.section("Source_Perlin");
+    settings["m_octaves"] = m_octaves;
+    settings["m_seed"] = m_seed;
+    settings["m_seedSize"] = m_seedSize;
+    settings["m_persistance"] = m_persistance;
+    settings["m_drawGrid"] = m_drawGrid;
 }
 
 void Source_Perlin::load(const Save & save)
 {
-    m_octaves = save.octaves;
-    m_seed = save.seed;
-    m_seedSize = save.seedSize;
-    m_persistance = save.persistance;
-    m_drawGrid = save.drawGrid;
+    const Save::Json & settings = save.section("Source_Perlin");
+    Save::read(settings, "m_octaves", m_octaves);
+    Save::read(settings, "m_seed", m_seed);
+    Save::read(settings, "m_seedSize", m_seedSize);
+    Save::read(settings, "m_persistance", m_persistance);
+    Save::read(settings, "m_drawGrid", m_drawGrid);
     calculateNoise();
 }
 

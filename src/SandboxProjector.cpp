@@ -170,14 +170,31 @@ void SandBoxProjector::generateProjection()
 
 void SandBoxProjector::save(Save& save) const
 {
-    std::copy(std::cbegin(m_projectionPoints), std::cend(m_projectionPoints), std::begin(save.projectionPoints));
-    save.drawLines = m_drawLines;
-    save.drawProjection = m_drawProjection;
+    Save::Json & settings = save.section("SandBoxProjector");
+    settings["m_projectionPoints"] = Save::Json::array();
+    for (const cv::Point2f & point : m_projectionPoints)
+    {
+        settings["m_projectionPoints"].push_back({ point.x, point.y });
+    }
+    settings["m_drawLines"] = m_drawLines;
+    settings["m_drawProjection"] = m_drawProjection;
 }
 
 void SandBoxProjector::load(const Save& save)
 {
-    std::copy(std::cbegin(save.projectionPoints), std::cend(save.projectionPoints), std::begin(m_projectionPoints));
-    m_drawLines = save.drawLines;
-    m_drawProjection = save.drawProjection;
+    const Save::Json & settings = save.section("SandBoxProjector");
+    const auto points = settings.find("m_projectionPoints");
+    if (points != settings.end() && points->is_array() && points->size() == 4)
+    {
+        for (size_t index = 0; index < 4; index++)
+        {
+            const Save::Json & point = points->at(index);
+            if (point.is_array() && point.size() == 2)
+            {
+                m_projectionPoints[index] = { point[0].get<float>(), point[1].get<float>() };
+            }
+        }
+    }
+    Save::read(settings, "m_drawLines", m_drawLines);
+    Save::read(settings, "m_drawProjection", m_drawProjection);
 }

@@ -913,11 +913,17 @@ void Processor_Nature::processEvent(const sf::Event & event, const sf::Vector2f 
 
 void Processor_Nature::save(Save & save) const
 {
+    Save::Json & settings = save.section("Processor_Nature");
+    settings["m_terrainType"] = m_terrainType;
+    settings["m_waterLevel"] = m_waterLevel;
     m_projector.save(save);
 }
 
 void Processor_Nature::load(const Save & save)
 {
+    const Save::Json & settings = save.section("Processor_Nature");
+    Save::read(settings, "m_terrainType", m_terrainType);
+    Save::read(settings, "m_waterLevel", m_waterLevel);
     m_projector.load(save);
 }
 
@@ -1036,10 +1042,16 @@ void Processor_Nature::processOverlayEvent(
     }
 }
 
-void Processor_Nature::saveOverlay(Save &) const
+void Processor_Nature::saveOverlay(Save & save) const
 {
+    Save::Json & settings = save.section("Overlay_Nature");
+    settings["m_sheepSpeed"] = m_sheepSpeed;
+    settings["m_sheepSize"] = m_sheepSize;
 }
 
-void Processor_Nature::loadOverlay(const Save &)
+void Processor_Nature::loadOverlay(const Save & save)
 {
+    const Save::Json & settings = save.section("Overlay_Nature");
+    Save::read(settings, "m_sheepSpeed", m_sheepSpeed);
+    Save::read(settings, "m_sheepSize", m_sheepSize);
 }

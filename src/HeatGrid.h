@@ -89,6 +89,11 @@ public:
         return m_sources;
     }
 
+    const std::vector<HeatSource>& getSources() const
+    {
+        return m_sources;
+    }
+
 	void clearSources()
 	{
         m_sources.clear();

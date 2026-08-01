@@ -613,11 +613,30 @@ void Processor_FishPond::processEvent(
 
 void Processor_FishPond::save(Save & save) const
 {
+    Save::Json & settings = save.section("Processor_FishPond");
+    settings["m_targetFishCount"] = m_targetFishCount;
+    settings["m_speedMultiplier"] = m_speedMultiplier;
+    settings["m_fishSize"] = m_fishSize;
+    settings["m_schoolRadius"] = m_schoolRadius;
+    settings["m_schoolStrength"] = m_schoolStrength;
+    settings["m_separationStrength"] = m_separationStrength;
+    settings["m_minimumDepth"] = m_minimumDepth;
+    settings["m_maximumFishDepth"] = m_maximumFishDepth;
     m_projector.save(save);
 }
 
 void Processor_FishPond::load(const Save & save)
 {
+    const Save::Json & settings = save.section("Processor_FishPond");
+    Save::read(settings, "m_targetFishCount", m_targetFishCount);
+    Save::read(settings, "m_speedMultiplier", m_speedMultiplier);
+    Save::read(settings, "m_fishSize", m_fishSize);
+    Save::read(settings, "m_schoolRadius", m_schoolRadius);
+    Save::read(settings, "m_schoolStrength", m_schoolStrength);
+    Save::read(settings, "m_separationStrength", m_separationStrength);
+    Save::read(settings, "m_minimumDepth", m_minimumDepth);
+    Save::read(settings, "m_maximumFishDepth", m_maximumFishDepth);
+    m_resetPending = true;
     m_projector.load(save);
 }
 

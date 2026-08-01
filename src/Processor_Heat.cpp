@@ -159,16 +159,54 @@ void Processor_Heat::processEvent(const sf::Event& event, const sf::Vector2f& mo
 
 void Processor_Heat::save(Save& save) const
 {
-    save.drawContours = m_drawContours;
-    save.numberOfContourLines = m_numberOfContourLines;
-    save.drawProjection = m_drawProjection;
+    Save::Json & settings = save.section("Processor_Heat");
+    settings["m_drawContours"] = m_drawContours;
+    settings["m_numberOfContourLines"] = m_numberOfContourLines;
+    settings["m_drawProjection"] = m_drawProjection;
+    settings["m_iterations"] = m_iterations;
+    settings["m_selectedSource"] = m_selectedSource;
+    settings["m_algorithm"] = (int)m_heatGrid.m_algorithm;
+    settings["m_sources"] = Save::Json::array();
+    for (const HeatSource & source : m_heatGrid.getSources())
+    {
+        settings["m_sources"].push_back({
+            { "m_temp", source.m_temp },
+            { "m_area", {
+                { "x", source.m_area.x },
+                { "y", source.m_area.y },
+                { "width", source.m_area.width },
+                { "height", source.m_area.height }
+            } }
+        });
+    }
     m_projector.save(save);
 }
 void Processor_Heat::load(const Save& save)
 {
-    m_drawContours = save.drawContours;
-    m_numberOfContourLines = save.numberOfContourLines;
-    m_drawProjection = save.drawProjection;
+    const Save::Json & settings = save.section("Processor_Heat");
+    Save::read(settings, "m_drawContours", m_drawContours);
+    Save::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
+    Save::read(settings, "m_drawProjection", m_drawProjection);
+    Save::read(settings, "m_iterations", m_iterations);
+    Save::read(settings, "m_selectedSource", m_selectedSource);
+    int algorithm = (int)m_heatGrid.m_algorithm;
+    Save::read(settings, "m_algorithm", algorithm);
+    m_heatGrid.m_algorithm = (Algorithms)algorithm;
+    const auto sources = settings.find("m_sources");
+    if (sources != settings.end() && sources->is_array())
+    {
+        m_heatGrid.clearSources();
+        for (const Save::Json & sourceSettings : *sources)
+        {
+            const Save::Json & areaSettings = sourceSettings.at("m_area");
+            const cv::Rect area(
+                areaSettings.at("x").get<int>(),
+                areaSettings.at("y").get<int>(),
+                areaSettings.at("width").get<int>(),
+                areaSettings.at("height").get<int>());
+            m_heatGrid.addSource(HeatSource(area, sourceSettings.at("m_temp").get<float>()));
+        }
+    }
     m_projector.load(save);
 }
 

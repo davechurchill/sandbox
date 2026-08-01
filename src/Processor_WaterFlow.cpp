@@ -412,11 +412,43 @@ bool Processor_WaterFlow::mapMouseToTerrain(const sf::Vector2f & mouse, cv::Poin
 
 void Processor_WaterFlow::save(Save & save) const
 {
+    Save::Json & settings = save.section("Processor_WaterFlow");
+    settings["m_rainfall"] = m_rainfall;
+    settings["m_flowSpeed"] = m_flowSpeed;
+    settings["m_evaporation"] = m_evaporation;
+    settings["m_waterDepthScale"] = m_waterDepthScale;
+    settings["m_trailPersistence"] = m_trailPersistence;
+    settings["m_displayScale"] = m_displayScale;
+    settings["m_waterOpacity"] = m_waterOpacity;
+    settings["m_waterColor"] = { m_waterColor[0], m_waterColor[1], m_waterColor[2] };
+    settings["m_rainRadius"] = m_rainRadius;
+    settings["m_simulationSteps"] = m_simulationSteps;
+    settings["m_rainMode"] = m_rainMode;
     m_projector.save(save);
 }
 
 void Processor_WaterFlow::load(const Save & save)
 {
+    const Save::Json & settings = save.section("Processor_WaterFlow");
+    Save::read(settings, "m_rainfall", m_rainfall);
+    Save::read(settings, "m_flowSpeed", m_flowSpeed);
+    Save::read(settings, "m_evaporation", m_evaporation);
+    Save::read(settings, "m_waterDepthScale", m_waterDepthScale);
+    Save::read(settings, "m_trailPersistence", m_trailPersistence);
+    Save::read(settings, "m_displayScale", m_displayScale);
+    Save::read(settings, "m_waterOpacity", m_waterOpacity);
+    const auto color = settings.find("m_waterColor");
+    if (color != settings.end() && color->is_array() && color->size() == 3)
+    {
+        for (size_t index = 0; index < 3; index++)
+        {
+            m_waterColor[index] = color->at(index).get<float>();
+        }
+    }
+    Save::read(settings, "m_rainRadius", m_rainRadius);
+    Save::read(settings, "m_simulationSteps", m_simulationSteps);
+    Save::read(settings, "m_rainMode", m_rainMode);
+    resetWater();
     m_projector.load(save);
 }
 
@@ -477,10 +509,42 @@ void Processor_WaterFlow::processOverlayEvent(
     processEvent(event, mouse);
 }
 
-void Processor_WaterFlow::saveOverlay(Save &) const
+void Processor_WaterFlow::saveOverlay(Save & save) const
 {
+    Save::Json & settings = save.section("Processor_WaterFlow");
+    settings["m_rainfall"] = m_rainfall;
+    settings["m_flowSpeed"] = m_flowSpeed;
+    settings["m_evaporation"] = m_evaporation;
+    settings["m_waterDepthScale"] = m_waterDepthScale;
+    settings["m_trailPersistence"] = m_trailPersistence;
+    settings["m_displayScale"] = m_displayScale;
+    settings["m_waterOpacity"] = m_waterOpacity;
+    settings["m_waterColor"] = { m_waterColor[0], m_waterColor[1], m_waterColor[2] };
+    settings["m_rainRadius"] = m_rainRadius;
+    settings["m_simulationSteps"] = m_simulationSteps;
+    settings["m_rainMode"] = m_rainMode;
 }
 
-void Processor_WaterFlow::loadOverlay(const Save &)
+void Processor_WaterFlow::loadOverlay(const Save & save)
 {
+    const Save::Json & settings = save.section("Processor_WaterFlow");
+    Save::read(settings, "m_rainfall", m_rainfall);
+    Save::read(settings, "m_flowSpeed", m_flowSpeed);
+    Save::read(settings, "m_evaporation", m_evaporation);
+    Save::read(settings, "m_waterDepthScale", m_waterDepthScale);
+    Save::read(settings, "m_trailPersistence", m_trailPersistence);
+    Save::read(settings, "m_displayScale", m_displayScale);
+    Save::read(settings, "m_waterOpacity", m_waterOpacity);
+    const auto color = settings.find("m_waterColor");
+    if (color != settings.end() && color->is_array() && color->size() == 3)
+    {
+        for (size_t index = 0; index < 3; index++)
+        {
+            m_waterColor[index] = color->at(index).get<float>();
+        }
+    }
+    Save::read(settings, "m_rainRadius", m_rainRadius);
+    Save::read(settings, "m_simulationSteps", m_simulationSteps);
+    Save::read(settings, "m_rainMode", m_rainMode);
+    resetWater();
 }

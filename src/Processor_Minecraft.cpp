@@ -75,13 +75,16 @@ void Processor_Minecraft::processEvent(const sf::Event & event, const sf::Vector
 
 void Processor_Minecraft::save(Save & save) const
 {
-    save.minecraftBlockSize = m_blockSize;
+    Save::Json & settings = save.section("Processor_Minecraft");
+    settings["m_blockSize"] = m_blockSize;
     m_projector.save(save);
 }
 
 void Processor_Minecraft::load(const Save & save)
 {
-    m_blockSize = std::clamp(save.minecraftBlockSize, 2, 48);
+    const Save::Json & settings = save.section("Processor_Minecraft");
+    Save::read(settings, "m_blockSize", m_blockSize);
+    m_blockSize = std::clamp(m_blockSize, 2, 48);
     m_projector.load(save);
 }
 

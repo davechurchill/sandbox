@@ -890,11 +890,27 @@ void Processor_Balls::processEvent(const sf::Event & event, const sf::Vector2f &
 
 void Processor_Balls::save(Save & save) const
 {
+    Save::Json & settings = save.section("Processor_Balls");
+    settings["m_gravity"] = m_gravity;
+    settings["m_ballSpeedMultiplier"] = m_ballSpeedMultiplier;
+    settings["m_rollingResistance"] = m_rollingResistance;
+    settings["m_ballSize"] = m_ballSize;
+    settings["m_ballRestitution"] = m_ballRestitution;
+    settings["m_trailLength"] = m_trailLength;
+    settings["m_lavaAppearance"] = m_lavaAppearance;
     m_projector.save(save);
 }
 
 void Processor_Balls::load(const Save & save)
 {
+    const Save::Json & settings = save.section("Processor_Balls");
+    Save::read(settings, "m_gravity", m_gravity);
+    Save::read(settings, "m_ballSpeedMultiplier", m_ballSpeedMultiplier);
+    Save::read(settings, "m_rollingResistance", m_rollingResistance);
+    Save::read(settings, "m_ballSize", m_ballSize);
+    Save::read(settings, "m_ballRestitution", m_ballRestitution);
+    Save::read(settings, "m_trailLength", m_trailLength);
+    Save::read(settings, "m_lavaAppearance", m_lavaAppearance);
     m_projector.load(save);
 }
 
@@ -1033,10 +1049,26 @@ void Processor_Balls::processOverlayEvent(
     processEvent(event, mouse);
 }
 
-void Processor_Balls::saveOverlay(Save &) const
+void Processor_Balls::saveOverlay(Save & save) const
 {
+    Save::Json & settings = save.section("Processor_Balls");
+    settings["m_gravity"] = m_gravity;
+    settings["m_ballSpeedMultiplier"] = m_ballSpeedMultiplier;
+    settings["m_rollingResistance"] = m_rollingResistance;
+    settings["m_ballSize"] = m_ballSize;
+    settings["m_ballRestitution"] = m_ballRestitution;
+    settings["m_trailLength"] = m_trailLength;
+    settings["m_lavaAppearance"] = m_lavaAppearance;
 }
 
-void Processor_Balls::loadOverlay(const Save &)
+void Processor_Balls::loadOverlay(const Save & save)
 {
+    const Save::Json & settings = save.section("Processor_Balls");
+    Save::read(settings, "m_gravity", m_gravity);
+    Save::read(settings, "m_ballSpeedMultiplier", m_ballSpeedMultiplier);
+    Save::read(settings, "m_rollingResistance", m_rollingResistance);
+    Save::read(settings, "m_ballSize", m_ballSize);
+    Save::read(settings, "m_ballRestitution", m_ballRestitution);
+    Save::read(settings, "m_trailLength", m_trailLength);
+    Save::read(settings, "m_lavaAppearance", m_lavaAppearance);
 }

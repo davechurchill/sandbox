@@ -420,10 +420,25 @@ void Overlay_Weather::processOverlayEvent(
 {
 }
 
-void Overlay_Weather::saveOverlay(Save &) const
+void Overlay_Weather::saveOverlay(Save & save) const
 {
+    Save::Json & settings = save.section("Overlay_Weather");
+    settings["m_mode"] = m_mode;
+    settings["m_intensity"] = m_intensity;
+    settings["m_windX"] = m_windX;
+    settings["m_windY"] = m_windY;
+    settings["m_elementSize"] = m_elementSize;
+    settings["m_fallSpeed"] = m_fallSpeed;
 }
 
-void Overlay_Weather::loadOverlay(const Save &)
+void Overlay_Weather::loadOverlay(const Save & save)
 {
+    const Save::Json & settings = save.section("Overlay_Weather");
+    Save::read(settings, "m_mode", m_mode);
+    Save::read(settings, "m_intensity", m_intensity);
+    Save::read(settings, "m_windX", m_windX);
+    Save::read(settings, "m_windY", m_windY);
+    Save::read(settings, "m_elementSize", m_elementSize);
+    Save::read(settings, "m_fallSpeed", m_fallSpeed);
+    resetParticles();
 }

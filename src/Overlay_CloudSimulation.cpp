@@ -420,10 +420,21 @@ void Overlay_CloudSimulation::processOverlayEvent(
 {
 }
 
-void Overlay_CloudSimulation::saveOverlay(Save &) const
+void Overlay_CloudSimulation::saveOverlay(Save & save) const
 {
+    Save::Json & settings = save.section("Overlay_CloudSimulation");
+    settings["m_cloudHeight"] = m_cloudHeight;
+    settings["m_speedMultiplier"] = m_speedMultiplier;
+    settings["m_cloudSize"] = m_cloudSize;
+    settings["m_cloudCount"] = m_cloudCount;
 }
 
-void Overlay_CloudSimulation::loadOverlay(const Save &)
+void Overlay_CloudSimulation::loadOverlay(const Save & save)
 {
+    const Save::Json & settings = save.section("Overlay_CloudSimulation");
+    Save::read(settings, "m_cloudHeight", m_cloudHeight);
+    Save::read(settings, "m_speedMultiplier", m_speedMultiplier);
+    Save::read(settings, "m_cloudSize", m_cloudSize);
+    Save::read(settings, "m_cloudCount", m_cloudCount);
+    resetClouds();
 }
