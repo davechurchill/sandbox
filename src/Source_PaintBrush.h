@@ -30,6 +30,7 @@ class Source_PaintBrush : public TopographySource
 
 public:
     void init();
+    bool usesProjectedInput() const override { return true; }
     void imgui();
     void render(sf::RenderWindow & window);
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);

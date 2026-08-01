@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SandboxSession.hpp"
+#include "ProjectedSurface.h"
 #include "Scene.h"
 #include "ViewController.hpp"
 
@@ -22,6 +23,7 @@ class Scene_Main : public Scene
     };
 
     SandboxSession      m_session;
+    ProjectedSurface    m_projectedDepthSurface;
 
     bool                m_drawUI = true;
     bool                m_doubleSizeUI = true;

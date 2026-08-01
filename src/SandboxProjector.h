@@ -20,6 +20,7 @@ class SandBoxProjector
     sf::Vector2f                    m_boxScale;
     bool                            m_drawLines = true;
     bool                            m_drawProjection = true;
+    bool                            m_drawProjectedDepthMap = false;
     bool                            m_drawGrid = false;
     int                             m_gridDivisions = 8;
     int                             m_rotationQuarterTurns = 0;
@@ -42,7 +43,11 @@ public:
     void load(const Save & save);
     void project(const cv::Mat & input, cv::Mat & output);
     bool processEvent(const sf::Event & event, const sf::Vector2f & mouse);
+    bool unprojectPoint(const sf::Vector2f & point, sf::Vector2f & dataPoint);
     void render(sf::RenderWindow & window);
+
+    bool projectionVisible() const { return m_drawProjection; }
+    bool projectedDepthMapVisible() const { return m_drawProjectedDepthMap; }
 
     inline float getTransformedScale() const { return 1.f / m_boxScale.x; }
 

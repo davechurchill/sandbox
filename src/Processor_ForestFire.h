@@ -1,6 +1,5 @@
 #pragma once
 
-#include "SandboxProjector.h"
 #include "TopographyProcessor.hpp"
 
 #include <opencv2/opencv.hpp>
@@ -22,8 +21,6 @@ class Processor_ForestFire final : public TopographyProcessor
         float riseDistance = 8.0f;
         float phase = 0.0f;
     };
-
-    SandBoxProjector m_projector;
 
     cv::Mat m_topography;
     cv::Mat m_burnableMask;
@@ -94,7 +91,6 @@ public:
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Save & save) const override;
     void load(const Save & save) override;
-    SandBoxProjector & projector() override { return m_projector; }
     void onSourceChanged() override;
     bool usesCanvasInput() const override { return true; }
     void processTopography(const IntermediateData & data) override;

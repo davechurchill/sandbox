@@ -1,12 +1,10 @@
 #include "Processor_TerrainLighting.h"
 #include "Profiler.hpp"
-#include "Tools.h"
 
 #include "imgui.h"
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
 namespace
 {
@@ -54,10 +52,6 @@ void Processor_TerrainLighting::render(sf::RenderWindow & window)
 
     if (m_hasFrame)
     {
-        m_sprite.setPosition(m_projector.getTransformedPosition());
-        const float scale = m_projector.getTransformedScale();
-        m_sprite.setScale({ scale, scale });
-
         if (m_shaderLoaded)
         {
             m_shader.setUniform("lightAzimuth", m_lightAzimuth);
@@ -66,12 +60,15 @@ void Processor_TerrainLighting::render(sf::RenderWindow & window)
             m_shader.setUniform("shadowStrength", m_shadowStrength);
             m_shader.setUniform("heightStrength", m_heightStrength);
             m_shader.setUniform("palette", m_palette);
-            m_shader.setUniform("texelSize", sf::Glsl::Vec2(1.0f / m_texture.getSize().x, 1.0f / m_texture.getSize().y));
-            window.draw(m_sprite, &m_shader);
+            const sf::Vector2u textureSize = m_surface.texture().getSize();
+            m_shader.setUniform("texelSize", sf::Glsl::Vec2(
+                1.0f / textureSize.x,
+                1.0f / textureSize.y));
+            m_surface.draw(window, projector(), &m_shader);
         }
         else
         {
-            window.draw(m_sprite);
+            m_surface.draw(window, projector());
         }
     }
 
@@ -79,7 +76,7 @@ void Processor_TerrainLighting::render(sf::RenderWindow & window)
 
 void Processor_TerrainLighting::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
-    const bool draggingProjection = m_projector.processEvent(event, mouse);
+    const bool draggingProjection = projector().processEvent(event, mouse);
 
     if (const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>();
         mouseReleased && mouseReleased->button == sf::Mouse::Button::Left)
@@ -114,14 +111,14 @@ bool Processor_TerrainLighting::updateLightFromMouse(const sf::Vector2f & mouse)
         return false;
     }
 
-    const float scale = m_projector.getTransformedScale();
-    const sf::Vector2u textureSize = m_texture.getSize();
+    const float scale = projector().getTransformedScale();
+    const sf::Vector2u textureSize = m_surface.texture().getSize();
     if (!std::isfinite(scale) || scale <= 0.0f || textureSize.x == 0 || textureSize.y == 0)
     {
         return false;
     }
 
-    const sf::Vector2f local = (mouse - m_projector.getTransformedPosition()) / scale;
+    const sf::Vector2f local = (mouse - projector().getTransformedPosition()) / scale;
     if (local.x < 0.0f || local.x >= textureSize.x || local.y < 0.0f || local.y >= textureSize.y)
     {
         return false;
@@ -155,7 +152,6 @@ void Processor_TerrainLighting::save(Save & save) const
     settings["m_ambientLight"] = m_ambientLight;
     settings["m_shadowStrength"] = m_shadowStrength;
     settings["m_heightStrength"] = m_heightStrength;
-    m_projector.save(save);
 }
 
 void Processor_TerrainLighting::load(const Save & save)
@@ -167,27 +163,15 @@ void Processor_TerrainLighting::load(const Save & save)
     Save::read(settings, "m_ambientLight", m_ambientLight);
     Save::read(settings, "m_shadowStrength", m_shadowStrength);
     Save::read(settings, "m_heightStrength", m_heightStrength);
-    m_projector.load(save);
 }
 
 void Processor_TerrainLighting::processTopography(const IntermediateData & data)
 {
     PROFILE_FUNCTION();
 
-    m_projector.project(data.topography, m_projectedTopography);
-    if (m_projectedTopography.empty())
-    {
-        m_hasFrame = false;
-        return;
-    }
-
-    m_image = Tools::matToSfImage(m_projectedTopography);
-    if (!m_texture.loadFromImage(m_image))
-    {
-        std::cerr << "Failed to load the terrain-lighting texture.\n";
-        return;
-    }
-    m_texture.setSmooth(true);
-    m_sprite.setTexture(m_texture, true);
-    m_hasFrame = true;
+    m_hasFrame = m_surface.update(
+        data.topography,
+        projector(),
+        true,
+        "Failed to load the terrain-lighting texture.\n");
 }

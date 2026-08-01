@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SandboxProjector.h"
+#include "ProjectedSurface.h"
 #include "TopographyProcessor.hpp"
 
 #include <opencv2/opencv.hpp>
@@ -8,15 +8,10 @@
 
 class Processor_Nature : public TopographyProcessor
 {
-    SandBoxProjector m_projector;
-
     cv::Mat m_topography;
-    cv::Mat m_projectedTopography;
     cv::Size m_topographySize;
 
-    sf::Image m_image;
-    sf::Texture m_texture;
-    sf::Sprite m_sprite{ m_texture };
+    ProjectedSurface m_surface;
     sf::Shader m_shader;
 
     float m_waterLevel = 0.28f;
@@ -33,7 +28,6 @@ public:
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Save & save) const override;
     void load(const Save & save) override;
-    SandBoxProjector & projector() override { return m_projector; }
     bool isTerrainWalkable(
         const cv::Mat & terrain,
         const cv::Point2f & position) const override;

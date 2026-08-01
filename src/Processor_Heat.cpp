@@ -106,8 +106,8 @@ void Processor_Heat::render(sf::RenderWindow& window)
         PROFILE_SCOPE("Draw Transformed Image");
 
         {
-            m_sfTransformedDepthSpriteColor.setPosition(m_projector.getTransformedPosition());
-            float scale = m_projector.getTransformedScale();
+            m_sfTransformedDepthSpriteColor.setPosition(projector().getTransformedPosition());
+            float scale = projector().getTransformedScale();
             m_sfTransformedDepthSpriteColor.setScale({ scale, scale });
 
             static sf::Clock time;
@@ -120,8 +120,8 @@ void Processor_Heat::render(sf::RenderWindow& window)
         }
         
         {
-            m_sfTransformedDepthSpriteHeat.setPosition(m_projector.getTransformedPosition());
-            float scale = m_projector.getTransformedScale();
+            m_sfTransformedDepthSpriteHeat.setPosition(projector().getTransformedPosition());
+            float scale = projector().getTransformedScale();
             m_sfTransformedDepthSpriteHeat.setScale({ scale, scale });
 
             //Change color scheme
@@ -138,7 +138,7 @@ void Processor_Heat::processEvent(const sf::Event& event, const sf::Vector2f& mo
 {
     PROFILE_FUNCTION();
     
-    m_projector.processEvent(event, mouse);
+    projector().processEvent(event, mouse);
 
     if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) &&
         m_selectedSource >= 0 && m_selectedSource < (int)m_heatGrid.getSources().size())
@@ -178,7 +178,6 @@ void Processor_Heat::save(Save& save) const
             } }
         });
     }
-    m_projector.save(save);
 }
 void Processor_Heat::load(const Save& save)
 {
@@ -206,7 +205,6 @@ void Processor_Heat::load(const Save& save)
             m_heatGrid.addSource(HeatSource(area, sourceSettings.at("m_temp").get<float>()));
         }
     }
-    m_projector.load(save);
 }
 
 void Processor_Heat::processTopography(const IntermediateData& data)
@@ -218,7 +216,7 @@ void Processor_Heat::processTopography(const IntermediateData& data)
 
         {
             PROFILE_SCOPE("Calibration TransformProjection");
-            m_projector.project(data.topography, m_cvTransformedDepthImage32fColor);
+            projector().project(data.topography, m_cvTransformedDepthImage32fColor);
         }
 
         // Draw warped depth image
@@ -259,7 +257,7 @@ void Processor_Heat::processTopography(const IntermediateData& data)
 
         {
             PROFILE_SCOPE("Calibration TransformProjection");
-            m_projector.project(m_heatGrid.normalizedData(), m_cvTransformedDepthImage32fHeat);
+            projector().project(m_heatGrid.normalizedData(), m_cvTransformedDepthImage32fHeat);
         }
 
         // Draw warped depth image

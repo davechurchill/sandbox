@@ -295,8 +295,8 @@ void Processor_ForestFire::renderFireParticles(sf::RenderWindow & window)
         return;
     }
 
-    const cv::Mat projection = m_projector.getProjectionMatrix();
-    const float scale = m_projector.getTransformedScale();
+    const cv::Mat projection = projector().getProjectionMatrix();
+    const float scale = projector().getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
     {
         return;
@@ -310,7 +310,7 @@ void Processor_ForestFire::renderFireParticles(sf::RenderWindow & window)
     }
     cv::perspectiveTransform(positions, positions, projection);
 
-    const sf::Vector2f origin = m_projector.getTransformedPosition();
+    const sf::Vector2f origin = projector().getTransformedPosition();
     sf::VertexArray particles(sf::PrimitiveType::Triangles);
     for (size_t i = 0; i < m_fireParticles.size(); i++)
     {
@@ -542,7 +542,7 @@ void Processor_ForestFire::updateTexture(const cv::Mat & terrain)
         }
     }
 
-    m_projector.project(state, m_projectedState);
+    projector().project(state, m_projectedState);
     if (m_projectedState.empty())
     {
         m_hasFrame = false;
@@ -571,15 +571,15 @@ bool Processor_ForestFire::mapMouseToTerrain(
         return false;
     }
 
-    const float scale = m_projector.getTransformedScale();
+    const float scale = projector().getTransformedScale();
     if (!std::isfinite(scale) || scale <= 0.0f)
     {
         return false;
     }
 
-    const sf::Vector2f offset = mouse - m_projector.getTransformedPosition();
+    const sf::Vector2f offset = mouse - projector().getTransformedPosition();
     std::vector<cv::Point2f> point = { { offset.x / scale, offset.y / scale } };
-    const cv::Mat projection = m_projector.getProjectionMatrix();
+    const cv::Mat projection = projector().getProjectionMatrix();
     if (projection.empty())
     {
         return false;
@@ -654,8 +654,8 @@ void Processor_ForestFire::render(sf::RenderWindow & window)
         return;
     }
 
-    m_sprite.setPosition(m_projector.getTransformedPosition());
-    const float scale = m_projector.getTransformedScale();
+    m_sprite.setPosition(projector().getTransformedPosition());
+    const float scale = projector().getTransformedScale();
     m_sprite.setScale({ scale, scale });
     if (m_shaderLoaded)
     {
@@ -679,7 +679,7 @@ void Processor_ForestFire::processEvent(
     const sf::Event & event,
     const sf::Vector2f & mouse)
 {
-    const bool draggingProjection = m_projector.processEvent(event, mouse);
+    const bool draggingProjection = projector().processEvent(event, mouse);
     if (const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>();
         mouseReleased
         && (mouseReleased->button == sf::Mouse::Button::Left
@@ -767,7 +767,6 @@ void Processor_ForestFire::save(Save & save) const
     settings["m_windY"] = m_windY;
     settings["m_ignitionRadius"] = m_ignitionRadius;
     settings["m_paused"] = m_paused;
-    m_projector.save(save);
 }
 
 void Processor_ForestFire::load(const Save & save)
@@ -785,7 +784,6 @@ void Processor_ForestFire::load(const Save & save)
     Save::read(settings, "m_ignitionRadius", m_ignitionRadius);
     Save::read(settings, "m_paused", m_paused);
     m_resetRequested = true;
-    m_projector.load(save);
 }
 
 void Processor_ForestFire::onSourceChanged()

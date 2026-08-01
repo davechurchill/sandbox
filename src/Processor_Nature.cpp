@@ -1,12 +1,10 @@
 #include "Processor_Nature.h"
 #include "Profiler.hpp"
-#include "Tools.h"
 
 #include "imgui.h"
 
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
 namespace
 {
@@ -72,23 +70,19 @@ void Processor_Nature::render(sf::RenderWindow & window)
 
     if (m_hasFrame)
     {
-        m_sprite.setPosition(m_projector.getTransformedPosition());
-        const float scale = m_projector.getTransformedScale();
-        m_sprite.setScale({ scale, scale });
-
         if (m_shaderLoaded)
         {
-            const sf::Vector2u textureSize = m_texture.getSize();
+            const sf::Vector2u textureSize = m_surface.texture().getSize();
             m_shader.setUniform(
                 "texelSize",
                 sf::Glsl::Vec2(1.0f / textureSize.x, 1.0f / textureSize.y));
             m_shader.setUniform("terrainType", m_terrainType);
             m_shader.setUniform("waterLevel", m_waterLevel);
-            window.draw(m_sprite, &m_shader);
+            m_surface.draw(window, projector(), &m_shader);
         }
         else
         {
-            window.draw(m_sprite);
+            m_surface.draw(window, projector());
         }
     }
 }
@@ -97,7 +91,7 @@ void Processor_Nature::processEvent(
     const sf::Event & event,
     const sf::Vector2f & mouse)
 {
-    m_projector.processEvent(event, mouse);
+    projector().processEvent(event, mouse);
 }
 
 void Processor_Nature::save(Save & save) const
@@ -105,7 +99,6 @@ void Processor_Nature::save(Save & save) const
     Save::Json & settings = save.section("Processor_Nature");
     settings["m_terrainType"] = m_terrainType;
     settings["m_waterLevel"] = m_waterLevel;
-    m_projector.save(save);
 }
 
 void Processor_Nature::load(const Save & save)
@@ -113,7 +106,6 @@ void Processor_Nature::load(const Save & save)
     const Save::Json & settings = save.section("Processor_Nature");
     Save::read(settings, "m_terrainType", m_terrainType);
     Save::read(settings, "m_waterLevel", m_waterLevel);
-    m_projector.load(save);
 }
 
 void Processor_Nature::processTopography(const IntermediateData & data)
@@ -129,20 +121,9 @@ void Processor_Nature::processTopography(const IntermediateData & data)
     m_topography = data.topography;
     m_topographySize = data.topography.size();
 
-    m_projector.project(m_topography, m_projectedTopography);
-    if (m_projectedTopography.empty())
-    {
-        m_hasFrame = false;
-        return;
-    }
-
-    m_image = Tools::matToSfImage(m_projectedTopography);
-    if (!m_texture.loadFromImage(m_image))
-    {
-        std::cerr << "Failed to load the nature terrain texture.\n";
-        return;
-    }
-    m_texture.setSmooth(true);
-    m_sprite.setTexture(m_texture, true);
-    m_hasFrame = true;
+    m_hasFrame = m_surface.update(
+        m_topography,
+        projector(),
+        true,
+        "Failed to load the nature terrain texture.\n");
 }

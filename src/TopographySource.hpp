@@ -10,6 +10,7 @@ class TopographySource
 {
 public:
     virtual void init() = 0;
+    virtual bool usesProjectedInput() const { return false; }
     virtual void imgui() = 0;
     virtual void render(sf::RenderWindow & window) = 0;
     virtual void processEvent(const sf::Event & event, const sf::Vector2f & mouse) = 0;

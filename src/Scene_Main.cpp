@@ -217,6 +217,31 @@ namespace
             || event.is<sf::Event::MouseEntered>()
             || event.is<sf::Event::MouseLeft>();
     }
+
+    bool eventMousePosition(const sf::Event & event, sf::Vector2i & position)
+    {
+        if (const auto* moved = event.getIf<sf::Event::MouseMoved>())
+        {
+            position = moved->position;
+            return true;
+        }
+        if (const auto* pressed = event.getIf<sf::Event::MouseButtonPressed>())
+        {
+            position = pressed->position;
+            return true;
+        }
+        if (const auto* released = event.getIf<sf::Event::MouseButtonReleased>())
+        {
+            position = released->position;
+            return true;
+        }
+        if (const auto* wheel = event.getIf<sf::Event::MouseWheelScrolled>())
+        {
+            position = wheel->position;
+            return true;
+        }
+        return false;
+    }
 }
 
 
@@ -318,10 +343,10 @@ void Scene_Main::sUserInput()
         }
         sProcessEvent(event);
 
-        // happens whenever the mouse is being moved
-        if (const auto* mouseMoved = event.getIf<sf::Event::MouseMoved>())
+        sf::Vector2i eventPosition;
+        if (eventMousePosition(event, eventPosition))
         {
-            m_mouseScreen = mouseMoved->position;
+            m_mouseScreen = eventPosition;
             m_mouseWorld = main.mapPixelToCoords(m_mouseScreen);
         }
 
@@ -329,15 +354,24 @@ void Scene_Main::sUserInput()
         if (m_session.source()
             && (!mouseControlEvent || m_activeControlTab == ControlTab::Source))
         {
-            m_session.source()->processEvent(event, m_mouseWorld);
-        }
-        if (m_session.processor() && !displayOpen)
-        {
-            if (m_activeControlTab == ControlTab::Projection)
+            sf::Vector2f sourceMouse = m_mouseWorld;
+            const bool mapped = displayOpen
+                || !mouseControlEvent
+                || !m_session.projector().projectedDepthMapVisible()
+                || !m_session.source()->usesProjectedInput()
+                || m_session.projector().unprojectPoint(m_mouseWorld, sourceMouse);
+            if (mapped)
             {
-                m_session.processor()->projector().processEvent(event, m_mouseWorld);
+                m_session.source()->processEvent(event, sourceMouse);
             }
-            else if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
+        }
+        if (!displayOpen && m_activeControlTab == ControlTab::Projection)
+        {
+            m_session.projector().processEvent(event, m_mouseWorld);
+        }
+        else if (m_session.processor() && !displayOpen)
+        {
+            if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
             {
                 m_session.overlay()->processOverlayEvent(
                     event,
@@ -359,16 +393,35 @@ void Scene_Main::sUserInput()
             const sf::Event& displayEvent = *polledEvent;
             sProcessEvent(displayEvent);
 
-            if (m_session.processor())
+            sf::Vector2i eventPosition;
+            if (eventMousePosition(displayEvent, eventPosition))
             {
-                const bool mouseControlEvent = isMouseControlEvent(displayEvent);
-                if (m_activeControlTab == ControlTab::Projection)
+                m_mouseDisplay = {
+                    (float)eventPosition.x,
+                    (float)eventPosition.y
+                };
+            }
+
+            const bool mouseControlEvent = isMouseControlEvent(displayEvent);
+            if (m_activeControlTab == ControlTab::Source
+                && m_session.source()
+                && m_session.source()->usesProjectedInput()
+                && m_session.projector().projectedDepthMapVisible())
+            {
+                sf::Vector2f sourceMouse = m_mouseDisplay;
+                if (!mouseControlEvent
+                    || m_session.projector().unprojectPoint(m_mouseDisplay, sourceMouse))
                 {
-                    m_session.processor()->projector().processEvent(
-                        displayEvent,
-                        m_mouseDisplay);
+                    m_session.source()->processEvent(displayEvent, sourceMouse);
                 }
-                else if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
+            }
+            else if (m_activeControlTab == ControlTab::Projection)
+            {
+                m_session.projector().processEvent(displayEvent, m_mouseDisplay);
+            }
+            else if (m_session.processor())
+            {
+                if (m_activeControlTab == ControlTab::Overlay && m_session.overlay())
                 {
                     m_session.overlay()->processOverlayEvent(
                         displayEvent,
@@ -381,11 +434,6 @@ void Scene_Main::sUserInput()
                 }
             }
 
-            // happens whenever the mouse is being moved
-            if (const auto* mouseMoved = displayEvent.getIf<sf::Event::MouseMoved>())
-            {
-                m_mouseDisplay = { (float)mouseMoved->position.x, (float)mouseMoved->position.y };
-            }
         }
     }
 }
@@ -398,17 +446,34 @@ void Scene_Main::sRender()
     m_game->window().clear();
     m_game->displayWindow().clear();
 
-    if (m_session.source()) { m_session.source()->render(mainWindow()); }
-    if (!m_session.processor()) { return; }
-    sf::RenderWindow & target = m_game->displayWindow().isOpen()
+    const bool displayOpen = m_game->displayWindow().isOpen();
+    const bool showProjectedDepth = m_session.projector().projectedDepthMapVisible();
+    if (m_session.source() && (displayOpen || !showProjectedDepth))
+    {
+        m_session.source()->render(mainWindow());
+    }
+
+    sf::RenderWindow & target = displayOpen
         ? displayWindow()
         : mainWindow();
-    m_session.processor()->render(target);
-    if (m_session.overlay())
+    if (showProjectedDepth
+        && m_projectedDepthSurface.update(
+            m_session.topography(),
+            m_session.projector(),
+            false,
+            "Failed to load the projected depth-map texture.\n"))
     {
-        m_session.overlay()->renderOverlay(target, *m_session.processor());
+        m_projectedDepthSurface.draw(target, m_session.projector());
     }
-    m_session.processor()->projector().render(target);
+    if (m_session.processor() && m_session.projector().projectionVisible())
+    {
+        m_session.processor()->render(target);
+        if (m_session.overlay())
+        {
+            m_session.overlay()->renderOverlay(target, *m_session.processor());
+        }
+    }
+    m_session.projector().render(target);
 }
 
 void Scene_Main::renderUI()
@@ -607,14 +672,7 @@ void Scene_Main::renderUI()
         }
         ImGui::Separator();
 
-        if (m_session.processor())
-        {
-            m_session.processor()->projector().imgui();
-        }
-        else
-        {
-            ImGui::TextUnformatted("Select a processor to configure its projection.");
-        }
+        m_session.projector().imgui();
 
         ImGui::EndTabItem();
     }

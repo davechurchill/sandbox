@@ -24,6 +24,7 @@
     <ClCompile Include="..\src\Overlay_Balls.cpp" />
     <ClCompile Include="..\src\Overlay_Cloth.cpp" />
     <ClCompile Include="..\src\Overlay_CloudSimulation.cpp" />
+    <ClCompile Include="..\src\Overlay_ContourLines.cpp" />
     <ClCompile Include="..\src\Overlay_SmokeFire.cpp" />
     <ClCompile Include="..\src\Overlay_Vectors.cpp" />
     <ClCompile Include="..\src\Overlay_Weather.cpp" />
@@ -32,8 +33,9 @@
     <ClCompile Include="..\src\Processor_ForestFire.cpp" />
     <ClCompile Include="..\src\HeatGrid.cpp" />
     <ClCompile Include="..\src\ParticleManager.cpp" />
+    <ClCompile Include="..\src\ProjectedSurface.cpp" />
     <ClCompile Include="..\src\Processor_Heat.cpp" />
-    <ClCompile Include="..\src\Processor_Minecraft.cpp" />
+    <ClCompile Include="..\src\Processor_Blockworld.cpp" />
     <ClCompile Include="..\src\Processor_Nature.cpp" />
     <ClCompile Include="..\src\Processor_TerrainLighting.cpp" />
     <ClCompile Include="..\src\GoodAssert.cpp" />
@@ -63,6 +65,7 @@
     <ClInclude Include="..\src\Overlay_Balls.h" />
     <ClInclude Include="..\src\Overlay_Cloth.h" />
     <ClInclude Include="..\src\Overlay_CloudSimulation.h" />
+    <ClInclude Include="..\src\Overlay_ContourLines.h" />
     <ClInclude Include="..\src\Overlay_SmokeFire.h" />
     <ClInclude Include="..\src\Overlay_Vectors.h" />
     <ClInclude Include="..\src\Overlay_Weather.h" />
@@ -75,7 +78,7 @@
     <ClInclude Include="..\src\MarkerDetector.hpp" />
     <ClInclude Include="..\src\ParticleManager.h" />
     <ClInclude Include="..\src\Processor_Heat.h" />
-    <ClInclude Include="..\src\Processor_Minecraft.h" />
+    <ClInclude Include="..\src\Processor_Blockworld.h" />
     <ClInclude Include="..\src\Processor_Nature.h" />
     <ClInclude Include="..\src\Processor_TerrainLighting.h" />
     <ClInclude Include="..\src\GoodAssert.h" />
@@ -90,6 +93,7 @@
     <ClInclude Include="..\src\GameEngine.h" />
     <ClInclude Include="..\src\Perlin.hpp" />
     <ClInclude Include="..\src\Profiler.hpp" />
+    <ClInclude Include="..\src\ProjectedSurface.h" />
     <ClInclude Include="..\src\RealSenseTools.hpp" />
     <ClInclude Include="..\src\SandboxProjector.h" />
     <ClInclude Include="..\src\SandboxSession.hpp" />
@@ -111,10 +115,11 @@
     <None Include="..\bin\shaders\shader_ball_sphere.frag" />
     <None Include="..\bin\shaders\shader_balls.frag" />
     <None Include="..\bin\shaders\shader_contour_color.frag" />
+    <None Include="..\bin\shaders\shader_contour_overlay.frag" />
     <None Include="..\bin\shaders\shader_fish_pond.frag" />
     <None Include="..\bin\shaders\shader_forest_fire.frag" />
     <None Include="..\bin\shaders\shader_heat.frag" />
-    <None Include="..\bin\shaders\shader_minecraft.frag" />
+    <None Include="..\bin\shaders\shader_blockworld.frag" />
     <None Include="..\bin\shaders\shader_nature.frag" />
     <None Include="..\bin\shaders\shader_terrain_lighting.frag" />
     <None Include="..\bin\shaders\shader_vector_fields.frag" />

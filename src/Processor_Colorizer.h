@@ -1,17 +1,12 @@
 #pragma once
 
 #include "Profiler.hpp"
-#include "SandboxProjector.h"
-#include "Tools.h"
+#include "ProjectedSurface.h"
 #include "TopographyProcessor.hpp"
 
 class Processor_Colorizer : public TopographyProcessor 
 {
-    SandBoxProjector    m_projector;
-    cv::Mat             m_cvTransformedDepthImage32f;
-    sf::Image           m_sfTransformedDepthImage;
-    sf::Texture         m_sfTransformedDepthTexture;
-    sf::Sprite          m_sfTransformedDepthSprite{ m_sfTransformedDepthTexture };
+    ProjectedSurface    m_surface;
     sf::Shader          m_shader;
     int                 m_selectedShaderIndex = 0;
     bool                m_drawContours = true;
@@ -24,7 +19,5 @@ public:
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void save(Save & save) const;
     void load(const Save & save);
-    SandBoxProjector & projector() { return m_projector; }
-
     void processTopography(const IntermediateData& data);
 };

@@ -16,6 +16,9 @@
     <ClCompile Include="..\src\Overlay_CloudSimulation.cpp">
       <Filter>processors</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Overlay_ContourLines.cpp">
+      <Filter>processors</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\Overlay_SmokeFire.cpp">
       <Filter>processors</Filter>
     </ClCompile>
@@ -70,7 +73,7 @@
     <ClCompile Include="..\src\Processor_TerrainLighting.cpp">
       <Filter>processors</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Processor_Minecraft.cpp">
+    <ClCompile Include="..\src\Processor_Blockworld.cpp">
       <Filter>processors</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Processor_Nature.cpp">
@@ -96,6 +99,9 @@
     </ClCompile>
     <ClCompile Include="..\src\ParticleManager.cpp">
       <Filter>processors\vectors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ProjectedSurface.cpp">
+      <Filter>processors</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Overlay_Vectors.cpp">
       <Filter>processors\vectors</Filter>
@@ -136,6 +142,9 @@
       <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Overlay_CloudSimulation.h">
+      <Filter>processors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Overlay_ContourLines.h">
       <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Overlay_SmokeFire.h">
@@ -189,7 +198,7 @@
     <ClInclude Include="..\src\Processor_TerrainLighting.h">
       <Filter>processors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Processor_Minecraft.h">
+    <ClInclude Include="..\src\Processor_Blockworld.h">
       <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Processor_Nature.h">
@@ -203,6 +212,9 @@
     </ClInclude>
     <ClInclude Include="..\src\Profiler.hpp">
       <Filter>engine</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ProjectedSurface.h">
+      <Filter>processors</Filter>
     </ClInclude>
     <ClInclude Include="..\src\ViewController.hpp">
       <Filter>engine</Filter>
@@ -273,6 +285,9 @@
     <None Include="..\bin\shaders\shader_contour_color.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\bin\shaders\shader_contour_overlay.frag">
+      <Filter>shaders</Filter>
+    </None>
     <None Include="..\bin\shaders\shader_fish_pond.frag">
       <Filter>shaders</Filter>
     </None>
@@ -288,7 +303,7 @@
     <None Include="..\bin\shaders\shader_nature.frag">
       <Filter>shaders</Filter>
     </None>
-    <None Include="..\bin\shaders\shader_minecraft.frag">
+    <None Include="..\bin\shaders\shader_blockworld.frag">
       <Filter>shaders</Filter>
     </None>
     <None Include="..\bin\shaders\shader_vector_fields.frag">

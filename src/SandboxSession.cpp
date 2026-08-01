@@ -5,6 +5,7 @@
 #include "Overlay_Balls.h"
 #include "Overlay_Cloth.h"
 #include "Overlay_CloudSimulation.h"
+#include "Overlay_ContourLines.h"
 #include "Overlay_SmokeFire.h"
 #include "Overlay_Vectors.h"
 #include "Overlay_Weather.h"
@@ -13,7 +14,7 @@
 #include "Processor_FishPond.h"
 #include "Processor_ForestFire.h"
 #include "Processor_Heat.h"
-#include "Processor_Minecraft.h"
+#include "Processor_Blockworld.h"
 #include "Processor_Nature.h"
 #include "Processor_TerrainLighting.h"
 #include "Source_Camera.h"
@@ -61,16 +62,17 @@ void SandboxSession::registerComponents()
     registerProcessor<Processor_FishPond>("Fish Pond");
     registerProcessor<Processor_ForestFire>("Forest Fire");
     registerProcessor<Processor_Heat>("Heat");
-    registerProcessor<Processor_Minecraft>("Minecraft");
+    registerProcessor<Processor_Blockworld>("Blockworld");
     registerProcessor<Processor_Nature>("Nature");
     registerProcessor<Processor_TerrainLighting>("TerrainLighting");
-    m_processorMap.emplace("None", []() { return nullptr; });
+    m_processorMap.emplace("None", [](SandBoxProjector &) { return nullptr; });
 
     registerOverlay<Overlay_Animals>("Animals");
     registerOverlay<Overlay_BFS>("BFS");
     registerOverlay<Overlay_Balls>("Balls");
     registerOverlay<Overlay_Cloth>("Cloth Sheet");
     registerOverlay<Overlay_CloudSimulation>("Cloud Simulation");
+    registerOverlay<Overlay_ContourLines>("Contour Lines");
     registerOverlay<Overlay_SmokeFire>("Smoke and Fire");
     registerOverlay<Overlay_Vectors>("Vectors");
     registerOverlay<Overlay_Weather>("Weather");
@@ -140,11 +142,11 @@ void SandboxSession::setProcessor(const std::string & processor, bool saveCurren
     m_processorID = processor;
     if (m_processorMap.contains(processor))
     {
-        m_processor = m_processorMap.at(processor)();
+        m_processor = m_processorMap.at(processor)(m_projector);
     }
     else
     {
-        m_processor = m_processorMap.at("Colorizer")();
+        m_processor = m_processorMap.at("Colorizer")(m_projector);
     }
     if (m_processor)
     {
@@ -178,6 +180,7 @@ void SandboxSession::saveSettings(
     bool doubleSizeUI,
     const std::string & displayMonitorID)
 {
+    m_projector.save(m_save);
     if (m_source) { m_source->save(m_save); }
     if (m_processor) { m_processor->save(m_save); }
     if (m_overlay) { m_overlay->saveOverlay(m_save); }
@@ -202,6 +205,8 @@ bool SandboxSession::loadSettings(
         return false;
     }
 
+    m_projector.load(m_save);
+
     const Save::Json & settings = m_save.section("Scene_Main");
     std::string source = m_sourceID;
     std::string processor = m_processorID;
@@ -215,6 +220,10 @@ bool SandboxSession::loadSettings(
         "m_displayMonitorID",
         displayMonitorID);
 
+    if (processor == "Minecraft")
+    {
+        processor = "Blockworld";
+    }
     if (processor == "Balls")
     {
         processor = "Colorizer";

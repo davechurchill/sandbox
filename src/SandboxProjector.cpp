@@ -53,18 +53,17 @@ void SandBoxProjector::imgui()
     PROFILE_FUNCTION();
 
     ImGui::Checkbox("Show Projection", &m_drawProjection);
+    ImGui::Checkbox("Show Projected Depth Map", &m_drawProjectedDepthMap);
     ImGui::Checkbox("Show Projection Lines", &m_drawLines);
-
-    if (ImGui::Button("Reset Corners"))
-    {
-        resetProjectionPoints();
-    }
-
-    ImGui::Separator();
     ImGui::Checkbox("Show Calibration Grid", &m_drawGrid);
     if (m_drawGrid)
     {
         ImGui::SliderInt("Grid Divisions", &m_gridDivisions, 2, 32);
+    }
+
+    if (ImGui::Button("Reset Corners"))
+    {
+        resetProjectionPoints();
     }
 
     ImGui::Separator();
@@ -144,6 +143,12 @@ bool SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f 
 {
     PROFILE_FUNCTION();
 
+    if (!m_drawLines)
+    {
+        m_dragPoint = -1;
+        return false;
+    }
+
     // detect if we have clicked a circle
     if (const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
         mousePressed && mousePressed->button == sf::Mouse::Button::Left)
@@ -172,9 +177,41 @@ bool SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f 
     return m_dragPoint != -1;
 }
 
+bool SandBoxProjector::unprojectPoint(
+    const sf::Vector2f & point,
+    sf::Vector2f & dataPoint)
+{
+    generateProjection();
+    const float scale = getTransformedScale();
+    if (!m_projectionValid || m_projectionMatrix.empty()
+        || !std::isfinite(scale) || scale <= 0.0f)
+    {
+        return false;
+    }
+
+    cv::Mat inverseProjection;
+    if (cv::invert(m_projectionMatrix, inverseProjection) == 0.0)
+    {
+        return false;
+    }
+
+    const sf::Vector2f local = (point - m_minXY) / scale;
+    std::vector<cv::Point2f> projectedPoint = { { local.x, local.y } };
+    cv::perspectiveTransform(projectedPoint, projectedPoint, inverseProjection);
+    if (projectedPoint.empty()
+        || !std::isfinite(projectedPoint[0].x)
+        || !std::isfinite(projectedPoint[0].y))
+    {
+        return false;
+    }
+
+    dataPoint = { projectedPoint[0].x, projectedPoint[0].y };
+    return true;
+}
+
 void SandBoxProjector::render(sf::RenderWindow & window)
 {
-    if (!m_drawProjection) { return; }
+    if (!m_drawLines) { return; }
     PROFILE_FUNCTION();
 
     const auto colorChannel = [](float value)
@@ -216,22 +253,19 @@ void SandBoxProjector::render(sf::RenderWindow & window)
         window.draw(gridVertices);
     }
 
-    if (m_drawLines)
+    for (size_t i = 0; i < m_projectionCircles.size(); ++i)
     {
-        for (size_t i = 0; i < m_projectionCircles.size(); ++i)
-        {
-            m_projectionCircles[i].setPosition({ m_projectionPoints[i].x, m_projectionPoints[i].y });
-            window.draw(m_projectionCircles[i]);
-        }
-
-        sf::VertexArray projectionVertices(sf::PrimitiveType::LineStrip);
-        projectionVertices.append(sf::Vertex(m_projectionCircles[0].getPosition(), lineColor));
-        projectionVertices.append(sf::Vertex(m_projectionCircles[1].getPosition(), lineColor));
-        projectionVertices.append(sf::Vertex(m_projectionCircles[3].getPosition(), lineColor));
-        projectionVertices.append(sf::Vertex(m_projectionCircles[2].getPosition(), lineColor));
-        projectionVertices.append(sf::Vertex(m_projectionCircles[0].getPosition(), lineColor));
-        window.draw(projectionVertices);
+        m_projectionCircles[i].setPosition({ m_projectionPoints[i].x, m_projectionPoints[i].y });
+        window.draw(m_projectionCircles[i]);
     }
+
+    sf::VertexArray projectionVertices(sf::PrimitiveType::LineStrip);
+    projectionVertices.append(sf::Vertex(m_projectionCircles[0].getPosition(), lineColor));
+    projectionVertices.append(sf::Vertex(m_projectionCircles[1].getPosition(), lineColor));
+    projectionVertices.append(sf::Vertex(m_projectionCircles[3].getPosition(), lineColor));
+    projectionVertices.append(sf::Vertex(m_projectionCircles[2].getPosition(), lineColor));
+    projectionVertices.append(sf::Vertex(m_projectionCircles[0].getPosition(), lineColor));
+    window.draw(projectionVertices);
 }
 
 void SandBoxProjector::generateProjection()
@@ -321,6 +355,7 @@ void SandBoxProjector::save(Save& save) const
     }
     settings["m_drawLines"] = m_drawLines;
     settings["m_drawProjection"] = m_drawProjection;
+    settings["m_drawProjectedDepthMap"] = m_drawProjectedDepthMap;
     settings["m_drawGrid"] = m_drawGrid;
     settings["m_gridDivisions"] = m_gridDivisions;
     settings["m_rotationQuarterTurns"] = m_rotationQuarterTurns;
@@ -351,6 +386,7 @@ void SandBoxProjector::load(const Save& save)
     }
     Save::read(settings, "m_drawLines", m_drawLines);
     Save::read(settings, "m_drawProjection", m_drawProjection);
+    Save::read(settings, "m_drawProjectedDepthMap", m_drawProjectedDepthMap);
     Save::read(settings, "m_drawGrid", m_drawGrid);
     Save::read(settings, "m_gridDivisions", m_gridDivisions);
     Save::read(settings, "m_rotationQuarterTurns", m_rotationQuarterTurns);

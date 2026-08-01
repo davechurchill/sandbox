@@ -1,13 +1,11 @@
 #include "Processor_FishPond.h"
 
 #include "Profiler.hpp"
-#include "Tools.h"
 #include "imgui.h"
 
 #include <algorithm>
 #include <array>
 #include <cmath>
-#include <iostream>
 #include <limits>
 #include <numeric>
 
@@ -395,8 +393,8 @@ bool Processor_FishPond::mapMouseToTerrain(
         return false;
     }
 
-    const float scale = m_projector.getTransformedScale();
-    const cv::Mat projection = m_projector.getProjectionMatrix();
+    const float scale = projector().getTransformedScale();
+    const cv::Mat projection = projector().getProjectionMatrix();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
     {
         return false;
@@ -407,7 +405,7 @@ bool Processor_FishPond::mapMouseToTerrain(
     {
         return false;
     }
-    const sf::Vector2f local = (mouse - m_projector.getTransformedPosition()) / scale;
+    const sf::Vector2f local = (mouse - projector().getTransformedPosition()) / scale;
     std::vector<cv::Point2f> point = { { local.x, local.y } };
     cv::perspectiveTransform(point, point, inverseProjection);
     terrainPosition = point.front();
@@ -486,8 +484,8 @@ void Processor_FishPond::renderFish(sf::RenderWindow & window)
         return;
     }
 
-    const cv::Mat projection = m_projector.getProjectionMatrix();
-    const float scale = m_projector.getTransformedScale();
+    const cv::Mat projection = projector().getProjectionMatrix();
+    const float scale = projector().getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
     {
         return;
@@ -503,7 +501,7 @@ void Processor_FishPond::renderFish(sf::RenderWindow & window)
     }
     cv::perspectiveTransform(points, points, projection);
 
-    const sf::Vector2f origin = m_projector.getTransformedPosition();
+    const sf::Vector2f origin = projector().getTransformedPosition();
     std::vector<size_t> drawOrder(m_fish.size());
     std::iota(drawOrder.begin(), drawOrder.end(), 0);
     std::stable_sort(drawOrder.begin(), drawOrder.end(),
@@ -569,22 +567,19 @@ void Processor_FishPond::render(sf::RenderWindow & window)
         return;
     }
 
-    m_sprite.setPosition(m_projector.getTransformedPosition());
-    const float scale = m_projector.getTransformedScale();
-    m_sprite.setScale({ scale, scale });
     if (m_shaderLoaded)
     {
         static sf::Clock time;
-        const sf::Vector2u textureSize = m_texture.getSize();
+        const sf::Vector2u textureSize = m_surface.texture().getSize();
         m_shader.setUniform("texelSize", sf::Glsl::Vec2(
             1.0f / textureSize.x,
             1.0f / textureSize.y));
         m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
-        window.draw(m_sprite, &m_shader);
+        m_surface.draw(window, projector(), &m_shader);
     }
     else
     {
-        window.draw(m_sprite);
+        m_surface.draw(window, projector());
     }
     renderFish(window);
 }
@@ -593,7 +588,7 @@ void Processor_FishPond::processEvent(
     const sf::Event & event,
     const sf::Vector2f & mouse)
 {
-    const bool draggingProjection = m_projector.processEvent(event, mouse);
+    const bool draggingProjection = projector().processEvent(event, mouse);
     const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
     if (!mousePressed
         || mousePressed->button != sf::Mouse::Button::Left
@@ -620,7 +615,6 @@ void Processor_FishPond::save(Save & save) const
     settings["m_separationStrength"] = m_separationStrength;
     settings["m_minimumDepth"] = m_minimumDepth;
     settings["m_maximumFishDepth"] = m_maximumFishDepth;
-    m_projector.save(save);
 }
 
 void Processor_FishPond::load(const Save & save)
@@ -635,7 +629,6 @@ void Processor_FishPond::load(const Save & save)
     Save::read(settings, "m_minimumDepth", m_minimumDepth);
     Save::read(settings, "m_maximumFishDepth", m_maximumFishDepth);
     m_resetPending = true;
-    m_projector.load(save);
 }
 
 void Processor_FishPond::processTopography(const IntermediateData & data)
@@ -666,20 +659,9 @@ void Processor_FishPond::processTopography(const IntermediateData & data)
     m_topographySize = data.topography.size();
     updateFish(data.deltaTime);
 
-    m_projector.project(m_topography, m_projectedTopography);
-    if (m_projectedTopography.empty())
-    {
-        m_hasFrame = false;
-        return;
-    }
-
-    m_image = Tools::matToSfImage(m_projectedTopography);
-    if (!m_texture.loadFromImage(m_image))
-    {
-        std::cerr << "Failed to load the fish-pond terrain texture.\n";
-        return;
-    }
-    m_texture.setSmooth(true);
-    m_sprite.setTexture(m_texture, true);
-    m_hasFrame = true;
+    m_hasFrame = m_surface.update(
+        m_topography,
+        projector(),
+        true,
+        "Failed to load the fish-pond terrain texture.\n");
 }

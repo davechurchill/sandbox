@@ -15,11 +15,12 @@
 class SandboxSession
 {
     using SourceFactory = std::function<std::shared_ptr<TopographySource>()>;
-    using ProcessorFactory = std::function<std::shared_ptr<TopographyProcessor>()>;
+    using ProcessorFactory = std::function<std::shared_ptr<TopographyProcessor>(SandBoxProjector &)>;
     using OverlayFactory = std::function<std::shared_ptr<TopographyOverlay>()>;
 
     cv::Mat m_topography;
     Save m_save;
+    SandBoxProjector m_projector;
 
     std::string m_sourceID = "Camera";
     std::string m_processorID = "Colorizer";
@@ -47,7 +48,12 @@ class SandboxSession
             && !std::is_base_of_v<TopographyOverlay, T>)
     void registerProcessor(const std::string & name)
     {
-        m_processorMap.emplace(name, std::make_shared<T>);
+        m_processorMap.emplace(name, [](SandBoxProjector & projector)
+        {
+            std::shared_ptr<T> processor = std::make_shared<T>();
+            processor->setProjector(projector);
+            return processor;
+        });
     }
 
     template <class T>
@@ -68,6 +74,7 @@ public:
     TopographySource * source() const { return m_source.get(); }
     TopographyProcessor * processor() const { return m_processor.get(); }
     TopographyOverlay * overlay() const { return m_overlay.get(); }
+    SandBoxProjector & projector() { return m_projector; }
     const cv::Mat & topography() const { return m_topography; }
 
     const std::string & sourceID() const { return m_sourceID; }

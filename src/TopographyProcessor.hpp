@@ -8,6 +8,7 @@
 #include <SFML/Graphics.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 
 struct IntermediateData
@@ -19,6 +20,8 @@ struct IntermediateData
 
 class TopographyProcessor
 {
+    SandBoxProjector * m_projector = nullptr;
+
 public:
     virtual ~TopographyProcessor() = default;
 
@@ -28,7 +31,18 @@ public:
     virtual void processEvent(const sf::Event& event, const sf::Vector2f& mouse) = 0;
     virtual void save(Save& save) const = 0;
     virtual void load(const Save& save) = 0;
-    virtual SandBoxProjector & projector() = 0;
+
+    void setProjector(SandBoxProjector & projector) { m_projector = &projector; }
+    SandBoxProjector & projector()
+    {
+        assert(m_projector);
+        return *m_projector;
+    }
+    const SandBoxProjector & projector() const
+    {
+        assert(m_projector);
+        return *m_projector;
+    }
 
     virtual void onSourceChanged() {}
     virtual bool usesCanvasInput() const { return false; }
