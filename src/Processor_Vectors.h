@@ -12,7 +12,7 @@ class Processor_Vectors : public TopographyProcessor, public TopographyOverlay
     cv::Mat             m_cvTransformedDepthImage32f;
     sf::Image           m_sfTransformedDepthImage;
     sf::Texture         m_sfTransformedDepthTexture;
-    sf::Sprite          m_sfTransformedDepthSprite;
+    sf::Sprite          m_sfTransformedDepthSprite{ m_sfTransformedDepthTexture };
     sf::Shader          m_shader;
     int                 m_selectedShaderIndex = 0;
     bool                m_drawContours = true;

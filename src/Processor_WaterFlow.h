@@ -19,7 +19,7 @@ class Processor_WaterFlow : public TopographyProcessor, public TopographyOverlay
 
     sf::Image           m_image;
     sf::Texture         m_texture;
-    sf::Sprite          m_sprite;
+    sf::Sprite          m_sprite{ m_texture };
     sf::Shader          m_shader;
 
     float               m_rainfall = 0.004f;

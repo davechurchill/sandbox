@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 namespace
 {
@@ -86,7 +87,11 @@ void Source_PaintBrush::updateTexture()
     }
 
     m_image = Tools::matToSfImage(m_topography);
-    m_texture.loadFromImage(m_image);
+    if (!m_texture.loadFromImage(m_image))
+    {
+        std::cerr << "Failed to load the paintbrush terrain texture.\n";
+        return;
+    }
     m_sprite.setTexture(m_texture, true);
     m_textureDirty = false;
 }
@@ -114,9 +119,9 @@ void Source_PaintBrush::render(sf::RenderWindow & window)
 
 void Source_PaintBrush::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
-    if (event.type == sf::Event::MouseButtonReleased)
+    if (const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>())
     {
-        if (event.mouseButton.button == sf::Mouse::Left || event.mouseButton.button == sf::Mouse::Middle)
+        if (mouseReleased->button == sf::Mouse::Button::Left || mouseReleased->button == sf::Mouse::Button::Middle)
         {
             m_hasLastPaintPosition = false;
         }
@@ -129,22 +134,22 @@ void Source_PaintBrush::processEvent(const sf::Event & event, const sf::Vector2f
     }
 
     float direction = 0.0f;
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
     {
         direction = 1.0f;
     }
-    else if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
+    else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Middle))
     {
         direction = -1.0f;
     }
 
-    if (event.type == sf::Event::MouseButtonPressed && direction != 0.0f)
+    if (event.is<sf::Event::MouseButtonPressed>() && direction != 0.0f)
     {
         applyBrush(mouse, direction);
         m_lastPaintPosition = mouse;
         m_hasLastPaintPosition = true;
     }
-    else if (event.type == sf::Event::MouseMoved)
+    else if (event.is<sf::Event::MouseMoved>())
     {
         if (direction == 0.0f)
         {

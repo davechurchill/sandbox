@@ -22,7 +22,7 @@ class Source_Snapshot : public TopographySource
 
     sf::Image m_image;
     sf::Texture m_texture;
-    sf::Sprite m_sprite;
+    sf::Sprite m_sprite{ m_texture };
 
     std::vector<SnapshotFile> m_snapshotFiles;
     std::string m_loadedSnapshot;

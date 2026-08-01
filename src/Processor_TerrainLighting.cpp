@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 namespace
 {
@@ -20,7 +21,7 @@ void Processor_TerrainLighting::init()
 
 void Processor_TerrainLighting::reloadShader()
 {
-    m_shaderLoaded = m_shader.loadFromFile(TerrainLightingShaderPath, sf::Shader::Fragment);
+    m_shaderLoaded = m_shader.loadFromFile(TerrainLightingShaderPath, sf::Shader::Type::Fragment);
     if (m_shaderLoaded)
     {
         m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
@@ -57,7 +58,7 @@ void Processor_TerrainLighting::render(sf::RenderWindow & window)
     {
         m_sprite.setPosition(m_projector.getTransformedPosition());
         const float scale = m_projector.getTransformedScale();
-        m_sprite.setScale(scale, scale);
+        m_sprite.setScale({ scale, scale });
 
         if (m_shaderLoaded)
         {
@@ -82,7 +83,8 @@ void Processor_TerrainLighting::processEvent(const sf::Event & event, const sf::
 {
     const bool draggingProjection = m_projector.processEvent(event, mouse);
 
-    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+    if (const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>();
+        mouseReleased && mouseReleased->button == sf::Mouse::Button::Left)
     {
         m_draggingLight = false;
         return;
@@ -93,11 +95,12 @@ void Processor_TerrainLighting::processEvent(const sf::Event & event, const sf::
         return;
     }
 
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+    if (const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
+        mousePressed && mousePressed->button == sf::Mouse::Button::Left)
     {
         m_draggingLight = updateLightFromMouse(mouse);
     }
-    else if (event.type == sf::Event::MouseMoved && m_draggingLight)
+    else if (event.is<sf::Event::MouseMoved>() && m_draggingLight)
     {
         if (!updateLightFromMouse(mouse))
         {
@@ -167,7 +170,11 @@ void Processor_TerrainLighting::processTopography(const IntermediateData & data)
     }
 
     m_image = Tools::matToSfImage(m_projectedTopography);
-    m_texture.loadFromImage(m_image);
+    if (!m_texture.loadFromImage(m_image))
+    {
+        std::cerr << "Failed to load the terrain-lighting texture.\n";
+        return;
+    }
     m_texture.setSmooth(true);
     m_sprite.setTexture(m_texture, true);
     m_hasFrame = true;

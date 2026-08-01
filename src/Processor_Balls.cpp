@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <vector>
 
@@ -34,14 +35,14 @@ SandBoxProjector & Processor_Balls::activeProjector()
 
 void Processor_Balls::reloadShader()
 {
-    m_shaderLoaded = m_shader.loadFromFile(BallsShaderPath, sf::Shader::Fragment);
+    m_shaderLoaded = m_shader.loadFromFile(BallsShaderPath, sf::Shader::Type::Fragment);
     if (m_shaderLoaded)
     {
         m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
     }
     m_ballShaderLoaded = m_ballShader.loadFromFile(
         BallSphereShaderPath,
-        sf::Shader::Fragment);
+        sf::Shader::Type::Fragment);
 }
 
 void Processor_Balls::resetBalls()
@@ -79,9 +80,9 @@ sf::Color Processor_Balls::randomBallColor()
     }
 
     return sf::Color(
-        (sf::Uint8)std::round(red * 255.0f),
-        (sf::Uint8)std::round(green * 255.0f),
-        (sf::Uint8)std::round(blue * 255.0f));
+        (std::uint8_t)std::round(red * 255.0f),
+        (std::uint8_t)std::round(green * 255.0f),
+        (std::uint8_t)std::round(blue * 255.0f));
 }
 
 void Processor_Balls::imgui()
@@ -579,9 +580,9 @@ void Processor_Balls::drawBall(
     const float heading = std::atan2(forward.y, forward.x) * RadiansToDegrees;
 
     sf::CircleShape shadow(radius, 32);
-    shadow.setOrigin(radius, radius);
-    shadow.setPosition(position.x + radius * 0.32f, position.y + radius * 0.42f);
-    shadow.setScale(1.18f, 0.72f);
+    shadow.setOrigin({ radius, radius });
+    shadow.setPosition({ position.x + radius * 0.32f, position.y + radius * 0.42f });
+    shadow.setScale({ 1.18f, 0.72f });
     shadow.setFillColor(sf::Color(0, 0, 0, 105));
     window.draw(shadow);
 
@@ -591,14 +592,14 @@ void Processor_Balls::drawBall(
         {
             const float glowRadius = radius * 1.55f;
             sf::CircleShape glow(glowRadius, 36);
-            glow.setOrigin(glowRadius, glowRadius);
+            glow.setOrigin({ glowRadius, glowRadius });
             glow.setPosition(position);
             glow.setFillColor(sf::Color(255, 45, 0, 68));
             window.draw(glow, sf::BlendAdd);
         }
 
         sf::CircleShape shadedBall(radius, 64);
-        shadedBall.setOrigin(radius, radius);
+        shadedBall.setOrigin({ radius, radius });
         shadedBall.setPosition(position);
         shadedBall.setFillColor(sf::Color::White);
 
@@ -633,60 +634,60 @@ void Processor_Balls::drawBall(
     {
         const float glowRadius = radius * 1.55f;
         sf::CircleShape glow(glowRadius, 28);
-        glow.setOrigin(glowRadius, glowRadius);
+        glow.setOrigin({ glowRadius, glowRadius });
         glow.setPosition(position);
         glow.setFillColor(sf::Color(255, 45, 0, 75));
         window.draw(glow, sf::BlendAdd);
 
         sf::CircleShape lavaBall(radius, 18);
-        lavaBall.setOrigin(radius, radius);
+        lavaBall.setOrigin({ radius, radius });
         lavaBall.setPosition(position);
-        lavaBall.setRotation(rotation);
+        lavaBall.setRotation(sf::degrees(rotation));
         lavaBall.setFillColor(sf::Color(185, 48, 18));
         lavaBall.setOutlineColor(sf::Color(38, 25, 22));
         lavaBall.setOutlineThickness(std::max(1.0f, radius * 0.10f));
         window.draw(lavaBall);
 
         sf::RectangleShape crack({ radius * 1.28f, std::max(1.5f, radius * 0.14f) });
-        crack.setOrigin(crack.getSize().x * 0.5f, crack.getSize().y * 0.5f);
+        crack.setOrigin({ crack.getSize().x * 0.5f, crack.getSize().y * 0.5f });
         crack.setPosition(position);
-        crack.setRotation(heading + rotation);
+        crack.setRotation(sf::degrees(heading + rotation));
         crack.setFillColor(sf::Color(255, 180, 35, 245));
         window.draw(crack, sf::BlendAdd);
         return;
     }
 
     sf::CircleShape ball(radius, 40);
-    ball.setOrigin(radius, radius);
+    ball.setOrigin({ radius, radius });
     ball.setPosition(position);
     ball.setFillColor(color);
     ball.setOutlineColor(sf::Color(
-        (sf::Uint8)(color.r * 0.42f),
-        (sf::Uint8)(color.g * 0.42f),
-        (sf::Uint8)(color.b * 0.42f)));
+        (std::uint8_t)(color.r * 0.42f),
+        (std::uint8_t)(color.g * 0.42f),
+        (std::uint8_t)(color.b * 0.42f)));
     ball.setOutlineThickness(std::max(1.0f, radius * 0.10f));
     window.draw(ball);
 
     if (movementAmount > 0.0f)
     {
         sf::RectangleShape rollingMark({ radius * 0.82f, std::max(1.5f, radius * 0.14f) });
-        rollingMark.setOrigin(0.0f, rollingMark.getSize().y * 0.5f);
+        rollingMark.setOrigin({ 0.0f, rollingMark.getSize().y * 0.5f });
         rollingMark.setPosition(position);
-        rollingMark.setRotation(heading);
+        rollingMark.setRotation(sf::degrees(heading));
         rollingMark.setFillColor(sf::Color(
-            (sf::Uint8)(color.r * 0.55f),
-            (sf::Uint8)(color.g * 0.55f),
-            (sf::Uint8)(color.b * 0.55f)));
+            (std::uint8_t)(color.r * 0.55f),
+            (std::uint8_t)(color.g * 0.55f),
+            (std::uint8_t)(color.b * 0.55f)));
         window.draw(rollingMark);
     }
 
     sf::CircleShape highlight(std::max(1.5f, radius * 0.20f), 20);
-    highlight.setOrigin(highlight.getRadius(), highlight.getRadius());
-    highlight.setPosition(position.x - radius * 0.30f, position.y - radius * 0.32f);
+    highlight.setOrigin({ highlight.getRadius(), highlight.getRadius() });
+    highlight.setPosition({ position.x - radius * 0.30f, position.y - radius * 0.32f });
     highlight.setFillColor(sf::Color(
-        (sf::Uint8)(color.r + (255 - color.r) * 0.62f),
-        (sf::Uint8)(color.g + (255 - color.g) * 0.62f),
-        (sf::Uint8)(color.b + (255 - color.b) * 0.62f),
+        (std::uint8_t)(color.r + (255 - color.r) * 0.62f),
+        (std::uint8_t)(color.g + (255 - color.g) * 0.62f),
+        (std::uint8_t)(color.b + (255 - color.b) * 0.62f),
         210));
     window.draw(highlight);
 }
@@ -728,13 +729,13 @@ void Processor_Balls::renderBallTrails(sf::RenderWindow & window)
             : 0.0f;
         const float radius = m_ballSize * 0.20f * (0.55f + life * 0.45f);
         sf::CircleShape mark(radius, 16);
-        mark.setOrigin(radius, radius);
-        mark.setPosition(origin.x + points[i].x * scale, origin.y + points[i].y * scale);
+        mark.setOrigin({ radius, radius });
+        mark.setPosition({ origin.x + points[i].x * scale, origin.y + points[i].y * scale });
         mark.setFillColor(sf::Color(
             trail.color.r,
             trail.color.g,
             trail.color.b,
-            (sf::Uint8)((trail.lava ? 110.0f : 75.0f) * life)));
+            (std::uint8_t)((trail.lava ? 110.0f : 75.0f) * life)));
         window.draw(mark, trail.lava ? sf::BlendAdd : sf::BlendAlpha);
     }
 }
@@ -817,7 +818,7 @@ void Processor_Balls::render(sf::RenderWindow & window)
     {
         m_sprite.setPosition(m_projector.getTransformedPosition());
         const float scale = m_projector.getTransformedScale();
-        m_sprite.setScale(scale, scale);
+        m_sprite.setScale({ scale, scale });
 
         if (m_shaderLoaded)
         {
@@ -873,7 +874,8 @@ bool Processor_Balls::mapMouseToTerrain(
 void Processor_Balls::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
     const bool draggingProjection = activeProjector().processEvent(event, mouse);
-    if (event.type != sf::Event::MouseButtonPressed || event.mouseButton.button != sf::Mouse::Left
+    const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
+    if (!mousePressed || mousePressed->button != sf::Mouse::Button::Left
         || draggingProjection || ImGui::GetIO().WantCaptureMouse)
     {
         return;
@@ -937,7 +939,11 @@ void Processor_Balls::processTopography(const IntermediateData & data)
     }
 
     m_image = Tools::matToSfImage(m_projectedTopography);
-    m_texture.loadFromImage(m_image);
+    if (!m_texture.loadFromImage(m_image))
+    {
+        std::cerr << "Failed to load the balls terrain texture.\n";
+        return;
+    }
     m_texture.setSmooth(true);
     m_sprite.setTexture(m_texture, true);
     m_hasFrame = true;

@@ -5,9 +5,14 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 
+#include <iostream>
+
 void Processor_Colorizer::init()
 {
-    m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
+    if (!m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Type::Fragment))
+    {
+        std::cerr << "Failed to load the colorizer shader.\n";
+    }
 }
 
 void Processor_Colorizer::imgui()
@@ -25,7 +30,10 @@ void Processor_Colorizer::imgui()
 
     if (ImGui::Button("Reload Shader"))
     {
-        m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Fragment);
+        if (!m_shader.loadFromFile("shaders/shader_contour_color.frag", sf::Shader::Type::Fragment))
+        {
+            std::cerr << "Failed to reload the colorizer shader.\n";
+        }
     }
     m_projector.imgui();
 }
@@ -39,7 +47,7 @@ void Processor_Colorizer::render(sf::RenderWindow & window)
 
         m_sfTransformedDepthSprite.setPosition(m_projector.getTransformedPosition());
         float scale = m_projector.getTransformedScale();
-        m_sfTransformedDepthSprite.setScale(scale, scale);
+        m_sfTransformedDepthSprite.setScale({ scale, scale });
 
         //Use static so that it does not get initialized every time this function is called
         static sf::Clock time;
@@ -97,8 +105,14 @@ void Processor_Colorizer::processTopography(const IntermediateData& data)
 
             {
                 PROFILE_SCOPE("SFML Texture From Image");
-                m_sfTransformedDepthTexture.loadFromImage(m_sfTransformedDepthImage);
-                m_sfTransformedDepthSprite.setTexture(m_sfTransformedDepthTexture, true);
+                if (!m_sfTransformedDepthTexture.loadFromImage(m_sfTransformedDepthImage))
+                {
+                    std::cerr << "Failed to load the colorizer terrain texture.\n";
+                }
+                else
+                {
+                    m_sfTransformedDepthSprite.setTexture(m_sfTransformedDepthTexture, true);
+                }
             }
         }
     }

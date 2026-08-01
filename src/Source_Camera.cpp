@@ -2,6 +2,8 @@
 #include "Tools.h"
 #include "Profiler.hpp"
 
+#include <iostream>
+
 void Source_Camera::init()
 {
 }
@@ -82,9 +84,15 @@ void Source_Camera::captureImages()
 
             // Convert to SFML
             cv::cvtColor(m_cvColorImage, m_cvColorImage, cv::COLOR_RGB2RGBA);
-            m_sfColorImage.create(m_cvColorImage.cols, m_cvColorImage.rows, m_cvColorImage.ptr());
-            m_sfColorTexture.loadFromImage(m_sfColorImage);
-            m_colorSprite.setTexture(m_sfColorTexture, true);
+            m_sfColorImage.resize({ (unsigned int)m_cvColorImage.cols, (unsigned int)m_cvColorImage.rows }, m_cvColorImage.ptr());
+            if (!m_sfColorTexture.loadFromImage(m_sfColorImage))
+            {
+                std::cerr << "Failed to load the camera color texture.\n";
+            }
+            else
+            {
+                m_colorSprite.setTexture(m_sfColorTexture, true);
+            }
         }
     }
 
@@ -160,8 +168,14 @@ void Source_Camera::captureImages()
 
             {
                 PROFILE_SCOPE("SFML Texture From Image");
-                m_sfDepthTexture.loadFromImage(m_sfDepthImage);
-                m_depthSprite.setTexture(m_sfDepthTexture, true);
+                if (!m_sfDepthTexture.loadFromImage(m_sfDepthImage))
+                {
+                    std::cerr << "Failed to load the camera depth texture.\n";
+                }
+                else
+                {
+                    m_depthSprite.setTexture(m_sfDepthTexture, true);
+                }
             }
         }
     }
@@ -276,7 +290,8 @@ void Source_Camera::render(sf::RenderWindow & window)
 void Source_Camera::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
     m_warper.processEvent(event, mouse);
-    if (event.type == sf::Event::JoystickButtonPressed && event.joystickButton.button == 9)
+    if (const auto* joystickPressed = event.getIf<sf::Event::JoystickButtonPressed>();
+        joystickPressed && joystickPressed->button == 9)
     {
         m_pause = !m_pause;
     }

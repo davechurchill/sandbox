@@ -21,7 +21,7 @@ class Overlay_BFS final : public TopographyOverlay
     cv::Size m_topographySize;
 
     sf::Texture m_texture;
-    sf::Sprite m_sprite;
+    sf::Sprite m_sprite{ m_texture };
     sf::Shader m_shader;
 
     int m_trailLength = 4;

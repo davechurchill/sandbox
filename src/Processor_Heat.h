@@ -16,13 +16,13 @@ class Processor_Heat : public TopographyProcessor
     cv::Mat     m_cvTransformedDepthImage32fColor;
     sf::Image   m_sfTransformedDepthImageColor;
     sf::Texture m_sfTransformedDepthTextureColor;
-    sf::Sprite  m_sfTransformedDepthSpriteColor;
+    sf::Sprite  m_sfTransformedDepthSpriteColor{ m_sfTransformedDepthTextureColor };
     sf::Shader  m_shader_color;
 
     cv::Mat     m_cvTransformedDepthImage32fHeat;
     sf::Image   m_sfTransformedDepthImageHeat;
     sf::Texture m_sfTransformedDepthTextureHeat;
-    sf::Sprite  m_sfTransformedDepthSpriteHeat;
+    sf::Sprite  m_sfTransformedDepthSpriteHeat{ m_sfTransformedDepthTextureHeat };
     sf::Shader  m_shader_heat;
 
     bool        m_drawContours = false;

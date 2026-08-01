@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <limits>
 
 namespace
@@ -26,7 +27,7 @@ void Processor_Nature::init()
 
 void Processor_Nature::reloadShader()
 {
-    m_shaderLoaded = m_shader.loadFromFile(NatureShaderPath, sf::Shader::Fragment);
+    m_shaderLoaded = m_shader.loadFromFile(NatureShaderPath, sf::Shader::Type::Fragment);
     if (m_shaderLoaded)
     {
         m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
@@ -638,15 +639,15 @@ void Processor_Nature::drawSheep(
     const sf::Vector2f bodyPosition = position + right * sway;
 
     sf::CircleShape shadow(size * 0.48f, 24);
-    shadow.setOrigin(size * 0.48f, size * 0.48f);
+    shadow.setOrigin({ size * 0.48f, size * 0.48f });
     shadow.setPosition(bodyPosition + sf::Vector2f(size * 0.08f, size * 0.10f));
-    shadow.setScale(1.38f, 0.78f);
-    shadow.setRotation(angle);
+    shadow.setScale({ 1.38f, 0.78f });
+    shadow.setRotation(sf::degrees(angle));
     shadow.setFillColor(sf::Color(18, 32, 12, 85));
     window.draw(shadow);
 
     sf::CircleShape hoof(size * 0.10f, 12);
-    hoof.setOrigin(size * 0.10f, size * 0.10f);
+    hoof.setOrigin({ size * 0.10f, size * 0.10f });
     hoof.setFillColor(sf::Color(57, 51, 45));
     for (float along : { -0.30f, 0.28f })
     {
@@ -657,17 +658,17 @@ void Processor_Nature::drawSheep(
     }
 
     sf::CircleShape body(size * 0.5f, 32);
-    body.setOrigin(size * 0.5f, size * 0.5f);
+    body.setOrigin({ size * 0.5f, size * 0.5f });
     body.setPosition(bodyPosition);
-    body.setScale(1.35f, 0.78f);
-    body.setRotation(angle);
+    body.setScale({ 1.35f, 0.78f });
+    body.setRotation(sf::degrees(angle));
     body.setFillColor(sf::Color(238, 235, 216));
     body.setOutlineColor(sf::Color(172, 170, 152));
     body.setOutlineThickness(std::max(1.0f, size * 0.06f));
     window.draw(body);
 
     sf::CircleShape wool(size * 0.22f, 20);
-    wool.setOrigin(size * 0.22f, size * 0.22f);
+    wool.setOrigin({ size * 0.22f, size * 0.22f });
     wool.setFillColor(sf::Color(250, 248, 231));
     wool.setPosition(bodyPosition - forward * (size * 0.30f));
     window.draw(wool);
@@ -679,9 +680,9 @@ void Processor_Nature::drawSheep(
     const sf::Vector2f headPosition = bodyPosition + forward * (size * 0.67f);
 
     sf::CircleShape ear(size * 0.13f, 16);
-    ear.setOrigin(size * 0.13f, size * 0.13f);
-    ear.setScale(1.0f, 0.45f);
-    ear.setRotation(angle + 90.0f);
+    ear.setOrigin({ size * 0.13f, size * 0.13f });
+    ear.setScale({ 1.0f, 0.45f });
+    ear.setRotation(sf::degrees(angle + 90.0f));
     ear.setFillColor(sf::Color(64, 57, 51));
     ear.setPosition(headPosition + right * (size * 0.22f) - forward * (size * 0.06f));
     window.draw(ear);
@@ -689,15 +690,15 @@ void Processor_Nature::drawSheep(
     window.draw(ear);
 
     sf::CircleShape head(size * 0.25f, 24);
-    head.setOrigin(size * 0.25f, size * 0.25f);
+    head.setOrigin({ size * 0.25f, size * 0.25f });
     head.setPosition(headPosition);
-    head.setScale(1.10f, 0.78f);
-    head.setRotation(angle);
+    head.setScale({ 1.10f, 0.78f });
+    head.setRotation(sf::degrees(angle));
     head.setFillColor(sf::Color(73, 66, 58));
     window.draw(head);
 
     sf::CircleShape eye(std::max(0.8f, size * 0.04f), 12);
-    eye.setOrigin(eye.getRadius(), eye.getRadius());
+    eye.setOrigin({ eye.getRadius(), eye.getRadius() });
     eye.setFillColor(sf::Color::Black);
     eye.setPosition(headPosition + forward * (size * 0.10f) + right * (size * 0.09f));
     window.draw(eye);
@@ -766,22 +767,22 @@ void Processor_Nature::drawWolf(
     const sf::Vector2f bodyPosition = position + right * stride;
 
     sf::CircleShape shadow(size * 0.48f, 24);
-    shadow.setOrigin(size * 0.48f, size * 0.48f);
+    shadow.setOrigin({ size * 0.48f, size * 0.48f });
     shadow.setPosition(bodyPosition + sf::Vector2f(size * 0.08f, size * 0.10f));
-    shadow.setScale(1.45f, 0.67f);
-    shadow.setRotation(angle);
+    shadow.setScale({ 1.45f, 0.67f });
+    shadow.setRotation(sf::degrees(angle));
     shadow.setFillColor(sf::Color(12, 19, 10, 90));
     window.draw(shadow);
 
     sf::RectangleShape tail({ size * 0.65f, size * 0.13f });
-    tail.setOrigin(size * 0.65f, size * 0.065f);
+    tail.setOrigin({ size * 0.65f, size * 0.065f });
     tail.setPosition(bodyPosition - forward * (size * 0.48f));
-    tail.setRotation(angle + std::sin(m_wolf.animationPhase * 0.55f) * 18.0f);
+    tail.setRotation(sf::degrees(angle + std::sin(m_wolf.animationPhase * 0.55f) * 18.0f));
     tail.setFillColor(sf::Color(78, 82, 79));
     window.draw(tail);
 
     sf::CircleShape paw(size * 0.09f, 12);
-    paw.setOrigin(size * 0.09f, size * 0.09f);
+    paw.setOrigin({ size * 0.09f, size * 0.09f });
     paw.setFillColor(sf::Color(43, 45, 43));
     for (float along : { -0.27f, 0.27f })
     {
@@ -792,10 +793,10 @@ void Processor_Nature::drawWolf(
     }
 
     sf::CircleShape body(size * 0.5f, 28);
-    body.setOrigin(size * 0.5f, size * 0.5f);
+    body.setOrigin({ size * 0.5f, size * 0.5f });
     body.setPosition(bodyPosition);
-    body.setScale(1.38f, 0.64f);
-    body.setRotation(angle);
+    body.setScale({ 1.38f, 0.64f });
+    body.setRotation(sf::degrees(angle));
     body.setFillColor(sf::Color(91, 96, 92));
     body.setOutlineColor(sf::Color(48, 51, 49));
     body.setOutlineThickness(std::max(1.0f, size * 0.055f));
@@ -803,10 +804,10 @@ void Processor_Nature::drawWolf(
 
     const sf::Vector2f headPosition = bodyPosition + forward * (size * 0.62f);
     sf::CircleShape head(size * 0.28f, 22);
-    head.setOrigin(size * 0.28f, size * 0.28f);
+    head.setOrigin({ size * 0.28f, size * 0.28f });
     head.setPosition(headPosition);
-    head.setScale(1.05f, 0.76f);
-    head.setRotation(angle);
+    head.setScale({ 1.05f, 0.76f });
+    head.setRotation(sf::degrees(angle));
     head.setFillColor(sf::Color(72, 76, 73));
     window.draw(head);
 
@@ -816,9 +817,9 @@ void Processor_Nature::drawWolf(
     ear.setPoint(2, { -size * 0.13f, size * 0.10f });
     ear.setFillColor(sf::Color(47, 50, 48));
     ear.setPosition(headPosition + right * (size * 0.18f));
-    ear.setRotation(angle);
+    ear.setRotation(sf::degrees(angle));
     window.draw(ear);
-    ear.setScale(1.0f, -1.0f);
+    ear.setScale({ 1.0f, -1.0f });
     ear.setPosition(headPosition - right * (size * 0.18f));
     window.draw(ear);
 
@@ -827,12 +828,12 @@ void Processor_Nature::drawWolf(
     muzzle.setPoint(1, { size * 0.36f, 0.0f });
     muzzle.setPoint(2, { 0.0f, size * 0.15f });
     muzzle.setPosition(headPosition + forward * (size * 0.10f));
-    muzzle.setRotation(angle);
+    muzzle.setRotation(sf::degrees(angle));
     muzzle.setFillColor(sf::Color(58, 61, 59));
     window.draw(muzzle);
 
     sf::CircleShape eye(std::max(0.8f, size * 0.038f), 12);
-    eye.setOrigin(eye.getRadius(), eye.getRadius());
+    eye.setOrigin({ eye.getRadius(), eye.getRadius() });
     eye.setFillColor(sf::Color(224, 181, 54));
     eye.setPosition(headPosition + forward * (size * 0.07f) + right * (size * 0.10f));
     window.draw(eye);
@@ -887,7 +888,7 @@ void Processor_Nature::render(sf::RenderWindow & window)
     {
         m_sprite.setPosition(m_projector.getTransformedPosition());
         const float scale = m_projector.getTransformedScale();
-        m_sprite.setScale(scale, scale);
+        m_sprite.setScale({ scale, scale });
 
         if (m_shaderLoaded)
         {
@@ -941,7 +942,11 @@ void Processor_Nature::processTopography(const IntermediateData & data)
     }
 
     m_image = Tools::matToSfImage(m_projectedTopography);
-    m_texture.loadFromImage(m_image);
+    if (!m_texture.loadFromImage(m_image))
+    {
+        std::cerr << "Failed to load the nature terrain texture.\n";
+        return;
+    }
     m_texture.setSmooth(true);
     m_sprite.setTexture(m_texture, true);
     m_hasFrame = true;
@@ -1017,7 +1022,8 @@ void Processor_Nature::processOverlayEvent(
 {
     m_overlayProcessor = &processor;
     const bool draggingProjection = processor.projector().processEvent(event, mouse);
-    if (event.type != sf::Event::MouseButtonPressed || event.mouseButton.button != sf::Mouse::Left
+    const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
+    if (!mousePressed || mousePressed->button != sf::Mouse::Button::Left
         || draggingProjection || ImGui::GetIO().WantCaptureMouse)
     {
         return;

@@ -42,19 +42,12 @@ namespace
 
     bool isMouseControlEvent(const sf::Event & event)
     {
-        switch (event.type)
-        {
-        case sf::Event::MouseMoved:
-        case sf::Event::MouseButtonPressed:
-        case sf::Event::MouseButtonReleased:
-        case sf::Event::MouseWheelMoved:
-        case sf::Event::MouseWheelScrolled:
-        case sf::Event::MouseEntered:
-        case sf::Event::MouseLeft:
-            return true;
-        default:
-            return false;
-        }
+        return event.is<sf::Event::MouseMoved>()
+            || event.is<sf::Event::MouseButtonPressed>()
+            || event.is<sf::Event::MouseButtonReleased>()
+            || event.is<sf::Event::MouseWheelScrolled>()
+            || event.is<sf::Event::MouseEntered>()
+            || event.is<sf::Event::MouseLeft>();
     }
 }
 
@@ -144,31 +137,31 @@ void Scene_Main::onFrame(float deltaTime)
 void Scene_Main::sProcessEvent(const sf::Event& event)
 {
     // this event triggers when the window is closed
-    if (event.type == sf::Event::Closed)
+    if (event.is<sf::Event::Closed>())
     {
         endScene();
         m_game->quit();
     }
 
     // this event is triggered when a key is pressed
-    if (event.type == sf::Event::KeyPressed)
+    if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
     {
-        switch (event.key.code)
+        switch (keyPressed->code)
         {
         
-        case sf::Keyboard::Escape:
+        case sf::Keyboard::Key::Escape:
         {
             endScene();
             break;
         }
 
-        case sf::Keyboard::I:
+        case sf::Keyboard::Key::I:
         {
             m_drawUI = !m_drawUI;
             break;
         }
 
-        case sf::Keyboard::F:
+        case sf::Keyboard::Key::F:
         {
             toggleDisplayWindow();
         }
@@ -182,11 +175,11 @@ void Scene_Main::sUserInput()
 
     bool displayOpen = m_game->displayWindow().isOpen();
     auto & main = mainWindow();
-    sf::Event event;
-    while (main.pollEvent(event))
+    while (const auto polledEvent = main.pollEvent())
     {
+        const sf::Event& event = *polledEvent;
         ImGui::SFML::ProcessEvent(main, event);
-        const bool uiOwnsMouseWheel = event.type == sf::Event::MouseWheelScrolled
+        const bool uiOwnsMouseWheel = event.is<sf::Event::MouseWheelScrolled>()
             && ImGui::GetIO().WantCaptureMouse;
         if (!uiOwnsMouseWheel)
         {
@@ -195,9 +188,9 @@ void Scene_Main::sUserInput()
         sProcessEvent(event);
 
         // happens whenever the mouse is being moved
-        if (event.type == sf::Event::MouseMoved)
+        if (const auto* mouseMoved = event.getIf<sf::Event::MouseMoved>())
         {
-            m_mouseScreen = { event.mouseMove.x, event.mouseMove.y };
+            m_mouseScreen = mouseMoved->position;
             m_mouseWorld = main.mapPixelToCoords(m_mouseScreen);
         }
 
@@ -223,9 +216,9 @@ void Scene_Main::sUserInput()
     if (displayOpen)
     {
         auto & display = displayWindow();
-        sf::Event displayEvent;
-        while (display.pollEvent(displayEvent))
+        while (const auto polledEvent = display.pollEvent())
         {
+            const sf::Event& displayEvent = *polledEvent;
             sProcessEvent(displayEvent);
 
             if (m_processor)
@@ -242,9 +235,9 @@ void Scene_Main::sUserInput()
             }
 
             // happens whenever the mouse is being moved
-            if (displayEvent.type == sf::Event::MouseMoved)
+            if (const auto* mouseMoved = displayEvent.getIf<sf::Event::MouseMoved>())
             {
-                m_mouseDisplay = { (float)displayEvent.mouseMove.x, (float)displayEvent.mouseMove.y };
+                m_mouseDisplay = { (float)mouseMoved->position.x, (float)mouseMoved->position.y };
             }
         }
     }
@@ -544,7 +537,7 @@ void Scene_Main::toggleDisplayWindow()
 {
     if (!m_game->displayWindow().isOpen())
     {
-        m_game->displayWindow().create(sf::VideoMode(1920, 1080), "Display", sf::Style::None);
+        m_game->displayWindow().create(sf::VideoMode({ 1920, 1080 }), "Display", sf::Style::None);
         m_game->displayWindow().setPosition({ -1920, 0 });
     }
     else

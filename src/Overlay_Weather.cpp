@@ -206,7 +206,7 @@ void Overlay_Weather::renderPrecipitation(sf::RenderWindow & window, bool snow)
     }
     cv::perspectiveTransform(points, points, projection);
 
-    sf::VertexArray vertices(sf::Lines);
+    sf::VertexArray vertices(sf::PrimitiveType::Lines);
     const sf::Vector2f origin = projector.getTransformedPosition();
     for (size_t i = 0; i < m_particles.size(); i++)
     {
@@ -224,7 +224,7 @@ void Overlay_Weather::renderPrecipitation(sf::RenderWindow & window, bool snow)
         const sf::Vector2f position(
             origin.x + points[i].x * scale,
             origin.y + points[i].y * scale - clearance * (snow ? 18.0f : 28.0f));
-        const sf::Uint8 alpha = (sf::Uint8)std::clamp(
+        const std::uint8_t alpha = (std::uint8_t)std::clamp(
             (int)(95 + 135 * m_particles[i].opacity * m_intensity),
             0,
             255);
@@ -245,7 +245,7 @@ void Overlay_Weather::renderPrecipitation(sf::RenderWindow & window, bool snow)
                 position.x - m_windX * length * 0.45f,
                 position.y - length);
             const sf::Color startColor(135, 190, 255, alpha);
-            const sf::Color tailColor(185, 220, 255, (sf::Uint8)(alpha * 0.25f));
+            const sf::Color tailColor(185, 220, 255, (std::uint8_t)(alpha * 0.25f));
             vertices.append(sf::Vertex(position, startColor));
             vertices.append(sf::Vertex(tail, tailColor));
         }
@@ -309,36 +309,36 @@ void Overlay_Weather::renderAtmosphere(sf::RenderWindow & window, bool clouds)
         if (clouds)
         {
             sf::CircleShape shadow(radius * 0.92f, 32);
-            shadow.setOrigin(shadow.getRadius(), shadow.getRadius());
-            shadow.setPosition(position.x + radius * 0.24f, position.y + radius * 0.28f);
-            shadow.setScale(1.35f, 0.70f);
-            shadow.setFillColor(sf::Color(25, 32, 42, (sf::Uint8)(38 * alphaScale)));
+            shadow.setOrigin({ shadow.getRadius(), shadow.getRadius() });
+            shadow.setPosition({ position.x + radius * 0.24f, position.y + radius * 0.28f });
+            shadow.setScale({ 1.35f, 0.70f });
+            shadow.setFillColor(sf::Color(25, 32, 42, (std::uint8_t)(38 * alphaScale)));
             window.draw(shadow);
 
-            const sf::Uint8 alpha = (sf::Uint8)(105 * alphaScale);
+            const std::uint8_t alpha = (std::uint8_t)(105 * alphaScale);
             sf::CircleShape cloud(radius, 36);
-            cloud.setOrigin(radius, radius);
+            cloud.setOrigin({ radius, radius });
             cloud.setPosition(position);
-            cloud.setScale(1.35f, 0.72f);
+            cloud.setScale({ 1.35f, 0.72f });
             cloud.setFillColor(sf::Color(235, 240, 244, alpha));
             window.draw(cloud);
 
             sf::CircleShape lobe(radius * 0.66f, 30);
-            lobe.setOrigin(lobe.getRadius(), lobe.getRadius());
+            lobe.setOrigin({ lobe.getRadius(), lobe.getRadius() });
             lobe.setFillColor(sf::Color(248, 250, 252, alpha));
-            lobe.setPosition(position.x - radius * 0.55f, position.y - radius * 0.12f);
+            lobe.setPosition({ position.x - radius * 0.55f, position.y - radius * 0.12f });
             window.draw(lobe);
-            lobe.setPosition(position.x + radius * 0.50f, position.y - radius * 0.08f);
-            lobe.setScale(0.82f, 0.82f);
+            lobe.setPosition({ position.x + radius * 0.50f, position.y - radius * 0.08f });
+            lobe.setScale({ 0.82f, 0.82f });
             window.draw(lobe);
         }
         else
         {
             sf::CircleShape fog(radius, 32);
-            fog.setOrigin(radius, radius);
+            fog.setOrigin({ radius, radius });
             fog.setPosition(position);
-            fog.setScale(1.65f, 0.72f);
-            fog.setFillColor(sf::Color(205, 220, 225, (sf::Uint8)(48 * alphaScale)));
+            fog.setScale({ 1.65f, 0.72f });
+            fog.setFillColor(sf::Color(205, 220, 225, (std::uint8_t)(48 * alphaScale)));
             window.draw(fog);
         }
     }

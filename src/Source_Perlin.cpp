@@ -5,6 +5,7 @@
 #include "imgui-SFML.h"
 
 #include <algorithm>
+#include <iostream>
 
 void Source_Perlin::init()
 {
@@ -57,7 +58,11 @@ void Source_Perlin::render(sf::RenderWindow & window)
 {
     const sf::Color gridColor(64, 64, 64);
 
-    m_texture.loadFromImage(m_image);
+    if (!m_texture.loadFromImage(m_image))
+    {
+        std::cerr << "Failed to load the Perlin terrain texture.\n";
+        return;
+    }
     m_sprite.setTexture(m_texture, true);
 
 
@@ -66,15 +71,15 @@ void Source_Perlin::render(sf::RenderWindow & window)
 
 void Source_Perlin::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
-    if (event.type == sf::Event::KeyPressed)
+    if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
     {
-        switch (event.key.code)
+        switch (keyPressed->code)
         {
-        case sf::Keyboard::R: { m_seed += 1; calculateNoise(); break; }
-        case sf::Keyboard::W: { m_octaves = std::min(m_octaves + 1, m_seedSize); calculateNoise();  break; }
-        case sf::Keyboard::S: { m_octaves--; calculateNoise();  break; }
-        case sf::Keyboard::A: { m_persistance -= 0.1f; if (m_persistance < 0.1f) { m_persistance = 0.1f; } calculateNoise();  break; }
-        case sf::Keyboard::D: { m_persistance += 0.1f; calculateNoise();  break; }
+        case sf::Keyboard::Key::R: { m_seed += 1; calculateNoise(); break; }
+        case sf::Keyboard::Key::W: { m_octaves = std::min(m_octaves + 1, m_seedSize); calculateNoise();  break; }
+        case sf::Keyboard::Key::S: { m_octaves--; calculateNoise();  break; }
+        case sf::Keyboard::Key::A: { m_persistance -= 0.1f; if (m_persistance < 0.1f) { m_persistance = 0.1f; } calculateNoise();  break; }
+        case sf::Keyboard::Key::D: { m_persistance += 0.1f; calculateNoise();  break; }
         }
     }
 }

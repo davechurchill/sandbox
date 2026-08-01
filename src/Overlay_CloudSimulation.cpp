@@ -329,30 +329,30 @@ void Overlay_CloudSimulation::renderClouds(sf::RenderWindow & window)
             origin.y + points[i].y * scale + std::sin(cloud.phase) * 2.0f);
 
         sf::CircleShape shadow(radius * 0.90f, 32);
-        shadow.setOrigin(shadow.getRadius(), shadow.getRadius());
-        shadow.setPosition(position.x + radius * 0.25f, position.y + radius * 0.30f);
-        shadow.setScale(1.35f, 0.68f);
+        shadow.setOrigin({ shadow.getRadius(), shadow.getRadius() });
+        shadow.setPosition({ position.x + radius * 0.25f, position.y + radius * 0.30f });
+        shadow.setScale({ 1.35f, 0.68f });
         shadow.setFillColor(sf::Color(
             20,
             25,
             32,
-            (sf::Uint8)(20 + 35 * std::clamp(1.0f - clearance, 0.0f, 1.0f))));
+            (std::uint8_t)(20 + 35 * std::clamp(1.0f - clearance, 0.0f, 1.0f))));
         window.draw(shadow);
 
         sf::CircleShape body(radius, 36);
-        body.setOrigin(radius, radius);
+        body.setOrigin({ radius, radius });
         body.setPosition(position);
-        body.setScale(1.42f, 0.70f);
+        body.setScale({ 1.42f, 0.70f });
         body.setFillColor(sf::Color(232, 238, 243, 165));
         window.draw(body);
 
         sf::CircleShape lobe(radius * 0.68f, 30);
-        lobe.setOrigin(lobe.getRadius(), lobe.getRadius());
+        lobe.setOrigin({ lobe.getRadius(), lobe.getRadius() });
         lobe.setFillColor(sf::Color(248, 250, 252, 188));
-        lobe.setPosition(position.x - radius * 0.58f, position.y - radius * 0.12f);
+        lobe.setPosition({ position.x - radius * 0.58f, position.y - radius * 0.12f });
         window.draw(lobe);
-        lobe.setPosition(position.x + radius * 0.52f, position.y - radius * 0.10f);
-        lobe.setScale(0.84f, 0.84f);
+        lobe.setPosition({ position.x + radius * 0.52f, position.y - radius * 0.10f });
+        lobe.setScale({ 0.84f, 0.84f });
         window.draw(lobe);
     }
 }

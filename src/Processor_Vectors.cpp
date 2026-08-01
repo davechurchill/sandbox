@@ -4,11 +4,16 @@
 #include "Profiler.hpp"
 #include "Tools.h"
 
+#include <iostream>
+
 const char* Processor_Vectors::m_shaders[] = { "Popsicle", "Blue", "Red", "Terrain", "Animating Water", "None" };
 
 void Processor_Vectors::init()
 {
-    m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Fragment);
+    if (!m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Type::Fragment))
+    {
+        std::cerr << "Failed to load the vectors shader.\n";
+    }
 }
 
 SandBoxProjector & Processor_Vectors::activeProjector()
@@ -71,7 +76,10 @@ void Processor_Vectors::imguiControls(bool overlayOnly)
 
     if (ImGui::Button("Reload Shader"))
     {
-        m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Fragment);
+        if (!m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Type::Fragment))
+        {
+            std::cerr << "Failed to reload the vectors shader.\n";
+        }
     }
     if (!overlayOnly)
     {
@@ -96,7 +104,7 @@ void Processor_Vectors::renderVectors(sf::RenderWindow & window, bool overlayOnl
         SandBoxProjector & projector = activeProjector();
         m_sfTransformedDepthSprite.setPosition(projector.getTransformedPosition());
         float scale = projector.getTransformedScale();
-        m_sfTransformedDepthSprite.setScale(scale, scale);
+        m_sfTransformedDepthSprite.setScale({ scale, scale });
 
         //Use static so that it does not get initilialized every time this function is called
         static sf::Clock time;
@@ -286,14 +294,20 @@ void Processor_Vectors::processTopography(const IntermediateData& data)
 
             // Create SFML image
             sf::Image image;
-            image.create(rgb.cols, rgb.rows, rgb.ptr());
+            image.resize({ (unsigned int)rgb.cols, (unsigned int)rgb.rows }, rgb.ptr());
             m_sfTransformedDepthImage = image;
         }
 
         {
             PROFILE_SCOPE("SFML Texture From Image");
-            m_sfTransformedDepthTexture.loadFromImage(m_sfTransformedDepthImage);
-            m_sfTransformedDepthSprite.setTexture(m_sfTransformedDepthTexture, true);
+            if (!m_sfTransformedDepthTexture.loadFromImage(m_sfTransformedDepthImage))
+            {
+                std::cerr << "Failed to load the vectors terrain texture.\n";
+            }
+            else
+            {
+                m_sfTransformedDepthSprite.setTexture(m_sfTransformedDepthTexture, true);
+            }
         }
     }
 }
@@ -301,7 +315,10 @@ void Processor_Vectors::processTopography(const IntermediateData& data)
 void Processor_Vectors::initOverlay()
 {
     m_particleManager.reset();
-    m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Fragment);
+    if (!m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Type::Fragment))
+    {
+        std::cerr << "Failed to load the vectors overlay shader.\n";
+    }
 }
 
 void Processor_Vectors::imguiOverlay()

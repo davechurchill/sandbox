@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <iostream>
 #include <limits>
 #include <numeric>
 
@@ -55,7 +56,7 @@ void Processor_FishPond::init()
 
 void Processor_FishPond::reloadShader()
 {
-    m_shaderLoaded = m_shader.loadFromFile(FishPondShaderPath, sf::Shader::Fragment);
+    m_shaderLoaded = m_shader.loadFromFile(FishPondShaderPath, sf::Shader::Type::Fragment);
     if (m_shaderLoaded)
     {
         m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
@@ -151,9 +152,9 @@ bool Processor_FishPond::addFish(const cv::Point2f & position)
     const sf::Color baseColor = FishColors[fish.colorType];
     std::uniform_int_distribution<int> colorVariation(-10, 10);
     fish.color = sf::Color(
-        (sf::Uint8)std::clamp((int)baseColor.r + colorVariation(m_random), 0, 255),
-        (sf::Uint8)std::clamp((int)baseColor.g + colorVariation(m_random), 0, 255),
-        (sf::Uint8)std::clamp((int)baseColor.b + colorVariation(m_random), 0, 255));
+        (std::uint8_t)std::clamp((int)baseColor.r + colorVariation(m_random), 0, 255),
+        (std::uint8_t)std::clamp((int)baseColor.g + colorVariation(m_random), 0, 255),
+        (std::uint8_t)std::clamp((int)baseColor.b + colorVariation(m_random), 0, 255));
     m_fish.push_back(fish);
     return true;
 }
@@ -433,10 +434,10 @@ void Processor_FishPond::drawFish(
     const float fishSize = m_fishSize * (1.0f - visualDepth * 0.24f);
     const float waterTint = visualDepth * 0.68f;
     const sf::Color bodyColor(
-        (sf::Uint8)(fish.color.r * (1.0f - waterTint) + 7.0f * waterTint),
-        (sf::Uint8)(fish.color.g * (1.0f - waterTint) + 24.0f * waterTint),
-        (sf::Uint8)(fish.color.b * (1.0f - waterTint) + 38.0f * waterTint),
-        (sf::Uint8)(255.0f - visualDepth * 72.0f));
+        (std::uint8_t)(fish.color.r * (1.0f - waterTint) + 7.0f * waterTint),
+        (std::uint8_t)(fish.color.g * (1.0f - waterTint) + 24.0f * waterTint),
+        (std::uint8_t)(fish.color.b * (1.0f - waterTint) + 38.0f * waterTint),
+        (std::uint8_t)(255.0f - visualDepth * 72.0f));
     const float tailSwing = std::sin(fish.phase) * fishSize * 0.32f;
 
     sf::ConvexShape tail;
@@ -447,23 +448,23 @@ void Processor_FishPond::drawFish(
     tail.setPoint(1, tailBase - side * fishSize * 0.42f);
     tail.setPoint(2, tailTip);
     tail.setFillColor(sf::Color(
-        (sf::Uint8)(bodyColor.r * 0.82f),
-        (sf::Uint8)(bodyColor.g * 0.82f),
-        (sf::Uint8)(bodyColor.b * 0.82f),
+        (std::uint8_t)(bodyColor.r * 0.82f),
+        (std::uint8_t)(bodyColor.g * 0.82f),
+        (std::uint8_t)(bodyColor.b * 0.82f),
         bodyColor.a));
     window.draw(tail);
 
     const float bodyRadius = fishSize * 0.50f;
     sf::CircleShape body(bodyRadius, 26);
-    body.setOrigin(bodyRadius, bodyRadius);
+    body.setOrigin({ bodyRadius, bodyRadius });
     body.setPosition(position);
-    body.setScale(1.48f, 0.70f);
-    body.setRotation(heading);
+    body.setScale({ 1.48f, 0.70f });
+    body.setRotation(sf::degrees(heading));
     body.setFillColor(bodyColor);
     body.setOutlineColor(sf::Color(
-        (sf::Uint8)(bodyColor.r * 0.48f),
-        (sf::Uint8)(bodyColor.g * 0.48f),
-        (sf::Uint8)(bodyColor.b * 0.48f),
+        (std::uint8_t)(bodyColor.r * 0.48f),
+        (std::uint8_t)(bodyColor.g * 0.48f),
+        (std::uint8_t)(bodyColor.b * 0.48f),
         bodyColor.a));
     body.setOutlineThickness(1.0f);
     window.draw(body);
@@ -472,7 +473,7 @@ void Processor_FishPond::drawFish(
         + forward * fishSize * 0.47f
         + side * fishSize * 0.22f;
     sf::CircleShape eye(std::max(1.0f, fishSize * 0.085f), 12);
-    eye.setOrigin(eye.getRadius(), eye.getRadius());
+    eye.setOrigin({ eye.getRadius(), eye.getRadius() });
     eye.setPosition(eyePosition);
     eye.setFillColor(sf::Color(18, 20, 22, bodyColor.a));
     window.draw(eye);
@@ -572,7 +573,7 @@ void Processor_FishPond::render(sf::RenderWindow & window)
 
     m_sprite.setPosition(m_projector.getTransformedPosition());
     const float scale = m_projector.getTransformedScale();
-    m_sprite.setScale(scale, scale);
+    m_sprite.setScale({ scale, scale });
     if (m_shaderLoaded)
     {
         static sf::Clock time;
@@ -595,8 +596,9 @@ void Processor_FishPond::processEvent(
     const sf::Vector2f & mouse)
 {
     const bool draggingProjection = m_projector.processEvent(event, mouse);
-    if (event.type != sf::Event::MouseButtonPressed
-        || event.mouseButton.button != sf::Mouse::Left
+    const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
+    if (!mousePressed
+        || mousePressed->button != sf::Mouse::Button::Left
         || draggingProjection || ImGui::GetIO().WantCaptureMouse)
     {
         return;
@@ -655,7 +657,11 @@ void Processor_FishPond::processTopography(const IntermediateData & data)
     }
 
     m_image = Tools::matToSfImage(m_projectedTopography);
-    m_texture.loadFromImage(m_image);
+    if (!m_texture.loadFromImage(m_image))
+    {
+        std::cerr << "Failed to load the fish-pond terrain texture.\n";
+        return;
+    }
     m_texture.setSmooth(true);
     m_sprite.setTexture(m_texture, true);
     m_hasFrame = true;

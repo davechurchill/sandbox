@@ -22,7 +22,7 @@ class Source_Perlin : public TopographySource
 
     sf::Image           m_image;
     sf::Texture         m_texture;
-    sf::Sprite          m_sprite;
+    sf::Sprite          m_sprite{ m_texture };
 
 
     void calculateNoise();

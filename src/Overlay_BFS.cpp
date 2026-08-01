@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 namespace
 {
@@ -192,16 +193,26 @@ void Overlay_BFS::updateTexture(
     }
 
     sf::Image image;
-    image.create(rgba.cols, rgba.rows, rgba.ptr());
-    m_texture.loadFromImage(image);
+    image.resize({ (unsigned int)rgba.cols, (unsigned int)rgba.rows }, rgba.ptr());
+    if (!m_texture.loadFromImage(image))
+    {
+        std::cerr << "Failed to load the BFS particle texture.\n";
+        return;
+    }
     m_sprite.setTexture(m_texture, true);
 }
 
 void Overlay_BFS::initOverlay()
 {
     m_resetRequested = true;
-    m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Fragment);
-    m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
+    if (!m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Type::Fragment))
+    {
+        std::cerr << "Failed to load the BFS shader.\n";
+    }
+    else
+    {
+        m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
+    }
 }
 
 void Overlay_BFS::imguiOverlay()
@@ -223,8 +234,14 @@ void Overlay_BFS::imguiOverlay()
     }
     if (ImGui::Button("Reload Shader"))
     {
-        m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Fragment);
-        m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
+        if (!m_shader.loadFromFile("shaders/shader_vector_fields.frag", sf::Shader::Type::Fragment))
+        {
+            std::cerr << "Failed to reload the BFS shader.\n";
+        }
+        else
+        {
+            m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
+        }
     }
 }
 
@@ -253,7 +270,7 @@ void Overlay_BFS::renderOverlay(
     SandBoxProjector & projector = processor.projector();
     m_sprite.setPosition(projector.getTransformedPosition());
     const float scale = projector.getTransformedScale();
-    m_sprite.setScale(scale, scale);
+    m_sprite.setScale({ scale, scale });
     m_shader.setUniform("particleAlpha", m_particleAlpha);
     m_shader.setUniform("overlayOnly", true);
     m_shader.setUniform("reverseDepthAlpha", false);

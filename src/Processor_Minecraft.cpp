@@ -5,6 +5,7 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <iostream>
 
 namespace
 {
@@ -18,7 +19,7 @@ void Processor_Minecraft::init()
 
 void Processor_Minecraft::reloadShader()
 {
-    m_shaderLoaded = m_shader.loadFromFile(MinecraftShaderPath, sf::Shader::Fragment);
+    m_shaderLoaded = m_shader.loadFromFile(MinecraftShaderPath, sf::Shader::Type::Fragment);
     if (m_shaderLoaded)
     {
         m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
@@ -50,7 +51,7 @@ void Processor_Minecraft::render(sf::RenderWindow & window)
 
     m_sprite.setPosition(m_projector.getTransformedPosition());
     const float scale = m_projector.getTransformedScale();
-    m_sprite.setScale(scale, scale);
+    m_sprite.setScale({ scale, scale });
 
     if (m_shaderLoaded)
     {
@@ -96,7 +97,11 @@ void Processor_Minecraft::processTopography(const IntermediateData & data)
     }
 
     m_image = Tools::matToSfImage(m_projectedTopography);
-    m_texture.loadFromImage(m_image);
+    if (!m_texture.loadFromImage(m_image))
+    {
+        std::cerr << "Failed to load the Minecraft terrain texture.\n";
+        return;
+    }
     m_texture.setSmooth(false);
     m_sprite.setTexture(m_texture, true);
     m_hasFrame = true;

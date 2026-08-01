@@ -187,8 +187,8 @@
     <IncludePath>$(SFML_DIR)\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LibraryPath>$(SFML2_DIR)\lib;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SFML2_DIR)\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SFML_DIR)\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SFML_DIR)\include;$(IncludePath)</IncludePath>
     <LinkIncremental>false</LinkIncremental>
     <OutDir>../lib/</OutDir>
   </PropertyGroup>

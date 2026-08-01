@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 namespace
 {
@@ -27,7 +28,7 @@ void Processor_ForestFire::init()
 
 void Processor_ForestFire::reloadShader()
 {
-    m_shaderLoaded = m_shader.loadFromFile(ForestFireShaderPath, sf::Shader::Fragment);
+    m_shaderLoaded = m_shader.loadFromFile(ForestFireShaderPath, sf::Shader::Type::Fragment);
     if (m_shaderLoaded)
     {
         m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
@@ -220,27 +221,27 @@ void Processor_ForestFire::spawnFireParticle()
     if (heat < 0.22f)
     {
         particle.color = sf::Color(
-            255, 235, (sf::Uint8)(115.0f + variation * 95.0f));
+            255, 235, (std::uint8_t)(115.0f + variation * 95.0f));
     }
     else if (heat < 0.55f)
     {
         particle.color = sf::Color(
             255,
-            (sf::Uint8)(145.0f + variation * 80.0f),
-            (sf::Uint8)(12.0f + variation * 38.0f));
+            (std::uint8_t)(145.0f + variation * 80.0f),
+            (std::uint8_t)(12.0f + variation * 38.0f));
     }
     else if (heat < 0.84f)
     {
         particle.color = sf::Color(
             255,
-            (sf::Uint8)(65.0f + variation * 85.0f),
-            (sf::Uint8)(variation * 14.0f));
+            (std::uint8_t)(65.0f + variation * 85.0f),
+            (std::uint8_t)(variation * 14.0f));
     }
     else
     {
         particle.color = sf::Color(
-            (sf::Uint8)(205.0f + variation * 50.0f),
-            (sf::Uint8)(24.0f + variation * 46.0f),
+            (std::uint8_t)(205.0f + variation * 50.0f),
+            (std::uint8_t)(24.0f + variation * 46.0f),
             1);
     }
     m_fireParticles.push_back(particle);
@@ -310,7 +311,7 @@ void Processor_ForestFire::renderFireParticles(sf::RenderWindow & window)
     cv::perspectiveTransform(positions, positions, projection);
 
     const sf::Vector2f origin = m_projector.getTransformedPosition();
-    sf::VertexArray particles(sf::Quads);
+    sf::VertexArray particles(sf::PrimitiveType::Triangles);
     for (size_t i = 0; i < m_fireParticles.size(); i++)
     {
         if (!std::isfinite(positions[i].x) || !std::isfinite(positions[i].y))
@@ -334,15 +335,19 @@ void Processor_ForestFire::renderFireParticles(sf::RenderWindow & window)
             particle.size * (1.0f - life * 0.58f) * flicker * 0.5f);
         const float cooling = std::clamp((life - 0.42f) / 0.58f, 0.0f, 1.0f);
         const sf::Color color(
-            (sf::Uint8)(particle.color.r + (190 - particle.color.r) * cooling),
-            (sf::Uint8)(particle.color.g + (24 - particle.color.g) * cooling),
-            (sf::Uint8)(particle.color.b * (1.0f - cooling)),
-            (sf::Uint8)(255.0f * (1.0f - life) * flicker));
+            (std::uint8_t)(particle.color.r + (190 - particle.color.r) * cooling),
+            (std::uint8_t)(particle.color.g + (24 - particle.color.g) * cooling),
+            (std::uint8_t)(particle.color.b * (1.0f - cooling)),
+            (std::uint8_t)(255.0f * (1.0f - life) * flicker));
 
         particles.append(sf::Vertex(
             { position.x - halfSize, position.y + halfSize }, color));
         particles.append(sf::Vertex(
             { position.x + halfSize, position.y + halfSize }, color));
+        particles.append(sf::Vertex(
+            { position.x + halfSize, position.y - halfSize }, color));
+        particles.append(sf::Vertex(
+            { position.x - halfSize, position.y + halfSize }, color));
         particles.append(sf::Vertex(
             { position.x + halfSize, position.y - halfSize }, color));
         particles.append(sf::Vertex(
@@ -546,8 +551,12 @@ void Processor_ForestFire::updateTexture(const cv::Mat & terrain)
 
     cv::Mat rgba;
     m_projectedState.convertTo(rgba, CV_8UC4, 255.0);
-    m_image.create(rgba.cols, rgba.rows, rgba.ptr());
-    m_texture.loadFromImage(m_image);
+    m_image.resize({ (unsigned int)rgba.cols, (unsigned int)rgba.rows }, rgba.ptr());
+    if (!m_texture.loadFromImage(m_image))
+    {
+        std::cerr << "Failed to load the forest-fire terrain texture.\n";
+        return;
+    }
     m_texture.setSmooth(true);
     m_sprite.setTexture(m_texture, true);
     m_hasFrame = true;
@@ -649,7 +658,7 @@ void Processor_ForestFire::render(sf::RenderWindow & window)
 
     m_sprite.setPosition(m_projector.getTransformedPosition());
     const float scale = m_projector.getTransformedScale();
-    m_sprite.setScale(scale, scale);
+    m_sprite.setScale({ scale, scale });
     if (m_shaderLoaded)
     {
         const sf::Vector2u textureSize = m_texture.getSize();
@@ -673,9 +682,10 @@ void Processor_ForestFire::processEvent(
     const sf::Vector2f & mouse)
 {
     const bool draggingProjection = m_projector.processEvent(event, mouse);
-    if (event.type == sf::Event::MouseButtonReleased
-        && (event.mouseButton.button == sf::Mouse::Left
-            || event.mouseButton.button == sf::Mouse::Middle))
+    if (const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>();
+        mouseReleased
+        && (mouseReleased->button == sf::Mouse::Button::Left
+            || mouseReleased->button == sf::Mouse::Button::Middle))
     {
         m_hasLastTreePaintPosition = false;
         return;
@@ -687,8 +697,8 @@ void Processor_ForestFire::processEvent(
         return;
     }
 
-    if (event.type == sf::Event::MouseButtonPressed
-        && event.mouseButton.button == sf::Mouse::Right)
+    if (const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
+        mousePressed && mousePressed->button == sf::Mouse::Button::Right)
     {
         cv::Point2f terrainPosition;
         if (mapMouseToTerrain(mouse, terrainPosition))
@@ -699,18 +709,18 @@ void Processor_ForestFire::processEvent(
     }
 
     float paintDirection = 0.0f;
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
     {
         paintDirection = 1.0f;
     }
-    else if (sf::Mouse::isButtonPressed(sf::Mouse::Middle))
+    else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Middle))
     {
         paintDirection = -1.0f;
     }
 
     if (paintDirection == 0.0f)
     {
-        if (event.type == sf::Event::MouseMoved)
+        if (event.is<sf::Event::MouseMoved>())
         {
             m_hasLastTreePaintPosition = false;
         }
@@ -724,13 +734,13 @@ void Processor_ForestFire::processEvent(
         return;
     }
 
-    if (event.type == sf::Event::MouseButtonPressed)
+    if (event.is<sf::Event::MouseButtonPressed>())
     {
         applyTreeBrush(terrainPosition, paintDirection);
         m_lastTreePaintPosition = terrainPosition;
         m_hasLastTreePaintPosition = true;
     }
-    else if (event.type == sf::Event::MouseMoved)
+    else if (event.is<sf::Event::MouseMoved>())
     {
         if (m_hasLastTreePaintPosition)
         {

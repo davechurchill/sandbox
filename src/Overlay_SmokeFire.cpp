@@ -146,19 +146,19 @@ void Overlay_SmokeFire::spawnFlame(const Fire & fire)
     const float colorVariation = unitDistribution(m_random);
     if (heat < 0.16f)
     {
-        particle.color = sf::Color(255, 238, (sf::Uint8)(125 + colorVariation * 85.0f));
+        particle.color = sf::Color(255, 238, (std::uint8_t)(125 + colorVariation * 85.0f));
     }
     else if (heat < 0.44f)
     {
-        particle.color = sf::Color(255, (sf::Uint8)(175 + colorVariation * 65.0f), (sf::Uint8)(18 + colorVariation * 45.0f));
+        particle.color = sf::Color(255, (std::uint8_t)(175 + colorVariation * 65.0f), (std::uint8_t)(18 + colorVariation * 45.0f));
     }
     else if (heat < 0.78f)
     {
-        particle.color = sf::Color(255, (sf::Uint8)(82 + colorVariation * 88.0f), (sf::Uint8)(colorVariation * 20.0f));
+        particle.color = sf::Color(255, (std::uint8_t)(82 + colorVariation * 88.0f), (std::uint8_t)(colorVariation * 20.0f));
     }
     else
     {
-        particle.color = sf::Color((sf::Uint8)(215 + colorVariation * 40.0f), (sf::Uint8)(30 + colorVariation * 65.0f), 2);
+        particle.color = sf::Color((std::uint8_t)(215 + colorVariation * 40.0f), (std::uint8_t)(30 + colorVariation * 65.0f), 2);
     }
     m_flames.push_back(particle);
 }
@@ -310,7 +310,7 @@ void Overlay_SmokeFire::renderFlameParticles(
     cv::perspectiveTransform(points, points, projection);
 
     const sf::Vector2f origin = projector.getTransformedPosition();
-    sf::VertexArray particles(sf::Quads);
+    sf::VertexArray particles(sf::PrimitiveType::Triangles);
     for (size_t i = 0; i < m_flames.size(); i++)
     {
         if (!std::isfinite(points[i].x) || !std::isfinite(points[i].y))
@@ -336,16 +336,22 @@ void Overlay_SmokeFire::renderFlameParticles(
         const float halfSize = std::max(0.7f, size * 0.5f);
         const float cooling = std::clamp((life - 0.45f) / 0.55f, 0.0f, 1.0f);
         sf::Color color(
-            (sf::Uint8)(particle.color.r + (190 - particle.color.r) * cooling),
-            (sf::Uint8)(particle.color.g + (25 - particle.color.g) * cooling),
-            (sf::Uint8)(particle.color.b * (1.0f - cooling)),
-            (sf::Uint8)(255.0f * (1.0f - life) * flicker));
+            (std::uint8_t)(particle.color.r + (190 - particle.color.r) * cooling),
+            (std::uint8_t)(particle.color.g + (25 - particle.color.g) * cooling),
+            (std::uint8_t)(particle.color.b * (1.0f - cooling)),
+            (std::uint8_t)(255.0f * (1.0f - life) * flicker));
 
         particles.append(sf::Vertex(
             { position.x - halfSize, position.y + halfSize },
             color));
         particles.append(sf::Vertex(
             { position.x + halfSize, position.y + halfSize },
+            color));
+        particles.append(sf::Vertex(
+            { position.x + halfSize, position.y - halfSize },
+            color));
+        particles.append(sf::Vertex(
+            { position.x - halfSize, position.y + halfSize },
             color));
         particles.append(sf::Vertex(
             { position.x + halfSize, position.y - halfSize },
@@ -400,13 +406,13 @@ void Overlay_SmokeFire::renderSmoke(
             origin.x + points[i].x * scale,
             origin.y + points[i].y * scale - clearance * 120.0f * scale);
         const float radius = particle.size * (5.5f + life * 14.0f);
-        const sf::Uint8 alpha = (sf::Uint8)(105.0f * std::pow(1.0f - life, 1.25f));
-        const sf::Uint8 shade = (sf::Uint8)(58 + life * 72);
+        const std::uint8_t alpha = (std::uint8_t)(105.0f * std::pow(1.0f - life, 1.25f));
+        const std::uint8_t shade = (std::uint8_t)(58 + life * 72);
 
         sf::CircleShape puff(radius, 24);
-        puff.setOrigin(radius, radius);
+        puff.setOrigin({ radius, radius });
         puff.setPosition(position);
-        puff.setScale(1.22f, 0.86f);
+        puff.setScale({ 1.22f, 0.86f });
         puff.setFillColor(sf::Color(shade, shade, shade, alpha));
         window.draw(puff, sf::BlendAlpha);
     }
@@ -503,8 +509,9 @@ void Overlay_SmokeFire::processOverlayEvent(
 {
     m_processor = &processor;
     const bool draggingProjection = processor.projector().processEvent(event, mouse);
-    if (event.type != sf::Event::MouseButtonPressed
-        || event.mouseButton.button != sf::Mouse::Left
+    const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
+    if (!mousePressed
+        || mousePressed->button != sf::Mouse::Button::Left
         || draggingProjection || ImGui::GetIO().WantCaptureMouse)
     {
         return;

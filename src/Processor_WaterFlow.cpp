@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <vector>
 
 namespace
@@ -29,7 +30,7 @@ SandBoxProjector & Processor_WaterFlow::activeProjector()
 
 void Processor_WaterFlow::reloadShader()
 {
-    m_shaderLoaded = m_shader.loadFromFile(WaterShaderPath, sf::Shader::Fragment);
+    m_shaderLoaded = m_shader.loadFromFile(WaterShaderPath, sf::Shader::Type::Fragment);
     if (m_shaderLoaded)
     {
         m_shader.setUniform("currentTexture", sf::Shader::CurrentTexture);
@@ -254,8 +255,12 @@ void Processor_WaterFlow::buildImage(const cv::Mat & terrain)
         return;
     }
 
-    m_image.create(m_projectedImage.cols, m_projectedImage.rows, m_projectedImage.ptr());
-    m_texture.loadFromImage(m_image);
+    m_image.resize({ (unsigned int)m_projectedImage.cols, (unsigned int)m_projectedImage.rows }, m_projectedImage.ptr());
+    if (!m_texture.loadFromImage(m_image))
+    {
+        std::cerr << "Failed to load the water-flow texture.\n";
+        return;
+    }
     m_texture.setSmooth(true);
     m_sprite.setTexture(m_texture, true);
     m_hasFrame = true;
@@ -323,7 +328,7 @@ void Processor_WaterFlow::renderWater(sf::RenderWindow & window, bool overlayOnl
         SandBoxProjector & projector = activeProjector();
         m_sprite.setPosition(projector.getTransformedPosition());
         const float scale = projector.getTransformedScale();
-        m_sprite.setScale(scale, scale);
+        m_sprite.setScale({ scale, scale });
 
         if (m_shaderLoaded)
         {
@@ -343,7 +348,8 @@ void Processor_WaterFlow::processEvent(const sf::Event & event, const sf::Vector
 {
     const bool draggingProjection = activeProjector().processEvent(event, mouse);
 
-    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+    if (const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>();
+        mouseReleased && mouseReleased->button == sf::Mouse::Button::Left)
     {
         m_rainBrushActive = false;
         return;
@@ -354,12 +360,13 @@ void Processor_WaterFlow::processEvent(const sf::Event & event, const sf::Vector
         return;
     }
 
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+    if (const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
+        mousePressed && mousePressed->button == sf::Mouse::Button::Left)
     {
         m_rainBrushActive = mapMouseToTerrain(mouse, m_rainBrushPosition);
         m_rainPulsePending = m_rainBrushActive;
     }
-    else if (event.type == sf::Event::MouseMoved && m_rainBrushActive)
+    else if (event.is<sf::Event::MouseMoved>() && m_rainBrushActive)
     {
         if (!mapMouseToTerrain(mouse, m_rainBrushPosition))
         {

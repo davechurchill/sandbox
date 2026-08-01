@@ -13,7 +13,7 @@ class Source_Waves : public TopographySource
 
     sf::Image           m_image;
     sf::Texture         m_texture;
-    sf::Sprite          m_sprite;
+    sf::Sprite          m_sprite{ m_texture };
     sf::Clock           m_clock;
 
     int                 m_animationMode = 1;

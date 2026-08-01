@@ -13,7 +13,7 @@ class Processor_TerrainLighting : public TopographyProcessor
     cv::Mat             m_projectedTopography;
     sf::Image           m_image;
     sf::Texture         m_texture;
-    sf::Sprite          m_sprite;
+    sf::Sprite          m_sprite{ m_texture };
     sf::Shader          m_shader;
 
     float               m_lightAzimuth = 315.0f;

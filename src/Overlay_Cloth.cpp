@@ -292,8 +292,8 @@ void Overlay_Cloth::renderCloth(
             origin.y + projectedPoints[i].y * scale - clearance * scale * 0.42f };
     }
 
-    sf::VertexArray fabric(sf::Triangles);
-    const sf::Uint8 fabricAlpha = (sf::Uint8)std::clamp(
+    sf::VertexArray fabric(sf::PrimitiveType::Triangles);
+    const std::uint8_t fabricAlpha = (std::uint8_t)std::clamp(
         (int)std::round((1.0f - m_sheetTransparency) * 255.0f),
         0,
         255);
@@ -318,16 +318,16 @@ void Overlay_Cloth::renderCloth(
     }
     window.draw(fabric, sf::BlendAlpha);
 
-    sf::VertexArray grid(sf::Lines);
+    sf::VertexArray grid(sf::PrimitiveType::Lines);
     std::vector<sf::Color> gridColors(m_nodes.size());
     for (size_t i = 0; i < m_nodes.size(); i++)
     {
         const float normalizedHeight = std::clamp(m_nodes[i].position.z / verticalScale, 0.0f, 1.0f);
         const float brightness = 0.78f + normalizedHeight * 0.22f;
         gridColors[i] = sf::Color(
-            (sf::Uint8)(205.0f * brightness),
-            (sf::Uint8)(235.0f * brightness),
-            (sf::Uint8)(247.0f * brightness),
+            (std::uint8_t)(205.0f * brightness),
+            (std::uint8_t)(235.0f * brightness),
+            (std::uint8_t)(247.0f * brightness),
             255);
     }
     for (int row = 0; row <= m_cellsY; row++)
@@ -429,8 +429,9 @@ void Overlay_Cloth::processOverlayEvent(
 {
     m_processor = &processor;
     const bool draggingProjection = processor.projector().processEvent(event, mouse);
-    if (event.type != sf::Event::MouseButtonPressed
-        || event.mouseButton.button != sf::Mouse::Left
+    const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
+    if (!mousePressed
+        || mousePressed->button != sf::Mouse::Button::Left
         || draggingProjection || ImGui::GetIO().WantCaptureMouse)
     {
         return;

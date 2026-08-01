@@ -36,7 +36,7 @@ namespace Tools
 
         // Create SFML image
         sf::Image image;
-        image.create(rgb.cols, rgb.rows, rgb.ptr());
+        image.resize({ (unsigned int)rgb.cols, (unsigned int)rgb.rows }, rgb.ptr());
 
         return image;
     }

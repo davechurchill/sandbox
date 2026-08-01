@@ -3,8 +3,8 @@
 
 Scene::Scene(GameEngine * game)
     : m_game(game)
-    , m_lineStrip(sf::LinesStrip)
-    , m_quadArray(sf::Quads)
+    , m_lineStrip(sf::PrimitiveType::LineStrip)
+    , m_quadArray(sf::PrimitiveType::Triangles)
 { 
     
 }

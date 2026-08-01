@@ -40,7 +40,7 @@ class Source_Camera : public TopographySource
     cv::Mat             m_cvColorImage;
     sf::Image           m_sfColorImage;
     sf::Texture         m_sfColorTexture;
-    sf::Sprite          m_colorSprite;
+    sf::Sprite          m_colorSprite{ m_sfColorTexture };
 
     cv::Mat             m_cvDepthImage16u;
     cv::Mat             m_cvDepthImage32f;
@@ -49,7 +49,7 @@ class Source_Camera : public TopographySource
     cv::Mat             m_data;
     sf::Image           m_sfDepthImage;
     sf::Texture         m_sfDepthTexture;
-    sf::Sprite          m_depthSprite;
+    sf::Sprite          m_depthSprite{ m_sfDepthTexture };
     float               m_depthFrameUnits = 0.0f;
     float               m_maxDistance = 1.13f;
     float               m_minDistance = 0.90f;

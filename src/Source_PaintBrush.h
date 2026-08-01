@@ -14,7 +14,7 @@ class Source_PaintBrush : public TopographySource
 
     sf::Image           m_image;
     sf::Texture         m_texture;
-    sf::Sprite          m_sprite;
+    sf::Sprite          m_sprite{ m_texture };
 
     float               m_brushSize = 30.0f;
     float               m_brushBlur = 12.0f;

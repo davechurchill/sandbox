@@ -31,7 +31,7 @@ class Processor_FishPond : public TopographyProcessor
     cv::Size            m_topographySize;
     sf::Image           m_image;
     sf::Texture         m_texture;
-    sf::Sprite          m_sprite;
+    sf::Sprite          m_sprite{ m_texture };
     sf::Shader          m_shader;
 
     std::vector<Fish>   m_fish;

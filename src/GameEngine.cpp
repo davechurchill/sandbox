@@ -14,10 +14,15 @@ GameEngine::GameEngine()
 
 void GameEngine::init()
 {
-    m_window.create(sf::VideoMode(1600, 900), "Sandbox");
+    m_window.create(sf::VideoMode({ 1600, 900 }), "Sandbox");
     //m_window.setFramerateLimit(60);
 
-    ImGui::SFML::Init(m_window);
+    if (!ImGui::SFML::Init(m_window))
+    {
+        std::cerr << "Failed to initialize ImGui-SFML.\n";
+        m_running = false;
+        return;
+    }
     m_originalStyle = ImGui::GetStyle();
 }
 

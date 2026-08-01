@@ -5,6 +5,8 @@
 #include "imgui.h"
 #include "imgui-SFML.h"
 
+#include <iostream>
+
 namespace {
     const std::string shaderPathColor = "shaders/shader_contour_color.frag";
     const std::string shaderPathHeat = "shaders/shader_heat.frag";
@@ -13,8 +15,14 @@ namespace {
 void Processor_Heat::init()
 {
     setInitialHeatSources();
-    m_shader_color.loadFromFile(shaderPathColor, sf::Shader::Fragment);
-    m_shader_heat.loadFromFile(shaderPathHeat, sf::Shader::Fragment);
+    if (!m_shader_color.loadFromFile(shaderPathColor, sf::Shader::Type::Fragment))
+    {
+        std::cerr << "Failed to load the heat color shader.\n";
+    }
+    if (!m_shader_heat.loadFromFile(shaderPathHeat, sf::Shader::Type::Fragment))
+    {
+        std::cerr << "Failed to load the heat shader.\n";
+    }
 }
 
 void Processor_Heat::setInitialHeatSources()
@@ -74,8 +82,14 @@ void Processor_Heat::imgui()
 
     if (ImGui::Button("Reload Shader"))
     {
-        m_shader_color.loadFromFile(shaderPathColor, sf::Shader::Fragment);
-        m_shader_heat.loadFromFile(shaderPathHeat, sf::Shader::Fragment);
+        if (!m_shader_color.loadFromFile(shaderPathColor, sf::Shader::Type::Fragment))
+        {
+            std::cerr << "Failed to reload the heat color shader.\n";
+        }
+        if (!m_shader_heat.loadFromFile(shaderPathHeat, sf::Shader::Type::Fragment))
+        {
+            std::cerr << "Failed to reload the heat shader.\n";
+        }
     }
 
     ImGui::Checkbox("##Contours", &m_drawContours);
@@ -95,7 +109,7 @@ void Processor_Heat::render(sf::RenderWindow& window)
         {
             m_sfTransformedDepthSpriteColor.setPosition(m_projector.getTransformedPosition());
             float scale = m_projector.getTransformedScale();
-            m_sfTransformedDepthSpriteColor.setScale(scale, scale);
+            m_sfTransformedDepthSpriteColor.setScale({ scale, scale });
 
             static sf::Clock time;
 
@@ -109,7 +123,7 @@ void Processor_Heat::render(sf::RenderWindow& window)
         {
             m_sfTransformedDepthSpriteHeat.setPosition(m_projector.getTransformedPosition());
             float scale = m_projector.getTransformedScale();
-            m_sfTransformedDepthSpriteHeat.setScale(scale, scale);
+            m_sfTransformedDepthSpriteHeat.setScale({ scale, scale });
 
             //Change color scheme
             m_shader_heat.setUniform("contour", m_drawContours);
@@ -127,7 +141,7 @@ void Processor_Heat::processEvent(const sf::Event& event, const sf::Vector2f& mo
     
     m_projector.processEvent(event, mouse);
 
-    if (sf::Mouse::isButtonPressed(sf::Mouse::Left) &&
+    if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left) &&
         m_selectedSource >= 0 && m_selectedSource < (int)m_heatGrid.getSources().size())
     {
         sf::Vector2f diff = mouse - m_previousMouse;
@@ -183,8 +197,14 @@ void Processor_Heat::processTopography(const IntermediateData& data)
 
                 {
                     PROFILE_SCOPE("SFML Texture From Image");
-                    m_sfTransformedDepthTextureColor.loadFromImage(m_sfTransformedDepthImageColor);
-                    m_sfTransformedDepthSpriteColor.setTexture(m_sfTransformedDepthTextureColor, true);
+                    if (!m_sfTransformedDepthTextureColor.loadFromImage(m_sfTransformedDepthImageColor))
+                    {
+                        std::cerr << "Failed to load the heat color texture.\n";
+                    }
+                    else
+                    {
+                        m_sfTransformedDepthSpriteColor.setTexture(m_sfTransformedDepthTextureColor, true);
+                    }
                 }
             }
         }
@@ -218,8 +238,14 @@ void Processor_Heat::processTopography(const IntermediateData& data)
 
                 {
                     PROFILE_SCOPE("SFML Texture From Image");
-                    m_sfTransformedDepthTextureHeat.loadFromImage(m_sfTransformedDepthImageHeat);
-                    m_sfTransformedDepthSpriteHeat.setTexture(m_sfTransformedDepthTextureHeat, true);
+                    if (!m_sfTransformedDepthTextureHeat.loadFromImage(m_sfTransformedDepthImageHeat))
+                    {
+                        std::cerr << "Failed to load the heat-map texture.\n";
+                    }
+                    else
+                    {
+                        m_sfTransformedDepthSpriteHeat.setTexture(m_sfTransformedDepthTextureHeat, true);
+                    }
                 }
             }
         }

@@ -38,7 +38,7 @@ class Processor_Balls : public TopographyProcessor, public TopographyOverlay
 
     sf::Image           m_image;
     sf::Texture         m_texture;
-    sf::Sprite          m_sprite;
+    sf::Sprite          m_sprite{ m_texture };
     sf::Shader          m_shader;
     sf::Shader          m_ballShader;
 

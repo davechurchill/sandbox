@@ -15,7 +15,7 @@ DataWarper::DataWarper()
 {
     float radius = 10.0;
     sf::CircleShape circle(radius, 64);
-    circle.setOrigin(radius, radius);
+    circle.setOrigin({ radius, radius });
     circle.setFillColor(sf::Color::Green);
     
     // create the circles for the interior box selection
@@ -122,21 +122,23 @@ void DataWarper::processEvent(const sf::Event & event, const sf::Vector2f & mous
     PROFILE_FUNCTION();
 
     // detect if we have clicked a circle
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+    if (const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
+        mousePressed && mousePressed->button == sf::Mouse::Button::Left)
     {
         m_dragWarpPoint = Tools::getClickedCircleIndex(mouse.x, mouse.y, m_warpCircles);
         m_dragPlanarPoint = Tools::getClickedCircleIndex(mouse.x, mouse.y, m_planarCircles);
     }
 
     // if we have released the mouse button
-    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+    if (const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>();
+        mouseReleased && mouseReleased->button == sf::Mouse::Button::Left)
     {
         m_dragWarpPoint = -1;
         m_dragPlanarPoint = -1;
     }
 
     // if the mouse moved and we are dragging something, update its position and regenerate the matrix
-    if (event.type == sf::Event::MouseMoved)
+    if (event.is<sf::Event::MouseMoved>())
     {
         if (m_dragWarpPoint != -1) 
         {
@@ -168,7 +170,7 @@ void DataWarper::render(sf::RenderWindow & window)
             window.draw(m_warpCircles[i]);
         }
 
-        sf::VertexArray boxInteriorVertices(sf::LinesStrip);
+        sf::VertexArray boxInteriorVertices(sf::PrimitiveType::LineStrip);
         boxInteriorVertices.append(sf::Vertex(m_warpCircles[0].getPosition()));
         boxInteriorVertices.append(sf::Vertex(m_warpCircles[1].getPosition()));
         boxInteriorVertices.append(sf::Vertex(m_warpCircles[3].getPosition()));
@@ -186,7 +188,7 @@ void DataWarper::render(sf::RenderWindow & window)
             window.draw(m_planarCircles[i]);
         }
 
-        sf::VertexArray planarVertices(sf::LinesStrip);
+        sf::VertexArray planarVertices(sf::PrimitiveType::LineStrip);
         planarVertices.append(sf::Vertex(m_planarCircles[0].getPosition()));
         planarVertices.append(sf::Vertex(m_planarCircles[1].getPosition()));
         planarVertices.append(sf::Vertex(m_planarCircles[2].getPosition()));

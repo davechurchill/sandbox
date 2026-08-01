@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cfloat>
 #include <filesystem>
+#include <iostream>
 
 void Source_Snapshot::init()
 {
@@ -226,7 +227,12 @@ bool Source_Snapshot::loadDataDump(const std::string & filename)
     }
 
     m_image = Tools::matToSfImage(m_snapshot);
-    m_texture.loadFromImage(m_image);
+    if (!m_texture.loadFromImage(m_image))
+    {
+        m_loadError = "The selected snapshot could not be uploaded to the graphics card.";
+        std::cerr << m_loadError << '\n';
+        return false;
+    }
     m_sprite.setTexture(m_texture, true);
     m_loadedSnapshot = filename;
     m_loadError.clear();

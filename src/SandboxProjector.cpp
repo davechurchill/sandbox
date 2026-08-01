@@ -15,7 +15,7 @@ SandBoxProjector::SandBoxProjector()
 {
     float radius = 10.0;
     sf::CircleShape circle(radius, 64);
-    circle.setOrigin(radius, radius);
+    circle.setOrigin({ radius, radius });
     circle.setFillColor(sf::Color::Green);
 
     // create the circles for the display correction
@@ -64,19 +64,21 @@ bool SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f 
     PROFILE_FUNCTION();
 
     // detect if we have clicked a circle
-    if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+    if (const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
+        mousePressed && mousePressed->button == sf::Mouse::Button::Left)
     {
         m_dragPoint = Tools::getClickedCircleIndex(mouse.x, mouse.y, m_projectionCircles);
     }
 
     // if we have released the mouse button
-    if (event.type == sf::Event::MouseButtonReleased && event.mouseButton.button == sf::Mouse::Left)
+    if (const auto* mouseReleased = event.getIf<sf::Event::MouseButtonReleased>();
+        mouseReleased && mouseReleased->button == sf::Mouse::Button::Left)
     {
         m_dragPoint = -1;
     }
 
     // if the mouse moved and we are dragging something, update its position and regenerate the matrix
-    if (event.type == sf::Event::MouseMoved)
+    if (event.is<sf::Event::MouseMoved>())
     {
         if (m_dragPoint != -1)
         {
@@ -97,11 +99,11 @@ void SandBoxProjector::render(sf::RenderWindow & window)
     {
         for (size_t i = 0; i < m_projectionCircles.size(); ++i)
         {
-            m_projectionCircles[i].setPosition(m_projectionPoints[i].x, m_projectionPoints[i].y);
+            m_projectionCircles[i].setPosition({ m_projectionPoints[i].x, m_projectionPoints[i].y });
             window.draw(m_projectionCircles[i]);
         }
 
-        sf::VertexArray projectionVertices(sf::LinesStrip);
+        sf::VertexArray projectionVertices(sf::PrimitiveType::LineStrip);
         projectionVertices.append(sf::Vertex(m_projectionCircles[0].getPosition()));
         projectionVertices.append(sf::Vertex(m_projectionCircles[1].getPosition()));
         projectionVertices.append(sf::Vertex(m_projectionCircles[3].getPosition()));
