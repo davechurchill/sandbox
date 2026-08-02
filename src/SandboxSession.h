@@ -23,7 +23,7 @@ class SandboxSession
     std::uint64_t m_terrainRevision = 0;
     std::uint64_t m_sourceRevision = 0;
     Settings m_settings;
-    SandBoxProjector m_projector;
+    SandboxProjector m_projector;
 
     std::string m_sourceName = "Camera";
     std::string m_visualizerName;
@@ -43,7 +43,7 @@ public:
     Visualizer * visualizer() const;
     Visualizer * inputVisualizer() const;
     bool visualizerEnabled(std::string_view name) const;
-    SandBoxProjector & projector() { return m_projector; }
+    SandboxProjector & projector() { return m_projector; }
     const cv::Mat & topography() const { return m_topography; }
 
     const std::string & sourceName() const { return m_sourceName; }

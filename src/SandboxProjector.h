@@ -8,7 +8,7 @@
 
 #include "Settings.hpp"
 
-class SandBoxProjector
+class SandboxProjector
 {
     cv::Mat                         m_projectionMatrix;
     cv::Mat                         m_terrainSource;
@@ -50,7 +50,7 @@ class SandBoxProjector
 
 public:
 
-    SandBoxProjector();
+    SandboxProjector();
     void imgui();
     void save(Settings & save) const;
     void load(const Settings & save);

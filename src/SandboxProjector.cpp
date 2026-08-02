@@ -1,4 +1,4 @@
-#include "SandBoxProjector.h"
+#include "SandboxProjector.h"
 #include "Profiler.hpp"
 #include "imgui-SFML.h"
 #include "imgui.h"
@@ -14,13 +14,13 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp> 
 
-SandBoxProjector::SandBoxProjector()
+SandboxProjector::SandboxProjector()
 {
     m_projectionCircles = std::vector<sf::CircleShape>(4, sf::CircleShape(m_handleSize, 64));
     updateProjectionHandles();
 }
 
-sf::FloatRect SandBoxProjector::projectionBounds() const
+sf::FloatRect SandboxProjector::projectionBounds() const
 {
     sf::Vector2f minimum{ m_projectionPoints[0].x, m_projectionPoints[0].y };
     sf::Vector2f maximum = minimum;
@@ -34,7 +34,7 @@ sf::FloatRect SandBoxProjector::projectionBounds() const
     return { minimum, maximum - minimum };
 }
 
-void SandBoxProjector::project(const cv::Mat & input, cv::Mat & output)
+void SandboxProjector::project(const cv::Mat & input, cv::Mat & output)
 {
     if (input.empty())
     {
@@ -62,7 +62,7 @@ void SandBoxProjector::project(const cv::Mat & input, cv::Mat & output)
     cv::warpPerspective(input, output, m_projectionMatrix, cv::Size(m_finalWidth, m_finalHeight));
 }
 
-void SandBoxProjector::setTerrain(const cv::Mat & source, std::uint64_t terrainRevision)
+void SandboxProjector::setTerrain(const cv::Mat & source, std::uint64_t terrainRevision)
 {
     PROFILE_FUNCTION();
 
@@ -100,7 +100,7 @@ void SandBoxProjector::setTerrain(const cv::Mat & source, std::uint64_t terrainR
     }
 }
 
-bool SandBoxProjector::ensureTerrainTexture()
+bool SandboxProjector::ensureTerrainTexture()
 {
     if (m_terrainSource.empty())
     {
@@ -183,7 +183,7 @@ bool SandBoxProjector::ensureTerrainTexture()
     return true;
 }
 
-bool SandBoxProjector::drawTerrain(sf::RenderWindow & window, sf::Shader * shader, bool smooth)
+bool SandboxProjector::drawTerrain(sf::RenderWindow & window, sf::Shader * shader, bool smooth)
 {
     if (!ensureTerrainTexture())
     {
@@ -208,7 +208,7 @@ bool SandBoxProjector::drawTerrain(sf::RenderWindow & window, sf::Shader * shade
     return true;
 }
 
-const sf::Texture * SandBoxProjector::terrainTexture(bool smooth)
+const sf::Texture * SandboxProjector::terrainTexture(bool smooth)
 {
     if (!ensureTerrainTexture())
     {
@@ -221,7 +221,7 @@ const sf::Texture * SandBoxProjector::terrainTexture(bool smooth)
     return &m_terrainTexture;
 }
 
-void SandBoxProjector::imgui()
+void SandboxProjector::imgui()
 {
     PROFILE_FUNCTION();
 
@@ -289,7 +289,7 @@ void SandBoxProjector::imgui()
     ImGui::SliderFloat("Line Opacity", &m_lineOpacity, 0.0f, 1.0f);
 }
 
-void SandBoxProjector::resetProjectionPoints()
+void SandboxProjector::resetProjectionPoints()
 {
     m_dragPoint = -1;
     m_projectionPoints[0] = { 400.0f, 400.0f };
@@ -300,7 +300,7 @@ void SandBoxProjector::resetProjectionPoints()
     regenerateProjection();
 }
 
-void SandBoxProjector::updateProjectionHandles()
+void SandboxProjector::updateProjectionHandles()
 {
     for (size_t index = 0; index < m_projectionCircles.size(); index++)
     {
@@ -312,7 +312,7 @@ void SandBoxProjector::updateProjectionHandles()
     }
 }
 
-bool SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
+bool SandboxProjector::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
 {
     PROFILE_FUNCTION();
 
@@ -350,7 +350,7 @@ bool SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f 
     return m_dragPoint != -1;
 }
 
-bool SandBoxProjector::unprojectPoint(
+bool SandboxProjector::unprojectPoint(
     const sf::Vector2f & point,
     sf::Vector2f & dataPoint)
 {
@@ -381,7 +381,7 @@ bool SandBoxProjector::unprojectPoint(
     return true;
 }
 
-void SandBoxProjector::render(sf::RenderWindow & window)
+void SandboxProjector::render(sf::RenderWindow & window)
 {
     if (!m_drawLines) { return; }
     PROFILE_FUNCTION();
@@ -432,7 +432,7 @@ void SandBoxProjector::render(sf::RenderWindow & window)
     window.draw(projectionVertices);
 }
 
-void SandBoxProjector::generateProjection()
+void SandboxProjector::generateProjection()
 {
     PROFILE_FUNCTION();
 
@@ -519,13 +519,13 @@ void SandBoxProjector::generateProjection()
     }
 }
 
-void SandBoxProjector::regenerateProjection()
+void SandboxProjector::regenerateProjection()
 {
     generateProjection();
     m_terrainTextureNeedsUpdate = true;
 }
 
-void SandBoxProjector::save(Settings& save) const
+void SandboxProjector::save(Settings& save) const
 {
     Settings::json & settings = save.section("Projection");
     settings["m_projectionPoints"] = Settings::json::array();
@@ -546,7 +546,7 @@ void SandBoxProjector::save(Settings& save) const
     settings["m_lineOpacity"] = m_lineOpacity;
 }
 
-void SandBoxProjector::load(const Settings& save)
+void SandboxProjector::load(const Settings& save)
 {
     const Settings::json & settings = save.section("Projection");
     const auto points = settings.find("m_projectionPoints");

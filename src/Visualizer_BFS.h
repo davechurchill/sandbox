@@ -39,7 +39,7 @@ class Visualizer_BFS final : public Visualizer
 
 public:
     static constexpr std::string_view Name = "BFS";
-    explicit Visualizer_BFS(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_BFS(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

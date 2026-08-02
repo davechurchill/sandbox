@@ -58,7 +58,7 @@ class Visualizer_FishPond : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Fish Pond";
-    explicit Visualizer_FishPond(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_FishPond(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

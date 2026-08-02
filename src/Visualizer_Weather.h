@@ -50,7 +50,7 @@ class Visualizer_Weather : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Weather";
-    explicit Visualizer_Weather(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_Weather(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

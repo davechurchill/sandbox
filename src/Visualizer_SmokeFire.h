@@ -77,7 +77,7 @@ class Visualizer_SmokeFire : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Smoke and Fire";
-    explicit Visualizer_SmokeFire(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_SmokeFire(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     bool usesCanvasInput() const override { return true; }
     void init() override;

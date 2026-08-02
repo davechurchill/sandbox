@@ -80,7 +80,7 @@ bool Visualizer_AStar::mapMouseToTerrain(
         return false;
     }
 
-    SandBoxProjector & projector = this->projector();
+    SandboxProjector & projector = this->projector();
     const float scale = projector.getTransformedScale();
     const cv::Mat projection = projector.getProjectionMatrix();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)

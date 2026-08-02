@@ -24,7 +24,7 @@ class Visualizer_MountainPeaks final : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Mountain Peaks";
-    explicit Visualizer_MountainPeaks(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_MountainPeaks(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

@@ -23,7 +23,7 @@ class Visualizer_ColorAdjustment final : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Adjust Terrain Color";
-    explicit Visualizer_ColorAdjustment(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_ColorAdjustment(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

@@ -10,17 +10,17 @@
 
 class Visualizer
 {
-    SandBoxProjector & m_projector;
+    SandboxProjector & m_projector;
     const std::string m_name;
 
 protected:
-    Visualizer(std::string_view name, SandBoxProjector & projector)
+    Visualizer(std::string_view name, SandboxProjector & projector)
         : m_projector(projector)
         , m_name(name)
     {
     }
 
-    SandBoxProjector & projector() const { return m_projector; }
+    SandboxProjector & projector() const { return m_projector; }
 
 public:
     virtual ~Visualizer() = default;

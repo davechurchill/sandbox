@@ -83,7 +83,7 @@ class Visualizer_ForestFire final : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Forest Fire";
-    explicit Visualizer_ForestFire(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_ForestFire(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

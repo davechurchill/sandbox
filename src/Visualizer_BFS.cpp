@@ -264,7 +264,7 @@ void Visualizer_BFS::render(
         return;
     }
 
-    SandBoxProjector & projector = this->projector();
+    SandboxProjector & projector = this->projector();
     m_sprite.setPosition(projector.getTransformedPosition());
     const float scale = projector.getTransformedScale();
     m_sprite.setScale({ scale, scale });

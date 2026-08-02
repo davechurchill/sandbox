@@ -10,7 +10,7 @@ class Visualizer_Colorizer : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Colorizer";
-    explicit Visualizer_Colorizer(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_Colorizer(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init();
     void imgui();

@@ -23,7 +23,7 @@ class Visualizer_ObsidianCaldera : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Obsidian Caldera";
-    explicit Visualizer_ObsidianCaldera(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_ObsidianCaldera(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

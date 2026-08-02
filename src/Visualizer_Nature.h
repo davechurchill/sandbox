@@ -17,7 +17,7 @@ class Visualizer_Nature : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Nature";
-    explicit Visualizer_Nature(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_Nature(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

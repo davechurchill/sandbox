@@ -18,7 +18,7 @@ namespace
     }
 }
 
-SandBoxProjector & Visualizer_WaterFlow::activeProjector()
+SandboxProjector & Visualizer_WaterFlow::activeProjector()
 {
     return projector();
 }
@@ -304,7 +304,7 @@ void Visualizer_WaterFlow::renderWater(sf::RenderWindow & window)
 {
     if (m_hasFrame)
     {
-        SandBoxProjector & projector = activeProjector();
+        SandboxProjector & projector = activeProjector();
         m_sprite.setPosition(projector.getTransformedPosition());
         const float scale = projector.getTransformedScale();
         m_sprite.setScale({ scale, scale });
@@ -357,7 +357,7 @@ bool Visualizer_WaterFlow::mapMouseToTerrain(const sf::Vector2f & mouse, cv::Poi
         return false;
     }
 
-    SandBoxProjector & projector = activeProjector();
+    SandboxProjector & projector = activeProjector();
     const float scale = projector.getTransformedScale();
     if (!std::isfinite(scale) || scale <= 0.0f)
     {

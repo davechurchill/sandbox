@@ -22,7 +22,7 @@ class Visualizer_GravitationalStarfield final : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Gravitational Starfield";
-    explicit Visualizer_GravitationalStarfield(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_GravitationalStarfield(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

@@ -190,7 +190,7 @@ void Visualizer_Weather::renderPrecipitation(sf::RenderWindow & window, bool sno
         return;
     }
 
-    SandBoxProjector & projector = this->projector();
+    SandboxProjector & projector = this->projector();
     const cv::Mat projection = projector.getProjectionMatrix();
     const float scale = projector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -260,7 +260,7 @@ void Visualizer_Weather::renderAtmosphere(sf::RenderWindow & window, bool clouds
         return;
     }
 
-    SandBoxProjector & projector = this->projector();
+    SandboxProjector & projector = this->projector();
     const cv::Mat projection = projector.getProjectionMatrix();
     const float scale = projector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)

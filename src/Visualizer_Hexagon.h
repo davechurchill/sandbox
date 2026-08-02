@@ -20,7 +20,7 @@ class Visualizer_Hexagon final : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Hexagon";
-    explicit Visualizer_Hexagon(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_Hexagon(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

@@ -56,7 +56,7 @@ class Visualizer_Animals : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Animals";
-    explicit Visualizer_Animals(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_Animals(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     bool usesCanvasInput() const override { return true; }
     void init() override;

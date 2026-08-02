@@ -49,7 +49,7 @@ bool Visualizer_SmokeFire::mapMouseToTerrain(
         return false;
     }
 
-    SandBoxProjector & projector = this->projector();
+    SandboxProjector & projector = this->projector();
     const cv::Mat projection = projector.getProjectionMatrix();
     const float scale = projector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -287,7 +287,7 @@ void Visualizer_SmokeFire::renderFlameParticles(
         return;
     }
 
-    SandBoxProjector & projector = this->projector();
+    SandboxProjector & projector = this->projector();
     const cv::Mat projection = projector.getProjectionMatrix();
     const float scale = projector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -365,7 +365,7 @@ void Visualizer_SmokeFire::renderSmoke(
         return;
     }
 
-    SandBoxProjector & projector = this->projector();
+    SandboxProjector & projector = this->projector();
     const cv::Mat projection = projector.getProjectionMatrix();
     const float scale = projector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)

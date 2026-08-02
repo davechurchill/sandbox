@@ -545,7 +545,7 @@ bool Visualizer_Animals::mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point
         return false;
     }
 
-    SandBoxProjector & overlayProjector = projector();
+    SandboxProjector & overlayProjector = projector();
     const float scale = overlayProjector.getTransformedScale();
     if (!std::isfinite(scale) || scale <= 0.0f)
     {
@@ -662,7 +662,7 @@ void Visualizer_Animals::renderSheep(sf::RenderWindow & window)
         return;
     }
 
-    SandBoxProjector & overlayProjector = projector();
+    SandboxProjector & overlayProjector = projector();
     const cv::Mat projection = overlayProjector.getProjectionMatrix();
     const float scale = overlayProjector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -797,7 +797,7 @@ void Visualizer_Animals::renderWolf(sf::RenderWindow & window)
         return;
     }
 
-    SandBoxProjector & overlayProjector = projector();
+    SandboxProjector & overlayProjector = projector();
     const cv::Mat projection = overlayProjector.getProjectionMatrix();
     const float scale = overlayProjector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)

@@ -24,7 +24,7 @@ class Visualizer_Minecraft final : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Minecraft";
-    explicit Visualizer_Minecraft(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_Minecraft(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

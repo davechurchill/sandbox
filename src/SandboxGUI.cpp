@@ -330,7 +330,7 @@ void SandboxGUI::sRender()
     {
         m_session.projector().drawTerrain(target);
     }
-    SandBoxProjector & projector = m_session.projector();
+    SandboxProjector & projector = m_session.projector();
     if (projector.projectionVisible())
     {
         m_session.renderVisualizers(target);

@@ -20,7 +20,7 @@ namespace
     }
 }
 
-SandBoxProjector & Visualizer_Balls::activeProjector()
+SandboxProjector & Visualizer_Balls::activeProjector()
 {
     return projector();
 }
@@ -226,7 +226,7 @@ void Visualizer_Balls::resolveBallCollisions(const cv::Mat & terrain)
 {
     const float visibleBallDiameter = m_ballSize * 1.10f;
     const float fallbackMinimumDistance = getTerrainBallRadius(terrain) * 2.0f * 1.10f;
-    SandBoxProjector & projector = activeProjector();
+    SandboxProjector & projector = activeProjector();
     const cv::Mat projection = projector.getProjectionMatrix();
     const float projectorScale = projector.getTransformedScale();
     const bool useProjectedDistance = !projection.empty()
@@ -653,7 +653,7 @@ void Visualizer_Balls::renderBallTrails(sf::RenderWindow & window)
         return;
     }
 
-    SandBoxProjector & projector = activeProjector();
+    SandboxProjector & projector = activeProjector();
     const cv::Mat projection = projector.getProjectionMatrix();
     const float scale = projector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -702,7 +702,7 @@ void Visualizer_Balls::renderBalls(sf::RenderWindow & window)
         return;
     }
 
-    SandBoxProjector & projector = activeProjector();
+    SandboxProjector & projector = activeProjector();
     const cv::Mat projection = projector.getProjectionMatrix();
     const float scale = projector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -773,7 +773,7 @@ bool Visualizer_Balls::mapMouseToTerrain(
         return false;
     }
 
-    SandBoxProjector & projector = activeProjector();
+    SandboxProjector & projector = activeProjector();
     const float scale = projector.getTransformedScale();
     if (!std::isfinite(scale) || scale <= 0.0f)
     {

@@ -231,7 +231,7 @@ bool Visualizer_Cloth::mapMouseToTerrain(
         return false;
     }
 
-    SandBoxProjector & projector = this->projector();
+    SandboxProjector & projector = this->projector();
     const float scale = projector.getTransformedScale();
     const cv::Mat projection = projector.getProjectionMatrix();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -261,7 +261,7 @@ void Visualizer_Cloth::renderCloth(
         return;
     }
 
-    SandBoxProjector & projector = this->projector();
+    SandboxProjector & projector = this->projector();
     const cv::Mat projection = projector.getProjectionMatrix();
     const float scale = projector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)

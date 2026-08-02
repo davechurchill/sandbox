@@ -47,7 +47,7 @@ class Visualizer_Balls : public Visualizer
     bool                m_defaultBallCreated = false;
     bool                m_randomResetPending = false;
     bool                m_ballShaderLoaded = false;
-    SandBoxProjector & activeProjector();
+    SandboxProjector & activeProjector();
     void reloadShader();
     void resetBalls();
     sf::Color randomBallColor();
@@ -68,7 +68,7 @@ class Visualizer_Balls : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Balls";
-    explicit Visualizer_Balls(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_Balls(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     bool usesCanvasInput() const override { return true; }
     void init() override;

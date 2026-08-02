@@ -34,7 +34,7 @@ class Visualizer_Heat : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Heat";
-    explicit Visualizer_Heat(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_Heat(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init();
     void imgui();

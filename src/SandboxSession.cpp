@@ -43,7 +43,7 @@ namespace
         return nullptr;
     }
 
-    std::unique_ptr<Visualizer> CreateVisualizer(std::string_view name, SandBoxProjector & projector)
+    std::unique_ptr<Visualizer> CreateVisualizer(std::string_view name, SandboxProjector & projector)
     {
         if (name == Visualizer_Blockworld::Name) return std::make_unique<Visualizer_Blockworld>(projector);
         if (name == Visualizer_BioluminescentMycelium::Name) return std::make_unique<Visualizer_BioluminescentMycelium>(projector);

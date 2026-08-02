@@ -22,7 +22,7 @@ class Visualizer_PrismaticGlacier : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Prismatic Crystal Glacier";
-    explicit Visualizer_PrismaticGlacier(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_PrismaticGlacier(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

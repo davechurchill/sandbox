@@ -46,7 +46,7 @@ class Visualizer_AStar final : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Pathfinding (A*)";
-    explicit Visualizer_AStar(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_AStar(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     bool usesCanvasInput() const override { return true; }
     void init() override;

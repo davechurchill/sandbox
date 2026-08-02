@@ -12,14 +12,14 @@ class Visualizer_Vectors : public Visualizer
     sf::Sprite          m_sfTransformedDepthSprite{ m_sfTransformedDepthTexture };
     sf::Shader          m_shader;
     ParticleManager     m_particleManager{};
-    SandBoxProjector & activeProjector();
+    SandboxProjector & activeProjector();
     void imguiControls();
     void updateParticles(const TerrainFrame & data);
     void renderVectors(sf::RenderWindow & window);
 
 public:
     static constexpr std::string_view Name = "Vectors";
-    explicit Visualizer_Vectors(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_Vectors(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

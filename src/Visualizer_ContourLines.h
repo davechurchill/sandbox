@@ -17,7 +17,7 @@ class Visualizer_ContourLines final : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Contour Lines";
-    explicit Visualizer_ContourLines(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_ContourLines(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

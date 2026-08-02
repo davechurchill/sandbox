@@ -23,7 +23,7 @@ class Visualizer_TerrainLighting : public Visualizer
 
 public:
     static constexpr std::string_view Name = "TerrainLighting";
-    explicit Visualizer_TerrainLighting(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_TerrainLighting(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init();
     void imgui();

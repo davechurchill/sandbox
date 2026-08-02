@@ -21,7 +21,7 @@ class Visualizer_BioluminescentMycelium : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Bioluminescent Mycelium";
-    explicit Visualizer_BioluminescentMycelium(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_BioluminescentMycelium(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

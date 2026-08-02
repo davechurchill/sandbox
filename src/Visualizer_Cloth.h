@@ -60,7 +60,7 @@ class Visualizer_Cloth : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Cloth Sheet";
-    explicit Visualizer_Cloth(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_Cloth(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     bool usesCanvasInput() const override { return true; }
     void init() override;

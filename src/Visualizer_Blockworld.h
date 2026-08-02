@@ -16,7 +16,7 @@ class Visualizer_Blockworld : public Visualizer
 
 public:
     static constexpr std::string_view Name = "Blockworld";
-    explicit Visualizer_Blockworld(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_Blockworld(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     void init();
     void imgui();

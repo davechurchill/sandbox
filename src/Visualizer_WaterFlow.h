@@ -34,7 +34,7 @@ class Visualizer_WaterFlow : public Visualizer
     bool                m_rainBrushActive = false;
     bool                m_rainPulsePending = false;
     cv::Point2f         m_rainBrushPosition;
-    SandBoxProjector & activeProjector();
+    SandboxProjector & activeProjector();
     void ensureSimulationSize(const cv::Size & size);
     void addRain(const cv::Mat & terrain, float amount);
     void simulate(const cv::Mat & terrain, float deltaTime);
@@ -48,7 +48,7 @@ class Visualizer_WaterFlow : public Visualizer
 
 public:
     static constexpr std::string_view Name = "WaterFlow";
-    explicit Visualizer_WaterFlow(SandBoxProjector & projector) : Visualizer(Name, projector) {}
+    explicit Visualizer_WaterFlow(SandboxProjector & projector) : Visualizer(Name, projector) {}
 
     bool usesCanvasInput() const override { return m_rainMode == 1; }
     void init() override;

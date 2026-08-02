@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-SandBoxProjector & Visualizer_Vectors::activeProjector()
+SandboxProjector & Visualizer_Vectors::activeProjector()
 {
     return projector();
 }
@@ -67,7 +67,7 @@ void Visualizer_Vectors::renderVectors(sf::RenderWindow & window)
     {
         PROFILE_SCOPE("Draw Transformed Image");
 
-        SandBoxProjector & projector = activeProjector();
+        SandboxProjector & projector = activeProjector();
         m_sfTransformedDepthSprite.setPosition(projector.getTransformedPosition());
         float scale = projector.getTransformedScale();
         m_sfTransformedDepthSprite.setScale({ scale, scale });
@@ -193,7 +193,7 @@ void Visualizer_Vectors::updateParticles(const TerrainFrame& data)
 
     {
         PROFILE_SCOPE("Calibration TransformProjection");
-        SandBoxProjector & projector = activeProjector();
+        SandboxProjector & projector = activeProjector();
         projector.project(top, m_cvTransformedDepthImage32f);
         projector.project(particleGrid, m_cvTransformedParticleGrid32f);
         projector.project(particleHeightGrid, transformedParticleHeightGrid);
