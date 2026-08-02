@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
 #include <opencv2/core.hpp>
 #include <SFML/Graphics.hpp>
@@ -8,7 +8,7 @@
 #include <random>
 #include <vector>
 
-class Visualizer_BFS final : public TopographyVisualizer
+class Visualizer_BFS final : public Visualizer
 {
     struct Particle
     {
@@ -39,14 +39,12 @@ class Visualizer_BFS final : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "BFS";
-    Visualizer_BFS() : TopographyVisualizer(Name) {}
+    explicit Visualizer_BFS(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
-    bool usesCanvasInput() const override { return false; }
     void init() override;
     void imgui() override;
     void process(const TerrainFrame & data) override;
     void render(sf::RenderWindow & window) override;
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
 };

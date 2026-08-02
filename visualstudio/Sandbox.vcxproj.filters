@@ -79,12 +79,6 @@
     <ClCompile Include="..\src\DataWarper.cpp">
       <Filter>calibration</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\HeatGrid.cpp">
-      <Filter>processors\heat</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Visualizer_Heat.cpp">
-      <Filter>processors\heat</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\ParticleManager.cpp">
       <Filter>visualizers\vectors</Filter>
     </ClCompile>
@@ -98,9 +92,6 @@
       <Filter>sources</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Source_PaintBrush.cpp">
-      <Filter>sources</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\Source_Perlin.cpp">
       <Filter>sources</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Source_Snapshot.cpp">
@@ -117,6 +108,11 @@
     </ClCompile>
     <ClCompile Include="..\src\Visualizer_Heat.cpp">
       <Filter>visualizers\heat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HeatGrid.cpp" />
+    <ClCompile Include="..\src\Visualizer_Heat.cpp" />
+    <ClCompile Include="..\src\Source_Perlin.cpp">
+      <Filter>sources\perlin</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -156,9 +152,6 @@
     <ClInclude Include="..\src\SandboxSession.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Logger.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\SandboxGUI.h">
       <Filter>engine</Filter>
     </ClInclude>
@@ -171,13 +164,10 @@
     <ClInclude Include="..\src\Settings.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TerrainContext.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\TerrainFrame.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TopographyVisualizer.hpp">
+    <ClInclude Include="..\src\Visualizer.hpp">
       <Filter>visualizers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Visualizer_Heat.h">
@@ -204,9 +194,6 @@
     <ClInclude Include="..\src\ViewController.hpp">
       <Filter>engine</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\RealSenseTools.hpp">
-      <Filter>camera</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\CameraFilters.hpp">
       <Filter>camera</Filter>
     </ClInclude>
@@ -216,13 +203,7 @@
     <ClInclude Include="..\src\DataWarper.h">
       <Filter>calibration</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Perlin.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Grid.hpp">
-      <Filter>engine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Sandbox.hpp" />
+    <ClInclude Include="..\src\Sandbox.h" />
     <ClInclude Include="..\src\ParticleManager.h">
       <Filter>visualizers\vectors</Filter>
     </ClInclude>
@@ -232,16 +213,13 @@
     <ClInclude Include="..\src\Visualizer_WaterFlow.h">
       <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\TopographySource.hpp">
+    <ClInclude Include="..\src\Source.hpp">
       <Filter>sources</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Source_Camera.h">
       <Filter>sources</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Source_PaintBrush.h">
-      <Filter>sources</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\Source_Perlin.h">
       <Filter>sources</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Source_Snapshot.h">
@@ -253,11 +231,17 @@
     <ClInclude Include="..\src\MarkerDetector.hpp">
       <Filter>camera</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\MarkerData.hpp">
-      <Filter>camera</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\VectorField.h">
       <Filter>visualizers\vectors</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Grid.hpp">
+      <Filter>sources\perlin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Perlin.hpp">
+      <Filter>sources\perlin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Source_Perlin.h">
+      <Filter>sources\perlin</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -331,6 +315,9 @@
     </Filter>
     <Filter Include="visualizers\vectors">
       <UniqueIdentifier>{22e83f83-56dc-408f-9d8d-788309b022db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources\perlin">
+      <UniqueIdentifier>{2715f9d0-61e9-4d0b-bb53-6ae526df3884}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

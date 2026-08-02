@@ -2,9 +2,9 @@
 
 #include "ParticleManager.h"
 #include "Profiler.hpp"
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
-class Visualizer_Vectors : public TopographyVisualizer
+class Visualizer_Vectors : public Visualizer
 {
     cv::Mat             m_cvTransformedDepthImage32f;
     sf::Image           m_sfTransformedDepthImage;
@@ -19,14 +19,12 @@ class Visualizer_Vectors : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Vectors";
-    Visualizer_Vectors() : TopographyVisualizer(Name) {}
+    explicit Visualizer_Vectors(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
-    bool usesCanvasInput() const override { return false; }
     void init() override;
     void imgui() override;
     void process(const TerrainFrame & data) override;
     void render(sf::RenderWindow & window) override;
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
 };

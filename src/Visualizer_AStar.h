@@ -1,11 +1,11 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
 #include <cstdint>
 #include <vector>
 
-class Visualizer_AStar final : public TopographyVisualizer
+class Visualizer_AStar final : public Visualizer
 {
     cv::Mat m_topography;
     cv::Size m_topographySize;
@@ -46,7 +46,7 @@ class Visualizer_AStar final : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Pathfinding (A*)";
-    Visualizer_AStar() : TopographyVisualizer(Name) {}
+    explicit Visualizer_AStar(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
     bool usesCanvasInput() const override { return true; }
     void init() override;

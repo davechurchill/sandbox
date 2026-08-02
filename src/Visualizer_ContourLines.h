@@ -1,10 +1,10 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
 #include <array>
 
-class Visualizer_ContourLines final : public TopographyVisualizer
+class Visualizer_ContourLines final : public Visualizer
 {
     cv::Mat m_projectedTopography;
     sf::Image m_image;
@@ -22,14 +22,12 @@ class Visualizer_ContourLines final : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Contour Lines";
-    Visualizer_ContourLines() : TopographyVisualizer(Name) {}
+    explicit Visualizer_ContourLines(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
-    bool usesCanvasInput() const override { return false; }
     void init() override;
     void imgui() override;
     void process(const TerrainFrame & data) override;
     void render(sf::RenderWindow & window) override;
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
 };

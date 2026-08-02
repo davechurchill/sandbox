@@ -1,11 +1,11 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
 
-class Visualizer_WaterFlow : public TopographyVisualizer
+class Visualizer_WaterFlow : public Visualizer
 {
     cv::Mat             m_water;
     cv::Mat             m_nextWater;
@@ -48,7 +48,7 @@ class Visualizer_WaterFlow : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "WaterFlow";
-    Visualizer_WaterFlow() : TopographyVisualizer(Name) {}
+    explicit Visualizer_WaterFlow(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
     bool usesCanvasInput() const override { return m_rainMode == 1; }
     void init() override;

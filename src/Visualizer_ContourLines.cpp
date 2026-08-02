@@ -51,7 +51,7 @@ void Visualizer_ContourLines::process(
 
     if (!data.heightMap.empty())
     {
-        m_hasFrame = context().projector().updateTexture(
+        m_hasFrame = projector().updateTexture(
                 data.heightMap,
                 m_projectedTopography,
                 m_image,
@@ -72,8 +72,8 @@ void Visualizer_ContourLines::render(
         return;
     }
 
-    m_sprite.setPosition(context().projector().getTransformedPosition());
-    const float scale = context().projector().getTransformedScale();
+    m_sprite.setPosition(projector().getTransformedPosition());
+    const float scale = projector().getTransformedScale();
     m_sprite.setScale({ scale, scale });
 
     m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
@@ -83,12 +83,6 @@ void Visualizer_ContourLines::render(
         m_lineColor[2]));
     m_shader.setUniform("lineOpacity", m_lineOpacity);
     window.draw(m_sprite, &m_shader);
-}
-
-void Visualizer_ContourLines::processEvent(
-    const sf::Event &,
-    const sf::Vector2f &)
-{
 }
 
 void Visualizer_ContourLines::save(Settings & save) const

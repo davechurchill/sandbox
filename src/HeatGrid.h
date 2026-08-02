@@ -1,10 +1,6 @@
 #pragma once
 
 #include "opencv2/core.hpp"
-#include <iostream>
-
-constexpr float CelciusFactor = 100.f;
-constexpr float KelvinDiff = 273.15f;
 
 enum class Algorithms
 {
@@ -33,20 +29,14 @@ struct HeatSource
 			
 	}
 
-    bool contains(cv::Point point)
-    {
-        return m_area.contains(point);
-    }
 };
 
 class HeatGrid
 {
 	cv::Mat m_temps;
-    cv::Mat m_result;
     cv::Mat m_workingTemps;
     cv::Mat m_normalized;
 	bool    m_restartRequested = false;
-	int     m_iterations = 0;
     std::vector<HeatSource> m_sources;
 
 public:
@@ -57,24 +47,13 @@ public:
 
     void update(const cv::Mat& kMat, int iterations);
 
-	const cv::Mat& data() const
-	{
-		return m_temps;
-	}
-
     const cv::Mat& normalizedData() const
     {
         return m_normalized;
     }
 
-	void setIterations(int iterations)
-	{
-        m_iterations = iterations;
-	}
-
 	void reset()
 	{
-        m_iterations = 0;
         m_restartRequested = true;
 	}
 
@@ -100,13 +79,9 @@ public:
 	}
 
 
-    void formulaAvg(const cv::Mat& kMat);
-    void formulaAvgSIMD(const cv::Mat& kMat);
-    void formulaHeat(const cv::Mat& kMat);
+    void formulaAvg(const cv::Mat&);
     void formulaHeatParallel(const cv::Mat& kMat);
-    void formulaHeatOMP(const cv::Mat& kMat);
     void formulaHeatSIMD(const cv::Mat& kMat);
     void formulaHeatKernel(const cv::Mat& kMat);
 	void updateSources();
 };
-

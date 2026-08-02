@@ -26,7 +26,7 @@
 
 namespace
 {
-    std::unique_ptr<TopographySource> createSource(std::string_view name)
+    std::unique_ptr<Source> createSource(std::string_view name)
     {
         if (name == "Camera") return std::make_unique<Source_Camera>();
         if (name == "PaintBrush") return std::make_unique<Source_PaintBrush>();
@@ -36,26 +36,26 @@ namespace
         return nullptr;
     }
 
-    std::unique_ptr<TopographyVisualizer> createVisualizer(std::string_view name)
+    std::unique_ptr<Visualizer> createVisualizer(std::string_view name, SandBoxProjector & projector)
     {
-        if (name == Visualizer_Blockworld::Name) return std::make_unique<Visualizer_Blockworld>();
-        if (name == Visualizer_Colorizer::Name) return std::make_unique<Visualizer_Colorizer>();
-        if (name == Visualizer_FishPond::Name) return std::make_unique<Visualizer_FishPond>();
-        if (name == Visualizer_ForestFire::Name) return std::make_unique<Visualizer_ForestFire>();
-        if (name == Visualizer_Heat::Name) return std::make_unique<Visualizer_Heat>();
-        if (name == Visualizer_Nature::Name) return std::make_unique<Visualizer_Nature>();
-        if (name == Visualizer_TerrainLighting::Name) return std::make_unique<Visualizer_TerrainLighting>();
-        if (name == Visualizer_ColorAdjustment::Name) return std::make_unique<Visualizer_ColorAdjustment>();
-        if (name == Visualizer_Animals::Name) return std::make_unique<Visualizer_Animals>();
-        if (name == Visualizer_BFS::Name) return std::make_unique<Visualizer_BFS>();
-        if (name == Visualizer_Balls::Name) return std::make_unique<Visualizer_Balls>();
-        if (name == Visualizer_Cloth::Name) return std::make_unique<Visualizer_Cloth>();
-        if (name == Visualizer_ContourLines::Name) return std::make_unique<Visualizer_ContourLines>();
-        if (name == Visualizer_AStar::Name) return std::make_unique<Visualizer_AStar>();
-        if (name == Visualizer_SmokeFire::Name) return std::make_unique<Visualizer_SmokeFire>();
-        if (name == Visualizer_Vectors::Name) return std::make_unique<Visualizer_Vectors>();
-        if (name == Visualizer_WaterFlow::Name) return std::make_unique<Visualizer_WaterFlow>();
-        if (name == Visualizer_Weather::Name) return std::make_unique<Visualizer_Weather>();
+        if (name == Visualizer_Blockworld::Name) return std::make_unique<Visualizer_Blockworld>(projector);
+        if (name == Visualizer_Colorizer::Name) return std::make_unique<Visualizer_Colorizer>(projector);
+        if (name == Visualizer_FishPond::Name) return std::make_unique<Visualizer_FishPond>(projector);
+        if (name == Visualizer_ForestFire::Name) return std::make_unique<Visualizer_ForestFire>(projector);
+        if (name == Visualizer_Heat::Name) return std::make_unique<Visualizer_Heat>(projector);
+        if (name == Visualizer_Nature::Name) return std::make_unique<Visualizer_Nature>(projector);
+        if (name == Visualizer_TerrainLighting::Name) return std::make_unique<Visualizer_TerrainLighting>(projector);
+        if (name == Visualizer_ColorAdjustment::Name) return std::make_unique<Visualizer_ColorAdjustment>(projector);
+        if (name == Visualizer_Animals::Name) return std::make_unique<Visualizer_Animals>(projector);
+        if (name == Visualizer_BFS::Name) return std::make_unique<Visualizer_BFS>(projector);
+        if (name == Visualizer_Balls::Name) return std::make_unique<Visualizer_Balls>(projector);
+        if (name == Visualizer_Cloth::Name) return std::make_unique<Visualizer_Cloth>(projector);
+        if (name == Visualizer_ContourLines::Name) return std::make_unique<Visualizer_ContourLines>(projector);
+        if (name == Visualizer_AStar::Name) return std::make_unique<Visualizer_AStar>(projector);
+        if (name == Visualizer_SmokeFire::Name) return std::make_unique<Visualizer_SmokeFire>(projector);
+        if (name == Visualizer_Vectors::Name) return std::make_unique<Visualizer_Vectors>(projector);
+        if (name == Visualizer_WaterFlow::Name) return std::make_unique<Visualizer_WaterFlow>(projector);
+        if (name == Visualizer_Weather::Name) return std::make_unique<Visualizer_Weather>(projector);
         return nullptr;
     }
 }
@@ -131,13 +131,12 @@ SandboxSession::VisualizerState * SandboxSession::ensureVisualizer(std::string_v
         return found->second.visualizer ? &found->second : nullptr;
     }
 
-    std::unique_ptr<TopographyVisualizer> visualizer = createVisualizer(name);
+    std::unique_ptr<Visualizer> visualizer = createVisualizer(name, m_projector);
     if (!visualizer)
     {
         return nullptr;
     }
 
-    visualizer->setContext(m_terrainContext);
     visualizer->init();
     visualizer->load(m_settings);
     const std::string visualizerName(visualizer->name());
@@ -147,7 +146,7 @@ SandboxSession::VisualizerState * SandboxSession::ensureVisualizer(std::string_v
     return &inserted.first->second;
 }
 
-TopographyVisualizer * SandboxSession::visualizer() const
+Visualizer * SandboxSession::visualizer() const
 {
     const auto found = m_visualizerStates.find(m_visualizerName);
     return found != m_visualizerStates.end()
@@ -155,7 +154,7 @@ TopographyVisualizer * SandboxSession::visualizer() const
         : nullptr;
 }
 
-TopographyVisualizer * SandboxSession::inputVisualizer() const
+Visualizer * SandboxSession::inputVisualizer() const
 {
     const auto found = m_visualizerStates.find(m_visualizerName);
     return found != m_visualizerStates.end()
@@ -173,7 +172,7 @@ bool SandboxSession::visualizerEnabled(std::string_view name) const
 void SandboxSession::setSource(std::string_view source, bool saveCurrent)
 {
     std::string selectedName(source);
-    std::unique_ptr<TopographySource> nextSource = createSource(selectedName);
+    std::unique_ptr<Source> nextSource = createSource(selectedName);
     if (!nextSource)
     {
         selectedName = "Camera";
@@ -184,13 +183,11 @@ void SandboxSession::setSource(std::string_view source, bool saveCurrent)
     if (m_source)
     {
         if (saveCurrent) { m_source->save(m_settings); }
-        m_source->deactivate();
     }
     m_sourceName = std::move(selectedName);
     m_source = std::move(nextSource);
     m_source->init();
     m_source->load(m_settings);
-    m_source->activate();
     m_sourceRevision = m_source->revision();
     ++m_terrainRevision;
 
@@ -210,7 +207,7 @@ void SandboxSession::setVisualizer(std::string_view visualizer, bool saveCurrent
 {
     if (saveCurrent)
     {
-        if (TopographyVisualizer * current = this->visualizer())
+        if (Visualizer * current = this->visualizer())
         {
             current->save(m_settings);
         }
@@ -240,8 +237,6 @@ void SandboxSession::setVisualizerEnabled(std::string_view visualizer, bool enab
     VisualizerState * state = ensureVisualizer(visualizer);
     if (state && state->enabled != enabled)
     {
-        if (enabled) { state->visualizer->activate(); }
-        else { state->visualizer->deactivate(); }
         state->enabled = enabled;
     }
 }
@@ -322,13 +317,6 @@ bool SandboxSession::loadSettings(const std::string & filename, bool & doubleSiz
     Settings::read(visualizerSettings, "m_selectedVisualizerName", selectedVisualizer);
 
     setSource(source, false);
-    for (auto & [_, state] : m_visualizerStates)
-    {
-        if (state.enabled && state.visualizer)
-        {
-            state.visualizer->deactivate();
-        }
-    }
     m_visualizerStates.clear();
 
     for (const std::string & id : enabledVisualizers)

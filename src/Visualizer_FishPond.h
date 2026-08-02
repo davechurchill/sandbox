@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
@@ -8,7 +8,7 @@
 #include <random>
 #include <vector>
 
-class Visualizer_FishPond : public TopographyVisualizer
+class Visualizer_FishPond : public Visualizer
 {
     static constexpr int MaximumFishCount = 1000;
 
@@ -63,7 +63,7 @@ class Visualizer_FishPond : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Fish Pond";
-    Visualizer_FishPond() : TopographyVisualizer(Name) {}
+    explicit Visualizer_FishPond(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

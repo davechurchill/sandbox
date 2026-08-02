@@ -4,9 +4,14 @@
 #include <opencv2/opencv.hpp>
 #include "imgui.h"
 #include "imgui-SFML.h"
-#include "MarkerData.hpp"
 
 #include <numeric>
+
+struct MarkerData
+{
+    int id;
+    cv::Point2f center;
+};
 
 class MarkerDetector
 {

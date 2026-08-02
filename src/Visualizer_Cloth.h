@@ -1,13 +1,13 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
 
 #include <vector>
 
-class Visualizer_Cloth : public TopographyVisualizer
+class Visualizer_Cloth : public Visualizer
 {
     struct Vector3
     {
@@ -60,7 +60,7 @@ class Visualizer_Cloth : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Cloth Sheet";
-    Visualizer_Cloth() : TopographyVisualizer(Name) {}
+    explicit Visualizer_Cloth(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
     bool usesCanvasInput() const override { return true; }
     void init() override;

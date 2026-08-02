@@ -86,7 +86,7 @@ void Visualizer_ColorAdjustment::process(
 
     if (!data.heightMap.empty())
     {
-        m_hasFrame = context().projector().updateTexture(
+        m_hasFrame = projector().updateTexture(
             data.heightMap,
             m_projectedTopography,
             m_terrainImage,
@@ -109,8 +109,8 @@ void Visualizer_ColorAdjustment::render(
 
     const sf::Vector2u windowSize = window.getSize();
     const sf::Vector2u terrainSize = m_terrainTexture.getSize();
-    const float scale = context().projector().getTransformedScale();
-    const sf::Vector2f origin = context().projector().getTransformedPosition();
+    const float scale = projector().getTransformedScale();
+    const sf::Vector2f origin = projector().getTransformedPosition();
     if (windowSize.x == 0 || windowSize.y == 0
         || terrainSize.x == 0 || terrainSize.y == 0
         || !std::isfinite(scale) || scale <= 0.0f)
@@ -163,12 +163,6 @@ void Visualizer_ColorAdjustment::render(
     m_shader.setUniform("gamma", m_gamma);
     m_shader.setUniform("temperature", m_temperature);
     window.draw(m_captureSprite, &m_shader);
-}
-
-void Visualizer_ColorAdjustment::processEvent(
-    const sf::Event &,
-    const sf::Vector2f &)
-{
 }
 
 void Visualizer_ColorAdjustment::save(Settings & save) const

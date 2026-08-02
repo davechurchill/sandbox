@@ -1,8 +1,8 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
-class Visualizer_ColorAdjustment final : public TopographyVisualizer
+class Visualizer_ColorAdjustment final : public Visualizer
 {
     cv::Mat m_projectedTopography;
     sf::Image m_terrainImage;
@@ -28,14 +28,12 @@ class Visualizer_ColorAdjustment final : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Adjust Terrain Color";
-    Visualizer_ColorAdjustment() : TopographyVisualizer(Name) {}
+    explicit Visualizer_ColorAdjustment(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
-    bool usesCanvasInput() const override { return false; }
     void init() override;
     void imgui() override;
     void process(const TerrainFrame & data) override;
     void render(sf::RenderWindow & window) override;
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
 };

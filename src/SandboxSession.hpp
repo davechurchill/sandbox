@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Settings.hpp"
-#include "TerrainContext.hpp"
-#include "TopographySource.hpp"
-#include "TopographyVisualizer.hpp"
+#include "Source.hpp"
+#include "Visualizer.hpp"
 
 #include <cstdint>
 #include <map>
@@ -16,7 +15,7 @@ class SandboxSession
 {
     struct VisualizerState
     {
-        std::unique_ptr<TopographyVisualizer> visualizer;
+        std::unique_ptr<Visualizer> visualizer;
         bool enabled = false;
     };
 
@@ -25,12 +24,11 @@ class SandboxSession
     std::uint64_t m_sourceRevision = 0;
     Settings m_settings;
     SandBoxProjector m_projector;
-    TerrainContext m_terrainContext{ m_projector };
 
     std::string m_sourceName = "Camera";
     std::string m_visualizerName = "Colorizer";
 
-    std::unique_ptr<TopographySource> m_source;
+    std::unique_ptr<Source> m_source;
     std::map<std::string, VisualizerState, std::less<>> m_visualizerStates;
 
     VisualizerState * ensureVisualizer(std::string_view name);
@@ -40,10 +38,10 @@ public:
 
     void processFrame(float deltaTime);
 
-    TopographySource & source() { return *m_source; }
-    const TopographySource & source() const { return *m_source; }
-    TopographyVisualizer * visualizer() const;
-    TopographyVisualizer * inputVisualizer() const;
+    Source & source() { return *m_source; }
+    const Source & source() const { return *m_source; }
+    Visualizer * visualizer() const;
+    Visualizer * inputVisualizer() const;
     bool visualizerEnabled(std::string_view name) const;
     SandBoxProjector & projector() { return m_projector; }
     const cv::Mat & topography() const { return m_topography; }

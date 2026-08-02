@@ -103,10 +103,6 @@ void Source_Snapshot::render(sf::RenderWindow & window)
     window.draw(m_sprite);
 }
 
-void Source_Snapshot::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
-{
-}
-
 void Source_Snapshot::refreshSnapshotFiles()
 {
     std::string previousSelection;

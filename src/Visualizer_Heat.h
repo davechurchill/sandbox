@@ -3,9 +3,9 @@
 #include "HeatGrid.h"
 #include "Profiler.hpp"
 #include "Tools.h"
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
-class Visualizer_Heat : public TopographyVisualizer
+class Visualizer_Heat : public Visualizer
 {
     HeatGrid    m_heatGrid;
 
@@ -28,9 +28,6 @@ class Visualizer_Heat : public TopographyVisualizer
     int         m_iterations = 0;
     bool        m_doStep = false;
 
-    bool        m_drawingSource = false;
-    cv::Point   m_sources;
-
     int         m_selectedSource = 0;
 
     sf::Vector2f m_previousMouse;
@@ -39,7 +36,7 @@ class Visualizer_Heat : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Heat";
-    Visualizer_Heat() : TopographyVisualizer(Name) {}
+    explicit Visualizer_Heat(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
     void init();
     void imgui();

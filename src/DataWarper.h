@@ -43,7 +43,6 @@ public:
     void render(sf::RenderWindow & window);
 
     inline bool shouldAdjustHeight() const { return m_applyHeightAdjustment && (m_updatePlane || m_planeValid); }
-    inline const cv::Point2f* getPoints() const { return m_warpPoints; }
 
     void transformPoints(std::vector<cv::Point2f>& points) const;
 

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Profiler.hpp"
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
-class Visualizer_Colorizer : public TopographyVisualizer
+class Visualizer_Colorizer : public Visualizer
 {
     cv::Mat             m_projectedTopography;
     sf::Image           m_image;
@@ -16,7 +16,7 @@ class Visualizer_Colorizer : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Colorizer";
-    Visualizer_Colorizer() : TopographyVisualizer(Name) {}
+    explicit Visualizer_Colorizer(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
     void init();
     void imgui();

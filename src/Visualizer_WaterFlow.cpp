@@ -20,7 +20,7 @@ namespace
 
 SandBoxProjector & Visualizer_WaterFlow::activeProjector()
 {
-    return context().projector();
+    return projector();
 }
 
 void Visualizer_WaterFlow::reloadShader()

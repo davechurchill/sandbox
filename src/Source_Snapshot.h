@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Settings.hpp"
-#include "TopographySource.hpp"
+#include "Source.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-class Source_Snapshot : public TopographySource
+class Source_Snapshot : public Source
 {
     struct SnapshotFile
     {
@@ -37,7 +37,6 @@ public:
     void init();
     void imgui();
     void render(sf::RenderWindow & window);
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void save(Settings & save) const;
     void load(const Settings & save);
 

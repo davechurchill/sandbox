@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <algorithm>
 
 
 template <class T>
@@ -13,8 +12,7 @@ class Grid
     std::vector<T> m_grid;
 
 public:
-
-    Grid() {}
+    Grid() = default;
 
     Grid(size_t width, size_t height, T val)
         : m_width(width)
@@ -22,62 +20,6 @@ public:
         , m_grid(width* height, val)
     {
 
-    }
-
-    void normalize()
-    {
-        T max = maxVal();
-        if (max != 0)
-        {
-            for (T & val : m_grid)
-            {
-                val /= max;
-            }
-        }
-    }
-
-    T maxVal()
-    {
-        return *std::max_element(std::begin(m_grid), std::end(m_grid));
-    }
-
-    T minVal()
-    {
-        return *std::min_element(std::begin(m_grid), std::end(m_grid));
-    }
-
-    inline void refill(size_t width, size_t height, T val)
-    {
-        if (width == m_width && height == m_height)
-        {
-            std::fill(m_grid.begin(), m_grid.end(), val);
-        }
-        else
-        {
-            m_width = width;
-            m_height = height;
-            m_grid = std::vector<T>(width * height, val);
-        }
-    }
-
-    void clear(T val)
-    {
-        std::fill(m_grid.begin(), m_grid.end(), val);
-    }
-
-    inline T& get(size_t index)
-    {
-        return m_grid[index];
-    }
-
-    inline const T& get(size_t index) const
-    {
-        return m_grid[index];
-    }
-
-    inline void set(size_t index, T val)
-    {
-        m_grid[index] = val;
     }
 
     inline T& get(size_t x, size_t y)

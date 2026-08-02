@@ -80,7 +80,7 @@ bool Visualizer_AStar::mapMouseToTerrain(
         return false;
     }
 
-    SandBoxProjector & projector = context().projector();
+    SandBoxProjector & projector = this->projector();
     const float scale = projector.getTransformedScale();
     const cv::Mat projection = projector.getProjectionMatrix();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -462,15 +462,15 @@ void Visualizer_AStar::drawPath(
         terrainPoints.push_back({ (float)m_goal.x, (float)m_goal.y });
     }
 
-    const cv::Mat projection = context().projector().getProjectionMatrix();
-    const float scale = context().projector().getTransformedScale();
+    const cv::Mat projection = projector().getProjectionMatrix();
+    const float scale = projector().getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
     {
         return;
     }
     cv::perspectiveTransform(terrainPoints, terrainPoints, projection);
 
-    const sf::Vector2f origin = context().projector().getTransformedPosition();
+    const sf::Vector2f origin = projector().getTransformedPosition();
     const auto screenPoint = [&](size_t index)
     {
         return sf::Vector2f(

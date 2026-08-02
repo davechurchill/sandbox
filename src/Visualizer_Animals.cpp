@@ -545,7 +545,7 @@ bool Visualizer_Animals::mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point
         return false;
     }
 
-    SandBoxProjector & overlayProjector = context().projector();
+    SandBoxProjector & overlayProjector = projector();
     const float scale = overlayProjector.getTransformedScale();
     if (!std::isfinite(scale) || scale <= 0.0f)
     {
@@ -662,7 +662,7 @@ void Visualizer_Animals::renderSheep(sf::RenderWindow & window)
         return;
     }
 
-    SandBoxProjector & overlayProjector = context().projector();
+    SandBoxProjector & overlayProjector = projector();
     const cv::Mat projection = overlayProjector.getProjectionMatrix();
     const float scale = overlayProjector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -797,7 +797,7 @@ void Visualizer_Animals::renderWolf(sf::RenderWindow & window)
         return;
     }
 
-    SandBoxProjector & overlayProjector = context().projector();
+    SandBoxProjector & overlayProjector = projector();
     const cv::Mat projection = overlayProjector.getProjectionMatrix();
     const float scale = overlayProjector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -892,7 +892,7 @@ void Visualizer_Animals::processEvent(
     const sf::Event & event,
     const sf::Vector2f & mouse)
 {
-    const bool draggingProjection = context().projector().processEvent(event, mouse);
+    const bool draggingProjection = projector().processEvent(event, mouse);
     const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
     if (!mousePressed || mousePressed->button != sf::Mouse::Button::Left
         || draggingProjection || ImGui::GetIO().WantCaptureMouse)

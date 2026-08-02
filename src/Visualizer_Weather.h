@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
@@ -8,7 +8,7 @@
 #include <random>
 #include <vector>
 
-class Visualizer_Weather : public TopographyVisualizer
+class Visualizer_Weather : public Visualizer
 {
     enum class Mode
     {
@@ -50,14 +50,12 @@ class Visualizer_Weather : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Weather";
-    Visualizer_Weather() : TopographyVisualizer(Name) {}
+    explicit Visualizer_Weather(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
-    bool usesCanvasInput() const override { return false; }
     void init() override;
     void imgui() override;
     void process(const TerrainFrame & data) override;
     void render(sf::RenderWindow & window) override;
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
 };

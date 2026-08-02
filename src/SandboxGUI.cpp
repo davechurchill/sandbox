@@ -209,7 +209,7 @@ void SandboxGUI::routeControlEvent(
         break;
     }
     case ControlTab::Visualizer:
-        if (TopographyVisualizer * visualizer = m_session.inputVisualizer())
+        if (Visualizer * visualizer = m_session.inputVisualizer())
         {
             visualizer->processEvent(event, mouse);
         }
@@ -445,7 +445,7 @@ void SandboxGUI::renderUI()
 
             if (expanded)
             {
-                TopographyVisualizer * visualizer = m_session.visualizer();
+                Visualizer * visualizer = m_session.visualizer();
                 if (visualizer && visualizer->name() == name)
                 {
                     ImGui::Indent();

@@ -70,7 +70,7 @@ void Source_Perlin::render(sf::RenderWindow & window)
     window.draw(m_sprite);
 }
 
-void Source_Perlin::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
+void Source_Perlin::processEvent(const sf::Event & event, const sf::Vector2f &)
 {
     if (const auto* keyPressed = event.getIf<sf::Event::KeyPressed>())
     {

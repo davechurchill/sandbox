@@ -22,7 +22,7 @@ namespace
 
 SandBoxProjector & Visualizer_Balls::activeProjector()
 {
-    return context().projector();
+    return projector();
 }
 
 void Visualizer_Balls::reloadShader()

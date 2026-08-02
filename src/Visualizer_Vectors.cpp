@@ -7,7 +7,7 @@
 
 SandBoxProjector & Visualizer_Vectors::activeProjector()
 {
-    return context().projector();
+    return projector();
 }
 
 void Visualizer_Vectors::imguiControls()
@@ -272,12 +272,6 @@ void Visualizer_Vectors::render(
     sf::RenderWindow & window)
 {
     renderVectors(window);
-}
-
-void Visualizer_Vectors::processEvent(
-    const sf::Event &,
-    const sf::Vector2f &)
-{
 }
 
 void Visualizer_Vectors::save(Settings & save) const

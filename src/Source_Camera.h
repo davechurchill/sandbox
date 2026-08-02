@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TopographySource.hpp"
+#include "Source.hpp"
 #include "CameraFilters.hpp"
 #include "DataWarper.h"
 #include "MarkerDetector.hpp"
@@ -16,7 +16,7 @@ enum class alignment
     nothing
 };
 
-class Source_Camera : public TopographySource
+class Source_Camera : public Source
 {
     rs2::pipeline       m_pipe;
     bool                m_cameraConnected = false;
@@ -64,7 +64,6 @@ class Source_Camera : public TopographySource
     void removeHands(const cv::Mat& input, cv::Mat& output, float maxDistance, float minDistance);
 
 public:
-    void init();
     void imgui();
     void render(sf::RenderWindow & window);
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);

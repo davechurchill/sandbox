@@ -168,7 +168,7 @@ void Visualizer_BFS::updateTexture(
     }
 
     cv::Mat transformedParticles;
-    context().projector().project(particleGrid, transformedParticles);
+    projector().project(particleGrid, transformedParticles);
     if (transformedParticles.empty())
     {
         return;
@@ -264,7 +264,7 @@ void Visualizer_BFS::render(
         return;
     }
 
-    SandBoxProjector & projector = context().projector();
+    SandBoxProjector & projector = this->projector();
     m_sprite.setPosition(projector.getTransformedPosition());
     const float scale = projector.getTransformedScale();
     m_sprite.setScale({ scale, scale });
@@ -272,12 +272,6 @@ void Visualizer_BFS::render(
     m_shader.setUniform("overlayOnly", true);
     m_shader.setUniform("reverseDepthAlpha", false);
     window.draw(m_sprite, &m_shader);
-}
-
-void Visualizer_BFS::processEvent(
-    const sf::Event &,
-    const sf::Vector2f &)
-{
 }
 
 void Visualizer_BFS::save(Settings & save) const

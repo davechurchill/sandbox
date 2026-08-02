@@ -72,15 +72,13 @@
     <ClInclude Include="..\src\Visualizer_ForestFire.h" />
     <ClInclude Include="..\src\Grid.hpp" />
     <ClInclude Include="..\src\HeatGrid.h" />
-    <ClInclude Include="..\src\MarkerData.hpp" />
     <ClInclude Include="..\src\MarkerDetector.hpp" />
     <ClInclude Include="..\src\ParticleManager.h" />
     <ClInclude Include="..\src\Visualizer_Heat.h" />
     <ClInclude Include="..\src\Visualizer_Blockworld.h" />
     <ClInclude Include="..\src\Visualizer_Nature.h" />
     <ClInclude Include="..\src\Visualizer_TerrainLighting.h" />
-    <ClInclude Include="..\src\Logger.hpp" />
-    <ClInclude Include="..\src\Sandbox.hpp" />
+    <ClInclude Include="..\src\Sandbox.h" />
     <ClInclude Include="..\src\Settings.hpp" />
     <ClInclude Include="..\src\Source_Camera.h" />
     <ClInclude Include="..\src\Source_PaintBrush.h" />
@@ -90,7 +88,6 @@
     <ClInclude Include="..\src\SandboxGUI.h" />
     <ClInclude Include="..\src\Perlin.hpp" />
     <ClInclude Include="..\src\Profiler.hpp" />
-    <ClInclude Include="..\src\RealSenseTools.hpp" />
     <ClInclude Include="..\src\SandboxProjector.h" />
     <ClInclude Include="..\src\SandboxSession.hpp" />
     <ClInclude Include="..\src\Source_Perlin.h" />
@@ -98,9 +95,8 @@
     <ClInclude Include="..\src\Source_Waves.h" />
     <ClInclude Include="..\src\Timer.hpp" />
     <ClInclude Include="..\src\Tools.h" />
-    <ClInclude Include="..\src\TopographyVisualizer.hpp" />
-    <ClInclude Include="..\src\TopographySource.hpp" />
-    <ClInclude Include="..\src\TerrainContext.hpp" />
+    <ClInclude Include="..\src\Visualizer.hpp" />
+    <ClInclude Include="..\src\Source.hpp" />
     <ClInclude Include="..\src\TerrainFrame.hpp" />
     <ClCompile Include="..\src\VectorField.cpp" />
     <ClInclude Include="..\src\VectorField.h" />

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
 
-class Visualizer_Blockworld : public TopographyVisualizer
+class Visualizer_Blockworld : public Visualizer
 {
     cv::Mat             m_projectedTopography;
     sf::Image           m_image;
@@ -21,7 +21,7 @@ class Visualizer_Blockworld : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Blockworld";
-    Visualizer_Blockworld() : TopographyVisualizer(Name) {}
+    explicit Visualizer_Blockworld(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
     void init();
     void imgui();

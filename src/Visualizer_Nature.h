@@ -1,11 +1,11 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
 
-class Visualizer_Nature : public TopographyVisualizer
+class Visualizer_Nature : public Visualizer
 {
     cv::Mat m_topography;
     cv::Mat m_projectedTopography;
@@ -25,7 +25,7 @@ class Visualizer_Nature : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Nature";
-    Visualizer_Nature() : TopographyVisualizer(Name) {}
+    explicit Visualizer_Nature(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;

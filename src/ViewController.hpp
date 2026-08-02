@@ -1,8 +1,6 @@
 #pragma once
 
-#include <cassert>
 #include <SFML/Graphics.hpp>
-#include <iostream>
 
 class ViewController
 {
@@ -10,15 +8,6 @@ class ViewController
     sf::Mouse::Button   m_scrollButton = sf::Mouse::Button::Right;
 
 public:
-
-    ViewController()
-    { 
-    }
-
-    void setScrollButton(sf::Mouse::Button button)
-    {
-        m_scrollButton = button;
-    }
 
     // zoom the view by a specific factor
     // the 'target' position in world coordinates should remain fixed

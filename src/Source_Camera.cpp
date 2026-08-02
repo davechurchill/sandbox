@@ -4,14 +4,8 @@
 
 #include <iostream>
 
-void Source_Camera::init()
-{
-}
-
 void Source_Camera::connectToCamera()
 {
-    //RealSenseTools::PrintAvailableCameraModes();
-
     rs2::context ctx;  // Create a context object, which is used to manage devices
     rs2::device_list devices = ctx.query_devices();  // Get a list of connected RealSense devices
     if (devices.size() > 0) // If at least one device is connected start pipe

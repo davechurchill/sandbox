@@ -1,11 +1,11 @@
 #pragma once
 
-#include "TopographySource.hpp"
+#include "Source.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
 
-class Source_PaintBrush : public TopographySource
+class Source_PaintBrush : public Source
 {
     static constexpr int CanvasSize = 512;
     static constexpr float DefaultHeight = 0.5f;

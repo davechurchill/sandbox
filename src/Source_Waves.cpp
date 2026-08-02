@@ -146,10 +146,6 @@ void Source_Waves::render(sf::RenderWindow & window)
     window.draw(m_sprite);
 }
 
-void Source_Waves::processEvent(const sf::Event &, const sf::Vector2f &)
-{
-}
-
 void Source_Waves::save(Settings & save) const
 {
     Settings::json & settings = save.section("Source_Waves");

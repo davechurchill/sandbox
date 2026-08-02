@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
@@ -8,7 +8,7 @@
 #include <random>
 #include <vector>
 
-class Visualizer_Animals : public TopographyVisualizer
+class Visualizer_Animals : public Visualizer
 {
     struct Sheep
     {
@@ -56,7 +56,7 @@ class Visualizer_Animals : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Animals";
-    Visualizer_Animals() : TopographyVisualizer(Name) {}
+    explicit Visualizer_Animals(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
     bool usesCanvasInput() const override { return true; }
     void init() override;

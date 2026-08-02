@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Settings.hpp"
-#include "TopographySource.hpp"
+#include "Source.hpp"
 #include "Perlin.hpp"
 #include "Grid.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
 
-class Source_Perlin : public TopographySource
+class Source_Perlin : public Source
 {
     Perlin2DNew         m_perlin;
     int                 m_octaves = 5;

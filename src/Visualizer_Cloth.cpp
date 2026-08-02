@@ -231,7 +231,7 @@ bool Visualizer_Cloth::mapMouseToTerrain(
         return false;
     }
 
-    SandBoxProjector & projector = context().projector();
+    SandBoxProjector & projector = this->projector();
     const float scale = projector.getTransformedScale();
     const cv::Mat projection = projector.getProjectionMatrix();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -261,7 +261,7 @@ void Visualizer_Cloth::renderCloth(
         return;
     }
 
-    SandBoxProjector & projector = context().projector();
+    SandBoxProjector & projector = this->projector();
     const cv::Mat projection = projector.getProjectionMatrix();
     const float scale = projector.getTransformedScale();
     if (projection.empty() || !std::isfinite(scale) || scale <= 0.0f)
@@ -420,7 +420,7 @@ void Visualizer_Cloth::processEvent(
     const sf::Event & event,
     const sf::Vector2f & mouse)
 {
-    const bool draggingProjection = context().projector().processEvent(event, mouse);
+    const bool draggingProjection = projector().processEvent(event, mouse);
     const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
     if (!mousePressed
         || mousePressed->button != sf::Mouse::Button::Left

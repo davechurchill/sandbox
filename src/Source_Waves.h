@@ -1,11 +1,11 @@
 #pragma once
 
-#include "TopographySource.hpp"
+#include "Source.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
 
-class Source_Waves : public TopographySource
+class Source_Waves : public Source
 {
     static constexpr int CanvasSize = 512;
 
@@ -31,7 +31,6 @@ public:
     void init();
     void imgui();
     void render(sf::RenderWindow & window);
-    void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void save(Settings & save) const;
     void load(const Settings & save);
 

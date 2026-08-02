@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MarkerData.hpp"
+#include "MarkerDetector.hpp"
 
 #include <opencv2/core.hpp>
 

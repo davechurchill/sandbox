@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TopographyVisualizer.hpp"
+#include "Visualizer.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
@@ -8,7 +8,7 @@
 #include <random>
 #include <vector>
 
-class Visualizer_ForestFire final : public TopographyVisualizer
+class Visualizer_ForestFire final : public Visualizer
 {
     struct FireParticle
     {
@@ -83,7 +83,7 @@ class Visualizer_ForestFire final : public TopographyVisualizer
 
 public:
     static constexpr std::string_view Name = "Forest Fire";
-    Visualizer_ForestFire() : TopographyVisualizer(Name) {}
+    explicit Visualizer_ForestFire(SandBoxProjector & projector) : Visualizer(Name, projector) {}
 
     void init() override;
     void imgui() override;
