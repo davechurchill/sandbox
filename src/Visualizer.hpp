@@ -29,7 +29,7 @@ public:
 
     virtual void init() = 0;
     virtual void imgui() = 0;
-    virtual void process(const TerrainFrame & data) = 0;
+    virtual void process(const TerrainFrame &) {}
     virtual void render(sf::RenderWindow & window) = 0;
     virtual void processEvent(const sf::Event &, const sf::Vector2f &) {}
     virtual void save(Settings & settings) const = 0;

@@ -7,10 +7,6 @@
 
 class Visualizer_ObsidianCaldera : public Visualizer
 {
-    cv::Mat m_projectedTopography;
-    sf::Image m_image;
-    sf::Texture m_texture;
-    sf::Sprite m_sprite{ m_texture };
     sf::Shader m_shader;
     sf::Clock m_clock;
 
@@ -20,7 +16,6 @@ class Visualizer_ObsidianCaldera : public Visualizer
     float m_flowSpeed = 0.75f;
     float m_cooling = 0.42f;
     float m_heatDistortion = 0.35f;
-    bool m_hasFrame = false;
     bool m_shaderLoaded = false;
 
     void reloadShader();
@@ -36,5 +31,4 @@ public:
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
-    void process(const TerrainFrame & data) override;
 };

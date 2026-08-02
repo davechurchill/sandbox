@@ -70,45 +70,21 @@ void Visualizer_GravitationalStarfield::process(const TerrainFrame & data)
         ? std::clamp(data.deltaTime, 0.0f, 0.1f)
         : 0.0f;
     m_time = std::fmod(m_time + deltaTime, 1000.0f);
-    if (data.heightMap.empty() || data.heightMap.type() != CV_32F)
-    {
-        m_hasFrame = false;
-        return;
-    }
-
-    m_hasFrame = projector().updateTexture(
-        data.heightMap,
-        m_projectedTopography,
-        m_image,
-        m_texture,
-        m_sprite,
-        true,
-        "Failed to load the gravitational-starfield terrain texture.\n");
 }
 
 void Visualizer_GravitationalStarfield::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
 
-    if (!m_hasFrame)
-    {
-        return;
-    }
-
-    m_sprite.setPosition(projector().getTransformedPosition());
-    const float scale = projector().getTransformedScale();
-    m_sprite.setScale({ scale, scale });
     if (!m_shaderLoaded)
     {
-        window.draw(m_sprite);
+        projector().drawTerrain(window, nullptr, true);
         return;
     }
 
-    const sf::Vector2u textureSize = m_texture.getSize();
-    if (textureSize.x == 0 || textureSize.y == 0)
-    {
-        return;
-    }
+    const sf::Texture * terrainTexture = projector().terrainTexture(true);
+    if (!terrainTexture) { return; }
+    const sf::Vector2u textureSize = terrainTexture->getSize();
 
     m_shader.setUniform("texelSize", sf::Glsl::Vec2(
         1.0f / textureSize.x,
@@ -119,7 +95,7 @@ void Visualizer_GravitationalStarfield::render(sf::RenderWindow & window)
     m_shader.setUniform("nebulaIntensity", m_nebulaIntensity);
     m_shader.setUniform("ringIntensity", m_ringIntensity);
     m_shader.setUniform("driftSpeed", m_driftSpeed);
-    window.draw(m_sprite, &m_shader);
+    projector().drawTerrain(window, &m_shader, true);
 }
 
 void Visualizer_GravitationalStarfield::save(Settings & save) const

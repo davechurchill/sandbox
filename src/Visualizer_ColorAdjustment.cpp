@@ -79,36 +79,20 @@ void Visualizer_ColorAdjustment::imgui()
     }
 }
 
-void Visualizer_ColorAdjustment::process(
-    const TerrainFrame & data)
-{
-    PROFILE_FUNCTION();
-
-    if (!data.heightMap.empty())
-    {
-        m_hasFrame = projector().updateTexture(
-            data.heightMap,
-            m_projectedTopography,
-            m_terrainImage,
-            m_terrainTexture,
-            m_terrainSprite,
-            false,
-            "Failed to load the color-adjustment terrain mask.\n");
-    }
-}
-
 void Visualizer_ColorAdjustment::render(
     sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
 
-    if (!m_hasFrame || !m_shaderLoaded || !hasAdjustments())
+    if (!m_shaderLoaded || !hasAdjustments())
     {
         return;
     }
 
     const sf::Vector2u windowSize = window.getSize();
-    const sf::Vector2u terrainSize = m_terrainTexture.getSize();
+    const sf::Texture * terrainTexture = projector().terrainTexture();
+    if (!terrainTexture) { return; }
+    const sf::Vector2u terrainSize = terrainTexture->getSize();
     const float scale = projector().getTransformedScale();
     const sf::Vector2f origin = projector().getTransformedPosition();
     if (windowSize.x == 0 || windowSize.y == 0
@@ -160,7 +144,7 @@ void Visualizer_ColorAdjustment::render(
     m_captureSprite.setPosition({ (float)left, (float)top });
     m_captureSprite.setScale({ 1.0f, 1.0f });
 
-    m_shader.setUniform("terrainTexture", m_terrainTexture);
+    m_shader.setUniform("terrainTexture", *terrainTexture);
     m_shader.setUniform("windowHeight", (float)windowSize.y);
     m_shader.setUniform("projectionOrigin", sf::Glsl::Vec2(projectionPixelOrigin));
     m_shader.setUniform("projectionSize", sf::Glsl::Vec2(projectionPixelSize));

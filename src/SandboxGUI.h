@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SandboxSession.hpp"
+#include "SandboxSession.h"
 #include "Terrain3DView.h"
 #include "ViewController.hpp"
 
@@ -25,11 +25,6 @@ class SandboxGUI
     SandboxSession m_session;
     Terrain3DView m_terrain3DView;
     sf::Clock m_deltaClock;
-
-    cv::Mat m_projectedDepthImage;
-    sf::Image m_projectedDepthSfImage;
-    sf::Texture m_projectedDepthTexture;
-    sf::Sprite m_projectedDepthSprite{ m_projectedDepthTexture };
 
     bool m_running = true;
     bool m_drawUI = true;

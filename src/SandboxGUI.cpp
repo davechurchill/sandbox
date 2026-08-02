@@ -108,10 +108,12 @@ void SandboxGUI::update()
     }
 
     const float deltaTime = dt.asMicroseconds() / 1000000.f;
+    sUserInput();
+    if (!isRunning()) { return; }
+
     m_session.processFrame(deltaTime);
     frameInitialView();
 
-    sUserInput();
     sRender();
     if (m_drawUI)
     {
@@ -324,21 +326,9 @@ void SandboxGUI::sRender()
     sf::RenderWindow & target = displayOpen
         ? projectionWindow()
         : mainWindow();
-    if (showProjectedDepth
-        && m_session.projector().updateTexture(
-            m_session.topography(),
-            m_projectedDepthImage,
-            m_projectedDepthSfImage,
-            m_projectedDepthTexture,
-            m_projectedDepthSprite,
-            false,
-            "Failed to load the projected depth-map texture.\n"))
+    if (showProjectedDepth)
     {
-        m_projectedDepthSprite.setPosition(
-            m_session.projector().getTransformedPosition());
-        const float scale = m_session.projector().getTransformedScale();
-        m_projectedDepthSprite.setScale({ scale, scale });
-        target.draw(m_projectedDepthSprite);
+        m_session.projector().drawTerrain(target);
     }
     SandBoxProjector & projector = m_session.projector();
     if (projector.projectionVisible())

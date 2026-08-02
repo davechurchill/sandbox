@@ -45,11 +45,11 @@ void SandBoxProjector::project(const cv::Mat & input, cv::Mat & output)
     // Check to see if data matrix has changed in size and generate the projection matrix again if so
     int width = input.cols;
     int height = input.rows;
-    if (width != m_dataWidth || height != m_dataHeight || m_projectionMatrix.rows == 0 || m_projectionMatrix.cols == 0)
+    if (width != m_dataWidth || height != m_dataHeight)
     {
         m_dataWidth = width;
         m_dataHeight = height;
-        generateProjection();
+        regenerateProjection();
     }
 
     if (!m_projectionValid || m_projectionMatrix.empty())
@@ -62,40 +62,163 @@ void SandBoxProjector::project(const cv::Mat & input, cv::Mat & output)
     cv::warpPerspective(input, output, m_projectionMatrix, cv::Size(m_finalWidth, m_finalHeight));
 }
 
-bool SandBoxProjector::updateTexture(
-    const cv::Mat & source,
-    cv::Mat & projectedImage,
-    sf::Image & image,
-    sf::Texture & texture,
-    sf::Sprite & sprite,
-    bool smooth,
-    const char * textureErrorMessage)
+void SandBoxProjector::setTerrain(const cv::Mat & source, std::uint64_t terrainRevision)
 {
     PROFILE_FUNCTION();
 
+    const bool terrainChanged = terrainRevision != m_terrainRevision
+        || source.data != m_terrainSource.data
+        || source.size() != m_terrainSource.size()
+        || source.type() != m_terrainSource.type();
+    m_terrainRevision = terrainRevision;
+
+    if (source.empty())
     {
-        PROFILE_SCOPE("Calibration TransformProjection");
-        project(source, projectedImage);
+        m_terrainSource.release();
+        m_hasTerrainTexture = false;
+        m_terrainTextureNeedsUpdate = false;
+        if (m_dataWidth != 0 || m_dataHeight != 0)
+        {
+            m_dataWidth = 0;
+            m_dataHeight = 0;
+            regenerateProjection();
+            m_terrainTextureNeedsUpdate = false;
+        }
+        return;
     }
-    if (projectedImage.empty())
+
+    m_terrainSource = source;
+    if (source.cols != m_dataWidth || source.rows != m_dataHeight)
+    {
+        m_dataWidth = source.cols;
+        m_dataHeight = source.rows;
+        regenerateProjection();
+    }
+    else if (terrainChanged)
+    {
+        m_terrainTextureNeedsUpdate = true;
+    }
+}
+
+bool SandBoxProjector::ensureTerrainTexture()
+{
+    if (m_terrainSource.empty())
+    {
+        m_hasTerrainTexture = false;
+        return false;
+    }
+
+    if (!m_terrainTextureNeedsUpdate)
+    {
+        return m_hasTerrainTexture;
+    }
+
+    if (m_terrainSource.cols != m_dataWidth || m_terrainSource.rows != m_dataHeight)
+    {
+        m_dataWidth = m_terrainSource.cols;
+        m_dataHeight = m_terrainSource.rows;
+        generateProjection();
+    }
+
+    m_terrainTextureNeedsUpdate = false;
+    m_hasTerrainTexture = false;
+
+    if (m_terrainSource.type() != CV_32F
+        || !m_projectionValid || m_projectionMatrix.empty())
     {
         return false;
     }
 
-    image = Tools::MatToSfImage(projectedImage);
-    if (!texture.loadFromImage(image))
+    try
     {
-        if (textureErrorMessage)
         {
-            std::cerr << textureErrorMessage;
+            PROFILE_SCOPE("Calibration TransformProjection");
+            cv::warpPerspective(
+                m_terrainSource,
+                m_projectedTerrain,
+                m_projectionMatrix,
+                cv::Size(m_finalWidth, m_finalHeight));
         }
-        const sf::Vector2u textureSize = texture.getSize();
-        return textureSize.x > 0 && textureSize.y > 0;
+        if (m_projectedTerrain.empty())
+        {
+            return false;
+        }
+
+        {
+            PROFILE_SCOPE("Convert Projected Terrain");
+            m_projectedTerrain.convertTo(m_terrainBytes, CV_8U, 255.0);
+            cv::cvtColor(m_terrainBytes, m_terrainRgba, cv::COLOR_GRAY2RGBA);
+            if (!m_terrainRgba.isContinuous())
+            {
+                m_terrainRgba = m_terrainRgba.clone();
+            }
+        }
+    }
+    catch (const cv::Exception & error)
+    {
+        std::cerr << "Failed to prepare the shared projected terrain: " << error.what() << '\n';
+        return false;
     }
 
-    texture.setSmooth(smooth);
-    sprite.setTexture(texture, true);
+    const sf::Vector2u textureSize(
+        (unsigned int)m_terrainRgba.cols,
+        (unsigned int)m_terrainRgba.rows);
+    if (m_terrainTexture.getSize() != textureSize)
+    {
+        if (!m_terrainTexture.resize(textureSize))
+        {
+            std::cerr << "Failed to resize the shared projected-terrain texture.\n";
+            m_hasTerrainTexture = false;
+            return false;
+        }
+        m_terrainSprite.setTexture(m_terrainTexture, true);
+    }
+
+    {
+        PROFILE_SCOPE("Upload Projected Terrain");
+        m_terrainTexture.update(m_terrainRgba.ptr());
+    }
+
+    m_hasTerrainTexture = true;
     return true;
+}
+
+bool SandBoxProjector::drawTerrain(sf::RenderWindow & window, sf::Shader * shader, bool smooth)
+{
+    if (!ensureTerrainTexture())
+    {
+        return false;
+    }
+
+    if (m_terrainTexture.isSmooth() != smooth)
+    {
+        m_terrainTexture.setSmooth(smooth);
+    }
+    m_terrainSprite.setPosition(getTransformedPosition());
+    const float scale = getTransformedScale();
+    m_terrainSprite.setScale({ scale, scale });
+    if (shader)
+    {
+        window.draw(m_terrainSprite, shader);
+    }
+    else
+    {
+        window.draw(m_terrainSprite);
+    }
+    return true;
+}
+
+const sf::Texture * SandBoxProjector::terrainTexture(bool smooth)
+{
+    if (!ensureTerrainTexture())
+    {
+        return nullptr;
+    }
+    if (m_terrainTexture.isSmooth() != smooth)
+    {
+        m_terrainTexture.setSmooth(smooth);
+    }
+    return &m_terrainTexture;
 }
 
 void SandBoxProjector::imgui()
@@ -135,7 +258,7 @@ void SandBoxProjector::imgui()
     if (pointsChanged)
     {
         updateProjectionHandles();
-        generateProjection();
+        regenerateProjection();
     }
 
     ImGui::Separator();
@@ -154,7 +277,7 @@ void SandBoxProjector::imgui()
     orientationChanged |= ImGui::Checkbox("Mirror Vertically", &m_mirrorVertical);
     if (orientationChanged)
     {
-        generateProjection();
+        regenerateProjection();
     }
 
     ImGui::Separator();
@@ -174,7 +297,7 @@ void SandBoxProjector::resetProjectionPoints()
     m_projectionPoints[2] = { 400.0f, 500.0f };
     m_projectionPoints[3] = { 500.0f, 500.0f };
     updateProjectionHandles();
-    generateProjection();
+    regenerateProjection();
 }
 
 void SandBoxProjector::updateProjectionHandles()
@@ -220,7 +343,7 @@ bool SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f 
         {
             m_projectionPoints[m_dragPoint] = cv::Point((int)mouse.x, (int)mouse.y);
             m_projectionCircles[m_dragPoint].setPosition(mouse);
-            generateProjection();
+            regenerateProjection();
         }
     }
 
@@ -231,7 +354,6 @@ bool SandBoxProjector::unprojectPoint(
     const sf::Vector2f & point,
     sf::Vector2f & dataPoint)
 {
-    generateProjection();
     const float scale = getTransformedScale();
     if (!m_projectionValid || m_projectionMatrix.empty()
         || !std::isfinite(scale) || scale <= 0.0f)
@@ -314,6 +436,10 @@ void SandBoxProjector::generateProjection()
 {
     PROFILE_FUNCTION();
 
+    m_projectionValid = false;
+    m_projectionMatrix.release();
+    m_finalWidth = 0;
+    m_finalHeight = 0;
     if (m_dataWidth <= 0 || m_dataHeight <= 0) { return; }
 
     std::array<cv::Point2f, 4> dataCorners = {
@@ -382,8 +508,21 @@ void SandBoxProjector::generateProjection()
         boxPoints[i].y *= m_boxScale.y;
     }
 
-    m_projectionMatrix = cv::getPerspectiveTransform(dataCorners.data(), boxPoints);
-    m_projectionValid = true;
+    try
+    {
+        m_projectionMatrix = cv::getPerspectiveTransform(dataCorners.data(), boxPoints);
+        m_projectionValid = !m_projectionMatrix.empty();
+    }
+    catch (const cv::Exception & error)
+    {
+        std::cerr << "Failed to generate the terrain projection: " << error.what() << '\n';
+    }
+}
+
+void SandBoxProjector::regenerateProjection()
+{
+    generateProjection();
+    m_terrainTextureNeedsUpdate = true;
 }
 
 void SandBoxProjector::save(Settings& save) const
@@ -450,4 +589,5 @@ void SandBoxProjector::load(const Settings& save)
     }
     m_lineOpacity = std::clamp(m_lineOpacity, 0.0f, 1.0f);
     updateProjectionHandles();
+    regenerateProjection();
 }

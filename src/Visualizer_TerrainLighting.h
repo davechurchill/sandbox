@@ -7,10 +7,6 @@
 
 class Visualizer_TerrainLighting : public Visualizer
 {
-    cv::Mat             m_projectedTopography;
-    sf::Image           m_image;
-    sf::Texture         m_texture;
-    sf::Sprite          m_sprite{ m_texture };
     sf::Shader          m_shader;
 
     float               m_lightAzimuth = 315.0f;
@@ -19,7 +15,6 @@ class Visualizer_TerrainLighting : public Visualizer
     float               m_shadowStrength = 1.0f;
     float               m_heightStrength = 10.0f;
     int                 m_palette = 0;
-    bool                m_hasFrame = false;
     bool                m_shaderLoaded = false;
     bool                m_draggingLight = false;
 
@@ -36,5 +31,4 @@ public:
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     void save(Settings & save) const;
     void load(const Settings & save);
-    void process(const TerrainFrame & data) override;
 };

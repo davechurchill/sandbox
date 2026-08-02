@@ -44,37 +44,15 @@ void Visualizer_ContourLines::imgui()
     }
 }
 
-void Visualizer_ContourLines::process(
-    const TerrainFrame & data)
-{
-    PROFILE_FUNCTION();
-
-    if (!data.heightMap.empty())
-    {
-        m_hasFrame = projector().updateTexture(
-                data.heightMap,
-                m_projectedTopography,
-                m_image,
-                m_texture,
-                m_sprite,
-                false,
-                "Failed to load the contour overlay texture.\n");
-    }
-}
-
 void Visualizer_ContourLines::render(
     sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
 
-    if (!m_hasFrame || !m_shaderLoaded || m_numberOfContourLines <= 0)
+    if (!m_shaderLoaded || m_numberOfContourLines <= 0)
     {
         return;
     }
-
-    m_sprite.setPosition(projector().getTransformedPosition());
-    const float scale = projector().getTransformedScale();
-    m_sprite.setScale({ scale, scale });
 
     m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
     m_shader.setUniform("lineColor", sf::Glsl::Vec3(
@@ -82,7 +60,7 @@ void Visualizer_ContourLines::render(
         m_lineColor[1],
         m_lineColor[2]));
     m_shader.setUniform("lineOpacity", m_lineOpacity);
-    window.draw(m_sprite, &m_shader);
+    projector().drawTerrain(window, &m_shader);
 }
 
 void Visualizer_ContourLines::save(Settings & save) const

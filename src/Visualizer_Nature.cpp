@@ -44,27 +44,22 @@ void Visualizer_Nature::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
 
-    if (m_hasFrame)
+    if (m_shaderLoaded)
     {
-        m_sprite.setPosition(projector().getTransformedPosition());
-        const float scale = projector().getTransformedScale();
-        m_sprite.setScale({ scale, scale });
-
-        if (m_shaderLoaded)
-        {
-            const sf::Vector2u textureSize = m_texture.getSize();
-            m_shader.setUniform(
-                "texelSize",
-                sf::Glsl::Vec2(1.0f / textureSize.x, 1.0f / textureSize.y));
-            m_shader.setUniform("terrainType", m_terrainType);
-            m_shader.setUniform("waterLevel", m_waterLevel);
-            m_shader.setUniform("textureStrength", m_textureDetail ? 1.0f : 0.0f);
-            window.draw(m_sprite, &m_shader);
-        }
-        else
-        {
-            window.draw(m_sprite);
-        }
+        const sf::Texture * terrainTexture = projector().terrainTexture(true);
+        if (!terrainTexture) { return; }
+        const sf::Vector2u textureSize = terrainTexture->getSize();
+        m_shader.setUniform(
+            "texelSize",
+            sf::Glsl::Vec2(1.0f / textureSize.x, 1.0f / textureSize.y));
+        m_shader.setUniform("terrainType", m_terrainType);
+        m_shader.setUniform("waterLevel", m_waterLevel);
+        m_shader.setUniform("textureStrength", m_textureDetail ? 1.0f : 0.0f);
+        projector().drawTerrain(window, &m_shader, true);
+    }
+    else
+    {
+        projector().drawTerrain(window, nullptr, true);
     }
 }
 
@@ -89,27 +84,4 @@ void Visualizer_Nature::load(const Settings & save)
     Settings::read(settings, "m_terrainType", m_terrainType);
     Settings::read(settings, "m_waterLevel", m_waterLevel);
     Settings::read(settings, "m_textureDetail", m_textureDetail);
-}
-
-void Visualizer_Nature::process(const TerrainFrame & data)
-{
-    PROFILE_FUNCTION();
-
-    if (data.heightMap.empty() || data.heightMap.type() != CV_32F)
-    {
-        m_hasFrame = false;
-        return;
-    }
-
-    m_topography = data.heightMap;
-    m_topographySize = data.heightMap.size();
-
-    m_hasFrame = projector().updateTexture(
-        m_topography,
-        m_projectedTopography,
-        m_image,
-        m_texture,
-        m_sprite,
-        true,
-        "Failed to load the nature terrain texture.\n");
 }

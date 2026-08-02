@@ -7,10 +7,6 @@
 
 class Visualizer_MountainPeaks final : public Visualizer
 {
-    cv::Mat m_projectedTopography;
-    sf::Image m_image;
-    sf::Texture m_texture;
-    sf::Sprite m_sprite{ m_texture };
     sf::Shader m_shader;
 
     float m_time = 0.0f;
@@ -20,7 +16,6 @@ class Visualizer_MountainPeaks final : public Visualizer
     float m_sunAzimuth = 315.0f;
     float m_sunElevation = 38.0f;
     float m_haze = 0.32f;
-    bool m_hasFrame = false;
     bool m_shaderLoaded = false;
 
     void resetDefaults();

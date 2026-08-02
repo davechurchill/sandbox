@@ -103,7 +103,7 @@
     <ClInclude Include="..\src\Perlin.hpp" />
     <ClInclude Include="..\src\Profiler.hpp" />
     <ClInclude Include="..\src\SandboxProjector.h" />
-    <ClInclude Include="..\src\SandboxSession.hpp" />
+    <ClInclude Include="..\src\SandboxSession.h" />
     <ClInclude Include="..\src\Source_Perlin.h" />
     <ClInclude Include="..\src\Source_Snapshot.h" />
     <ClInclude Include="..\src\Source_Waves.h" />

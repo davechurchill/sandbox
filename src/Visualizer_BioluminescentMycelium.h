@@ -7,10 +7,6 @@
 
 class Visualizer_BioluminescentMycelium : public Visualizer
 {
-    cv::Mat m_projectedTopography;
-    sf::Image m_image;
-    sf::Texture m_texture;
-    sf::Sprite m_sprite{ m_texture };
     sf::Shader m_shader;
 
     float m_glowIntensity = 1.35f;
@@ -18,7 +14,6 @@ class Visualizer_BioluminescentMycelium : public Visualizer
     float m_pulseSpeed = 1.0f;
     float m_sporeDensity = 0.35f;
     float m_time = 0.0f;
-    bool m_hasFrame = false;
     bool m_shaderLoaded = false;
 
     void reloadShader();

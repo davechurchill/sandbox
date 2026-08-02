@@ -50,30 +50,25 @@ void Visualizer_TerrainLighting::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
 
-    if (m_hasFrame)
+    if (m_shaderLoaded)
     {
-        m_sprite.setPosition(projector().getTransformedPosition());
-        const float scale = projector().getTransformedScale();
-        m_sprite.setScale({ scale, scale });
-
-        if (m_shaderLoaded)
-        {
-            m_shader.setUniform("lightAzimuth", m_lightAzimuth);
-            m_shader.setUniform("lightElevation", m_lightElevation);
-            m_shader.setUniform("ambientLight", m_ambientLight);
-            m_shader.setUniform("shadowStrength", m_shadowStrength);
-            m_shader.setUniform("heightStrength", m_heightStrength);
-            m_shader.setUniform("palette", m_palette);
-            const sf::Vector2u textureSize = m_texture.getSize();
-            m_shader.setUniform("texelSize", sf::Glsl::Vec2(
-                1.0f / textureSize.x,
-                1.0f / textureSize.y));
-            window.draw(m_sprite, &m_shader);
-        }
-        else
-        {
-            window.draw(m_sprite);
-        }
+        m_shader.setUniform("lightAzimuth", m_lightAzimuth);
+        m_shader.setUniform("lightElevation", m_lightElevation);
+        m_shader.setUniform("ambientLight", m_ambientLight);
+        m_shader.setUniform("shadowStrength", m_shadowStrength);
+        m_shader.setUniform("heightStrength", m_heightStrength);
+        m_shader.setUniform("palette", m_palette);
+        const sf::Texture * terrainTexture = projector().terrainTexture(true);
+        if (!terrainTexture) { return; }
+        const sf::Vector2u textureSize = terrainTexture->getSize();
+        m_shader.setUniform("texelSize", sf::Glsl::Vec2(
+            1.0f / textureSize.x,
+            1.0f / textureSize.y));
+        projector().drawTerrain(window, &m_shader, true);
+    }
+    else
+    {
+        projector().drawTerrain(window, nullptr, true);
     }
 
 }
@@ -110,17 +105,13 @@ void Visualizer_TerrainLighting::processEvent(const sf::Event & event, const sf:
 
 bool Visualizer_TerrainLighting::updateLightFromMouse(const sf::Vector2f & mouse)
 {
-    if (!m_hasFrame)
-    {
-        return false;
-    }
-
+    const sf::Texture * terrainTexture = projector().terrainTexture(true);
     const float scale = projector().getTransformedScale();
-    const sf::Vector2u textureSize = m_texture.getSize();
-    if (!std::isfinite(scale) || scale <= 0.0f || textureSize.x == 0 || textureSize.y == 0)
+    if (!terrainTexture || !std::isfinite(scale) || scale <= 0.0f)
     {
         return false;
     }
+    const sf::Vector2u textureSize = terrainTexture->getSize();
 
     const sf::Vector2f local = (mouse - projector().getTransformedPosition()) / scale;
     if (local.x < 0.0f || local.x >= textureSize.x || local.y < 0.0f || local.y >= textureSize.y)
@@ -167,18 +158,4 @@ void Visualizer_TerrainLighting::load(const Settings & save)
     Settings::read(settings, "m_ambientLight", m_ambientLight);
     Settings::read(settings, "m_shadowStrength", m_shadowStrength);
     Settings::read(settings, "m_heightStrength", m_heightStrength);
-}
-
-void Visualizer_TerrainLighting::process(const TerrainFrame & data)
-{
-    PROFILE_FUNCTION();
-
-    m_hasFrame = projector().updateTexture(
-        data.heightMap,
-        m_projectedTopography,
-        m_image,
-        m_texture,
-        m_sprite,
-        true,
-        "Failed to load the terrain-lighting texture.\n");
 }

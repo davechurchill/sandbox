@@ -60,26 +60,15 @@ void Visualizer_ObsidianCaldera::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
 
-    if (!m_hasFrame)
-    {
-        return;
-    }
-
-    m_sprite.setPosition(projector().getTransformedPosition());
-    const float scale = projector().getTransformedScale();
-    m_sprite.setScale({ scale, scale });
-
     if (!m_shaderLoaded)
     {
-        window.draw(m_sprite);
+        projector().drawTerrain(window, nullptr, true);
         return;
     }
 
-    const sf::Vector2u textureSize = m_texture.getSize();
-    if (textureSize.x == 0 || textureSize.y == 0)
-    {
-        return;
-    }
+    const sf::Texture * terrainTexture = projector().terrainTexture(true);
+    if (!terrainTexture) { return; }
+    const sf::Vector2u textureSize = terrainTexture->getSize();
 
     m_shader.setUniform("texelSize", sf::Glsl::Vec2(1.0f / textureSize.x, 1.0f / textureSize.y));
     m_shader.setUniform("u_time", m_clock.getElapsedTime().asSeconds());
@@ -89,7 +78,7 @@ void Visualizer_ObsidianCaldera::render(sf::RenderWindow & window)
     m_shader.setUniform("flowSpeed", m_flowSpeed);
     m_shader.setUniform("cooling", m_cooling);
     m_shader.setUniform("heatDistortion", m_heatDistortion);
-    window.draw(m_sprite, &m_shader);
+    projector().drawTerrain(window, &m_shader, true);
 }
 
 void Visualizer_ObsidianCaldera::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
@@ -124,24 +113,4 @@ void Visualizer_ObsidianCaldera::load(const Settings & save)
     m_flowSpeed = std::clamp(m_flowSpeed, 0.0f, 3.0f);
     m_cooling = std::clamp(m_cooling, 0.0f, 1.0f);
     m_heatDistortion = std::clamp(m_heatDistortion, 0.0f, 1.5f);
-}
-
-void Visualizer_ObsidianCaldera::process(const TerrainFrame & data)
-{
-    PROFILE_FUNCTION();
-
-    if (data.heightMap.empty() || data.heightMap.type() != CV_32F)
-    {
-        m_hasFrame = false;
-        return;
-    }
-
-    m_hasFrame = projector().updateTexture(
-        data.heightMap,
-        m_projectedTopography,
-        m_image,
-        m_texture,
-        m_sprite,
-        true,
-        "Failed to load the Obsidian Caldera terrain texture.\n");
 }

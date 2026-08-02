@@ -7,10 +7,6 @@
 
 class Visualizer_Minecraft final : public Visualizer
 {
-    cv::Mat m_projectedTopography;
-    sf::Image m_image;
-    sf::Texture m_texture;
-    sf::Sprite m_sprite{ m_texture };
     sf::Shader m_shader;
 
     int m_blockSize = 24;
@@ -20,7 +16,6 @@ class Visualizer_Minecraft final : public Visualizer
     float m_snowLine = 0.82f;
     float m_aoStrength = 0.85f;
     float m_time = 0.0f;
-    bool m_hasFrame = false;
     bool m_shaderLoaded = false;
 
     void resetDefaults();

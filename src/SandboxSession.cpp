@@ -1,4 +1,4 @@
-#include "SandboxSession.hpp"
+#include "SandboxSession.h"
 
 #include "Visualizer_AStar.h"
 #include "Visualizer_Animals.h"
@@ -88,13 +88,14 @@ void SandboxSession::processFrame(float deltaTime)
         m_sourceRevision = m_source->revision();
         ++m_terrainRevision;
     }
+    m_projector.setTerrain(m_topography, m_terrainRevision);
     if (m_topography.empty())
     {
         return;
     }
 
     const std::vector<MarkerData> markers = m_source->getMarkers();
-    const TerrainFrame frame { m_topography, deltaTime, markers, m_terrainRevision };
+    const TerrainFrame frame { m_topography, deltaTime, markers };
     for (const std::string & name : visualizerNames())
     {
         const auto found = m_visualizerStates.find(name);

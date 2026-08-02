@@ -7,10 +7,6 @@
 
 class Visualizer_PrismaticGlacier : public Visualizer
 {
-    cv::Mat m_projectedTopography;
-    sf::Image m_image;
-    sf::Texture m_texture;
-    sf::Sprite m_sprite{ m_texture };
     sf::Shader m_shader;
     float m_facetSize = 18.0f;
     float m_iceDepthAbsorption = 1.15f;
@@ -18,7 +14,6 @@ class Visualizer_PrismaticGlacier : public Visualizer
     float m_fractureIntensity = 0.85f;
     float m_causticSpeed = 0.65f;
     float m_time = 0.0f;
-    bool m_hasFrame = false;
     bool m_shaderLoaded = false;
 
     void resetDefaults();

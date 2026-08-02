@@ -61,56 +61,25 @@ void Visualizer_Hexagon::imgui()
     }
 }
 
-void Visualizer_Hexagon::process(const TerrainFrame & data)
-{
-    PROFILE_FUNCTION();
-
-    if (data.heightMap.empty() || data.heightMap.type() != CV_32F)
-    {
-        m_hasFrame = false;
-        return;
-    }
-
-    m_hasFrame = projector().updateTexture(
-        data.heightMap,
-        m_projectedTopography,
-        m_image,
-        m_texture,
-        m_sprite,
-        false,
-        "Failed to load the Hexagon terrain texture.\n");
-}
-
 void Visualizer_Hexagon::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
 
-    if (!m_hasFrame)
-    {
-        return;
-    }
-
-    const sf::Vector2u textureSize = m_texture.getSize();
-    if (textureSize.x == 0 || textureSize.y == 0)
-    {
-        return;
-    }
-
-    m_sprite.setPosition(projector().getTransformedPosition());
-    const float scale = projector().getTransformedScale();
-    m_sprite.setScale({ scale, scale });
-
     if (!m_shaderLoaded)
     {
-        window.draw(m_sprite);
+        projector().drawTerrain(window);
         return;
     }
+
+    const sf::Texture * terrainTexture = projector().terrainTexture();
+    if (!terrainTexture) { return; }
+    const sf::Vector2u textureSize = terrainTexture->getSize();
 
     m_shader.setUniform("texelSize", sf::Glsl::Vec2(1.0f / textureSize.x, 1.0f / textureSize.y));
     m_shader.setUniform("hexagonSize", (float)m_hexagonSize);
     m_shader.setUniform("heightSteps", (float)m_heightSteps);
     m_shader.setUniform("prismRelief", m_prismRelief);
-    window.draw(m_sprite, &m_shader);
+    projector().drawTerrain(window, &m_shader);
 }
 
 void Visualizer_Hexagon::processEvent(const sf::Event & event, const sf::Vector2f & mouse)

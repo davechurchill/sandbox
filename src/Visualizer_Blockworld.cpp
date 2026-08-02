@@ -40,27 +40,20 @@ void Visualizer_Blockworld::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
 
-    if (!m_hasFrame)
-    {
-        return;
-    }
-
-    m_sprite.setPosition(projector().getTransformedPosition());
-    const float scale = projector().getTransformedScale();
-    m_sprite.setScale({ scale, scale });
-
     if (m_shaderLoaded)
     {
-        const sf::Vector2u textureSize = m_texture.getSize();
+        const sf::Texture * terrainTexture = projector().terrainTexture();
+        if (!terrainTexture) { return; }
+        const sf::Vector2u textureSize = terrainTexture->getSize();
         m_shader.setUniform("texelSize", sf::Glsl::Vec2(
             1.0f / textureSize.x,
             1.0f / textureSize.y));
         m_shader.setUniform("blockSize", (float)m_blockSize);
-        window.draw(m_sprite, &m_shader);
+        projector().drawTerrain(window, &m_shader);
     }
     else
     {
-        window.draw(m_sprite);
+        projector().drawTerrain(window);
     }
 }
 
@@ -80,18 +73,4 @@ void Visualizer_Blockworld::load(const Settings & save)
     const Settings::json & settings = save.section("Visualizer_Blockworld");
     Settings::read(settings, "m_blockSize", m_blockSize);
     m_blockSize = std::clamp(m_blockSize, 2, 48);
-}
-
-void Visualizer_Blockworld::process(const TerrainFrame & data)
-{
-    PROFILE_FUNCTION();
-
-    m_hasFrame = projector().updateTexture(
-        data.heightMap,
-        m_projectedTopography,
-        m_image,
-        m_texture,
-        m_sprite,
-        false,
-        "Failed to load the Blockworld terrain texture.\n");
 }

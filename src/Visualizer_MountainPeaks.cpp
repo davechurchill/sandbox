@@ -78,27 +78,15 @@ void Visualizer_MountainPeaks::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
 
-    if (!m_hasFrame)
-    {
-        return;
-    }
-
-    const sf::Vector2u textureSize = m_texture.getSize();
-    if (textureSize.x == 0 || textureSize.y == 0)
-    {
-        return;
-    }
-
-    m_sprite.setPosition(projector().getTransformedPosition());
-    const float scale = projector().getTransformedScale();
-    m_sprite.setScale({ scale, scale });
-
     if (!m_shaderLoaded)
     {
-        window.draw(m_sprite);
+        projector().drawTerrain(window, nullptr, true);
         return;
     }
 
+    const sf::Texture * terrainTexture = projector().terrainTexture(true);
+    if (!terrainTexture) { return; }
+    const sf::Vector2u textureSize = terrainTexture->getSize();
     m_shader.setUniform("texelSize", sf::Glsl::Vec2(1.0f / textureSize.x, 1.0f / textureSize.y));
     m_shader.setUniform("u_time", m_time);
     m_shader.setUniform("snowLine", m_snowLine);
@@ -107,7 +95,7 @@ void Visualizer_MountainPeaks::render(sf::RenderWindow & window)
     m_shader.setUniform("sunAzimuth", m_sunAzimuth);
     m_shader.setUniform("sunElevation", m_sunElevation);
     m_shader.setUniform("hazeAmount", m_haze);
-    window.draw(m_sprite, &m_shader);
+    projector().drawTerrain(window, &m_shader, true);
 }
 
 void Visualizer_MountainPeaks::processEvent(const sf::Event & event, const sf::Vector2f & mouse)
@@ -144,18 +132,4 @@ void Visualizer_MountainPeaks::process(const TerrainFrame & data)
 
     const float deltaTime = std::isfinite(data.deltaTime) ? std::clamp(data.deltaTime, 0.0f, 0.10f) : 0.0f;
     m_time = std::fmod(m_time + deltaTime, 4096.0f);
-    if (data.heightMap.empty() || data.heightMap.type() != CV_32F)
-    {
-        m_hasFrame = false;
-        return;
-    }
-
-    m_hasFrame = projector().updateTexture(
-        data.heightMap,
-        m_projectedTopography,
-        m_image,
-        m_texture,
-        m_sprite,
-        true,
-        "Failed to load the Mountain Peaks terrain texture.\n");
 }

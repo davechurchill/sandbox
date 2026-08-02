@@ -2,13 +2,21 @@
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
+#include <cstdint>
 #include <fstream>
+#include <limits>
 
 #include "Settings.hpp"
 
 class SandBoxProjector
 {
     cv::Mat                         m_projectionMatrix;
+    cv::Mat                         m_terrainSource;
+    cv::Mat                         m_projectedTerrain;
+    cv::Mat                         m_terrainBytes;
+    cv::Mat                         m_terrainRgba;
+    sf::Texture                     m_terrainTexture;
+    sf::Sprite                      m_terrainSprite{ m_terrainTexture };
     int                             m_dragPoint = -1;
     int                             m_dataWidth = 0;
     int                             m_dataHeight = 0;
@@ -30,10 +38,15 @@ class SandBoxProjector
     float                           m_lineColor[3] = { 1.0f, 1.0f, 1.0f };
     float                           m_lineOpacity = 1.0f;
     bool                            m_projectionValid = false;
+    bool                            m_hasTerrainTexture = false;
+    bool                            m_terrainTextureNeedsUpdate = true;
+    std::uint64_t                   m_terrainRevision = std::numeric_limits<std::uint64_t>::max();
 
     void generateProjection();
+    void regenerateProjection();
     void resetProjectionPoints();
     void updateProjectionHandles();
+    bool ensureTerrainTexture();
 
 public:
 
@@ -42,7 +55,9 @@ public:
     void save(Settings & save) const;
     void load(const Settings & save);
     void project(const cv::Mat & input, cv::Mat & output);
-    [[nodiscard]] bool updateTexture(const cv::Mat & source, cv::Mat & projectedImage, sf::Image & image, sf::Texture & texture, sf::Sprite & sprite, bool smooth, const char * textureErrorMessage);
+    void setTerrain(const cv::Mat & source, std::uint64_t terrainRevision);
+    bool drawTerrain(sf::RenderWindow & window, sf::Shader * shader = nullptr, bool smooth = false);
+    [[nodiscard]] const sf::Texture * terrainTexture(bool smooth = false);
     bool processEvent(const sf::Event & event, const sf::Vector2f & mouse);
     bool unprojectPoint(const sf::Vector2f & point, sf::Vector2f & dataPoint);
     void render(sf::RenderWindow & window);
@@ -57,7 +72,6 @@ public:
 
     inline cv::Mat getProjectionMatrix()
     {
-        generateProjection();
         return m_projectionMatrix;
     }
 };

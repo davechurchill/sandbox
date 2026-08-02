@@ -7,10 +7,6 @@
 
 class Visualizer_GravitationalStarfield final : public Visualizer
 {
-    cv::Mat m_projectedTopography;
-    sf::Image m_image;
-    sf::Texture m_texture;
-    sf::Sprite m_sprite{ m_texture };
     sf::Shader m_shader;
 
     float m_time = 0.0f;
@@ -19,7 +15,6 @@ class Visualizer_GravitationalStarfield final : public Visualizer
     float m_nebulaIntensity = 0.85f;
     float m_ringIntensity = 1.35f;
     float m_driftSpeed = 0.22f;
-    bool m_hasFrame = false;
     bool m_shaderLoaded = false;
 
     void reloadShader();

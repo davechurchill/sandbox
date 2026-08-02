@@ -25,11 +25,7 @@ class Visualizer_FishPond : public Visualizer
     };
 
     cv::Mat             m_topography;
-    cv::Mat             m_projectedTopography;
     cv::Size            m_topographySize;
-    sf::Image           m_image;
-    sf::Texture         m_texture;
-    sf::Sprite          m_sprite{ m_texture };
     sf::Shader          m_shader;
 
     std::vector<Fish>   m_fish;
@@ -44,7 +40,6 @@ class Visualizer_FishPond : public Visualizer
     float m_minimumDepth = 0.07f;
     float m_maximumFishDepth = 0.48f;
     bool  m_resetPending = true;
-    bool  m_hasFrame = false;
     bool  m_shaderLoaded = false;
 
     void reloadShader();

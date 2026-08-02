@@ -9,11 +9,10 @@ void main()
 {
     vec2 coordinate = gl_TexCoord[0].xy;
     float height = texture2D(currentTexture, coordinate).r;
-    gl_FragColor = vec4(0.0);
 
     if (height < 0.02 || height > 0.99 || numberOfContourLines <= 0)
     {
-        return;
+        discard;
     }
 
     vec2 texelSize = 1.0 / vec2(textureSize(currentTexture, 0));
@@ -22,16 +21,18 @@ void main()
     float upHeight = texture2D(currentTexture, coordinate - vec2(0.0, texelSize.y)).r;
     float downHeight = texture2D(currentTexture, coordinate + vec2(0.0, texelSize.y)).r;
 
-    float contourStep = 1.0 / (float(numberOfContourLines) + 1.0);
-    for (int line = 1; line <= numberOfContourLines; ++line)
+    // The original loop drew on the high side of a contour whenever any
+    // threshold satisfied neighborHeight <= threshold < height. Find that
+    // integer threshold interval directly instead of testing every line.
+    float contourScale = float(numberOfContourLines) + 1.0;
+    float lowestNeighbor = min(min(leftHeight, rightHeight), min(upHeight, downHeight));
+    float firstPossibleLine = max(1.0, ceil(lowestNeighbor * contourScale));
+    float lastPossibleLine = min(float(numberOfContourLines), ceil(height * contourScale) - 1.0);
+
+    if (firstPossibleLine > lastPossibleLine)
     {
-        float contourHeight = contourStep * float(line);
-        if (height > contourHeight
-            && (leftHeight <= contourHeight || rightHeight <= contourHeight
-                || upHeight <= contourHeight || downHeight <= contourHeight))
-        {
-            gl_FragColor = vec4(lineColor, lineOpacity);
-            return;
-        }
+        discard;
     }
+
+    gl_FragColor = vec4(lineColor, lineOpacity);
 }

@@ -188,7 +188,7 @@
     <ClInclude Include="..\src\Visualizer_Hexagon.h">
       <Filter>visualizers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\SandboxSession.hpp">
+    <ClInclude Include="..\src\SandboxSession.h">
       <Filter>engine</Filter>
     </ClInclude>
     <ClInclude Include="..\src\SandboxGUI.h">

@@ -39,10 +39,6 @@ void Visualizer_Colorizer::render(sf::RenderWindow & window)
     {
         PROFILE_SCOPE("Draw Transformed Image");
 
-        m_sprite.setPosition(projector().getTransformedPosition());
-        const float scale = projector().getTransformedScale();
-        m_sprite.setScale({ scale, scale });
-
         //Use static so that it does not get initialized every time this function is called
         static sf::Clock time;
 
@@ -50,7 +46,7 @@ void Visualizer_Colorizer::render(sf::RenderWindow & window)
         m_shader.setUniform("shaderIndex", m_selectedShaderIndex);
         m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
 
-        window.draw(m_sprite, &m_shader);
+        projector().drawTerrain(window, &m_shader);
     }
 
 }
@@ -70,20 +66,4 @@ void Visualizer_Colorizer::load(const Settings & save)
 {
     const Settings::json & settings = save.section("Visualizer_Colorizer");
     Settings::read(settings, "m_selectedShaderIndex", m_selectedShaderIndex);
-}
-
-void Visualizer_Colorizer::process(const TerrainFrame& data)
-{
-    PROFILE_FUNCTION();
-    if (!projector().updateTexture(
-            data.heightMap,
-            m_projectedTopography,
-            m_image,
-            m_texture,
-            m_sprite,
-            false,
-            "Failed to load the colorizer terrain texture.\n"))
-    {
-        return;
-    }
 }

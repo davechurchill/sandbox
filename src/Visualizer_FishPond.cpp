@@ -562,28 +562,21 @@ void Visualizer_FishPond::render(sf::RenderWindow & window)
 {
     PROFILE_FUNCTION();
 
-    if (!m_hasFrame)
-    {
-        return;
-    }
-
-    m_sprite.setPosition(projector().getTransformedPosition());
-    const float scale = projector().getTransformedScale();
-    m_sprite.setScale({ scale, scale });
-
     if (m_shaderLoaded)
     {
         static sf::Clock time;
-        const sf::Vector2u textureSize = m_texture.getSize();
+        const sf::Texture * terrainTexture = projector().terrainTexture(true);
+        if (!terrainTexture) { return; }
+        const sf::Vector2u textureSize = terrainTexture->getSize();
         m_shader.setUniform("texelSize", sf::Glsl::Vec2(
             1.0f / textureSize.x,
             1.0f / textureSize.y));
         m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
-        window.draw(m_sprite, &m_shader);
+        if (!projector().drawTerrain(window, &m_shader, true)) { return; }
     }
     else
     {
-        window.draw(m_sprite);
+        if (!projector().drawTerrain(window, nullptr, true)) { return; }
     }
     renderFish(window);
 }
@@ -641,7 +634,6 @@ void Visualizer_FishPond::process(const TerrainFrame & data)
 
     if (data.heightMap.empty() || data.heightMap.type() != CV_32F)
     {
-        m_hasFrame = false;
         return;
     }
 
@@ -662,13 +654,4 @@ void Visualizer_FishPond::process(const TerrainFrame & data)
     m_topography = data.heightMap;
     m_topographySize = data.heightMap.size();
     updateFish(data.deltaTime);
-
-    m_hasFrame = projector().updateTexture(
-        m_topography,
-        m_projectedTopography,
-        m_image,
-        m_texture,
-        m_sprite,
-        true,
-        "Failed to load the fish-pond terrain texture.\n");
 }
