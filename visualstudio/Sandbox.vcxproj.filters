@@ -46,6 +46,9 @@
     <ClCompile Include="..\src\Visualizer_PrismaticGlacier.cpp">
       <Filter>visualizers</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Visualizer_Hexagon.cpp">
+      <Filter>visualizers</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\imgui\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
@@ -182,6 +185,9 @@
     <ClInclude Include="..\src\Visualizer_PrismaticGlacier.h">
       <Filter>visualizers</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Visualizer_Hexagon.h">
+      <Filter>visualizers</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\SandboxSession.hpp">
       <Filter>engine</Filter>
     </ClInclude>
@@ -312,6 +318,9 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="..\bin\shaders\shader_heat.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\shader_hexagon.frag">
       <Filter>shaders</Filter>
     </None>
     <None Include="..\bin\shaders\shader_terrain_lighting.frag">

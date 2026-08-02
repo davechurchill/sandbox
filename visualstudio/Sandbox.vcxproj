@@ -37,6 +37,7 @@
     <ClCompile Include="..\src\HeatGrid.cpp" />
     <ClCompile Include="..\src\ParticleManager.cpp" />
     <ClCompile Include="..\src\Visualizer_Heat.cpp" />
+    <ClCompile Include="..\src\Visualizer_Hexagon.cpp" />
     <ClCompile Include="..\src\Visualizer_Blockworld.cpp" />
     <ClCompile Include="..\src\Visualizer_Minecraft.cpp" />
     <ClCompile Include="..\src\Visualizer_MountainPeaks.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="..\src\MarkerDetector.hpp" />
     <ClInclude Include="..\src\ParticleManager.h" />
     <ClInclude Include="..\src\Visualizer_Heat.h" />
+    <ClInclude Include="..\src\Visualizer_Hexagon.h" />
     <ClInclude Include="..\src\Visualizer_Blockworld.h" />
     <ClInclude Include="..\src\Visualizer_Minecraft.h" />
     <ClInclude Include="..\src\Visualizer_MountainPeaks.h" />
@@ -126,6 +128,7 @@
     <None Include="..\bin\shaders\shader_forest_fire.frag" />
     <None Include="..\bin\shaders\shader_gravitational_starfield.frag" />
     <None Include="..\bin\shaders\shader_heat.frag" />
+    <None Include="..\bin\shaders\shader_hexagon.frag" />
     <None Include="..\bin\shaders\shader_blockworld.frag" />
     <None Include="..\bin\shaders\shader_minecraft.frag" />
     <None Include="..\bin\shaders\shader_mountain_peaks.frag" />

@@ -18,6 +18,7 @@
 #include "Visualizer_ForestFire.h"
 #include "Visualizer_GravitationalStarfield.h"
 #include "Visualizer_Heat.h"
+#include "Visualizer_Hexagon.h"
 #include "Visualizer_Minecraft.h"
 #include "Visualizer_MountainPeaks.h"
 #include "Visualizer_Nature.h"
@@ -51,6 +52,7 @@ namespace
         if (name == Visualizer_ForestFire::Name) return std::make_unique<Visualizer_ForestFire>(projector);
         if (name == Visualizer_GravitationalStarfield::Name) return std::make_unique<Visualizer_GravitationalStarfield>(projector);
         if (name == Visualizer_Heat::Name) return std::make_unique<Visualizer_Heat>(projector);
+        if (name == Visualizer_Hexagon::Name) return std::make_unique<Visualizer_Hexagon>(projector);
         if (name == Visualizer_Minecraft::Name) return std::make_unique<Visualizer_Minecraft>(projector);
         if (name == Visualizer_MountainPeaks::Name) return std::make_unique<Visualizer_MountainPeaks>(projector);
         if (name == Visualizer_Nature::Name) return std::make_unique<Visualizer_Nature>(projector);
@@ -119,6 +121,7 @@ const std::vector<std::string> & SandboxSession::visualizerNames() const
         std::string(Visualizer_ForestFire::Name),
         std::string(Visualizer_GravitationalStarfield::Name),
         std::string(Visualizer_Heat::Name),
+        std::string(Visualizer_Hexagon::Name),
         std::string(Visualizer_Minecraft::Name),
         std::string(Visualizer_MountainPeaks::Name),
         std::string(Visualizer_Nature::Name),

@@ -66,6 +66,10 @@ Simulates heat diffusion across the terrain and colors the result as a heat map.
 - The **Source** dropdown selects one existing hot or cold source. Hold the left mouse button and drag to move only that selected source.
 - Optional contour lines can be displayed from 0 to 19 lines.
 
+### Hexagon
+
+Rebuilds the projected terrain as stepped hexagonal prisms using Blockworld's height-based water, sand, grass, rock, and snow coloring. **Hexagon Size**, **Height Steps**, and **Prism Relief** control the shape of the terrain.
+
 ### Blockworld
 
 Turns the height map into a block-based terrain visualization with quantized elevations, visible block edges and sides, and height-based water, sand, grass, rock, and snow materials. **Block Size** controls the visual cell size from 2 to 48 pixels.
