@@ -129,6 +129,8 @@ void SandboxGUI::update()
             m_displayWindow.display();
         }
     }
+
+    m_terrain3DView.update(m_session.topography());
 }
 
 void SandboxGUI::frameInitialView()
@@ -162,6 +164,7 @@ void SandboxGUI::run()
 
 void SandboxGUI::quit()
 {
+    m_terrain3DView.close();
     m_displayWindow.close();
     m_running = false;
 }
@@ -337,11 +340,21 @@ void SandboxGUI::sRender()
         m_projectedDepthSprite.setScale({ scale, scale });
         target.draw(m_projectedDepthSprite);
     }
-    if (m_session.projector().projectionVisible())
+    SandBoxProjector & projector = m_session.projector();
+    if (projector.projectionVisible())
     {
         m_session.renderVisualizers(target);
+        if (m_terrain3DView.isOpen())
+        {
+            m_terrain3DView.captureVisualization(
+                m_session.topography(),
+                target,
+                projector.getProjectionMatrix(),
+                projector.getTransformedPosition(),
+                projector.getTransformedScale());
+        }
     }
-    m_session.projector().render(target);
+    projector.render(target);
 }
 
 void SandboxGUI::renderUI()
@@ -369,6 +382,13 @@ void SandboxGUI::renderUI()
             if (ImGui::MenuItem("Toggle Display Window", "F"))
             {
                 toggleDisplayWindow();
+            }
+            if (ImGui::MenuItem(
+                "3D Terrain View",
+                nullptr,
+                m_terrain3DView.isOpen()))
+            {
+                m_terrain3DView.toggle();
             }
             if (ImGui::MenuItem("Save Settings"))
             {

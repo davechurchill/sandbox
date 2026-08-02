@@ -54,6 +54,7 @@
     <ClCompile Include="..\src\Source_Perlin.cpp" />
     <ClCompile Include="..\src\Source_Snapshot.cpp" />
     <ClCompile Include="..\src\Source_Waves.cpp" />
+    <ClCompile Include="..\src\Terrain3DView.cpp" />
     <ClCompile Include="..\src\Tools.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -70,7 +71,6 @@
     <ClInclude Include="..\src\Visualizer_WaterFlow.h" />
     <ClInclude Include="..\src\Visualizer_FishPond.h" />
     <ClInclude Include="..\src\Visualizer_ForestFire.h" />
-    <ClInclude Include="..\src\Grid.hpp" />
     <ClInclude Include="..\src\HeatGrid.h" />
     <ClInclude Include="..\src\MarkerDetector.hpp" />
     <ClInclude Include="..\src\ParticleManager.h" />
@@ -98,6 +98,7 @@
     <ClInclude Include="..\src\Visualizer.hpp" />
     <ClInclude Include="..\src\Source.hpp" />
     <ClInclude Include="..\src\TerrainFrame.hpp" />
+    <ClInclude Include="..\src\Terrain3DView.h" />
     <ClCompile Include="..\src\VectorField.cpp" />
     <ClInclude Include="..\src\VectorField.h" />
     <ClInclude Include="..\src\ViewController.hpp" />

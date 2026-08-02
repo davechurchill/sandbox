@@ -55,7 +55,6 @@ void main()
     float lighting = 0.43 + diffuse * 0.67;
 
     vec2 pixel = uv / texelSize;
-    float broadVariation = noise(pixel * 0.035);
     float patchVariation = noise(pixel * 0.012 + vec2(19.0, 7.0));
     float fineVariation = noise(pixel * 0.22 + vec2(43.0, 29.0));
     float steepness = clamp(length(normal.xy), 0.0, 1.0);
@@ -64,7 +63,6 @@ void main()
     vec3 shallowWater = vec3(0.080, 0.300, 0.390);
     vec3 deepWater = vec3(0.006, 0.035, 0.160);
     vec3 pondColor = mix(shallowWater, deepWater, smoothstep(0.0, 0.65, depth));
-    pondColor *= 0.94 + broadVariation * 0.06;
 
     float landHeight = clamp((height - waterLevel) / max(1.0 - waterLevel, 0.001), 0.0, 1.0);
     vec3 deepGrass = vec3(0.045, 0.155, 0.032);
@@ -73,18 +71,12 @@ void main()
     vec3 grassColor = mix(deepGrass, meadowGrass, smoothstep(0.0, 0.42, landHeight));
     grassColor = mix(grassColor, hillGrass, smoothstep(0.38, 0.82, landHeight));
 
-    vec3 dryGrass = vec3(0.48, 0.43, 0.19);
-    float dryPatch = smoothstep(0.58, 0.82, patchVariation + height * 0.20);
-    grassColor = mix(grassColor, dryGrass, dryPatch * 0.24);
-
     float exposedGround = smoothstep(0.62, 0.94, steepness) * smoothstep(0.32, 0.85, height);
     vec3 earth = mix(vec3(0.18, 0.125, 0.070), vec3(0.39, 0.37, 0.31), height);
     vec3 color = mix(grassColor, earth, exposedGround * 0.78);
 
     float wetBank = 1.0 - smoothstep(waterLevel + 0.005, waterLevel + 0.060, height);
     color = mix(color, vec3(0.19, 0.225, 0.105), wetBank * 0.62);
-    color *= 0.88 + broadVariation * 0.20;
-    color += (fineVariation - 0.5) * vec3(0.018, 0.030, 0.012);
 
     float waterBlend = 1.0 - smoothstep(waterLevel - 0.018, waterLevel + 0.030, height);
     color = mix(color, pondColor, waterBlend);

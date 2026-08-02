@@ -3,7 +3,6 @@
 #include "Settings.hpp"
 #include "Source.hpp"
 #include "Perlin.hpp"
-#include "Grid.hpp"
 
 #include <opencv2/opencv.hpp>
 #include <SFML/Graphics.hpp>
@@ -16,7 +15,6 @@ class Source_Perlin : public Source
     int                 m_seedSize = 9;
     float               m_persistance = 0.5f;
     bool                m_drawGrid = false;
-    Grid<float>         m_grid;
 
     cv::Mat             m_topography;
 

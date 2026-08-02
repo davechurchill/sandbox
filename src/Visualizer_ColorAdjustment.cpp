@@ -128,17 +128,26 @@ void Visualizer_ColorAdjustment::render(
         m_captureSprite.setTexture(m_captureTexture, true);
     }
 
-    const sf::Vector2f projectedSize(
+    const sf::Vector2f projectedWorldSize(
         terrainSize.x * scale,
         terrainSize.y * scale);
-    const int left = std::max(0, (int)std::floor(origin.x));
-    const int top = std::max(0, (int)std::floor(origin.y));
-    const int right = std::min(
-        (int)windowSize.x,
-        (int)std::ceil(origin.x + projectedSize.x));
-    const int bottom = std::min(
-        (int)windowSize.y,
-        (int)std::ceil(origin.y + projectedSize.y));
+    const sf::Vector2i firstPixel = window.mapCoordsToPixel(origin);
+    const sf::Vector2i secondPixel = window.mapCoordsToPixel(
+        origin + projectedWorldSize);
+    const int projectionLeft = std::min(firstPixel.x, secondPixel.x);
+    const int projectionTop = std::min(firstPixel.y, secondPixel.y);
+    const int projectionRight = std::max(firstPixel.x, secondPixel.x);
+    const int projectionBottom = std::max(firstPixel.y, secondPixel.y);
+    const sf::Vector2f projectionPixelOrigin(
+        (float)projectionLeft,
+        (float)projectionTop);
+    const sf::Vector2f projectionPixelSize(
+        (float)(projectionRight - projectionLeft),
+        (float)(projectionBottom - projectionTop));
+    const int left = std::clamp(projectionLeft, 0, (int)windowSize.x);
+    const int top = std::clamp(projectionTop, 0, (int)windowSize.y);
+    const int right = std::clamp(projectionRight, 0, (int)windowSize.x);
+    const int bottom = std::clamp(projectionBottom, 0, (int)windowSize.y);
     if (right <= left || bottom <= top)
     {
         return;
@@ -153,8 +162,8 @@ void Visualizer_ColorAdjustment::render(
 
     m_shader.setUniform("terrainTexture", m_terrainTexture);
     m_shader.setUniform("windowHeight", (float)windowSize.y);
-    m_shader.setUniform("projectionOrigin", sf::Glsl::Vec2(origin));
-    m_shader.setUniform("projectionSize", sf::Glsl::Vec2(projectedSize));
+    m_shader.setUniform("projectionOrigin", sf::Glsl::Vec2(projectionPixelOrigin));
+    m_shader.setUniform("projectionSize", sf::Glsl::Vec2(projectionPixelSize));
     m_shader.setUniform("brightness", m_brightness);
     m_shader.setUniform("contrast", m_contrast);
     m_shader.setUniform("exposure", m_exposure);
@@ -162,7 +171,14 @@ void Visualizer_ColorAdjustment::render(
     m_shader.setUniform("hue", m_hue);
     m_shader.setUniform("gamma", m_gamma);
     m_shader.setUniform("temperature", m_temperature);
+
+    const sf::View previousView = window.getView();
+    sf::View pixelView = window.getDefaultView();
+    pixelView.setCenter({ windowSize.x * 0.5f, windowSize.y * 0.5f });
+    pixelView.setSize({ (float)windowSize.x, (float)windowSize.y });
+    window.setView(pixelView);
     window.draw(m_captureSprite, &m_shader);
+    window.setView(previousView);
 }
 
 void Visualizer_ColorAdjustment::save(Settings & save) const

@@ -3,7 +3,6 @@
 #include <limits>
 #include <queue>
 
-#include "Grid.hpp"
 #include "SFML/System/Vector2.hpp"
 #include "VectorField.h"
 
@@ -28,11 +27,8 @@ cv::Mat VectorField::ComputeBFS(
         gridHeight += 1;
     }
 
-    Grid<double> m_grid = Grid<double>(gridWidth, gridHeight, 0); // average terrain height
-    Grid<double> m_distance = Grid<double>(
-        gridWidth + 1,
-        gridHeight,
-        std::numeric_limits<double>::infinity()); // height-adjusted distance to the goal
+    cv::Mat m_grid = cv::Mat::zeros(gridHeight, gridWidth, CV_64F); // average terrain height
+    cv::Mat m_distance(gridHeight, gridWidth + 1, CV_64F, cv::Scalar(std::numeric_limits<double>::infinity())); // height-adjusted distance to the goal
     cv::Mat m_directions = cv::Mat::zeros(gridHeight, gridWidth, CV_64FC2); // director vector
 
     for (int x = 0; x < gridWidth; ++x)
@@ -55,7 +51,7 @@ cv::Mat VectorField::ComputeBFS(
                 }
             }
 
-            m_grid.set(x, y, sampleCount > 0 ? heightSum / sampleCount : 1.0);
+            m_grid.at<double>(y, x) = sampleCount > 0 ? heightSum / sampleCount : 1.0;
         }
     }
 
@@ -76,7 +72,7 @@ cv::Mat VectorField::ComputeBFS(
     for (int y = 0; y < gridHeight; ++y)
     {
         openList.push({ 0.0, { gridWidth, y } });
-        m_distance.set(gridWidth, y, 0.0);
+        m_distance.at<double>(y, gridWidth) = 0.0;
     }
 
     while (!openList.empty())
@@ -84,7 +80,7 @@ cv::Mat VectorField::ComputeBFS(
         const QueueEntry entry = openList.top();
         openList.pop();
         const sf::Vector2i cell = entry.cell;
-        const double value = m_distance.get(cell.x, cell.y);
+        const double value = m_distance.at<double>(cell.y, cell.x);
         if (entry.distance > value)
         {
             continue;
@@ -93,10 +89,10 @@ cv::Mat VectorField::ComputeBFS(
         auto update = [&](int x, int y)
         {
             const double terrainCost = x < gridWidth
-                ? m_grid.get(x, y) * heightPenalty
+                ? m_grid.at<double>(y, x) * heightPenalty
                 : 0.0;
             const double candidateDistance = value + 1.0 + terrainCost;
-            double& dist = m_distance.get(x, y);
+            double& dist = m_distance.at<double>(y, x);
             if (candidateDistance < dist)
             {
                 dist = candidateDistance;
@@ -126,7 +122,7 @@ cv::Mat VectorField::ComputeBFS(
     {
         for (int y = 0; y < gridHeight; ++y)
         {
-            double thisDist = m_distance.get(x, y);
+            double thisDist = m_distance.at<double>(y, x);
             if (!std::isfinite(thisDist))
             {
                 m_directions.at<cv::Vec2d>(y, x) = { 0.0, 0.0 };
@@ -136,7 +132,7 @@ cv::Mat VectorField::ComputeBFS(
             sf::Vector2<double> dir{ 0.0, 0.0 };
             const auto addDescent = [&](int sampleX, int sampleY, double xDirection, double yDirection)
             {
-                const double sampleDistance = m_distance.get(sampleX, sampleY);
+                const double sampleDistance = m_distance.at<double>(sampleY, sampleX);
                 if (sampleDistance < thisDist)
                 {
                     const double strength = thisDist - sampleDistance;

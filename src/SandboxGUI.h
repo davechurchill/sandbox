@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SandboxSession.hpp"
+#include "Terrain3DView.h"
 #include "ViewController.hpp"
 
 #include <SFML/Graphics.hpp>
@@ -22,6 +23,7 @@ class SandboxGUI
     sf::RenderWindow m_window;
     bool m_imguiInitialized;
     SandboxSession m_session;
+    Terrain3DView m_terrain3DView;
     sf::Clock m_deltaClock;
 
     cv::Mat m_projectedDepthImage;

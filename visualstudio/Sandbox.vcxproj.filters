@@ -114,6 +114,9 @@
     <ClCompile Include="..\src\Source_Perlin.cpp">
       <Filter>sources\perlin</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Terrain3DView.cpp">
+      <Filter>engine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Visualizer_AStar.h">
@@ -234,14 +237,14 @@
     <ClInclude Include="..\src\VectorField.h">
       <Filter>visualizers\vectors</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\Grid.hpp">
-      <Filter>sources\perlin</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Perlin.hpp">
       <Filter>sources\perlin</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Source_Perlin.h">
       <Filter>sources\perlin</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Terrain3DView.h">
+      <Filter>engine</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
