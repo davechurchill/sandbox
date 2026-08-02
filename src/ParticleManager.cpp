@@ -13,16 +13,16 @@ namespace
     constexpr double MaximumParticleSpeedMultiplier = 1.25;
     constexpr size_t MaximumActiveParticles = 250000;
 
-    double vectorLength(const sf::Vector2<double> & value)
+    double VectorLength(const sf::Vector2<double> & value)
     {
         return std::sqrt(value.x * value.x + value.y * value.y);
     }
 
-    sf::Vector2<double> normalized(
+    sf::Vector2<double> Normalized(
         const sf::Vector2<double> & value,
         const sf::Vector2<double> & fallback = { 1.0, 0.0 })
     {
-        const double length = vectorLength(value);
+        const double length = VectorLength(value);
         return length > 0.000001
             ? sf::Vector2<double>(value.x / length, value.y / length)
             : fallback;
@@ -262,7 +262,7 @@ void ParticleManager::update(const cv::Mat & data, float deltaTime)
                 ? right
                 : traversalDirection(particle);
             const double steeringAmount = std::clamp(6.0 * dt, 0.0, 1.0);
-            particle.direction = normalized({
+            particle.direction = Normalized({
                 particle.direction.x + (desiredDirection.x - particle.direction.x) * steeringAmount,
                 particle.direction.y + (desiredDirection.y - particle.direction.y) * steeringAmount });
             particle.pos.x += particle.direction.x * particleMovement * TerrainTraversalSpeed;
@@ -308,7 +308,7 @@ void ParticleManager::update(const cv::Mat & data, float deltaTime)
 
             const double steeringRate = avoidingTerrain ? 7.0 : 2.8;
             const double steeringAmount = std::clamp(steeringRate * dt, 0.0, 1.0);
-            particle.direction = normalized({
+            particle.direction = Normalized({
                 particle.direction.x + (desiredDirection.x - particle.direction.x) * steeringAmount,
                 particle.direction.y + (desiredDirection.y - particle.direction.y) * steeringAmount });
 
@@ -317,7 +317,7 @@ void ParticleManager::update(const cv::Mat & data, float deltaTime)
                 particle.pos.y + particle.direction.y * particleMovement);
             if (!positionIsOpen(particle, nextPosition))
             {
-                particle.direction = normalized(desiredDirection);
+                particle.direction = Normalized(desiredDirection);
                 nextPosition = {
                     particle.pos.x + particle.direction.x * particleMovement,
                     particle.pos.y + particle.direction.y * particleMovement };

@@ -26,7 +26,7 @@
 
 namespace
 {
-    std::unique_ptr<Source> createSource(std::string_view name)
+    std::unique_ptr<Source> CreateSource(std::string_view name)
     {
         if (name == "Camera") return std::make_unique<Source_Camera>();
         if (name == "PaintBrush") return std::make_unique<Source_PaintBrush>();
@@ -36,7 +36,7 @@ namespace
         return nullptr;
     }
 
-    std::unique_ptr<Visualizer> createVisualizer(std::string_view name, SandBoxProjector & projector)
+    std::unique_ptr<Visualizer> CreateVisualizer(std::string_view name, SandBoxProjector & projector)
     {
         if (name == Visualizer_Blockworld::Name) return std::make_unique<Visualizer_Blockworld>(projector);
         if (name == Visualizer_Colorizer::Name) return std::make_unique<Visualizer_Colorizer>(projector);
@@ -130,7 +130,7 @@ SandboxSession::VisualizerState * SandboxSession::ensureVisualizer(std::string_v
         return found->second.visualizer ? &found->second : nullptr;
     }
 
-    std::unique_ptr<Visualizer> visualizer = createVisualizer(name, m_projector);
+    std::unique_ptr<Visualizer> visualizer = CreateVisualizer(name, m_projector);
     if (!visualizer)
     {
         return nullptr;
@@ -171,11 +171,11 @@ bool SandboxSession::visualizerEnabled(std::string_view name) const
 void SandboxSession::setSource(std::string_view source, bool saveCurrent)
 {
     std::string selectedName(source);
-    std::unique_ptr<Source> nextSource = createSource(selectedName);
+    std::unique_ptr<Source> nextSource = CreateSource(selectedName);
     if (!nextSource)
     {
         selectedName = "Camera";
-        nextSource = createSource(selectedName);
+        nextSource = CreateSource(selectedName);
     }
 
     const bool sourceChanged = !m_source || selectedName != m_sourceName;

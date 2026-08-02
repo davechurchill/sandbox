@@ -213,7 +213,7 @@ void Visualizer_Heat::process(const TerrainFrame& data)
         {
             {
                 PROFILE_SCOPE("Transformed Image SFML Image");
-                m_sfTransformedDepthImageColor = Tools::matToSfImage(m_cvTransformedDepthImage32fColor);
+                m_sfTransformedDepthImageColor = Tools::MatToSfImage(m_cvTransformedDepthImage32fColor);
 
                 {
                     PROFILE_SCOPE("SFML Texture From Image");
@@ -254,7 +254,7 @@ void Visualizer_Heat::process(const TerrainFrame& data)
         {
             {
                 PROFILE_SCOPE("Transformed Image SFML Image");
-                m_sfTransformedDepthImageHeat = Tools::matToSfImage(m_cvTransformedDepthImage32fHeat);
+                m_sfTransformedDepthImageHeat = Tools::MatToSfImage(m_cvTransformedDepthImage32fHeat);
 
                 {
                     PROFILE_SCOPE("SFML Texture From Image");

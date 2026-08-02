@@ -12,7 +12,7 @@ namespace
 {
     constexpr const char * WaterShaderPath = "shaders/shader_water_flow.frag";
 
-    bool isTerrainCell(float height)
+    bool IsTerrainCell(float height)
     {
         return std::isfinite(height) && height > 0.001f && height < 0.999f;
     }
@@ -67,7 +67,7 @@ void Visualizer_WaterFlow::addRain(const cv::Mat & terrain, float amount)
             float * waterRow = m_water.ptr<float>(y);
             for (int x = 0; x < terrain.cols; x++)
             {
-                if (isTerrainCell(terrainRow[x]))
+                if (IsTerrainCell(terrainRow[x]))
                 {
                     waterRow[x] = std::min(waterRow[x] + amount, 1.0f);
                 }
@@ -97,7 +97,7 @@ void Visualizer_WaterFlow::addRain(const cv::Mat & terrain, float amount)
             const float dx = x - m_rainBrushPosition.x;
             const float dy = y - m_rainBrushPosition.y;
             const float distanceSquared = dx * dx + dy * dy;
-            if (distanceSquared <= radiusSquared && isTerrainCell(terrainRow[x]))
+            if (distanceSquared <= radiusSquared && IsTerrainCell(terrainRow[x]))
             {
                 const float falloff = 1.0f - std::sqrt(distanceSquared) / radius;
                 waterRow[x] = std::min(waterRow[x] + amount * falloff, 1.0f);
@@ -119,7 +119,7 @@ void Visualizer_WaterFlow::simulate(const cv::Mat & terrain, float deltaTime)
         float * waterRow = m_water.ptr<float>(y);
         for (int x = 0; x < terrain.cols; x++)
         {
-            if (!isTerrainCell(terrainRow[x]))
+            if (!IsTerrainCell(terrainRow[x]))
             {
                 waterRow[x] = 0.0f;
             }
@@ -143,7 +143,7 @@ void Visualizer_WaterFlow::simulate(const cv::Mat & terrain, float deltaTime)
             {
                 const float terrainHeight = terrain.at<float>(y, x);
                 const float waterAmount = m_water.at<float>(y, x);
-                if (!isTerrainCell(terrainHeight) || waterAmount <= 0.0f)
+                if (!IsTerrainCell(terrainHeight) || waterAmount <= 0.0f)
                 {
                     continue;
                 }
@@ -163,7 +163,7 @@ void Visualizer_WaterFlow::simulate(const cv::Mat & terrain, float deltaTime)
                     }
 
                     const float neighborHeight = terrain.at<float>(ny, nx);
-                    if (!isTerrainCell(neighborHeight))
+                    if (!IsTerrainCell(neighborHeight))
                     {
                         continue;
                     }
@@ -193,7 +193,7 @@ void Visualizer_WaterFlow::simulate(const cv::Mat & terrain, float deltaTime)
             float * nextRow = m_nextWater.ptr<float>(y);
             for (int x = 0; x < terrain.cols; x++)
             {
-                nextRow[x] = isTerrainCell(terrainRow[x])
+                nextRow[x] = IsTerrainCell(terrainRow[x])
                     ? std::clamp(nextRow[x] * evaporation, 0.0f, 1.0f)
                     : 0.0f;
             }

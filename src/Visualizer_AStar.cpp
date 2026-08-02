@@ -19,7 +19,7 @@ namespace
         cv::Point(-1, 1),  cv::Point(0, 1),  cv::Point(1, 1)
     };
 
-    float octileDistance(const cv::Point & first, const cv::Point & second)
+    float OctileDistance(const cv::Point & first, const cv::Point & second)
     {
         const int dx = std::abs(first.x - second.x);
         const int dy = std::abs(first.y - second.y);
@@ -28,7 +28,7 @@ namespace
         return diagonal * DiagonalDistance + (float)straight;
     }
 
-    void appendThickSegment(
+    void AppendThickSegment(
         sf::VertexArray & vertices,
         const sf::Vector2f & first,
         const sf::Vector2f & second,
@@ -224,7 +224,7 @@ void Visualizer_AStar::calculatePath()
     {
         return std::max(
             0.0f,
-            octileDistance(point, m_goal)
+            OctileDistance(point, m_goal)
                 - m_movementLength * DiagonalDistance);
     };
     const float infinity = std::numeric_limits<float>::infinity();
@@ -486,13 +486,13 @@ void Visualizer_AStar::drawPath(
         {
             const sf::Vector2f first = screenPoint(index - 1);
             const sf::Vector2f second = screenPoint(index);
-            appendThickSegment(
+            AppendThickSegment(
                 outline,
                 first,
                 second,
                 m_pathThickness + 3.0f,
                 sf::Color(18, 20, 24, 210));
-            appendThickSegment(
+            AppendThickSegment(
                 line,
                 first,
                 second,

@@ -22,25 +22,25 @@ namespace
         sf::Color(72, 164, 190),
         sf::Color(235, 118, 155) };
 
-    int fishDepthBand(float depth)
+    int FishDepthBand(float depth)
     {
         return std::clamp((int)(depth * 4.0f), 0, 3);
     }
 
-    float vectorLength(const cv::Point2f & value)
+    float VectorLength(const cv::Point2f & value)
     {
         return std::sqrt(value.x * value.x + value.y * value.y);
     }
 
-    cv::Point2f normalized(const cv::Point2f & value, const cv::Point2f & fallback = { 1.0f, 0.0f })
+    cv::Point2f Normalized(const cv::Point2f & value, const cv::Point2f & fallback = { 1.0f, 0.0f })
     {
-        const float length = vectorLength(value);
+        const float length = VectorLength(value);
         return length > 0.0001f
             ? cv::Point2f(value.x / length, value.y / length)
             : fallback;
     }
 
-    bool isTerrainHeight(float height)
+    bool IsTerrainHeight(float height)
     {
         return std::isfinite(height) && height > 0.001f && height < 0.999f;
     }
@@ -73,7 +73,7 @@ float Visualizer_FishPond::sampleHeight(const cv::Point2f & position) const
     const int x = std::clamp((int)std::round(position.x), 0, m_topography.cols - 1);
     const int y = std::clamp((int)std::round(position.y), 0, m_topography.rows - 1);
     const float height = m_topography.at<float>(y, x);
-    return isTerrainHeight(height)
+    return IsTerrainHeight(height)
         ? height
         : std::numeric_limits<float>::quiet_NaN();
 }
@@ -123,10 +123,10 @@ bool Visualizer_FishPond::addFish(const cv::Point2f & position)
 
     float nearestSchoolDistanceSquared = m_schoolRadius * m_schoolRadius * 2.25f;
     int nearbyColorType = -1;
-    const int depthBand = fishDepthBand(fish.swimDepth);
+    const int depthBand = FishDepthBand(fish.swimDepth);
     for (const Fish & nearbyFish : m_fish)
     {
-        if (fishDepthBand(nearbyFish.swimDepth) != depthBand)
+        if (FishDepthBand(nearbyFish.swimDepth) != depthBand)
         {
             continue;
         }
@@ -286,19 +286,19 @@ void Visualizer_FishPond::updateFish(float deltaTime)
             randomizeWander(fish);
         }
 
-        const cv::Point2f forward = normalized(fish.velocity);
+        const cv::Point2f forward = Normalized(fish.velocity);
         cv::Point2f center(0.0f, 0.0f);
         cv::Point2f alignment(0.0f, 0.0f);
         cv::Point2f separation(0.0f, 0.0f);
         int neighbors = 0;
-        const int depthBand = fishDepthBand(fish.swimDepth);
+        const int depthBand = FishDepthBand(fish.swimDepth);
         for (size_t j = 0; j < m_fish.size(); j++)
         {
             if (i == j)
             {
                 continue;
             }
-            const int neighborDepthBand = fishDepthBand(m_fish[j].swimDepth);
+            const int neighborDepthBand = FishDepthBand(m_fish[j].swimDepth);
             if (neighborDepthBand != depthBand)
             {
                 continue;
@@ -325,7 +325,7 @@ void Visualizer_FishPond::updateFish(float deltaTime)
 
             center.x += m_fish[j].position.x;
             center.y += m_fish[j].position.y;
-            const cv::Point2f neighborDirection = normalized(m_fish[j].velocity);
+            const cv::Point2f neighborDirection = Normalized(m_fish[j].velocity);
             alignment.x += neighborDirection.x;
             alignment.y += neighborDirection.y;
             neighbors++;
@@ -338,8 +338,8 @@ void Visualizer_FishPond::updateFish(float deltaTime)
         {
             center.x = center.x / neighbors - fish.position.x;
             center.y = center.y / neighbors - fish.position.y;
-            const cv::Point2f cohesion = normalized(center, forward);
-            alignment = normalized(alignment, forward);
+            const cv::Point2f cohesion = Normalized(center, forward);
+            alignment = Normalized(alignment, forward);
             desired.x += (cohesion.x * 0.58f + alignment.x * 0.82f) * m_schoolStrength;
             desired.y += (cohesion.y * 0.58f + alignment.y * 0.82f) * m_schoolStrength;
         }
@@ -349,10 +349,10 @@ void Visualizer_FishPond::updateFish(float deltaTime)
         const cv::Point2f avoidance = shorelineSteering(fish, forward);
         desired.x += avoidance.x * 1.65f;
         desired.y += avoidance.y * 1.65f;
-        desired = normalized(desired, forward);
+        desired = Normalized(desired, forward);
 
         const float steeringAmount = std::clamp(dt * 2.8f, 0.0f, 1.0f);
-        nextDirections[i] = normalized({
+        nextDirections[i] = Normalized({
             forward.x + (desired.x - forward.x) * steeringAmount,
             forward.y + (desired.y - forward.y) * steeringAmount }, forward);
     }
@@ -495,7 +495,7 @@ void Visualizer_FishPond::renderFish(sf::RenderWindow & window)
     points.reserve(m_fish.size() * 2);
     for (const Fish & fish : m_fish)
     {
-        const cv::Point2f direction = normalized(fish.velocity);
+        const cv::Point2f direction = Normalized(fish.velocity);
         points.push_back(fish.position);
         points.push_back({ fish.position.x + direction.x * 4.0f, fish.position.y + direction.y * 4.0f });
     }

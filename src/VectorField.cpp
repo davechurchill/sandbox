@@ -7,7 +7,7 @@
 #include "SFML/System/Vector2.hpp"
 #include "VectorField.h"
 
-cv::Mat VectorField::computeBFS(
+cv::Mat VectorField::ComputeBFS(
     const cv::Mat& grid,
     int spacing,
     float heightPenalty)

@@ -82,7 +82,7 @@ bool SandBoxProjector::updateTexture(
         return false;
     }
 
-    image = Tools::matToSfImage(projectedImage);
+    image = Tools::MatToSfImage(projectedImage);
     if (!texture.loadFromImage(image))
     {
         if (textureErrorMessage)
@@ -203,7 +203,7 @@ bool SandBoxProjector::processEvent(const sf::Event & event, const sf::Vector2f 
     if (const auto* mousePressed = event.getIf<sf::Event::MouseButtonPressed>();
         mousePressed && mousePressed->button == sf::Mouse::Button::Left)
     {
-        m_dragPoint = Tools::getClickedCircleIndex(mouse.x, mouse.y, m_projectionCircles);
+        m_dragPoint = Tools::GetClickedCircleIndex(mouse.x, mouse.y, m_projectionCircles);
     }
 
     // if we have released the mouse button

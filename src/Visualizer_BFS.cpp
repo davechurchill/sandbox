@@ -12,7 +12,7 @@ namespace
 {
     constexpr size_t MaximumActiveParticles = 250000;
 
-    double wrapCoordinate(double value, int size)
+    double WrapCoordinate(double value, int size)
     {
         const double extent = (double)std::max(size - 1, 1);
         value = std::fmod(value, extent);
@@ -64,7 +64,7 @@ void Visualizer_BFS::updateParticles(const cv::Mat & terrain, float deltaTime)
 
     const int cellSize = std::max(m_cellSize, 1);
     const int trailLength = std::max(m_trailLength, 1);
-    const cv::Mat directions = VectorField::computeBFS(
+    const cv::Mat directions = VectorField::ComputeBFS(
         terrain,
         cellSize,
         std::max(m_heightPenalty, 0.0f));
@@ -114,7 +114,7 @@ void Visualizer_BFS::updateParticles(const cv::Mat & terrain, float deltaTime)
         }
         if (yOutOfBounds)
         {
-            particle.position.y = wrapCoordinate(particle.position.y, size.height);
+            particle.position.y = WrapCoordinate(particle.position.y, size.height);
             particle.trail.clear();
         }
 

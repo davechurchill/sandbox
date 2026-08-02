@@ -31,7 +31,7 @@ namespace Tools
     };
 
 #if defined(_WIN32)
-    BOOL CALLBACK collectMonitor(
+    BOOL CALLBACK CollectMonitor(
         HMONITOR monitor,
         HDC,
         LPRECT,
@@ -42,13 +42,13 @@ namespace Tools
         return TRUE;
     }
 
-    std::vector<HMONITOR> getMonitors()
+    std::vector<HMONITOR> GetMonitors()
     {
         std::vector<HMONITOR> monitors;
         if (!EnumDisplayMonitors(
             nullptr,
             nullptr,
-            collectMonitor,
+            CollectMonitor,
             reinterpret_cast<LPARAM>(&monitors)))
         {
             monitors.clear();
@@ -56,14 +56,14 @@ namespace Tools
         return monitors;
     }
 
-    bool getMonitorInfo(HMONITOR monitor, MONITORINFOEXA & info)
+    bool ReadMonitorInfo(HMONITOR monitor, MONITORINFOEXA & info)
     {
         info = {};
         info.cbSize = sizeof(info);
         return GetMonitorInfoA(monitor, &info) != FALSE;
     }
 
-    DisplayTarget makeDisplayTarget(const MONITORINFOEXA & info)
+    DisplayTarget MakeDisplayTarget(const MONITORINFOEXA & info)
     {
         const LONG width = info.rcMonitor.right - info.rcMonitor.left;
         const LONG height = info.rcMonitor.bottom - info.rcMonitor.top;
@@ -74,7 +74,7 @@ namespace Tools
     }
 #endif
 
-    std::vector<MonitorOption> getMonitorOptions(const sf::Window & mainWindow)
+    std::vector<MonitorOption> GetMonitorOptions(const sf::Window & mainWindow)
     {
 #if defined(_WIN32)
         std::vector<MonitorOption> options;
@@ -82,10 +82,10 @@ namespace Tools
             mainWindow.getNativeHandle(),
             MONITOR_DEFAULTTOPRIMARY);
 
-        for (HMONITOR monitor : getMonitors())
+        for (HMONITOR monitor : GetMonitors())
         {
             MONITORINFOEXA info{};
-            if (!getMonitorInfo(monitor, info))
+            if (!ReadMonitorInfo(monitor, info))
             {
                 continue;
             }
@@ -127,7 +127,7 @@ namespace Tools
 #endif
     }
 
-    DisplayTarget getDisplayTarget(
+    DisplayTarget GetDisplayTarget(
         const sf::Window & mainWindow,
         const std::string & selectedMonitorID)
     {
@@ -137,22 +137,22 @@ namespace Tools
             mainWindow.getNativeHandle(),
             MONITOR_DEFAULTTOPRIMARY);
 
-        const std::vector<HMONITOR> monitors = getMonitors();
+        const std::vector<HMONITOR> monitors = GetMonitors();
         if (!selectedMonitorID.empty())
         {
             for (HMONITOR monitor : monitors)
             {
                 MONITORINFOEXA info{};
-                if (getMonitorInfo(monitor, info)
+                if (ReadMonitorInfo(monitor, info)
                     && selectedMonitorID == info.szDevice)
                 {
-                    return makeDisplayTarget(info);
+                    return MakeDisplayTarget(info);
                 }
             }
         }
 
         MONITORINFOEXA mainInfo{};
-        if (!mainMonitor || !getMonitorInfo(mainMonitor, mainInfo))
+        if (!mainMonitor || !ReadMonitorInfo(mainMonitor, mainInfo))
         {
             return target;
         }
@@ -173,7 +173,7 @@ namespace Tools
             }
 
             MONITORINFOEXA info{};
-            if (!getMonitorInfo(monitor, info))
+            if (!ReadMonitorInfo(monitor, info))
             {
                 continue;
             }
@@ -191,18 +191,18 @@ namespace Tools
             }
         }
 
-        return selectedMonitor ? makeDisplayTarget(selectedInfo) : target;
+        return selectedMonitor ? MakeDisplayTarget(selectedInfo) : target;
 #else
         return { sf::VideoMode::getDesktopMode(), { 0, 0 } };
 #endif
     }
     }
 
-    bool imguiMonitorSelector(
+    bool ImGuiMonitorSelector(
         const sf::Window & mainWindow,
         std::string & selectedMonitorID)
     {
-        const std::vector<MonitorOption> monitorOptions = getMonitorOptions(mainWindow);
+        const std::vector<MonitorOption> monitorOptions = GetMonitorOptions(mainWindow);
         std::string monitorPreview = "Automatic (nearest other monitor)";
         bool selectedMonitorAvailable = selectedMonitorID.empty();
         for (const MonitorOption & option : monitorOptions)
@@ -244,19 +244,19 @@ namespace Tools
         return changed;
     }
 
-    void openDisplayWindow(
+    void OpenDisplayWindow(
         sf::RenderWindow & displayWindow,
         const sf::Window & mainWindow,
         const std::string & selectedMonitorID)
     {
-        const DisplayTarget target = getDisplayTarget(mainWindow, selectedMonitorID);
+        const DisplayTarget target = GetDisplayTarget(mainWindow, selectedMonitorID);
         displayWindow.create(target.mode, "Display", sf::Style::None);
         displayWindow.setPosition(target.position);
     }
 
     // given an (mx, my) mouse position, return the index of the first circle the contains the position
     // returns -1 if the mouse position is not inside any circle
-    int getClickedCircleIndex(float mx, float my, std::vector<sf::CircleShape> & circles)
+    int GetClickedCircleIndex(float mx, float my, std::vector<sf::CircleShape> & circles)
     {
         PROFILE_FUNCTION();
         for (int i = 0; i < circles.size(); i++)
@@ -271,7 +271,7 @@ namespace Tools
         return -1;
     }
 
-    sf::Image matToSfImage(const cv::Mat & mat)
+    sf::Image MatToSfImage(const cv::Mat & mat)
     {
         PROFILE_FUNCTION();
 

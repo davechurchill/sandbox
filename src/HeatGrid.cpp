@@ -5,7 +5,7 @@
 
 namespace
 {
-    void zeroBoundary(cv::Mat& matrix)
+    void ZeroBoundary(cv::Mat& matrix)
     {
         if (matrix.empty()) { return; }
 
@@ -17,7 +17,7 @@ namespace
 }
 
 
-void setRectValue(cv::Mat& mat, const cv::Rect& rect, float value)
+void SetRectValue(cv::Mat& mat, const cv::Rect& rect, float value)
 {
     // Check if the input matrix is valid
     if (mat.empty()) { return; }
@@ -87,9 +87,9 @@ void HeatGrid::updateSources()
 {
     for (auto& source : m_sources)
     {
-        setRectValue(m_temps, source.m_area, source.m_temp);
+        SetRectValue(m_temps, source.m_area, source.m_temp);
     }
-    zeroBoundary(m_temps);
+    ZeroBoundary(m_temps);
 }
 
 void HeatGrid::formulaAvg(const cv::Mat&)

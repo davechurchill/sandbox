@@ -21,7 +21,7 @@ namespace
     bool DefaultUIStyleCaptured = false;
     constexpr const char * SettingsFile = "settings.json";
 
-    bool isMouseControlEvent(const sf::Event & event)
+    bool IsMouseControlEvent(const sf::Event & event)
     {
         return event.is<sf::Event::MouseMoved>()
             || event.is<sf::Event::MouseButtonPressed>()
@@ -31,7 +31,7 @@ namespace
             || event.is<sf::Event::MouseLeft>();
     }
 
-    bool eventMousePosition(const sf::Event & event, sf::Vector2i & position)
+    bool EventMousePosition(const sf::Event & event, sf::Vector2i & position)
     {
         if (const auto* moved = event.getIf<sf::Event::MouseMoved>())
         {
@@ -206,7 +206,7 @@ void SandboxGUI::routeControlEvent(
     const sf::Vector2f & mouse,
     bool displayWindowEvent)
 {
-    const bool mouseControlEvent = isMouseControlEvent(event);
+    const bool mouseControlEvent = IsMouseControlEvent(event);
     if (!displayWindowEvent && mouseControlEvent && ImGui::GetIO().WantCaptureMouse)
     {
         return;
@@ -265,7 +265,7 @@ void SandboxGUI::sUserInput()
         sProcessEvent(event);
 
         sf::Vector2i eventPosition;
-        if (eventMousePosition(event, eventPosition))
+        if (EventMousePosition(event, eventPosition))
         {
             m_mouseScreen = eventPosition;
             m_mouseWorld = main.mapPixelToCoords(m_mouseScreen);
@@ -275,7 +275,8 @@ void SandboxGUI::sUserInput()
         {
             routeControlEvent(event, m_mouseWorld, false);
         }
-        else if (m_activeControlTab == ControlTab::Source)
+        else if (m_activeControlTab == ControlTab::Source
+            && (!IsMouseControlEvent(event) || !ImGui::GetIO().WantCaptureMouse))
         {
             m_session.source().processEvent(event, m_mouseWorld);
         }
@@ -290,7 +291,7 @@ void SandboxGUI::sUserInput()
             sProcessEvent(displayEvent);
 
             sf::Vector2i eventPosition;
-            if (eventMousePosition(displayEvent, eventPosition))
+            if (EventMousePosition(displayEvent, eventPosition))
             {
                 m_mouseDisplay = {
                     (float)eventPosition.x,
@@ -502,11 +503,11 @@ void SandboxGUI::renderUI()
     {
         m_activeControlTab = ControlTab::Projection;
 
-        if (Tools::imguiMonitorSelector(m_window, m_displayMonitorID)
+        if (Tools::ImGuiMonitorSelector(m_window, m_displayMonitorID)
             && m_displayWindow.isOpen())
         {
             m_displayWindow.close();
-            Tools::openDisplayWindow(
+            Tools::OpenDisplayWindow(
                 m_displayWindow,
                 m_window,
                 m_displayMonitorID);
@@ -547,7 +548,7 @@ void SandboxGUI::load()
             && previousDisplayMonitorID != m_displayMonitorID)
         {
             m_displayWindow.close();
-            Tools::openDisplayWindow(
+            Tools::OpenDisplayWindow(
                 m_displayWindow,
                 m_window,
                 m_displayMonitorID);
@@ -559,7 +560,7 @@ void SandboxGUI::toggleDisplayWindow()
 {
     if (!m_displayWindow.isOpen())
     {
-        Tools::openDisplayWindow(
+        Tools::OpenDisplayWindow(
             m_displayWindow,
             m_window,
             m_displayMonitorID);

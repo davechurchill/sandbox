@@ -11,7 +11,7 @@ namespace
 {
     constexpr float Pi = 3.14159265358979323846f;
 
-    bool isTerrainCell(float height)
+    bool IsTerrainCell(float height)
     {
         return std::isfinite(height) && height > 0.001f && height < 0.999f;
     }
@@ -36,7 +36,7 @@ float Visualizer_Weather::sampleHeight(
     const int x = std::clamp((int)std::round(position.x), 0, terrain.cols - 1);
     const int y = std::clamp((int)std::round(position.y), 0, terrain.rows - 1);
     const float height = terrain.at<float>(y, x);
-    return isTerrainCell(height)
+    return IsTerrainCell(height)
         ? height
         : std::numeric_limits<float>::quiet_NaN();
 }

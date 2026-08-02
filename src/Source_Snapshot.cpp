@@ -222,7 +222,7 @@ bool Source_Snapshot::loadDataDump(const std::string & filename)
         return false;
     }
 
-    m_image = Tools::matToSfImage(m_snapshot);
+    m_image = Tools::MatToSfImage(m_snapshot);
     if (!m_texture.loadFromImage(m_image))
     {
         m_loadError = "The selected snapshot could not be uploaded to the graphics card.";

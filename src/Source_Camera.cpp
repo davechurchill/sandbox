@@ -158,7 +158,7 @@ void Source_Camera::captureImages()
     {
         {
             PROFILE_SCOPE("Depth Image to SFML Image");
-            m_sfDepthImage = Tools::matToSfImage(m_cvNormalizedDepthImage32f);
+            m_sfDepthImage = Tools::MatToSfImage(m_cvNormalizedDepthImage32f);
 
             {
                 PROFILE_SCOPE("SFML Texture From Image");
@@ -348,9 +348,13 @@ std::vector<MarkerData> Source_Camera::getMarkers()
     {
         MarkerData data;
         data.id = m_markerDetector.markerIds[i];
-        auto& corners = m_markerDetector.markerCorners[i];
-        m_warper.transformPoints(corners);
-        data.center = std::accumulate(corners.begin(), corners.end(), cv::Point2f()) / 4.0;
+        std::vector<cv::Point2f> transformedCorners;
+        if (!m_warper.transformPoints(m_markerDetector.markerCorners[i], transformedCorners))
+        {
+            continue;
+        }
+        data.center = std::accumulate(transformedCorners.begin(), transformedCorners.end(), cv::Point2f())
+            / static_cast<float>(transformedCorners.size());
         markers.push_back(data);
     }
     return markers;

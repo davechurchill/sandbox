@@ -14,7 +14,7 @@ namespace
     constexpr float RadiansToDegrees = 57.29577951308232f;
     constexpr size_t MaxBallTrails = 400;
 
-    bool isTerrainCell(float height)
+    bool IsTerrainCell(float height)
     {
         return std::isfinite(height) && height > 0.001f && height < 0.999f;
     }
@@ -84,7 +84,7 @@ bool Visualizer_Balls::isValidTerrainPosition(
 
     const int x = std::clamp((int)std::round(position.x), 0, terrain.cols - 1);
     const int y = std::clamp((int)std::round(position.y), 0, terrain.rows - 1);
-    return isTerrainCell(terrain.at<float>(y, x));
+    return IsTerrainCell(terrain.at<float>(y, x));
 }
 
 bool Visualizer_Balls::sampleTerrainHeight(
@@ -106,8 +106,8 @@ bool Visualizer_Balls::sampleTerrainHeight(
     const float h10 = terrain.at<float>(y0, x1);
     const float h01 = terrain.at<float>(y1, x0);
     const float h11 = terrain.at<float>(y1, x1);
-    if (!isTerrainCell(h00) || !isTerrainCell(h10)
-        || !isTerrainCell(h01) || !isTerrainCell(h11))
+    if (!IsTerrainCell(h00) || !IsTerrainCell(h10)
+        || !IsTerrainCell(h01) || !IsTerrainCell(h11))
     {
         return false;
     }

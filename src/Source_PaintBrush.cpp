@@ -88,7 +88,7 @@ void Source_PaintBrush::updateTexture()
         return;
     }
 
-    m_image = Tools::matToSfImage(m_topography);
+    m_image = Tools::MatToSfImage(m_topography);
     if (!m_texture.loadFromImage(m_image))
     {
         std::cerr << "Failed to load the paintbrush terrain texture.\n";

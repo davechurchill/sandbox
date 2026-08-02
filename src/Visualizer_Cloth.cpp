@@ -9,7 +9,7 @@
 
 namespace
 {
-    bool isTerrainHeight(float height)
+    bool IsTerrainHeight(float height)
     {
         return std::isfinite(height) && height > 0.001f && height < 0.999f;
     }
@@ -38,7 +38,7 @@ float Visualizer_Cloth::sampleHeight(const cv::Point2f & position) const
     const int x = std::clamp((int)std::round(position.x), 0, m_topography.cols - 1);
     const int y = std::clamp((int)std::round(position.y), 0, m_topography.rows - 1);
     const float height = m_topography.at<float>(y, x);
-    return isTerrainHeight(height)
+    return IsTerrainHeight(height)
         ? height
         : std::numeric_limits<float>::quiet_NaN();
 }

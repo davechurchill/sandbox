@@ -15,7 +15,7 @@ namespace
     constexpr size_t MaximumFireParticles = 2400;
     constexpr float Pi = 3.14159265358979323846f;
 
-    bool isValidTerrainHeight(float height)
+    bool IsValidTerrainHeight(float height)
     {
         return std::isfinite(height) && height > 0.001f && height < 0.999f;
     }
@@ -43,7 +43,7 @@ void Visualizer_ForestFire::updateBurnableMask(const cv::Mat & terrain)
         x = std::clamp(x, 0, terrain.cols - 1);
         y = std::clamp(y, 0, terrain.rows - 1);
         const float height = terrain.at<float>(y, x);
-        return isValidTerrainHeight(height) ? height : fallback;
+        return IsValidTerrainHeight(height) ? height : fallback;
     };
 
     for (int y = 0; y < terrain.rows; y++)
@@ -51,7 +51,7 @@ void Visualizer_ForestFire::updateBurnableMask(const cv::Mat & terrain)
         for (int x = 0; x < terrain.cols; x++)
         {
             const float height = terrain.at<float>(y, x);
-            if (!isValidTerrainHeight(height) || height <= m_waterLevel || height >= m_rockLevel)
+            if (!IsValidTerrainHeight(height) || height <= m_waterLevel || height >= m_rockLevel)
             {
                 continue;
             }

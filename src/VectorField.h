@@ -4,5 +4,5 @@
 
 namespace VectorField
 {
-    cv::Mat computeBFS(const cv::Mat& grid, int spacing, float heightPenalty);
+    cv::Mat ComputeBFS(const cv::Mat& grid, int spacing, float heightPenalty);
 }
