@@ -65,9 +65,7 @@ class Visualizer_SmokeFire : public TopographyVisualizer
 
     float sampleHeight(const cv::Point2f & position) const;
     bool isBurnable(const cv::Point2f & position) const;
-    bool mapMouseToTerrain(
-        const sf::Vector2f & mouse,
-        cv::Point2f & terrainPosition) const;
+    bool mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point2f & terrainPosition) const;
     bool ignite(const cv::Point2f & position);
     void spawnFlame(const Fire & fire);
     void spawnSmoke(const Fire & fire);
@@ -84,13 +82,9 @@ public:
     bool usesCanvasInput() const override { return true; }
     void init() override;
     void imgui() override;
-    void process(
-        const TerrainFrame & data) override;
-    void render(
-        sf::RenderWindow & window) override;
-    void processEvent(
-        const sf::Event & event,
-        const sf::Vector2f & mouse) override;
+    void process(const TerrainFrame & data) override;
+    void render(sf::RenderWindow & window) override;
+    void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
 };

@@ -53,13 +53,9 @@ public:
     bool usesCanvasInput() const override { return m_rainMode == 1; }
     void init() override;
     void imgui() override;
-    void process(
-        const TerrainFrame & data) override;
-    void render(
-        sf::RenderWindow & window) override;
-    void processEvent(
-        const sf::Event & event,
-        const sf::Vector2f & mouse) override;
+    void process(const TerrainFrame & data) override;
+    void render(sf::RenderWindow & window) override;
+    void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
 };

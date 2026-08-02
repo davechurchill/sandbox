@@ -59,11 +59,7 @@ class Visualizer_FishPond : public TopographyVisualizer
     void updateFish(float deltaTime);
     bool mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point2f & terrainPosition);
     void renderFish(sf::RenderWindow & window);
-    void drawFish(
-        sf::RenderWindow & window,
-        const sf::Vector2f & position,
-        const sf::Vector2f & direction,
-        const Fish & fish) const;
+    void drawFish(sf::RenderWindow & window, const sf::Vector2f & position, const sf::Vector2f & direction, const Fish & fish) const;
 
 public:
     static constexpr std::string_view Name = "Fish Pond";
@@ -75,8 +71,6 @@ public:
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
-    bool isTerrainWalkable(const cv::Mat &, const cv::Point2f &) const override { return false; }
-    bool definesTerrainWalkability() const override { return true; }
 
     void process(const TerrainFrame & data) override;
 };

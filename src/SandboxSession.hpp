@@ -34,7 +34,6 @@ class SandboxSession
     std::map<std::string, VisualizerState, std::less<>> m_visualizerStates;
 
     VisualizerState * ensureVisualizer(std::string_view name);
-    void refreshWalkabilityProvider();
 
 public:
     SandboxSession();
@@ -60,12 +59,6 @@ public:
     void setVisualizerEnabled(std::string_view visualizer, bool enabled);
     void renderVisualizers(sf::RenderWindow & window);
 
-    void saveSettings(
-        const std::string & filename,
-        bool doubleSizeUI,
-        const std::string & displayMonitorID);
-    bool loadSettings(
-        const std::string & filename,
-        bool & doubleSizeUI,
-        std::string & displayMonitorID);
+    void saveSettings(const std::string & filename, bool doubleSizeUI, const std::string & displayMonitorID);
+    bool loadSettings(const std::string & filename, bool & doubleSizeUI, std::string & displayMonitorID);
 };

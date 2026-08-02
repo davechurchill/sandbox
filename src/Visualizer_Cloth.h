@@ -55,9 +55,7 @@ class Visualizer_Cloth : public TopographyVisualizer
     void addSpring(int first, int second, float stiffnessScale);
     void createCloth();
     void updateCloth(float deltaTime);
-    bool mapMouseToTerrain(
-        const sf::Vector2f & mouse,
-        cv::Point2f & terrainPosition) const;
+    bool mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point2f & terrainPosition) const;
     void renderCloth(sf::RenderWindow & window) const;
 
 public:
@@ -67,13 +65,9 @@ public:
     bool usesCanvasInput() const override { return true; }
     void init() override;
     void imgui() override;
-    void process(
-        const TerrainFrame & data) override;
-    void render(
-        sf::RenderWindow & window) override;
-    void processEvent(
-        const sf::Event & event,
-        const sf::Vector2f & mouse) override;
+    void process(const TerrainFrame & data) override;
+    void render(sf::RenderWindow & window) override;
+    void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
 };

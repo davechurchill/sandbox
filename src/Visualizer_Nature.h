@@ -33,9 +33,5 @@ public:
     void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
-    bool isTerrainWalkable(
-        const cv::Mat & terrain,
-        const cv::Point2f & position) const override;
-    bool definesTerrainWalkability() const override { return true; }
     void process(const TerrainFrame & data) override;
 };

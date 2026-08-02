@@ -32,7 +32,17 @@ void Visualizer_Animals::randomizeDirection(Sheep & sheep)
 
 bool Visualizer_Animals::isValidTerrainPosition(const cv::Mat & terrain, const cv::Point2f & position) const
 {
-    return context().isTerrainWalkable(terrain, position);
+    if (terrain.empty() || terrain.type() != CV_32F
+        || position.x < 0.0f || position.y < 0.0f
+        || position.x >= terrain.cols || position.y >= terrain.rows)
+    {
+        return false;
+    }
+
+    const int x = std::clamp((int)std::round(position.x), 0, terrain.cols - 1);
+    const int y = std::clamp((int)std::round(position.y), 0, terrain.rows - 1);
+    const float height = terrain.at<float>(y, x);
+    return std::isfinite(height) && height > 0.001f && height < 0.999f;
 }
 
 bool Visualizer_Animals::spawnSheep(const cv::Point2f & position)

@@ -61,9 +61,6 @@
     <ClCompile Include="..\src\Tools.cpp">
       <Filter>engine</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\Visualizer_Heat.cpp">
-      <Filter>visualizers\heat</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Visualizer_TerrainLighting.cpp">
       <Filter>visualizers</Filter>
     </ClCompile>
@@ -72,9 +69,6 @@
     </ClCompile>
     <ClCompile Include="..\src\Visualizer_Nature.cpp">
       <Filter>visualizers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\HeatGrid.cpp">
-      <Filter>visualizers\heat</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Visualizer_Colorizer.cpp">
       <Filter>visualizers\colorizer</Filter>
@@ -117,6 +111,12 @@
     </ClCompile>
     <ClCompile Include="..\src\VectorField.cpp">
       <Filter>visualizers\vectors</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\HeatGrid.cpp">
+      <Filter>visualizers\heat</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Visualizer_Heat.cpp">
+      <Filter>visualizers\heat</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

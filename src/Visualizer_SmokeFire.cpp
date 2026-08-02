@@ -37,11 +37,7 @@ float Visualizer_SmokeFire::sampleHeight(const cv::Point2f & position) const
 bool Visualizer_SmokeFire::isBurnable(const cv::Point2f & position) const
 {
     const float height = sampleHeight(position);
-    if (!std::isfinite(height) || height < 0.045f || height > 0.97f)
-    {
-        return false;
-    }
-    return context().isTerrainWalkable(m_topography, position);
+    return std::isfinite(height) && height >= 0.045f && height <= 0.97f;
 }
 
 bool Visualizer_SmokeFire::mapMouseToTerrain(

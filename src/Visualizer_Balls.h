@@ -64,14 +64,7 @@ class Visualizer_Balls : public TopographyVisualizer
     void updateBalls(const cv::Mat & terrain, float deltaTime);
     void renderBallTrails(sf::RenderWindow & window);
     void renderBalls(sf::RenderWindow & window);
-    void drawBall(
-        sf::RenderWindow & window,
-        const sf::Vector2f & position,
-        const sf::Vector2f & direction,
-        const sf::Color & color,
-        float rotation,
-        float visualScale,
-        float movementAmount);
+    void drawBall(sf::RenderWindow & window, const sf::Vector2f & position, const sf::Vector2f & direction, const sf::Color & color, float rotation, float visualScale, float movementAmount);
 
 public:
     static constexpr std::string_view Name = "Balls";
@@ -80,13 +73,9 @@ public:
     bool usesCanvasInput() const override { return true; }
     void init() override;
     void imgui() override;
-    void process(
-        const TerrainFrame & data) override;
-    void render(
-        sf::RenderWindow & window) override;
-    void processEvent(
-        const sf::Event & event,
-        const sf::Vector2f & mouse) override;
+    void process(const TerrainFrame & data) override;
+    void render(sf::RenderWindow & window) override;
+    void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
 };

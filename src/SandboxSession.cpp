@@ -243,35 +243,6 @@ void SandboxSession::setVisualizerEnabled(std::string_view visualizer, bool enab
         if (enabled) { state->visualizer->activate(); }
         else { state->visualizer->deactivate(); }
         state->enabled = enabled;
-        refreshWalkabilityProvider();
-    }
-}
-
-void SandboxSession::refreshWalkabilityProvider()
-{
-    const TopographyVisualizer * provider = nullptr;
-    for (const std::string & name : visualizerNames())
-    {
-        const auto found = m_visualizerStates.find(name);
-        if (found != m_visualizerStates.end()
-            && found->second.enabled
-            && found->second.visualizer
-            && found->second.visualizer->definesTerrainWalkability())
-        {
-            provider = found->second.visualizer.get();
-        }
-    }
-    if (provider)
-    {
-        m_terrainContext.setWalkabilityProvider(
-            [provider](const cv::Mat & terrain, const cv::Point2f & position)
-            {
-                return provider->isTerrainWalkable(terrain, position);
-            });
-    }
-    else
-    {
-        m_terrainContext.setWalkabilityProvider({});
     }
 }
 
@@ -358,7 +329,6 @@ bool SandboxSession::loadSettings(const std::string & filename, bool & doubleSiz
             state.visualizer->deactivate();
         }
     }
-    m_terrainContext.setWalkabilityProvider({});
     m_visualizerStates.clear();
 
     for (const std::string & id : enabledVisualizers)

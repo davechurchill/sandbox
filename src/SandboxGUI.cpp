@@ -453,7 +453,9 @@ void SandboxGUI::renderUI()
                     {
                         ImGui::TextWrapped("Canvas input controls this visualizer while it is expanded.");
                     }
+                    ImGui::PushID("Options");
                     visualizer->imgui();
+                    ImGui::PopID();
                     ImGui::Unindent();
                 }
             }

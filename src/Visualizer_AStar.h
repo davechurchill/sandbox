@@ -38,9 +38,7 @@ class Visualizer_AStar final : public TopographyVisualizer
     bool m_pathFound = false;
 
     bool isTraversable(int x, int y) const;
-    bool mapMouseToTerrain(
-        const sf::Vector2f & mouse,
-        cv::Point & terrainPoint) const;
+    bool mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point & terrainPoint) const;
     void precalculateSlopes();
     void calculatePath();
     void drawPath(sf::RenderWindow & window) const;
@@ -53,13 +51,9 @@ public:
     bool usesCanvasInput() const override { return true; }
     void init() override;
     void imgui() override;
-    void process(
-        const TerrainFrame & data) override;
-    void render(
-        sf::RenderWindow & window) override;
-    void processEvent(
-        const sf::Event & event,
-        const sf::Vector2f & mouse) override;
+    void process(const TerrainFrame & data) override;
+    void render(sf::RenderWindow & window) override;
+    void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
 };

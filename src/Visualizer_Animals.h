@@ -51,15 +51,8 @@ class Visualizer_Animals : public TopographyVisualizer
     bool mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point2f & terrainPosition);
     void renderSheep(sf::RenderWindow & window);
     void renderWolf(sf::RenderWindow & window);
-    void drawSheep(
-        sf::RenderWindow & window,
-        const sf::Vector2f & position,
-        const sf::Vector2f & direction,
-        const Sheep & sheep) const;
-    void drawWolf(
-        sf::RenderWindow & window,
-        const sf::Vector2f & position,
-        const sf::Vector2f & direction) const;
+    void drawSheep(sf::RenderWindow & window, const sf::Vector2f & position, const sf::Vector2f & direction, const Sheep & sheep) const;
+    void drawWolf(sf::RenderWindow & window, const sf::Vector2f & position, const sf::Vector2f & direction) const;
 
 public:
     static constexpr std::string_view Name = "Animals";
@@ -68,13 +61,9 @@ public:
     bool usesCanvasInput() const override { return true; }
     void init() override;
     void imgui() override;
-    void process(
-        const TerrainFrame & data) override;
-    void render(
-        sf::RenderWindow & window) override;
-    void processEvent(
-        const sf::Event & event,
-        const sf::Vector2f & mouse) override;
+    void process(const TerrainFrame & data) override;
+    void render(sf::RenderWindow & window) override;
+    void processEvent(const sf::Event & event, const sf::Vector2f & mouse) override;
     void save(Settings & save) const override;
     void load(const Settings & save) override;
 };

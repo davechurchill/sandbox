@@ -1,11 +1,11 @@
 #include "Visualizer_AStar.h"
 
 #include "Profiler.hpp"
+#include "Timer.hpp"
 #include "imgui.h"
 
 #include <algorithm>
 #include <array>
-#include <chrono>
 #include <cmath>
 #include <limits>
 
@@ -197,11 +197,10 @@ void Visualizer_AStar::calculatePath()
         return;
     }
 
-    const auto searchStarted = std::chrono::steady_clock::now();
+    Timer searchTimer;
     const auto recordSearchTime = [&]()
     {
-        m_searchTimeMilliseconds = std::chrono::duration<float, std::milli>(
-            std::chrono::steady_clock::now() - searchStarted).count();
+        m_searchTimeMilliseconds = searchTimer.elapsed() / 1000.0f;
     };
 
     const int width = m_topography.cols;

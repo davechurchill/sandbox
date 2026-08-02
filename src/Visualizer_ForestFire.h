@@ -76,10 +76,7 @@ class Visualizer_ForestFire final : public TopographyVisualizer
     void updateTexture(const cv::Mat & terrain);
     bool mapMouseToTerrain(const sf::Vector2f & mouse, cv::Point2f & terrainPosition);
     void applyTreeBrush(const cv::Point2f & position, float direction);
-    void paintTreeLine(
-        const cv::Point2f & from,
-        const cv::Point2f & to,
-        float direction);
+    void paintTreeLine(const cv::Point2f & from, const cv::Point2f & to, float direction);
     void ignite(const cv::Point2f & position, float radius);
     bool igniteRandomFire();
     void extinguish();
