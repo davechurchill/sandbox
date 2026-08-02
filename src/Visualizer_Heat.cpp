@@ -91,11 +91,6 @@ void Visualizer_Heat::imgui()
         }
     }
 
-    ImGui::Checkbox("##Contours", &m_drawContours);
-    ImGui::SameLine();
-    ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
-
-
 }
 
 void Visualizer_Heat::render(sf::RenderWindow& window)
@@ -114,8 +109,6 @@ void Visualizer_Heat::render(sf::RenderWindow& window)
 
             //Change color scheme
             m_shader_color.setUniform("shaderIndex", 1);
-            m_shader_color.setUniform("contour", m_drawContours);
-            m_shader_color.setUniform("numberOfContourLines", m_numberOfContourLines);
             m_shader_color.setUniform("u_time", time.getElapsedTime().asSeconds());
         }
         
@@ -123,10 +116,6 @@ void Visualizer_Heat::render(sf::RenderWindow& window)
             m_sfTransformedDepthSpriteHeat.setPosition(projector().getTransformedPosition());
             float scale = projector().getTransformedScale();
             m_sfTransformedDepthSpriteHeat.setScale({ scale, scale });
-
-            //Change color scheme
-            m_shader_heat.setUniform("contour", m_drawContours);
-            m_shader_heat.setUniform("numberOfContourLines", m_numberOfContourLines);
 
             window.draw(m_sfTransformedDepthSpriteHeat, &m_shader_heat);
         }
@@ -159,8 +148,6 @@ void Visualizer_Heat::processEvent(const sf::Event& event, const sf::Vector2f& m
 void Visualizer_Heat::save(Settings& save) const
 {
     Settings::json & settings = save.section("Visualizer_Heat");
-    settings["m_drawContours"] = m_drawContours;
-    settings["m_numberOfContourLines"] = m_numberOfContourLines;
     settings["m_drawProjection"] = m_drawProjection;
     settings["m_iterations"] = m_iterations;
     settings["m_selectedSource"] = m_selectedSource;
@@ -182,8 +169,6 @@ void Visualizer_Heat::save(Settings& save) const
 void Visualizer_Heat::load(const Settings& save)
 {
     const Settings::json & settings = save.section("Visualizer_Heat");
-    Settings::read(settings, "m_drawContours", m_drawContours);
-    Settings::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
     Settings::read(settings, "m_drawProjection", m_drawProjection);
     Settings::read(settings, "m_iterations", m_iterations);
     Settings::read(settings, "m_selectedSource", m_selectedSource);

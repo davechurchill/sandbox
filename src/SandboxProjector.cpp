@@ -20,6 +20,20 @@ SandBoxProjector::SandBoxProjector()
     updateProjectionHandles();
 }
 
+sf::FloatRect SandBoxProjector::projectionBounds() const
+{
+    sf::Vector2f minimum{ m_projectionPoints[0].x, m_projectionPoints[0].y };
+    sf::Vector2f maximum = minimum;
+    for (const cv::Point2f & point : m_projectionPoints)
+    {
+        minimum.x = std::min(minimum.x, point.x);
+        minimum.y = std::min(minimum.y, point.y);
+        maximum.x = std::max(maximum.x, point.x);
+        maximum.y = std::max(maximum.y, point.y);
+    }
+    return { minimum, maximum - minimum };
+}
+
 void SandBoxProjector::project(const cv::Mat & input, cv::Mat & output)
 {
     if (input.empty())
@@ -89,7 +103,7 @@ void SandBoxProjector::imgui()
     PROFILE_FUNCTION();
 
     ImGui::Checkbox("Show Projection", &m_drawProjection);
-    ImGui::Checkbox("Show Projected Depth Map", &m_drawProjectedDepthMap);
+    ImGui::Checkbox("Align Depth Map with Projection", &m_drawProjectedDepthMap);
     ImGui::Checkbox("Show Projection Lines", &m_drawLines);
     ImGui::Checkbox("Show Calibration Grid", &m_drawGrid);
     if (m_drawGrid)

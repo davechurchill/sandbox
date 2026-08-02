@@ -4,6 +4,7 @@ uniform sampler2D currentTexture;
 uniform vec2 texelSize;
 uniform int terrainType;
 uniform float waterLevel;
+uniform float textureStrength;
 
 float hash(vec2 point)
 {
@@ -65,7 +66,7 @@ void main()
         vec3 shallowWater = vec3(0.080, 0.300, 0.390);
         vec3 deepWater = vec3(0.006, 0.035, 0.160);
         vec3 pondColor = mix(shallowWater, deepWater, smoothstep(0.0, 0.65, depth));
-        pondColor *= 0.94 + broadVariation * 0.06;
+        pondColor *= mix(1.0, 0.94 + broadVariation * 0.06, textureStrength);
 
         float landHeight = clamp((height - waterLevel) / max(1.0 - waterLevel, 0.001), 0.0, 1.0);
         vec3 deepGrass = vec3(0.045, 0.155, 0.032);
@@ -75,7 +76,7 @@ void main()
         grassColor = mix(grassColor, hillGrass, smoothstep(0.38, 0.82, landHeight));
 
         vec3 dryGrass = vec3(0.48, 0.43, 0.19);
-        float dryPatch = smoothstep(0.58, 0.82, patchVariation + height * 0.20);
+        float dryPatch = smoothstep(0.58, 0.82, patchVariation + height * 0.20) * textureStrength;
         grassColor = mix(grassColor, dryGrass, dryPatch * 0.24);
 
         float exposedGround = smoothstep(0.62, 0.94, steepness) * smoothstep(0.32, 0.85, height);
@@ -84,8 +85,8 @@ void main()
 
         float wetBank = 1.0 - smoothstep(waterLevel + 0.005, waterLevel + 0.060, height);
         color = mix(color, vec3(0.19, 0.225, 0.105), wetBank * 0.62);
-        color *= 0.88 + broadVariation * 0.20;
-        color += (fineVariation - 0.5) * vec3(0.018, 0.030, 0.012);
+        color *= mix(1.0, 0.88 + broadVariation * 0.20, textureStrength);
+        color += (fineVariation - 0.5) * vec3(0.018, 0.030, 0.012) * textureStrength;
 
         float waterBlend = 1.0 - smoothstep(waterLevel - 0.018, waterLevel + 0.030, height);
         color = mix(color, pondColor, waterBlend);
@@ -108,7 +109,7 @@ void main()
         float slopeRock = smoothstep(0.38, 0.88, steepness);
         float rockAmount = clamp(heightRock * 0.78 + slopeRock * 0.38, 0.0, 1.0);
         color = mix(lowGrass, grayRock, rockAmount);
-        color *= 0.92 + broadVariation * 0.10 + fineVariation * 0.035;
+        color *= mix(1.0, 0.92 + broadVariation * 0.10 + fineVariation * 0.035, textureStrength);
     }
     else if (terrainType == 2)
     {
@@ -117,7 +118,7 @@ void main()
         color = mix(shadedSand, sunlitSand, smoothstep(0.04, 0.88, height));
 
         float duneRipple = sin(pixel.x * 0.075 + pixel.y * 0.025 + broadVariation * 5.0);
-        color *= 0.91 + duneRipple * 0.045 + patchVariation * 0.10;
+        color *= mix(1.0, 0.91 + duneRipple * 0.045 + patchVariation * 0.10, textureStrength);
         float desertRock = smoothstep(0.72, 0.96, steepness);
         color = mix(color, vec3(0.34, 0.205, 0.105), desertRock * 0.68);
     }
@@ -138,7 +139,7 @@ void main()
             * (1.0 - smoothstep(0.62, 0.96, steepness));
         vec3 snowColor = mix(vec3(0.68, 0.76, 0.78), vec3(0.965, 0.975, 0.965), diffuse);
         color = mix(color, snowColor, snow);
-        color *= 0.90 + broadVariation * 0.16;
+        color *= mix(1.0, 0.90 + broadVariation * 0.16, textureStrength);
     }
 
     gl_FragColor = vec4(clamp(color * lighting, 0.0, 1.0), 1.0);

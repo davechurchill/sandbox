@@ -28,6 +28,7 @@ void Visualizer_Nature::imgui()
 
     const char * terrainTypes[] = { "Grassy Hills", "Rocky Cliffs", "Desert Sand", "Alpine" };
     ImGui::Combo("Terrain Type", &m_terrainType, terrainTypes, IM_ARRAYSIZE(terrainTypes));
+    ImGui::Checkbox("Texture Detail", &m_textureDetail);
     if (m_terrainType == 0)
     {
         ImGui::SliderFloat("Pond Level", &m_waterLevel, 0.05f, 0.60f);
@@ -57,6 +58,7 @@ void Visualizer_Nature::render(sf::RenderWindow & window)
                 sf::Glsl::Vec2(1.0f / textureSize.x, 1.0f / textureSize.y));
             m_shader.setUniform("terrainType", m_terrainType);
             m_shader.setUniform("waterLevel", m_waterLevel);
+            m_shader.setUniform("textureStrength", m_textureDetail ? 1.0f : 0.0f);
             window.draw(m_sprite, &m_shader);
         }
         else
@@ -78,6 +80,7 @@ void Visualizer_Nature::save(Settings & save) const
     Settings::json & settings = save.section("Visualizer_Nature");
     settings["m_terrainType"] = m_terrainType;
     settings["m_waterLevel"] = m_waterLevel;
+    settings["m_textureDetail"] = m_textureDetail;
 }
 
 void Visualizer_Nature::load(const Settings & save)
@@ -85,6 +88,7 @@ void Visualizer_Nature::load(const Settings & save)
     const Settings::json & settings = save.section("Visualizer_Nature");
     Settings::read(settings, "m_terrainType", m_terrainType);
     Settings::read(settings, "m_waterLevel", m_waterLevel);
+    Settings::read(settings, "m_textureDetail", m_textureDetail);
 }
 
 void Visualizer_Nature::process(const TerrainFrame & data)

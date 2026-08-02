@@ -21,10 +21,6 @@ void Visualizer_Colorizer::imgui()
     const char * shaders[] = { "Popsicle", "Blue", "Red", "Terrain", "Animating Water", "None" };
     ImGui::Combo("Color Scheme", &m_selectedShaderIndex, shaders, 5);
 
-    ImGui::Checkbox("##Contours", &m_drawContours);
-    ImGui::SameLine();
-    ImGui::SliderInt("Contour Lines", &m_numberOfContourLines, 0, 19);
-
     ImGui::Separator();
 
     if (ImGui::Button("Reload Shader"))
@@ -52,8 +48,6 @@ void Visualizer_Colorizer::render(sf::RenderWindow & window)
 
         //Change color scheme
         m_shader.setUniform("shaderIndex", m_selectedShaderIndex);
-        m_shader.setUniform("contour", m_drawContours);
-        m_shader.setUniform("numberOfContourLines", m_numberOfContourLines);
         m_shader.setUniform("u_time", time.getElapsedTime().asSeconds());
 
         window.draw(m_sprite, &m_shader);
@@ -71,15 +65,11 @@ void Visualizer_Colorizer::save(Settings & save) const
 {
     Settings::json & settings = save.section("Visualizer_Colorizer");
     settings["m_selectedShaderIndex"] = m_selectedShaderIndex;
-    settings["m_drawContours"] = m_drawContours;
-    settings["m_numberOfContourLines"] = m_numberOfContourLines;
 }
 void Visualizer_Colorizer::load(const Settings & save)
 {
     const Settings::json & settings = save.section("Visualizer_Colorizer");
     Settings::read(settings, "m_selectedShaderIndex", m_selectedShaderIndex);
-    Settings::read(settings, "m_drawContours", m_drawContours);
-    Settings::read(settings, "m_numberOfContourLines", m_numberOfContourLines);
 }
 
 void Visualizer_Colorizer::process(const TerrainFrame& data)

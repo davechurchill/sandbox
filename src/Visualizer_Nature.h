@@ -18,6 +18,7 @@ class Visualizer_Nature : public Visualizer
 
     float m_waterLevel = 0.28f;
     int m_terrainType = 0;
+    bool m_textureDetail = true;
     bool m_hasFrame = false;
     bool m_shaderLoaded = false;
 

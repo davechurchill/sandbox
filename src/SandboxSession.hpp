@@ -26,7 +26,7 @@ class SandboxSession
     SandBoxProjector m_projector;
 
     std::string m_sourceName = "Camera";
-    std::string m_visualizerName = "Colorizer";
+    std::string m_visualizerName;
 
     std::unique_ptr<Source> m_source;
     std::map<std::string, VisualizerState, std::less<>> m_visualizerStates;

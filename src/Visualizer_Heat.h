@@ -23,8 +23,6 @@ class Visualizer_Heat : public Visualizer
     sf::Sprite  m_sfTransformedDepthSpriteHeat{ m_sfTransformedDepthTextureHeat };
     sf::Shader  m_shader_heat;
 
-    bool        m_drawContours = false;
-    int         m_numberOfContourLines = 19;
     int         m_iterations = 0;
     bool        m_doStep = false;
 

@@ -11,8 +11,6 @@ class Visualizer_Colorizer : public Visualizer
     sf::Sprite          m_sprite{ m_texture };
     sf::Shader          m_shader;
     int                 m_selectedShaderIndex = 0;
-    bool                m_drawContours = true;
-    int                 m_numberOfContourLines = 19;
 
 public:
     static constexpr std::string_view Name = "Colorizer";

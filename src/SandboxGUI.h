@@ -39,6 +39,7 @@ class SandboxGUI
     sf::Vector2f m_mouseDisplay;
     std::string m_displayMonitorID;
     bool m_switchWindows = false;
+    bool m_initialViewPending = true;
     float m_framerate = 0.0f;
 
     void update();
@@ -47,6 +48,7 @@ class SandboxGUI
     void sProcessEvent(const sf::Event & event);
     void routeControlEvent(const sf::Event & event, const sf::Vector2f & mouse, bool displayWindowEvent);
     void sRender();
+    void frameInitialView();
     void applyUIScale();
     void toggleDisplayWindow();
     void saveDataDump();

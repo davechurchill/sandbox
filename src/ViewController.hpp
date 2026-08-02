@@ -9,6 +9,30 @@ class ViewController
 
 public:
 
+    void frameBounds(sf::RenderWindow & window, const sf::FloatRect & bounds, float margin)
+    {
+        if (bounds.size.x <= 0.0f || bounds.size.y <= 0.0f) { return; }
+
+        const sf::Vector2u windowSize = window.getSize();
+        if (windowSize.x == 0 || windowSize.y == 0) { return; }
+
+        sf::Vector2f viewSize = bounds.size * (1.0f + margin * 2.0f);
+        const float windowAspect = (float)windowSize.x / windowSize.y;
+        if (viewSize.x / viewSize.y < windowAspect)
+        {
+            viewSize.x = viewSize.y * windowAspect;
+        }
+        else
+        {
+            viewSize.y = viewSize.x / windowAspect;
+        }
+
+        sf::View view = window.getView();
+        view.setCenter(bounds.position + bounds.size * 0.5f);
+        view.setSize(viewSize);
+        window.setView(view);
+    }
+
     // zoom the view by a specific factor
     // the 'target' position in world coordinates should remain fixed
     // by default, view.zoom() would keep the center of the view fixed

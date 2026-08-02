@@ -109,6 +109,7 @@ void SandboxGUI::update()
 
     const float deltaTime = dt.asMicroseconds() / 1000000.f;
     m_session.processFrame(deltaTime);
+    frameInitialView();
 
     sUserInput();
     sRender();
@@ -128,6 +129,26 @@ void SandboxGUI::update()
             m_displayWindow.display();
         }
     }
+}
+
+void SandboxGUI::frameInitialView()
+{
+    const cv::Mat & topography = m_session.topography();
+    if (!m_initialViewPending || topography.empty()) { return; }
+
+    sf::Vector2f minimum{ 0.0f, 0.0f };
+    sf::Vector2f maximum{ (float)topography.cols, (float)topography.rows };
+    const sf::FloatRect projectionBounds = m_session.projector().projectionBounds();
+    minimum.x = std::min(minimum.x, projectionBounds.position.x);
+    minimum.y = std::min(minimum.y, projectionBounds.position.y);
+    maximum.x = std::max(maximum.x, projectionBounds.position.x + projectionBounds.size.x);
+    maximum.y = std::max(maximum.y, projectionBounds.position.y + projectionBounds.size.y);
+
+    m_viewController.frameBounds(
+        m_window,
+        { minimum, maximum - minimum },
+        0.10f);
+    m_initialViewPending = false;
 }
 
 void SandboxGUI::run()
@@ -186,6 +207,11 @@ void SandboxGUI::routeControlEvent(
     bool displayWindowEvent)
 {
     const bool mouseControlEvent = isMouseControlEvent(event);
+    if (!displayWindowEvent && mouseControlEvent && ImGui::GetIO().WantCaptureMouse)
+    {
+        return;
+    }
+
     switch (m_activeControlTab)
     {
     case ControlTab::Source:
@@ -428,6 +454,10 @@ void SandboxGUI::renderUI()
             if (ImGui::Checkbox("##Enabled", &enabled))
             {
                 m_session.setVisualizerEnabled(name, enabled);
+                if (enabled)
+                {
+                    m_session.setVisualizer(name);
+                }
             }
             if (ImGui::IsItemHovered())
             {

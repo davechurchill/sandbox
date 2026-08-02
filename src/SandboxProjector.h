@@ -20,7 +20,7 @@ class SandBoxProjector
     sf::Vector2f                    m_boxScale;
     bool                            m_drawLines = true;
     bool                            m_drawProjection = true;
-    bool                            m_drawProjectedDepthMap = false;
+    bool                            m_drawProjectedDepthMap = true;
     bool                            m_drawGrid = false;
     int                             m_gridDivisions = 8;
     int                             m_rotationQuarterTurns = 0;
@@ -49,6 +49,7 @@ public:
 
     bool projectionVisible() const { return m_drawProjection; }
     bool projectedDepthMapVisible() const { return m_drawProjectedDepthMap; }
+    sf::FloatRect projectionBounds() const;
 
     inline float getTransformedScale() const { return 1.f / m_boxScale.x; }
 

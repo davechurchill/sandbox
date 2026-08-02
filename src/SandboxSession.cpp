@@ -63,8 +63,7 @@ namespace
 SandboxSession::SandboxSession()
 {
     setSource(m_sourceName, false);
-    setVisualizer(m_visualizerName, false);
-    setVisualizerEnabled(m_visualizerName, true);
+    setVisualizerEnabled(Visualizer_Colorizer::Name, true);
 }
 
 void SandboxSession::processFrame(float deltaTime)
@@ -279,7 +278,7 @@ void SandboxSession::saveSettings(const std::string & filename, bool doubleSizeU
             visualizerSettings["m_enabledVisualizerNames"].push_back(name);
         }
     }
-    visualizerSettings["m_selectedVisualizerName"] = m_visualizerName;
+    visualizerSettings.erase("m_selectedVisualizerName");
 
     m_settings.section("Projection")["m_displayMonitorID"] = displayMonitorID;
     m_settings.saveToFile(filename);
@@ -301,7 +300,6 @@ bool SandboxSession::loadSettings(const std::string & filename, bool & doubleSiz
     Settings::read(m_settings.section("Projection"), "m_displayMonitorID", displayMonitorID);
 
     std::vector<std::string> enabledVisualizers;
-    std::string selectedVisualizer(m_visualizerName);
     const Settings::json & visualizerSettings = m_settings.section("Visualizers");
     const auto enabledIDs = visualizerSettings.find("m_enabledVisualizerNames");
     if (enabledIDs != visualizerSettings.end() && enabledIDs->is_array())
@@ -314,15 +312,13 @@ bool SandboxSession::loadSettings(const std::string & filename, bool & doubleSiz
             }
         }
     }
-    Settings::read(visualizerSettings, "m_selectedVisualizerName", selectedVisualizer);
-
     setSource(source, false);
+    m_visualizerName.clear();
     m_visualizerStates.clear();
 
     for (const std::string & id : enabledVisualizers)
     {
         setVisualizerEnabled(id, true);
     }
-    setVisualizer(selectedVisualizer, false);
     return true;
 }

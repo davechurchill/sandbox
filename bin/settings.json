@@ -6,9 +6,9 @@
     },
     "Visualizers": {
         "m_enabledVisualizerNames": [
-            "Nature"
-        ],
-        "m_selectedVisualizerName": "Animals"
+            "Nature",
+            "Contour Lines"
+        ]
     },
     "Source_Camera": {
         "m_alignment": 0,
@@ -96,7 +96,7 @@
         ],
         "m_drawLines": true,
         "m_drawProjection": true,
-        "m_drawProjectedDepthMap": false,
+        "m_drawProjectedDepthMap": true,
         "m_drawGrid": false,
         "m_gridDivisions": 8,
         "m_rotationQuarterTurns": 0,
@@ -112,13 +112,9 @@
         "m_lineOpacity": 1.0
     },
     "Visualizer_Colorizer": {
-        "m_selectedShaderIndex": 4,
-        "m_drawContours": true,
-        "m_numberOfContourLines": 19
+        "m_selectedShaderIndex": 4
     },
     "Visualizer_Heat": {
-        "m_drawContours": true,
-        "m_numberOfContourLines": 19,
         "m_drawProjection": true
     },
     "Visualizer_Blockworld": {
@@ -139,10 +135,20 @@
     },
     "Visualizer_Nature": {
         "m_terrainType": 0,
-        "m_waterLevel": 0.2800000011920929
+        "m_waterLevel": 0.2800000011920929,
+        "m_textureDetail": false
     },
     "Visualizer_Animals": {
         "m_sheepSpeed": 1.0,
         "m_sheepSize": 11.0
+    },
+    "Visualizer_Balls": {
+        "m_gravity": 7257.0,
+        "m_ballSpeedMultiplier": 5.900000095367432,
+        "m_rollingResistance": 0.4000000059604645,
+        "m_ballSize": 18.0,
+        "m_ballRestitution": 0.6499999761581421,
+        "m_trailLength": 0.0,
+        "m_lavaAppearance": false
     }
 }

@@ -830,8 +830,8 @@ void Visualizer_Balls::imgui()
     PROFILE_FUNCTION();
 
     ImGui::Text("Balls: %d", (int)m_balls.size());
-    ImGui::SliderFloat("Gravity", &m_gravity, 0.0f, 5000.0f, "%.0f");
-    ImGui::SliderFloat("Ball Speed Multiplier", &m_ballSpeedMultiplier, 0.1f, 4.0f, "%.1fx");
+    ImGui::SliderFloat("Gravity", &m_gravity, 0.0f, 10000.0f, "%.0f");
+    ImGui::SliderFloat("Ball Speed Multiplier", &m_ballSpeedMultiplier, 0.1f, 8.0f, "%.1fx");
     ImGui::SliderFloat("Rolling Resistance", &m_rollingResistance, 0.0f, 4.0f);
     ImGui::SliderFloat("Ball Size", &m_ballSize, 6.0f, 40.0f);
     ImGui::SliderFloat("Ball Bounciness", &m_ballRestitution, 0.0f, 1.0f);
