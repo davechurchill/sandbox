@@ -6,6 +6,10 @@ An interactive augmented-reality sandbox that turns live or generated height map
 
 [Sandbox image gallery](https://davechurchill.ca/files/images/sandbox/)
 
+## How it works
+
+[![AR Sandbox workflow](https://raw.githubusercontent.com/wiki/davechurchill/sandbox/images/diagram_simple.png)](https://raw.githubusercontent.com/wiki/davechurchill/sandbox/images/diagram_simple.png)
+
 ## Documentation
 
 Complete setup and usage documentation is maintained in the [GitHub Wiki](https://github.com/davechurchill/sandbox/wiki):
