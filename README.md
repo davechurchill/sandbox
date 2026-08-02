@@ -8,6 +8,8 @@ An interactive augmented-reality sandbox that turns live or generated height map
 
 ## How it works
 
+An overhead depth camera continuously measures the shape of the sand and turns those measurements into a greyscale depth image. The sandbox applies the selected colors, water, weather, animals, and other effects to that shape before a projector maps the finished scene directly back onto the sand. As people reshape the sand, the camera measures the new surface and the whole process repeats, allowing the projected world to respond immediately.
+
 [![AR Sandbox workflow](https://raw.githubusercontent.com/wiki/davechurchill/sandbox/images/diagram_simple.png)](https://raw.githubusercontent.com/wiki/davechurchill/sandbox/images/diagram_simple.png)
 
 ## Documentation
