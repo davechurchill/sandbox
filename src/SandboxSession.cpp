@@ -276,7 +276,7 @@ void SandboxSession::renderVisualizers(sf::RenderWindow & window)
     }
 }
 
-void SandboxSession::saveSettings(const std::string & filename, bool doubleSizeUI, const std::string & displayMonitorID)
+bool SandboxSession::saveSettings(const std::string & filename, bool doubleSizeUI, const std::string & displayMonitorID)
 {
     m_settings.setCurrentSchemaVersion();
     m_projector.save(m_settings);
@@ -303,7 +303,7 @@ void SandboxSession::saveSettings(const std::string & filename, bool doubleSizeU
     visualizerSettings.erase("m_selectedVisualizerName");
 
     m_settings.section("Projection")["m_displayMonitorID"] = displayMonitorID;
-    m_settings.saveToFile(filename);
+    return m_settings.saveToFile(filename);
 }
 
 bool SandboxSession::loadSettings(const std::string & filename, bool & doubleSizeUI, std::string & displayMonitorID)

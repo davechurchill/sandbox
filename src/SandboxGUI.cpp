@@ -4,22 +4,106 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cfloat>
 #include <chrono>
+#include <filesystem>
 #include <format>
 #include <iostream>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <SFML/Graphics.hpp>
 #include "imgui.h"
 #include "imgui-SFML.h"
 
+#if defined(_WIN32)
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
+#endif
+
 namespace
 {
     ImGuiStyle DefaultUIStyle;
     float DefaultUIFontScale = 1.0f;
     bool DefaultUIStyleCaptured = false;
-    constexpr const char * SettingsFile = "settings.json";
+
+    std::filesystem::path ApplicationDirectory()
+    {
+#if defined(_WIN32)
+        std::vector<wchar_t> path(32768);
+        const DWORD length = GetModuleFileNameW(nullptr, path.data(), (DWORD)path.size());
+        if (length > 0 && length < path.size())
+        {
+            return std::filesystem::path(std::wstring(path.data(), length)).parent_path();
+        }
+#endif
+        std::error_code error;
+        const std::filesystem::path currentDirectory = std::filesystem::current_path(error);
+        return error ? std::filesystem::path(".") : currentDirectory;
+    }
+
+    const std::filesystem::path SettingsDirectory = ApplicationDirectory() / "settings";
+    const std::filesystem::path QuickSettingsFile = SettingsDirectory / "settings.json";
+
+    std::string Lowercase(std::string value)
+    {
+        std::transform(value.begin(), value.end(), value.begin(), [](unsigned char character)
+        {
+            return (char)std::tolower(character);
+        });
+        return value;
+    }
+
+    bool HasJsonExtension(const std::filesystem::path & path)
+    {
+        return Lowercase(path.extension().string()) == ".json";
+    }
+
+    std::string TrimWhitespace(std::string value)
+    {
+        const auto notWhitespace = [](unsigned char character)
+        {
+            return !std::isspace(character);
+        };
+        value.erase(value.begin(), std::find_if(value.begin(), value.end(), notWhitespace));
+        value.erase(std::find_if(value.rbegin(), value.rend(), notWhitespace).base(), value.end());
+        return value;
+    }
+
+    std::optional<std::filesystem::path> BuildSettingsPath(const char * input, std::string & error)
+    {
+        std::string name = TrimWhitespace(input ? input : "");
+        if (name.empty())
+        {
+            error = "Enter a filename before saving.";
+            return std::nullopt;
+        }
+
+        const std::string lowercaseName = Lowercase(name);
+        if (lowercaseName.ends_with(".json"))
+        {
+            name.resize(name.size() - 5);
+            name = TrimWhitespace(name);
+        }
+
+        constexpr std::string_view InvalidCharacters = "<>:\"/\\|?*";
+        const bool invalidCharacter = std::any_of(name.begin(), name.end(), [InvalidCharacters](unsigned char character)
+        {
+            return character < 32 || InvalidCharacters.find((char)character) != std::string_view::npos;
+        });
+        if (name.empty() || name == "." || name == ".." || name.back() == '.' || invalidCharacter)
+        {
+            error = "Use a simple filename without paths or special characters.";
+            return std::nullopt;
+        }
+
+        error.clear();
+        return SettingsDirectory / (name + ".json");
+    }
 
     bool IsMouseControlEvent(const sf::Event & event)
     {
@@ -157,7 +241,7 @@ void SandboxGUI::frameInitialView()
 
 void SandboxGUI::run()
 {
-    load();
+    quickLoadSettings();
     while (isRunning())
     {
         update();
@@ -244,6 +328,8 @@ void SandboxGUI::routeControlEvent(
         {
             visualizer->processEvent(event, mouse);
         }
+        break;
+    case ControlTab::Settings:
         break;
     case ControlTab::Projection:
         m_session.projector().processEvent(event, mouse);
@@ -380,13 +466,13 @@ void SandboxGUI::renderUI()
             {
                 m_terrain3DView.toggle();
             }
-            if (ImGui::MenuItem("Save Settings"))
+            if (ImGui::MenuItem("Quick Save Settings"))
             {
-                save();
+                quickSaveSettings();
             }
-            if (ImGui::MenuItem("Load Settings"))
+            if (ImGui::MenuItem("Quick Load Settings"))
             {
-                load();
+                quickLoadSettings();
             }
             if (ImGui::MenuItem("Snapshot"))
             {
@@ -507,6 +593,15 @@ void SandboxGUI::renderUI()
         ImGui::EndTabItem();
     }
 
+    // Settings
+
+    if (ImGui::BeginTabItem("Settings"))
+    {
+        m_activeControlTab = ControlTab::Settings;
+        renderSettingsTab();
+        ImGui::EndTabItem();
+    }
+
     // Projection
 
     if (ImGui::BeginTabItem("Projection"))
@@ -538,30 +633,252 @@ void SandboxGUI::renderUI()
     ImGui::End();
 }
 
-void SandboxGUI::save()
+bool SandboxGUI::ensureSettingsDirectory()
 {
-    PROFILE_FUNCTION();
-    m_session.saveSettings(SettingsFile, m_doubleSizeUI, m_displayMonitorID);
+    std::error_code error;
+    std::filesystem::create_directories(SettingsDirectory, error);
+    if (!error)
+    {
+        return true;
+    }
+
+    m_settingsStatus = "Could not access the settings folder: " + error.message();
+    m_settingsStatusIsError = true;
+    return false;
 }
 
-void SandboxGUI::load()
+void SandboxGUI::refreshSettingsFiles(const std::filesystem::path & preferred)
+{
+    std::filesystem::path selectedPath = preferred;
+    if (selectedPath.empty()
+        && m_selectedSettingsFile >= 0
+        && m_selectedSettingsFile < (int)m_settingsFiles.size())
+    {
+        selectedPath = m_settingsFiles[m_selectedSettingsFile];
+    }
+
+    m_settingsFiles.clear();
+    m_selectedSettingsFile = -1;
+    if (!ensureSettingsDirectory())
+    {
+        return;
+    }
+
+    std::error_code error;
+    std::filesystem::directory_iterator iterator(SettingsDirectory, error);
+    const std::filesystem::directory_iterator end;
+    while (!error && iterator != end)
+    {
+        std::error_code typeError;
+        if (iterator->is_regular_file(typeError)
+            && !typeError
+            && HasJsonExtension(iterator->path()))
+        {
+            m_settingsFiles.push_back(iterator->path());
+        }
+        iterator.increment(error);
+    }
+
+    if (error)
+    {
+        m_settingsStatus = "Could not read the settings folder: " + error.message();
+        m_settingsStatusIsError = true;
+    }
+
+    std::sort(m_settingsFiles.begin(), m_settingsFiles.end(), [](const std::filesystem::path & left, const std::filesystem::path & right)
+    {
+        const std::string leftName = left.filename().string();
+        const std::string rightName = right.filename().string();
+        const bool leftIsQuickSettings = Lowercase(leftName) == "settings.json";
+        const bool rightIsQuickSettings = Lowercase(rightName) == "settings.json";
+        if (leftIsQuickSettings != rightIsQuickSettings)
+        {
+            return leftIsQuickSettings;
+        }
+
+        const std::string lowercaseLeft = Lowercase(leftName);
+        const std::string lowercaseRight = Lowercase(rightName);
+        return lowercaseLeft != lowercaseRight
+            ? lowercaseLeft < lowercaseRight
+            : leftName < rightName;
+    });
+
+    const auto selected = std::find(m_settingsFiles.begin(), m_settingsFiles.end(), selectedPath);
+    if (selected != m_settingsFiles.end())
+    {
+        m_selectedSettingsFile = (int)std::distance(m_settingsFiles.begin(), selected);
+        return;
+    }
+
+    const auto quickSettings = std::find(m_settingsFiles.begin(), m_settingsFiles.end(), QuickSettingsFile);
+    if (quickSettings != m_settingsFiles.end())
+    {
+        m_selectedSettingsFile = (int)std::distance(m_settingsFiles.begin(), quickSettings);
+    }
+    else if (!m_settingsFiles.empty())
+    {
+        m_selectedSettingsFile = 0;
+    }
+}
+
+bool SandboxGUI::saveSettingsFile(const std::filesystem::path & filename)
+{
+    PROFILE_FUNCTION();
+    if (!ensureSettingsDirectory())
+    {
+        return false;
+    }
+    if (!m_session.saveSettings(filename.string(), m_doubleSizeUI, m_displayMonitorID))
+    {
+        m_settingsStatus = "Could not save " + filename.filename().string() + ".";
+        m_settingsStatusIsError = true;
+        return false;
+    }
+
+    m_settingsStatus = "Saved " + filename.filename().string() + ".";
+    m_settingsStatusIsError = false;
+    refreshSettingsFiles(filename);
+    return true;
+}
+
+bool SandboxGUI::loadSettingsFile(const std::filesystem::path & filename)
 {
     PROFILE_FUNCTION();
     const std::string previousDisplayMonitorID = m_displayMonitorID;
-    if (m_session.loadSettings(
-        SettingsFile,
-        m_doubleSizeUI,
-        m_displayMonitorID))
+    if (!m_session.loadSettings(filename.string(), m_doubleSizeUI, m_displayMonitorID))
     {
-        applyUIScale();
-        if (m_displayWindow.isOpen()
-            && previousDisplayMonitorID != m_displayMonitorID)
+        m_settingsStatus = "Could not load " + filename.filename().string() + ".";
+        m_settingsStatusIsError = true;
+        return false;
+    }
+
+    applyUIScale();
+    if (m_displayWindow.isOpen()
+        && previousDisplayMonitorID != m_displayMonitorID)
+    {
+        m_displayWindow.close();
+        Tools::OpenDisplayWindow(
+            m_displayWindow,
+            m_window,
+            m_displayMonitorID);
+    }
+
+    m_settingsStatus = "Loaded " + filename.filename().string() + ".";
+    m_settingsStatusIsError = false;
+    return true;
+}
+
+void SandboxGUI::quickLoadSettings()
+{
+    if (ensureSettingsDirectory())
+    {
+        loadSettingsFile(QuickSettingsFile);
+        refreshSettingsFiles(QuickSettingsFile);
+    }
+}
+
+void SandboxGUI::quickSaveSettings()
+{
+    saveSettingsFile(QuickSettingsFile);
+}
+
+void SandboxGUI::saveNamedSettings()
+{
+    std::string error;
+    const std::optional<std::filesystem::path> filename = BuildSettingsPath(m_settingsFilename.data(), error);
+    if (!filename)
+    {
+        m_settingsStatus = error;
+        m_settingsStatusIsError = true;
+        return;
+    }
+
+    saveSettingsFile(*filename);
+}
+
+void SandboxGUI::renderSettingsTab()
+{
+    ImGui::TextUnformatted("Quick Settings");
+    if (ImGui::Button("Quick Save Settings"))
+    {
+        quickSaveSettings();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Quick Load Settings"))
+    {
+        quickLoadSettings();
+    }
+    ImGui::TextDisabled("bin/settings/settings.json");
+
+    ImGui::Separator();
+    ImGui::TextUnformatted("Save Settings File");
+    const bool enterPressed = ImGui::InputText(
+        "Filename",
+        m_settingsFilename.data(),
+        m_settingsFilename.size(),
+        ImGuiInputTextFlags_EnterReturnsTrue);
+    if (ImGui::Button("Save Settings") || enterPressed)
+    {
+        saveNamedSettings();
+    }
+    ImGui::TextDisabled("Saved in bin/settings as filename.json.");
+
+    ImGui::Separator();
+    ImGui::TextUnformatted("Settings Files");
+    if (ImGui::Button("Refresh##SettingsFiles"))
+    {
+        m_settingsStatus.clear();
+        m_settingsStatusIsError = false;
+        refreshSettingsFiles();
+    }
+    ImGui::SameLine();
+    ImGui::TextDisabled("%d file%s", (int)m_settingsFiles.size(), m_settingsFiles.size() == 1 ? "" : "s");
+
+    if (ImGui::BeginListBox(
+        "##SettingsFiles",
+        ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 10.0f)))
+    {
+        if (m_settingsFiles.empty())
         {
-            m_displayWindow.close();
-            Tools::OpenDisplayWindow(
-                m_displayWindow,
-                m_window,
-                m_displayMonitorID);
+            ImGui::TextDisabled("No settings files found.");
+        }
+
+        for (int i = 0; i < (int)m_settingsFiles.size(); i++)
+        {
+            const std::string name = m_settingsFiles[i].filename().string();
+            const bool selected = i == m_selectedSettingsFile;
+            if (ImGui::Selectable(name.c_str(), selected, ImGuiSelectableFlags_AllowDoubleClick))
+            {
+                m_selectedSettingsFile = i;
+                if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+                {
+                    loadSettingsFile(m_settingsFiles[i]);
+                }
+            }
+        }
+        ImGui::EndListBox();
+    }
+
+    const bool hasSelection = m_selectedSettingsFile >= 0
+        && m_selectedSettingsFile < (int)m_settingsFiles.size();
+    ImGui::BeginDisabled(!hasSelection);
+    if (ImGui::Button("Load Selected"))
+    {
+        loadSettingsFile(m_settingsFiles[m_selectedSettingsFile]);
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    ImGui::TextDisabled("or double-click a file");
+
+    if (!m_settingsStatus.empty())
+    {
+        if (m_settingsStatusIsError)
+        {
+            ImGui::TextColored(ImVec4(1.0f, 0.35f, 0.30f, 1.0f), "%s", m_settingsStatus.c_str());
+        }
+        else
+        {
+            ImGui::TextWrapped("%s", m_settingsStatus.c_str());
         }
     }
 }

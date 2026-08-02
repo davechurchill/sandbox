@@ -1,0 +1,154 @@
+{
+    "schemaVersion": 3,
+    "SandboxGUI": {
+        "m_sourceName": "Snapshot",
+        "m_doubleSizeUI": false
+    },
+    "Visualizers": {
+        "m_enabledVisualizerNames": [
+            "Blockworld",
+            "Balls"
+        ]
+    },
+    "Source_Camera": {
+        "m_alignment": 0,
+        "m_gaussianBlur": true,
+        "m_maxDistance": 1.181,
+        "m_minDistance": 0.987,
+        "m_drawDepth": true,
+        "m_drawColor": true,
+        "m_fpsSetting": 1
+    },
+    "CameraFilters": {
+        "m_smoothAlphaTemporal": 0.099,
+        "m_smoothDeltaTemporal": 72,
+        "m_persistanceTemporal": 3,
+        "m_holeFill": 1
+    },
+    "DataWarper": {
+        "m_warpPoints": [
+            [
+                204.0,
+                84.0
+            ],
+            [
+                708.0,
+                91.0
+            ],
+            [
+                200.0,
+                347.0
+            ],
+            [
+                690.0,
+                361.0
+            ]
+        ],
+        "m_applyHeightAdjustment": false,
+        "m_planarPoints": [
+            [
+                150.0,
+                0.0
+            ],
+            [
+                75.0,
+                150.0
+            ],
+            [
+                0.0,
+                75.0
+            ]
+        ],
+        "m_dataSize": 1.0
+    },
+    "Source_Perlin": {
+        "m_octaves": 8,
+        "m_seed": 13,
+        "m_seedSize": 9,
+        "m_persistance": 0.5,
+        "m_drawGrid": false
+    },
+    "Source_Waves": {
+        "m_animationMode": 1,
+        "m_frequency": 0.35,
+        "m_amplitude": 0.47,
+        "m_separation": 96.0,
+        "m_waveSize": 32.0
+    },
+    "Projection": {
+        "m_projectionPoints": [
+            [
+                34.0,
+                90.0
+            ],
+            [
+                1829.0,
+                77.0
+            ],
+            [
+                45.0,
+                1075.0
+            ],
+            [
+                1857.0,
+                1076.0
+            ]
+        ],
+        "m_drawLines": true,
+        "m_drawProjection": true,
+        "m_drawProjectedDepthMap": true,
+        "m_drawGrid": false,
+        "m_gridDivisions": 8,
+        "m_rotationQuarterTurns": 0,
+        "m_mirrorHorizontal": false,
+        "m_mirrorVertical": false,
+        "m_displayMonitorID": "",
+        "m_handleSize": 10.0,
+        "m_lineColor": [
+            1.0,
+            1.0,
+            1.0
+        ],
+        "m_lineOpacity": 1.0
+    },
+    "Visualizer_Colorizer": {
+        "m_selectedShaderIndex": 4
+    },
+    "Visualizer_Heat": {
+        "m_drawProjection": true
+    },
+    "Visualizer_Blockworld": {
+        "m_blockSize": 8
+    },
+    "Visualizer_ContourLines": {
+        "m_lineColor": [
+            0.0,
+            0.0,
+            0.0
+        ],
+        "m_lineOpacity": 1.0,
+        "m_numberOfContourLines": 19
+    },
+    "Source_Snapshot": {
+        "m_loadedSnapshot": "dataDumps\\snapshot.bin",
+        "m_sortByName": false
+    },
+    "Visualizer_Nature": {
+        "m_terrainType": 0,
+        "m_waterLevel": 0.2800000011920929,
+        "m_textureDetail": false
+    },
+    "Visualizer_Animals": {
+        "m_sheepSpeed": 1.0,
+        "m_sheepSize": 11.0
+    },
+    "Visualizer_Balls": {
+        "m_gravity": 7257.0,
+        "m_ballSpeedMultiplier": 5.900000095367432,
+        "m_rollingResistance": 0.4000000059604645,
+        "m_ballSize": 18.0,
+        "m_ballRestitution": 0.6499999761581421,
+        "m_trailLength": 0.0,
+        "m_lavaAppearance": false
+    }
+}

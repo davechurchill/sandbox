@@ -8,7 +8,10 @@
 
 #include <opencv2/opencv.hpp>
 
+#include <array>
+#include <filesystem>
 #include <string>
+#include <vector>
 
 class SandboxGUI
 {
@@ -16,6 +19,7 @@ class SandboxGUI
     {
         Source,
         Visualizer,
+        Settings,
         Projection
     };
 
@@ -39,6 +43,12 @@ class SandboxGUI
     bool m_initialViewPending = true;
     float m_framerate = 0.0f;
 
+    std::vector<std::filesystem::path> m_settingsFiles;
+    std::array<char, 128> m_settingsFilename{};
+    std::string m_settingsStatus;
+    int m_selectedSettingsFile = -1;
+    bool m_settingsStatusIsError = false;
+
     void update();
     void renderUI();
     void sUserInput();
@@ -49,8 +59,14 @@ class SandboxGUI
     void applyUIScale();
     void toggleDisplayWindow();
     void saveDataDump();
-    void load();
-    void save();
+    bool ensureSettingsDirectory();
+    void refreshSettingsFiles(const std::filesystem::path & preferred = {});
+    bool saveSettingsFile(const std::filesystem::path & filename);
+    bool loadSettingsFile(const std::filesystem::path & filename);
+    void quickLoadSettings();
+    void quickSaveSettings();
+    void saveNamedSettings();
+    void renderSettingsTab();
     void quit();
 
     bool isRunning() const;

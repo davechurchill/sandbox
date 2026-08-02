@@ -57,6 +57,6 @@ public:
     void setVisualizerEnabled(std::string_view visualizer, bool enabled);
     void renderVisualizers(sf::RenderWindow & window);
 
-    void saveSettings(const std::string & filename, bool doubleSizeUI, const std::string & displayMonitorID);
+    bool saveSettings(const std::string & filename, bool doubleSizeUI, const std::string & displayMonitorID);
     bool loadSettings(const std::string & filename, bool & doubleSizeUI, std::string & displayMonitorID);
 };
