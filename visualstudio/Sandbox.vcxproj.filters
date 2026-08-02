@@ -13,6 +13,9 @@
     <ClCompile Include="..\src\Visualizer_Balls.cpp">
       <Filter>visualizers</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\Visualizer_BioluminescentMycelium.cpp">
+      <Filter>visualizers</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\Visualizer_Cloth.cpp">
       <Filter>visualizers</Filter>
     </ClCompile>
@@ -32,6 +35,15 @@
       <Filter>visualizers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Visualizer_ForestFire.cpp">
+      <Filter>visualizers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Visualizer_GravitationalStarfield.cpp">
+      <Filter>visualizers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Visualizer_ObsidianCaldera.cpp">
+      <Filter>visualizers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Visualizer_PrismaticGlacier.cpp">
       <Filter>visualizers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\imgui\imgui.cpp">
@@ -65,6 +77,12 @@
       <Filter>visualizers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Visualizer_Blockworld.cpp">
+      <Filter>visualizers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Visualizer_Minecraft.cpp">
+      <Filter>visualizers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Visualizer_MountainPeaks.cpp">
       <Filter>visualizers</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Visualizer_Nature.cpp">
@@ -131,6 +149,9 @@
     <ClInclude Include="..\src\Visualizer_Balls.h">
       <Filter>visualizers</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\Visualizer_BioluminescentMycelium.h">
+      <Filter>visualizers</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\Visualizer_Cloth.h">
       <Filter>visualizers</Filter>
     </ClInclude>
@@ -150,6 +171,15 @@
       <Filter>visualizers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Visualizer_ForestFire.h">
+      <Filter>visualizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Visualizer_GravitationalStarfield.h">
+      <Filter>visualizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Visualizer_ObsidianCaldera.h">
+      <Filter>visualizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Visualizer_PrismaticGlacier.h">
       <Filter>visualizers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\SandboxSession.hpp">
@@ -180,6 +210,12 @@
       <Filter>visualizers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Visualizer_Blockworld.h">
+      <Filter>visualizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Visualizer_Minecraft.h">
+      <Filter>visualizers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Visualizer_MountainPeaks.h">
       <Filter>visualizers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\Visualizer_Nature.h">
@@ -254,6 +290,9 @@
     <None Include="..\bin\shaders\shader_balls.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\bin\shaders\shader_bioluminescent_mycelium.frag">
+      <Filter>shaders</Filter>
+    </None>
     <None Include="..\bin\shaders\shader_contour_color.frag">
       <Filter>shaders</Filter>
     </None>
@@ -269,6 +308,9 @@
     <None Include="..\bin\shaders\shader_forest_fire.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\bin\shaders\shader_gravitational_starfield.frag">
+      <Filter>shaders</Filter>
+    </None>
     <None Include="..\bin\shaders\shader_heat.frag">
       <Filter>shaders</Filter>
     </None>
@@ -278,7 +320,19 @@
     <None Include="..\bin\shaders\shader_nature.frag">
       <Filter>shaders</Filter>
     </None>
+    <None Include="..\bin\shaders\shader_obsidian_caldera.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\shader_prismatic_glacier.frag">
+      <Filter>shaders</Filter>
+    </None>
     <None Include="..\bin\shaders\shader_blockworld.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\shader_minecraft.frag">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\shader_mountain_peaks.frag">
       <Filter>shaders</Filter>
     </None>
     <None Include="..\bin\shaders\shader_vector_fields.frag">

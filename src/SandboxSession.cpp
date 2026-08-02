@@ -4,6 +4,7 @@
 #include "Visualizer_Animals.h"
 #include "Visualizer_BFS.h"
 #include "Visualizer_Balls.h"
+#include "Visualizer_BioluminescentMycelium.h"
 #include "Visualizer_Cloth.h"
 #include "Visualizer_ColorAdjustment.h"
 #include "Visualizer_ContourLines.h"
@@ -15,8 +16,13 @@
 #include "Visualizer_Colorizer.h"
 #include "Visualizer_FishPond.h"
 #include "Visualizer_ForestFire.h"
+#include "Visualizer_GravitationalStarfield.h"
 #include "Visualizer_Heat.h"
+#include "Visualizer_Minecraft.h"
+#include "Visualizer_MountainPeaks.h"
 #include "Visualizer_Nature.h"
+#include "Visualizer_ObsidianCaldera.h"
+#include "Visualizer_PrismaticGlacier.h"
 #include "Visualizer_TerrainLighting.h"
 #include "Source_Camera.h"
 #include "Source_PaintBrush.h"
@@ -39,11 +45,17 @@ namespace
     std::unique_ptr<Visualizer> CreateVisualizer(std::string_view name, SandBoxProjector & projector)
     {
         if (name == Visualizer_Blockworld::Name) return std::make_unique<Visualizer_Blockworld>(projector);
+        if (name == Visualizer_BioluminescentMycelium::Name) return std::make_unique<Visualizer_BioluminescentMycelium>(projector);
         if (name == Visualizer_Colorizer::Name) return std::make_unique<Visualizer_Colorizer>(projector);
         if (name == Visualizer_FishPond::Name) return std::make_unique<Visualizer_FishPond>(projector);
         if (name == Visualizer_ForestFire::Name) return std::make_unique<Visualizer_ForestFire>(projector);
+        if (name == Visualizer_GravitationalStarfield::Name) return std::make_unique<Visualizer_GravitationalStarfield>(projector);
         if (name == Visualizer_Heat::Name) return std::make_unique<Visualizer_Heat>(projector);
+        if (name == Visualizer_Minecraft::Name) return std::make_unique<Visualizer_Minecraft>(projector);
+        if (name == Visualizer_MountainPeaks::Name) return std::make_unique<Visualizer_MountainPeaks>(projector);
         if (name == Visualizer_Nature::Name) return std::make_unique<Visualizer_Nature>(projector);
+        if (name == Visualizer_ObsidianCaldera::Name) return std::make_unique<Visualizer_ObsidianCaldera>(projector);
+        if (name == Visualizer_PrismaticGlacier::Name) return std::make_unique<Visualizer_PrismaticGlacier>(projector);
         if (name == Visualizer_TerrainLighting::Name) return std::make_unique<Visualizer_TerrainLighting>(projector);
         if (name == Visualizer_ColorAdjustment::Name) return std::make_unique<Visualizer_ColorAdjustment>(projector);
         if (name == Visualizer_Animals::Name) return std::make_unique<Visualizer_Animals>(projector);
@@ -101,11 +113,17 @@ const std::vector<std::string> & SandboxSession::visualizerNames() const
 {
     static const std::vector<std::string> names{
         std::string(Visualizer_Blockworld::Name),
+        std::string(Visualizer_BioluminescentMycelium::Name),
         std::string(Visualizer_Colorizer::Name),
         std::string(Visualizer_FishPond::Name),
         std::string(Visualizer_ForestFire::Name),
+        std::string(Visualizer_GravitationalStarfield::Name),
         std::string(Visualizer_Heat::Name),
+        std::string(Visualizer_Minecraft::Name),
+        std::string(Visualizer_MountainPeaks::Name),
         std::string(Visualizer_Nature::Name),
+        std::string(Visualizer_ObsidianCaldera::Name),
+        std::string(Visualizer_PrismaticGlacier::Name),
         std::string(Visualizer_TerrainLighting::Name),
         std::string(Visualizer_ColorAdjustment::Name),
         std::string(Visualizer_Animals::Name),

@@ -70,6 +70,10 @@ Simulates heat diffusion across the terrain and colors the result as a heat map.
 
 Turns the height map into a block-based terrain visualization with quantized elevations, visible block edges and sides, and height-based water, sand, grass, rock, and snow materials. **Block Size** controls the visual cell size from 2 to 48 pixels.
 
+### Minecraft
+
+Rebuilds the supplied terrain as stable voxel columns with classic procedural 16x16-pixel materials: grass-topped dirt, underground stone strata, beaches, snow caps, and animated water held at one flat sea level. Exposed top and side faces use discrete cube lighting and interpolated corner ambient occlusion rather than smooth terrain normals. **Block Size** controls horizontal resolution independently of **Height Steps**; **Block Relief**, **Water Level**, **Snow Line**, and **AO / Shadow Strength** control the remaining geometry and lighting. The implementation is adapted from Reinder Nijhoff's 2013 "Minecraft" shader under the CC BY-NC-SA 4.0 license, with its source links and full attribution retained in the shader.
+
 ### Nature
 
 Provides natural terrain colorization with four selectable styles:
@@ -78,6 +82,26 @@ Provides natural terrain colorization with four selectable styles:
 - **Rocky Cliffs** transitions gradually from grass to gray rock as height and slope increase.
 - **Desert Sand** renders a dry sand and stone palette.
 - **Alpine** renders high-altitude mountain terrain.
+
+### Bioluminescent Mycelium
+
+Transforms the terrain into a dark alien substrate crossed by domain-warped, cellular fungal networks. The veins carry animated cyan and violet pulses, while high terrain emits independently twinkling spores. **Glow Intensity**, **Network Scale**, **Pulse Speed**, and **Spore Density** control the effect.
+
+### Obsidian Caldera
+
+Renders reflective black volcanic crust broken by glowing molten cracks. Lava pools below **Lava Level**, procedural flow follows the local downhill terrain gradient, and cooling creates moving crust islands over the liquid surface. **Crack Intensity**, **Crack Scale**, **Flow Speed**, **Cooling**, and **Heat Distortion** tune the material.
+
+### Prismatic Crystal Glacier
+
+Creates faceted translucent ice with depth-dependent blue absorption, refracted terrain detail, animated internal fractures, moving caustics, and iridescent facet edges. **Facet Size**, **Ice Depth / Absorption**, **Iridescence**, **Fracture Intensity**, and **Caustic Speed** control its appearance.
+
+### Gravitational Starfield
+
+Uses terrain height as a space-time distortion field. Slopes lens a drifting procedural starfield, valleys hold animated violet and cyan nebulae, and high terrain develops emissive accretion contours. **Lensing Strength**, **Star Density**, **Nebula Intensity**, **Accretion Rings**, and **Drift Speed** control the scene.
+
+### Mountain Peaks
+
+Applies an alpine material to the supplied terrain: bright snow accumulates according to elevation and slope, exposed faces become dark blue-black weathered rock, and cool sky light mixes with warm directional sunlight and sharp snow highlights. Animated wind wisps and elevation-aware haze soften the valleys. **Snow Line**, **Snow Coverage**, **Rock Contrast**, **Sun Azimuth**, **Sun Elevation**, and **Haze** control the effect. Its terrain scheme is adapted from Alexander Alekseev/TDM's 2014 "Mountain Peak" shader under the CC BY-NC-SA 3.0 license, with full attribution retained in the shader.
 
 ### TerrainLighting
 
