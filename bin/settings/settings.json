@@ -1,26 +1,27 @@
 {
     "schemaVersion": 3,
     "SandboxGUI": {
-        "m_sourceName": "Snapshot",
+        "m_sourceName": "Camera",
         "m_doubleSizeUI": false
     },
     "Visualizers": {
         "m_enabledVisualizerNames": [
-            "Nature",
-            "Contour Lines"
+            "Smoke and Fire"
         ]
     },
     "Source_Camera": {
         "m_alignment": 0,
         "m_gaussianBlur": true,
-        "m_maxDistance": 1.181,
-        "m_minDistance": 0.987,
+        "m_maxDistance": 1.2369999885559082,
+        "m_minDistance": 1.027999997138977,
         "m_drawDepth": true,
         "m_drawColor": true,
-        "m_fpsSetting": 1
+        "m_fpsSetting": 1,
+        "m_detectHands": true,
+        "m_handThresh": 0.8550000190734863
     },
     "CameraFilters": {
-        "m_smoothAlphaTemporal": 0.099,
+        "m_smoothAlphaTemporal": 0.0989999994635582,
         "m_smoothDeltaTemporal": 72,
         "m_persistanceTemporal": 3,
         "m_holeFill": 1
@@ -28,20 +29,20 @@
     "DataWarper": {
         "m_warpPoints": [
             [
-                204.0,
-                84.0
+                221.76687622070313,
+                126.25286865234375
             ],
             [
-                708.0,
-                91.0
+                700.693115234375,
+                135.0674591064453
             ],
             [
-                200.0,
-                347.0
+                207.66354370117188,
+                373.6490783691406
             ],
             [
-                690.0,
-                361.0
+                699.517822265625,
+                393.04119873046875
             ]
         ],
         "m_applyHeightAdjustment": false,
@@ -59,7 +60,8 @@
                 75.0
             ]
         ],
-        "m_dataSize": 1.0
+        "m_dataSize": 1.0,
+        "m_drawCameraRegion": true
     },
     "Source_Perlin": {
         "m_octaves": 8,
@@ -78,20 +80,20 @@
     "Projection": {
         "m_projectionPoints": [
             [
-                34.0,
-                90.0
+                1.0,
+                82.0
             ],
             [
-                1829.0,
-                77.0
+                1837.0,
+                129.0
             ],
             [
-                45.0,
-                1075.0
+                11.0,
+                1074.0
             ],
             [
-                1857.0,
-                1076.0
+                1843.0,
+                1079.0
             ]
         ],
         "m_drawLines": true,
@@ -118,7 +120,7 @@
         "m_drawProjection": true
     },
     "Visualizer_Blockworld": {
-        "m_blockSize": 12
+        "m_blockSize": 4
     },
     "Visualizer_ContourLines": {
         "m_lineColor": [
@@ -143,12 +145,161 @@
         "m_sheepSize": 11.0
     },
     "Visualizer_Balls": {
-        "m_gravity": 7257.0,
-        "m_ballSpeedMultiplier": 5.900000095367432,
-        "m_rollingResistance": 0.4000000059604645,
+        "m_gravity": 6146.0,
+        "m_ballSpeedMultiplier": 4.900000095367432,
+        "m_rollingResistance": 1.2079999446868896,
         "m_ballSize": 18.0,
         "m_ballRestitution": 0.6499999761581421,
         "m_trailLength": 0.0,
         "m_lavaAppearance": false
+    },
+    "Visualizer_Minecraft": {
+        "m_blockSize": 12,
+        "m_heightSteps": 28,
+        "m_blockRelief": 1.0,
+        "m_waterLevel": 0.2800000011920929,
+        "m_snowLine": 0.8199999928474426,
+        "m_aoStrength": 0.8500000238418579
+    },
+    "Visualizer_Hexagon": {
+        "m_hexagonSize": 7,
+        "m_heightSteps": 28,
+        "m_prismRelief": 1.149999976158142
+    },
+    "Visualizer_GravitationalStarfield": {
+        "m_lensingStrength": 1.25,
+        "m_starDensity": 58.0,
+        "m_nebulaIntensity": 0.8500000238418579,
+        "m_ringIntensity": 1.350000023841858,
+        "m_driftSpeed": 0.2199999988079071
+    },
+    "Visualizer_FishPond": {
+        "m_targetFishCount": 576,
+        "m_speedMultiplier": 1.7000000476837158,
+        "m_fishSize": 12.0,
+        "m_schoolRadius": 48.0,
+        "m_schoolStrength": 1.0,
+        "m_separationStrength": 1.350000023841858,
+        "m_minimumDepth": 0.07000000029802322,
+        "m_maximumFishDepth": 0.47999998927116394
+    },
+    "Visualizer_BFS": {
+        "m_trailLength": 4,
+        "m_cellSize": 8,
+        "m_spawnRate": 5000.0,
+        "m_particleSpeed": 120.0,
+        "m_particleAlpha": 0.8500000238418579,
+        "m_heightPenalty": 0.20000000298023224
+    },
+    "Visualizer_Vectors": {
+        "trailLength": 1,
+        "spawnRate": 485.0,
+        "particleSpeed": 120.0,
+        "particleAlpha": 1.0,
+        "minimumWindHeight": 0.05000000074505806,
+        "maximumWindHeight": 1.0,
+        "steeringDistance": 28.0
+    },
+    "Visualizer_TerrainLighting": {
+        "m_palette": 0,
+        "m_lightAzimuth": 235.0284423828125,
+        "m_lightElevation": 25.174610137939453,
+        "m_ambientLight": 0.20000000298023224,
+        "m_shadowStrength": 1.0,
+        "m_heightStrength": 10.0
+    },
+    "Visualizer_PrismaticGlacier": {
+        "m_facetSize": 18.0,
+        "m_iceDepthAbsorption": 1.149999976158142,
+        "m_iridescence": 0.800000011920929,
+        "m_fractureIntensity": 0.8500000238418579,
+        "m_causticSpeed": 0.6499999761581421
+    },
+    "Visualizer_AStar": {
+        "m_uphillPenalty": 120.0,
+        "m_downhillPenalty": 80.0,
+        "m_maximumLegalSlope": 5.0,
+        "m_movementLength": 1,
+        "m_pathThickness": 6.0
+    },
+    "Visualizer_ForestFire": {
+        "m_waterLevel": 0.2800000011920929,
+        "m_rockLevel": 0.7200000286102295,
+        "m_treeBrushSize": 30.0,
+        "m_treeBrushBlur": 12.0,
+        "m_treePaintAmount": 0.07999999821186066,
+        "m_spreadRate": 0.75,
+        "m_burnRate": 0.1599999964237213,
+        "m_windX": 0.44999998807907104,
+        "m_windY": 0.0,
+        "m_ignitionRadius": 8.0,
+        "m_paused": false
+    },
+    "Visualizer_MountainPeaks": {
+        "m_snowLine": 0.5799999833106995,
+        "m_snowCoverage": 1.0,
+        "m_rockContrast": 1.2000000476837158,
+        "m_sunAzimuth": 315.0,
+        "m_sunElevation": 38.0,
+        "m_haze": 0.3199999928474426
+    },
+    "Visualizer_BioluminescentMycelium": {
+        "m_glowIntensity": 1.350000023841858,
+        "m_networkScale": 8.0,
+        "m_pulseSpeed": 1.0,
+        "m_sporeDensity": 0.3499999940395355
+    },
+    "Visualizer_Cloth": {
+        "m_cellsX": 21,
+        "m_cellsY": 22,
+        "m_clothSize": 362.0,
+        "m_sheetTransparency": 0.8500000238418579,
+        "m_stiffness": 24.0,
+        "m_damping": 2.200000047683716,
+        "m_gravity": 2.0,
+        "m_windX": 0.0,
+        "m_windY": 0.0
+    },
+    "Visualizer_ObsidianCaldera": {
+        "m_lavaLevel": 0.2800000011920929,
+        "m_crackIntensity": 1.25,
+        "m_crackScale": 34.0,
+        "m_flowSpeed": 0.75,
+        "m_cooling": 0.41999998688697815,
+        "m_heatDistortion": 0.3499999940395355
+    },
+    "Visualizer_WaterFlow": {
+        "m_rainfall": 0.07880000025033951,
+        "m_flowSpeed": 153.4720001220703,
+        "m_evaporation": 0.02800000086426735,
+        "m_waterDepthScale": 0.3499999940395355,
+        "m_trailPersistence": 2.5,
+        "m_displayScale": 20.0,
+        "m_waterOpacity": 0.8999999761581421,
+        "m_waterColor": [
+            0.03999999910593033,
+            0.3499999940395355,
+            1.0
+        ],
+        "m_rainRadius": 95.36799621582031,
+        "m_simulationSteps": 2,
+        "m_rainMode": 1
+    },
+    "Visualizer_Weather": {
+        "m_mode": 0,
+        "m_intensity": 0.550000011920929,
+        "m_windX": 0.20000000298023224,
+        "m_windY": 0.019999999552965164,
+        "m_elementSize": 1.0,
+        "m_fallSpeed": 1.0
+    },
+    "Visualizer_SmokeFire": {
+        "m_fireSize": 16.0,
+        "m_fireLifetime": 9.0,
+        "m_spreadRate": 0.6499999761581421,
+        "m_smokeAmount": 1.0,
+        "m_buoyancy": 1.0,
+        "m_windX": 0.15000000596046448,
+        "m_windY": 0.0
     }
 }
